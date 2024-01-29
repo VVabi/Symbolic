@@ -65,6 +65,11 @@ class ModLong {
         return os;
     }
 
+    bool operator==(const ModLong& other) {
+    	assert(other.modulus == modulus);
+        return value == other.value;
+    }
+
     ModLong& operator+=(const ModLong& rhs) {
     	assert(rhs.modulus == modulus);
     	value += rhs.value;
@@ -132,11 +137,12 @@ class ModLong {
 		return ModLong(res.bezouta, modulus);
 	}
 
-	friend ModLong operator/(const ModLong a, const ModLong b) {
+	friend ModLong operator/(ModLong a, const ModLong& b) {
 		assert(a.modulus == b.modulus);
 		assert(b.value != 0);
 		auto binv = b.invert();
-		return a*binv;
+		a *= binv;
+		return a;
 	}
 
 	friend ModLong operator/(const int64_t a, const ModLong b) {
