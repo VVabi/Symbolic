@@ -1,79 +1,157 @@
 #include <iostream>
+#include <deque>
+#include <memory>
 #include "types/modLong.hpp"
 #include "types/power_series.hpp"
 #include "SymbolicMethod/unlabelled_symbolic.hpp"
 
+class PolishNotationElement {
+ public:
+	virtual ~PolishNotationElement() { };
+	virtual FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+									const int32_t modulus,
+									const size_t fp_size) = 0;
+};
+
+FormalPowerSeries<ModLong> iterate_polish(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+		const int32_t modulus,
+		const size_t fp_size) {
+	auto current = std::move(cmd_list.front());
+	cmd_list.pop_front();
+	return current->handle_power_series(cmd_list, modulus, fp_size);
+}
+
+class PolishPlus : public PolishNotationElement {
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+	    auto left  = iterate_polish(cmd_list, modulus, fp_size);
+	    auto right = iterate_polish(cmd_list, modulus, fp_size);
+	    return left+right;
+	}
+};
+
+class PolishMinus: public PolishNotationElement {
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+	    auto left  = iterate_polish(cmd_list, modulus, fp_size);
+	    auto right = iterate_polish(cmd_list, modulus, fp_size);
+	    return left-right;
+	}
+};
+
+class PolishTimes: public PolishNotationElement {
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+	    auto left  = iterate_polish(cmd_list, modulus, fp_size);
+	    auto right = iterate_polish(cmd_list, modulus, fp_size);
+	    return left*right;
+	}
+};
+
+class PolishDiv: public PolishNotationElement {
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+	    auto left  = iterate_polish(cmd_list, modulus, fp_size);
+	    auto right = iterate_polish(cmd_list, modulus, fp_size);
+	    return left/right;
+	}
+};
+
+class PolishVariable: public PolishNotationElement {
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+		auto res = FormalPowerSeries<ModLong>::get_atom(ModLong(1, modulus), 1, fp_size);
+		return res;
+	}
+};
+
+class PolishUnaryMinus: public PolishNotationElement {
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+		auto result = iterate_polish(cmd_list, modulus, fp_size);
+		return -result;
+	}
+};
 
 
-std::pair<FormalPowerSeries<ModLong>, size_t> iterate_polish(std::vector<std::string>& cmd_list, const size_t index, const int32_t modulus, const size_t fp_size) {
-	auto current = cmd_list[index];
-	std::cout << current << std::endl;
-    try {
-    	int32_t x = stoi(current);
-    	std::cout << x << std::endl;
-    	return std::pair<FormalPowerSeries<ModLong>, size_t>(FormalPowerSeries<ModLong>::get_atom(ModLong(x, modulus), 0, fp_size), 1);
-    } catch (...) {
+class PolishNumber: public PolishNotationElement {
+private:
+	ModLong num;
+public:
+	PolishNumber(ModLong num): num(num) { }
 
+	ModLong get_number() {
+		return num;
+	}
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+		return FormalPowerSeries<ModLong>::get_atom(num, 0, fp_size);
+	}
+};
+
+class PolishPower: public PolishNotationElement {
+ private:
+	uint32_t exponent;
+ public:
+	PolishPower(uint32_t exponent) {
+		this->exponent = exponent;
 	}
 
-    if (current == "z") { //TODO
-    	auto res = FormalPowerSeries<ModLong>::get_atom(ModLong(1, modulus), 1, fp_size);
-    	return std::pair<FormalPowerSeries<ModLong>, size_t>(res, 1);
-    }
+	uint32_t get_exponent() {
+		return exponent;
+	}
 
-    auto op = current;
-
-    if (op == "#-") {
-        auto left = iterate_polish(cmd_list, index+1, modulus, fp_size);
-        return std::pair<FormalPowerSeries<ModLong>, size_t>(-left.first, left.second+1);
-    }
-
-    if (op == "^") {
-    	assert(cmd_list[index+1] == "z");
-    	auto num = stoi(cmd_list[index+2]);
-
-    	auto res = FormalPowerSeries<ModLong>::get_atom(ModLong(1, modulus), num, fp_size);
-
-    	return std::pair<FormalPowerSeries<ModLong>, size_t>(res, 2);
-    }
-
-    auto left  = iterate_polish(cmd_list, index+1, modulus, fp_size);
-    auto right = iterate_polish(cmd_list, index+1+left.second, modulus, fp_size);
+	FormalPowerSeries<ModLong> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement>>& cmd_list,
+										const int32_t modulus,
+										const size_t fp_size) {
+		return FormalPowerSeries<ModLong>::get_atom(ModLong(1, modulus), exponent, fp_size);
+	}
+};
 
 
-    FormalPowerSeries<ModLong> res = FormalPowerSeries<ModLong>::get_atom(ModLong(1, modulus), 1, 2); //TODO
-    if (op == "+") {
-        res = left.first+right.first;
-    }
-    else if (op == "-") {
-        res = left.first-right.first;
-    }
-    else if (op == "*") {
-        res = left.first*right.first;
-    }
-    else if (op == "/") {
-        res = left.first/right.first;
-    } else {
-    	std::cout << "WTF" << std::endl;
-    }
-
-    return std::pair<FormalPowerSeries<ModLong>, size_t>(res, 1+left.second+right.second);
-}
-
-FormalPowerSeries<ModLong> parse_from_polish(std::vector<std::string>& polish, const int32_t modulus, const size_t num_coeffs) {
-	return iterate_polish(polish, 0, modulus, num_coeffs).first;
-}
 
 
 
 int main(int argc, char **argv) {
-	std::vector<std::string> polish = {"/", "1", "-", "1", "^", "z", "2"}; //{"/", "z", "-", "1", "z"};
+	std::vector<std::string> polish = {"/", "z", "-", "1", "*", "2", "^", "z", "2"}; //{"/", "1", "-", "1", "*", "2", "^", "z", "2"};
+	int32_t p = 257;
+	auto parsed = std::deque<std::unique_ptr<PolishNotationElement>>();
+	auto it = polish.begin();
+	while (it != polish.end()) {
+		auto next = *it;
+		if (next == "+") {
+			parsed.push_back(std::move(std::make_unique<PolishPlus>()));
+		} else if (next == "-") {
+			parsed.push_back(std::move(std::make_unique<PolishMinus>()));
+		} else if (next == "*") {
+			parsed.push_back(std::move(std::make_unique<PolishTimes>()));
+		} else if (next == "/") {
+			parsed.push_back(std::move(std::make_unique<PolishDiv>()));
+		}  else if (next == "#-") {
+			parsed.push_back(std::move(std::make_unique<PolishUnaryMinus>()));
+		}  else if (next == "z") {
+			parsed.push_back(std::move(std::make_unique<PolishVariable>()));
+		} else if (next == "^") {
+			auto var = *(++it);
+			auto exponent = stoi(*(++it));
+			assert(var == "z");
+			parsed.push_back(std::move(std::make_unique<PolishPower>(exponent)));
+		} else {
+			int32_t num = stoi(*it);
+			parsed.push_back(std::move(std::make_unique<PolishNumber>(ModLong(num, p))));
+		}
 
-	int32_t p = 19;
-
-	std::cout << parse_from_polish(polish, p, 10) << std::endl;
-
-
+		it++;
+	}
+	auto res = iterate_polish(parsed, p, 10);
+	std::cout << res << std::endl;
 
 
 	/*auto z = std::vector<ModLong>();
