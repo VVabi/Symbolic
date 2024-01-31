@@ -119,6 +119,15 @@ template<typename T>  class PolishPower: public PolishNotationElement<T> {
 	}
 };
 
+template<typename T> class PolishExp: public PolishNotationElement<T> {
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		auto exp = FormalPowerSeries<T>::get_exp(fp_size,  unit);
+		return exp.substitute(result);
+	}
+};
 
 template<class RandomAccessIterator, typename T> std::deque<std::unique_ptr<PolishNotationElement<T>>>
 parse_polish_string(RandomAccessIterator begin,RandomAccessIterator end) {
@@ -136,6 +145,8 @@ parse_polish_string(RandomAccessIterator begin,RandomAccessIterator end) {
 			ret.push_back(std::move(std::make_unique<PolishDiv<T>>()));
 		}  else if (next == "#-") {
 			ret.push_back(std::move(std::make_unique<PolishUnaryMinus<T>>()));
+		}  else if (next == "exp") {
+			ret.push_back(std::move(std::make_unique<PolishExp<T>>()));
 		}  else if (next == "z") {
 			ret.push_back(std::move(std::make_unique<PolishVariable<T>>()));
 		} else if (next == "^") {
@@ -158,11 +169,8 @@ template<class RandomAccessIterator, typename T> FormalPowerSeries<T>
 
 	auto parsed = parse_polish_string<RandomAccessIterator, T>(begin, end);
 	auto res = iterate_polish<T>(parsed, unit, precision);
+	assert(parsed.empty());
 	return res;
 }
-
-
-
-
 
 #endif /* PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_ */

@@ -56,12 +56,16 @@ template<> class RingCompanionHelper<double> {
 };
 
 
-template<typename T> class FormalPowerSeries {
+template<typename T, bool EXACT> class PowerSeries {
  private:
 	std::vector<T> coefficients;
  public:
-	FormalPowerSeries(std::vector<T>&& coeffs) {
+	PowerSeries(std::vector<T>&& coeffs) {
 		this->coefficients = std::vector<T>(coeffs);
+	}
+
+	std::vector<T>  copy_coefficients() const {
+		return coefficients;
 	}
 
 	size_t num_coefficients() const {
@@ -76,7 +80,7 @@ template<typename T> class FormalPowerSeries {
         return this->coefficients[idx];
     }
 
-    friend std::ostream& operator<<(std::ostream& os, FormalPowerSeries const & tc) {
+    friend std::ostream& operator<<(std::ostream& os, PowerSeries const & tc) {
     	auto pw = 0;
         for (auto x: tc.coefficients) {
         	os << x << "*z^" << pw << "+";
@@ -86,65 +90,76 @@ template<typename T> class FormalPowerSeries {
         return os;
     }
 
-	friend FormalPowerSeries operator+(FormalPowerSeries a, const FormalPowerSeries& b) {
-		auto size = std::min(a.num_coefficients(), b.num_coefficients()); //TODO this is wrong if a and b have different sizes!!!!
+	friend PowerSeries operator+(PowerSeries a, const PowerSeries& b) {
+		a.adapt_size_add(b.num_coefficients());
+		auto size = a.num_coefficients();
 		for (size_t idx = 0; idx < size; idx++) {
 			a[idx] = a[idx]+b[idx];
 		}
 		return a;
 	}
 
-	friend FormalPowerSeries operator+(FormalPowerSeries a, const T b) {
+	friend PowerSeries operator+(PowerSeries a, const T b) {
 		a[0] = a[0]+b;
 		return a;
 	}
 
-	friend FormalPowerSeries operator+(const T& a, const FormalPowerSeries& b) {
+	friend PowerSeries operator+(const T& a, const PowerSeries& b) {
 		return b+a;
 	}
 
-	friend FormalPowerSeries operator-(FormalPowerSeries a, const T b) {
+	friend PowerSeries operator-(PowerSeries a, const T b) {
 		a[0] = a[0]-b;
 		return a;
 	}
 
-	friend FormalPowerSeries operator-(const T& a, const FormalPowerSeries& b) {
+	friend PowerSeries operator-(const T& a, const PowerSeries& b) {
 		return -(b-a);
 	}
 
-	FormalPowerSeries operator-() const {
+	PowerSeries operator-() const {
 		std::vector<T> coeffs = std::vector<T>();
 		coeffs.reserve(this->num_coefficients());
 		for (auto it = coefficients.begin(); it < coefficients.end(); it++) {
 			coeffs.push_back(-*it);
 		}
-		return FormalPowerSeries(std::move(coeffs));
+		return PowerSeries(std::move(coeffs));
 	}
 
-	friend FormalPowerSeries operator-(FormalPowerSeries a, const FormalPowerSeries& b) {
-		auto size = std::min(a.num_coefficients(), b.num_coefficients()); //TODO this is wrong if a and b have different sizes!!!!
+	friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
+		a.adapt_size_add(b.num_coefficients());
+		auto size = a.num_coefficients();
 		for (size_t idx = 0; idx < size; idx++) {
 			a[idx] = a[idx]-b[idx];
 		}
 		return a;
 	}
 
-	friend FormalPowerSeries operator*(FormalPowerSeries a, const FormalPowerSeries& b) {
-		auto size = std::min(a.num_coefficients(), b.num_coefficients());
-		std::vector<T> coeffs = std::vector<T>();
-		coeffs.reserve(size);
+	void resize(const size_t new_size) {
+		coefficients.resize(new_size, RingCompanionHelper<T>::get_zero(coefficients[0]));
+	}
+
+	void adapt_size_add(const size_t other) {
+		size_t new_size = EXACT ? std::max(other, num_coefficients()) : std::min(other, num_coefficients());
+		resize(new_size);
+	}
+
+	friend PowerSeries operator*(PowerSeries a, const PowerSeries& b) {
+		auto size = EXACT ? a.num_coefficients()+b.num_coefficients()-1 : std::min(a.num_coefficients(), b.num_coefficients());
 		auto const_a = a[0];
 		auto zero = RingCompanionHelper<T>::get_zero(const_a);
-		for (size_t idx = 0; idx < size; idx++) {
-			coeffs.push_back(const_a*b[idx]);
-		}
+		std::vector<T> coeffs = std::vector<T>(size, zero);
 
-		for (size_t idx_a = 1; idx_a < size; idx_a++) {
+
+		for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
 			auto val_a = a[idx_a];
 			if (val_a == zero) {
 				continue;
 			}
-			for (size_t idx_b = 0; idx_b < size; idx_b++) {
+			if (idx_a >= size) {
+				break;
+			}
+			for (size_t idx_b = 0; idx_b < b.num_coefficients(); idx_b++) {
 				if (idx_a + idx_b >= size) {
 					break;
 				}
@@ -152,18 +167,18 @@ template<typename T> class FormalPowerSeries {
 			}
 		}
 
-		auto ret = FormalPowerSeries(std::move(coeffs));
+		auto ret = PowerSeries(std::move(coeffs));
 		return ret;
 	}
 
-	friend FormalPowerSeries operator*(const  T& a, FormalPowerSeries b) {
+	friend PowerSeries operator*(const  T& a, PowerSeries b) {
 		for (uint32_t ind = 0; ind < b.num_coefficients(); ind++) {
 			b[ind] = b[ind]*a;
 		}
 		return b;
 	}
 
-	FormalPowerSeries invert() const {
+	PowerSeries invert() const {
         auto inv_coefficients = std::vector<T>();
         inv_coefficients.reserve(num_coefficients());
         auto inv_first = 1/coefficients[0];
@@ -186,16 +201,17 @@ template<typename T> class FormalPowerSeries {
             }
         }
 
-        return FormalPowerSeries(std::move(inv_coefficients));
+        return PowerSeries(std::move(inv_coefficients));
 	}
 
-	friend FormalPowerSeries operator/(FormalPowerSeries a, const FormalPowerSeries& b) {
+	friend PowerSeries operator/(PowerSeries a, const PowerSeries& b) {
+		assert (!EXACT); //TODO implement
 		auto binv = b.invert();
 		auto ret = a*binv;
 		return ret;
 	}
 
-	friend FormalPowerSeries operator/(const T a, const FormalPowerSeries& b) {
+	friend PowerSeries operator/(const T a, const PowerSeries& b) {
 		auto binv = b.invert();
 		for (auto it = binv.coefficients.begin(); it != binv.coefficients.end(); it++) {
 			*it *= a;
@@ -203,15 +219,15 @@ template<typename T> class FormalPowerSeries {
 		return binv;
 	}
 
-	FormalPowerSeries substitute(FormalPowerSeries& fp) {
+	PowerSeries substitute(const PowerSeries& fp) {
 		auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
 		auto zero_coeffs = std::vector<T>(num_coefficients(), zero);
 
-		auto ret = FormalPowerSeries(std::move(zero_coeffs));
+		auto ret = PowerSeries(std::move(zero_coeffs));
 
 		auto unit_coeffs = std::vector<T>(num_coefficients(), zero);
 		unit_coeffs[0] = RingCompanionHelper<T>::get_unit(coefficients[0]);
-		auto pw = FormalPowerSeries(std::move(unit_coeffs));
+		auto pw = PowerSeries(std::move(unit_coeffs));
 
 		for (uint32_t exponent = 0; exponent < num_coefficients(); exponent++) {
 			auto factor = coefficients[exponent];
@@ -222,15 +238,20 @@ template<typename T> class FormalPowerSeries {
 		return ret;
 	}
 
-	static FormalPowerSeries get_atom(const T value, const size_t idx, const uint32_t size) {
+	static PowerSeries get_atom(const T value, const size_t idx, const uint32_t size) {
 		auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
 		if (idx < size) {
 			coeffs[idx] = value;
 		}
-		return FormalPowerSeries(std::move(coeffs));
+		return PowerSeries(std::move(coeffs));
 	}
 
-	static FormalPowerSeries get_exp(const uint32_t size, const T unit) {
+	static PowerSeries get_zero(const T value, const uint32_t size) {
+		auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
+		return PowerSeries(std::move(coeffs));
+	}
+
+	static PowerSeries get_exp(const uint32_t size, const T unit) {
 		std::vector<T> coeffs = std::vector<T>();
 
 		coeffs.push_back(unit);
@@ -240,10 +261,42 @@ template<typename T> class FormalPowerSeries {
 			coeffs.push_back(current);
 		}
 
-		return FormalPowerSeries(std::move(coeffs));
+		return PowerSeries(std::move(coeffs));
+	}
+
+	static PowerSeries get_log(const uint32_t size, const T unit) { //power series of log(1+z)
+		std::vector<T> coeffs = std::vector<T>();
+
+		coeffs.push_back(RingCompanionHelper<T>::get_zero(unit));
+		auto sign = 1;
+		for (uint32_t ind = 1; ind < size; ind++) {
+			coeffs.push_back(sign*unit/ind);
+			sign = -sign;
+		}
+
+		return PowerSeries(std::move(coeffs));
 	}
 };
 
 
+template<typename T> using FormalPowerSeries = PowerSeries<T, false>;
+template<typename T> using Polynomial = PowerSeries<T, true>;
+
+template<typename T>
+Polynomial<T> convert_power_series_to_polynomial(const FormalPowerSeries<T> in) {
+	return Polynomial<T>(in.copy_coefficients());
+
+}
+
+template<typename T> FormalPowerSeries<T> exp(const FormalPowerSeries<T> in) {
+	auto exp = FormalPowerSeries<T>::get_exp(in.num_coefficients(), RingCompanionHelper<T>::get_unit(in[0]));
+	return exp.substitute(in);
+}
+
+template<typename T> FormalPowerSeries<T> log(const FormalPowerSeries<T> in) {
+	auto unit = RingCompanionHelper<T>::get_unit(in[0]);
+	auto log = FormalPowerSeries<T>::get_log(in.num_coefficients(), unit);
+	return log.substitute(in-FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients()));
+}
 
 #endif /* TYPES_POWER_SERIES_HPP_ */
