@@ -9,6 +9,7 @@
 #define PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
 
 #include <string>
+#include <vector>
 enum expression_type {INFIX, UNARY, FUNCTION, NUMBER, VARIABLE, LEFT_PARENTHESIS, RIGHT_PARENTHESIS};
 
 struct MathLexerElement {
@@ -17,6 +18,6 @@ struct MathLexerElement {
 	MathLexerElement(expression_type type, std::string data): type(type), data(data) {}
 };
 
-
+std::vector<MathLexerElement> parse_math_expression_string(const std::string& input);
 
 #endif /* PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_ */

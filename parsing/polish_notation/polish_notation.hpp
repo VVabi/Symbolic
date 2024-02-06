@@ -223,6 +223,9 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 				return std::make_unique<PolishUnaryMinus<T>>();
 			}
 			break;
+		case FUNCTION:
+			assert(element.data == "exp");
+			return std::make_unique<PolishExp<T>>();
 		default:
 			break;
 

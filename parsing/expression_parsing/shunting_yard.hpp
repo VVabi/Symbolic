@@ -10,7 +10,7 @@
 #include <vector>
 #include "parsing/expression_parsing/math_lexer.hpp"
 
-std::vector<MathLexerElement> convert_to_polish_notation(std::vector<MathLexerElement>& input);
+std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input);
 
 
 

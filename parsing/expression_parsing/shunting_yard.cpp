@@ -44,7 +44,7 @@ bool is_right_associative(char op) {
 	}
 }
 
-std::vector<MathLexerElement> convert_to_polish_notation(std::vector<MathLexerElement>& input) {
+std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input) {
 	auto ret 		= std::vector<MathLexerElement>();
 	auto operators 	= std::stack<MathLexerElement>();
 
