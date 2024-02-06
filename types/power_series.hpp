@@ -216,11 +216,34 @@ template<typename T, bool EXACT> class PowerSeries {
 
 	friend PowerSeries operator/(PowerSeries a, const PowerSeries& b) {
 		assert (!EXACT); //TODO implement
-		auto binv = b.invert();
-		auto ret = a*binv;
+
+		uint32_t first_nonzero_idx = 0;
+		auto zero = RingCompanionHelper<T>::get_zero(a[0]);
+		while (b[first_nonzero_idx] == zero) {
+			assert(a[first_nonzero_idx] == zero);
+			first_nonzero_idx++;
+		}
+
+		if (first_nonzero_idx == 0) {
+			auto binv = b.invert();
+			auto ret = a*binv;
+			return ret;
+		}
+
+		auto a_shifted = a.shift(first_nonzero_idx);
+		auto b_shifted = b.shift(first_nonzero_idx);
+		auto binv = b_shifted.invert();
+		auto ret = a_shifted*binv;
 		return ret;
 	}
 
+	PowerSeries shift(uint32_t shift_size) const {
+		assert(shift_size < num_coefficients());
+
+		auto new_coeffs = std::vector<T>(coefficients.begin()+shift_size, coefficients.end());
+		return PowerSeries(std::move(new_coeffs));
+
+	}
 	friend PowerSeries operator/(const T a, const PowerSeries& b) {
 		auto binv = b.invert();
 		for (auto it = binv.coefficients.begin(); it != binv.coefficients.end(); it++) {
@@ -288,6 +311,28 @@ template<typename T, bool EXACT> class PowerSeries {
 		for (uint32_t ind = 1; ind < size; ind++) {
 			coeffs.push_back(sign*unit/ind);
 			sign = -sign;
+		}
+
+		return PowerSeries(std::move(coeffs));
+	}
+
+	static PowerSeries get_sqrt(const uint32_t size, const T unit) { //power series of sqrt(1+z)
+		std::vector<T> coeffs = std::vector<T>();
+		coeffs.push_back(unit);
+
+
+		auto sign = 1;
+		auto factorial = unit;
+		auto oddfactorial = unit;
+		auto pow2 = unit+unit;
+		for (uint32_t ind = 1; ind < size; ind++) {
+			factorial = factorial*ind;
+			if (ind > 1) {
+				oddfactorial = oddfactorial*(2*ind-3);
+			}
+			coeffs.push_back(sign*oddfactorial/(factorial*pow2));
+			sign = -sign;
+			pow2 = pow2*(unit+unit);
 		}
 
 		return PowerSeries(std::move(coeffs));

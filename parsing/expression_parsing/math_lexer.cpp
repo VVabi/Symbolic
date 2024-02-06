@@ -43,8 +43,9 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 			switch (*it) {
 				case '+':
 				case '-':
-					if (previous == '(') {
-						formula.push_back(MathLexerElement(UNARY, std::string(1, *it)));
+					if (previous == '(' || previous == ',') {
+						formula.push_back(MathLexerElement(NUMBER, "0"));
+						formula.push_back(MathLexerElement(INFIX, std::string(1, *it)));
 					} else {
 						formula.push_back(MathLexerElement(INFIX, std::string(1, *it)));
 					}
@@ -60,6 +61,11 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 					break;
 				case ')':
 					formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, ""));
+					break;
+				case ',':
+					formula.push_back(MathLexerElement(SEPARATOR, ""));
+					break;
+				case ' ':
 					break;
 				default:
 					assert(false);

@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-enum expression_type {INFIX, UNARY, FUNCTION, NUMBER, VARIABLE, LEFT_PARENTHESIS, RIGHT_PARENTHESIS};
+enum expression_type {INFIX, UNARY, FUNCTION, NUMBER, VARIABLE, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEPARATOR};
 
 struct MathLexerElement {
 	expression_type type;

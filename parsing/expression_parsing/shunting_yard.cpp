@@ -72,6 +72,16 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 			case RIGHT_PARENTHESIS:
 				operators.push(*it);
 				break;
+			case SEPARATOR:
+				while (operators.size() > 0) {
+					MathLexerElement op = operators.top();
+					if (op.type == RIGHT_PARENTHESIS) {
+						break;
+					}
+					ret.push_back(op);
+					operators.pop();
+				}
+				break;
 			case LEFT_PARENTHESIS:
 			{
 				while (operators.size() > 0 && operators.top().type != RIGHT_PARENTHESIS) {

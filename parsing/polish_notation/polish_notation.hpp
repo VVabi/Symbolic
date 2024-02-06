@@ -88,6 +88,7 @@ template<typename T> class PolishUnaryMinus: public PolishNotationElement<T> {
 										const T unit,
 										const size_t fp_size) {
 		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		std::cout << "unary " << result << std::endl;
 		return -result;
 	}
 };
@@ -155,49 +156,16 @@ template<typename T> class PolishExp: public PolishNotationElement<T> {
 	}
 };
 
-template<class RandomAccessIterator, typename T> std::deque<std::unique_ptr<PolishNotationElement<T>>>
-parse_polish_string(RandomAccessIterator begin,RandomAccessIterator end) {
-	auto ret = std::deque<std::unique_ptr<PolishNotationElement<T>>>();
-
-	for (auto it = begin; it != end; it++) {
-		auto next = *it;
-		if (next == "+") {
-			ret.push_back(std::move(std::make_unique<PolishPlus<T>>()));
-		} else if (next == "-") {
-			ret.push_back(std::move(std::make_unique<PolishMinus<T>>()));
-		} else if (next == "*") {
-			ret.push_back(std::move(std::make_unique<PolishTimes<T>>()));
-		} else if (next == "/") {
-			ret.push_back(std::move(std::make_unique<PolishDiv<T>>()));
-		}  else if (next == "#-") {
-			ret.push_back(std::move(std::make_unique<PolishUnaryMinus<T>>()));
-		}  else if (next == "exp") {
-			ret.push_back(std::move(std::make_unique<PolishExp<T>>()));
-		}  else if (next == "z") {
-			ret.push_back(std::move(std::make_unique<PolishVariable<T>>()));
-		} else if (next == "^") {
-			auto var = *(++it);
-			auto exponent = stoi(*(++it));
-			assert(var == "z");
-			ret.push_back(std::move(std::make_unique<PolishPower<T>>(exponent)));
-		} else {
-			ret.push_back(std::move(std::make_unique<PolishNumber<T>>(*it)));
-		}
+template<typename T> class PolishSqrt: public PolishNotationElement<T> {
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		result = result-unit;
+		auto sqrt = FormalPowerSeries<T>::get_sqrt(fp_size,  unit);
+		return sqrt.substitute(result);
 	}
-	return ret;
-}
-
-template<class RandomAccessIterator, typename T> FormalPowerSeries<T>
-	convert_polish_notation_to_fp(RandomAccessIterator begin,
-								RandomAccessIterator end,
-								const uint32_t precision,
-								const T unit) {
-
-	auto parsed = parse_polish_string<RandomAccessIterator, T>(begin, end);
-	auto res = iterate_polish<T>(parsed, unit, precision);
-	assert(parsed.empty());
-	return res;
-}
+};
 
 template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element) {
 	switch (element.type) {
@@ -224,8 +192,13 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 			}
 			break;
 		case FUNCTION:
-			assert(element.data == "exp");
-			return std::make_unique<PolishExp<T>>();
+			if (element.data == "exp") {
+				return std::make_unique<PolishExp<T>>();
+			} else if (element.data == "sqrt") {
+				return std::make_unique<PolishSqrt<T>>();
+			}
+			assert(false);
+			break;
 		default:
 			break;
 
