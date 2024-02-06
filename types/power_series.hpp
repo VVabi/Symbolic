@@ -126,6 +126,16 @@ template<typename T, bool EXACT> class PowerSeries {
 		return PowerSeries(std::move(coeffs));
 	}
 
+	PowerSeries pow(const uint32_t exponent) const {
+		//TODO
+		auto ret = PowerSeries<T, EXACT>::get_unit(coefficients[0], num_coefficients());
+
+		for (uint32_t ind = 0; ind < exponent; ind++) {
+			ret = ret*(*this);
+		}
+		return ret;
+	}
+
 	friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
 		a.adapt_size_add(b.num_coefficients());
 		auto size = a.num_coefficients();
@@ -248,6 +258,12 @@ template<typename T, bool EXACT> class PowerSeries {
 
 	static PowerSeries get_zero(const T value, const uint32_t size) {
 		auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
+		return PowerSeries(std::move(coeffs));
+	}
+
+	static PowerSeries get_unit(const T value, const uint32_t size) {
+		auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
+		coeffs[0] = RingCompanionHelper<T>::get_unit(value);
 		return PowerSeries(std::move(coeffs));
 	}
 

@@ -11,6 +11,7 @@
 #include <memory>
 #include <deque>
 #include "types/power_series.hpp"
+#include "parsing/expression_parsing/math_lexer.hpp"
 
 template<typename T>  class PolishNotationElement {
  public:
@@ -19,6 +20,9 @@ template<typename T>  class PolishNotationElement {
 									const T unit,
 									const size_t fp_size) = 0;
 };
+
+
+
 
 template<typename T> FormalPowerSeries<T> iterate_polish(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
 		const T unit,
@@ -68,6 +72,8 @@ template<typename T>  class PolishDiv: public PolishNotationElement<T> {
 	}
 };
 
+
+
 template<typename T>  class PolishVariable: public PolishNotationElement<T> {
 	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
 										const T unit,
@@ -97,6 +103,26 @@ public:
 										const size_t fp_size) {
 		auto num = RingCompanionHelper<T>::from_string(num_repr, unit);
 		return FormalPowerSeries<T>::get_atom(num, 0, fp_size);
+	}
+	int32_t get_num_as_int() {
+		return stoi(num_repr);
+	}
+};
+
+
+template<typename T>  class PolishPow: public PolishNotationElement<T> {
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+	    auto left  = iterate_polish<T>(cmd_list, unit, fp_size);
+	    auto current = std::move(cmd_list.front());
+		PolishNumber<T>* exponent = dynamic_cast<PolishNumber<T>*>(current.get()); //TODO this is bad
+		cmd_list.pop_front();
+		auto ret = FormalPowerSeries<T>::get_atom(unit, 0, fp_size);
+		for (int32_t ind = 0; ind < exponent->get_num_as_int(); ind++) {
+			ret = ret*left;
+		}
+		return ret;
 	}
 };
 
@@ -172,5 +198,39 @@ template<class RandomAccessIterator, typename T> FormalPowerSeries<T>
 	assert(parsed.empty());
 	return res;
 }
+
+template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element) {
+	switch (element.type) {
+		case NUMBER:
+			return std::make_unique<PolishNumber<T>>(element.data);
+		case VARIABLE:
+			return std::make_unique<PolishVariable<T>>();
+		case INFIX:
+			if (element.data == "+") {
+				return std::make_unique<PolishPlus<T>>();
+			} else if (element.data == "-") {
+				return std::make_unique<PolishMinus<T>>();
+			} else if (element.data == "*") {
+				return std::make_unique<PolishTimes<T>>();
+			} else if (element.data == "/") {
+				return std::make_unique<PolishDiv<T>>();
+			} else if (element.data == "^") {
+				return std::make_unique<PolishPow<T>>();
+			}
+			break;
+		case UNARY:
+			if (element.data == "-") {
+				return std::make_unique<PolishUnaryMinus<T>>();
+			}
+			break;
+		default:
+			break;
+
+	}
+
+	assert(false);
+}
+
+
 
 #endif /* PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_ */

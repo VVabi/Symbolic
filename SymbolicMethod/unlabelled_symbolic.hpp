@@ -11,7 +11,7 @@
 #include <set>
 #include <stdint.h>
 #include "types/power_series.hpp"
-
+#include "polya/cycle_index.hpp"
 
 template <typename T> FormalPowerSeries<T> unlabelled_sequence(FormalPowerSeries<T> a) {
 	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
@@ -71,5 +71,12 @@ template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> 
 	return FormalPowerSeries<T>::get_exp(a.num_coefficients(), unit).substitute(exp_argument);
 }
 
+template <typename T> FormalPowerSeries<T> unlabelled_mset(FormalPowerSeries<T> a, const uint32_t num_elements) {
+	return symmetric_group_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
+}
+
+template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> a, const uint32_t num_elements) {
+	return pset_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
+}
 
 #endif /* SYMBOLICMETHOD_UNLABELLED_SYMBOLIC_HPP_ */
