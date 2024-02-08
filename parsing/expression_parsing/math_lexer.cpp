@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include "parsing/expression_parsing/math_lexer.hpp"
+#include <iostream>
 
 std::vector<MathLexerElement> parse_math_expression_string(const std::string& input) {
 	std::vector<MathLexerElement> formula;
@@ -33,10 +34,18 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 				var = var + *it;
 				it++;
 			}
-			if (*it == '(') {
+			if (*it == '_') {
+				while(*it != '(') {
+					var = var + *it;
+					it++;
+				}
 				formula.push_back(MathLexerElement(FUNCTION, var));
 			} else {
-				formula.push_back(MathLexerElement(VARIABLE, var));
+				if (*it == '(') {
+					formula.push_back(MathLexerElement(FUNCTION, var));
+				} else {
+					formula.push_back(MathLexerElement(VARIABLE, var));
+				}
 			}
 			it--;
 		} else {
@@ -71,9 +80,14 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 					assert(false);
 			}
 		}
-		previous = *it;
+		if (*it != ' ') {
+			previous = *it;
+		}
 		it++;
 	}
+	/*for (auto x: formula) {
+		std::cout << x.type << " " << x.data << std::endl;
+	}*/
 
 	return formula;
 }

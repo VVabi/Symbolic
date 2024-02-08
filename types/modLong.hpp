@@ -65,10 +65,16 @@ class ModLong {
         return os;
     }
 
-    bool operator==(const ModLong& other) {
+    bool operator==(const ModLong& other) const {
     	assert(other.modulus == modulus);
         return value == other.value;
     }
+
+    bool operator!=(const ModLong& other) const {
+    	assert(other.modulus == modulus);
+        return value != other.value;
+    }
+
 
     ModLong& operator+=(const ModLong& rhs) {
     	assert(rhs.modulus == modulus);

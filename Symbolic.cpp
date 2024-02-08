@@ -8,98 +8,216 @@
 #include "SymbolicMethod/labelled_symbolic.hpp"
 #include "parsing/polish_notation/polish_notation.hpp"
 #include "polya/partitions.hpp"
-#include "math_utils/factorial_generator.hpp"
+#include "math_utils/binomial_generator.hpp"
 #include "polya/cycle_index.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 
 
-struct PowerSeriesTestcaseDouble {
+struct PowerSeriesTestcase {
 	std::string formula;
-	uint32_t size;
 	std::vector<int64_t> expected_result;
 	bool exponential;
 	uint32_t additional_offset;
 };
 
-std::vector<PowerSeriesTestcaseDouble> test_cases = {
-		{"1/(1-z)", 20, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, false, 0},
-		{"1/(1-z-z^2)", 20, {1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765}, false, 0}, //fibonacci
-		{"1/(1-z-z^2-z^3)", 10, {1,1,2,4,7,13,24,44,81,149}, false, 0}, //tribonacci
-		{"exp(-z)/(1-z)", 10, {1,0,1,2,9,44,265,1854,14833,133496}, true, 0}, //derangements
-		{"exp(-z-z^2/2)/(1-z)", 10, {1,0,0,2,6,24,160,1140,8988,80864}, true, 0}, //permutations with all cycle lengths > 2
-		{"exp(-z^2/2-z)/(1-z)", 10, {1,0,0,2,6,24,160,1140,8988,80864}, true, 0}, //permutations with all cycle lengths > 2
+std::vector<PowerSeriesTestcase> test_cases = {
+		{"1/(1-z)", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, false, 0},
+		//fibonacci
+		{"1/(1-z-z^2)", {1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765}, false, 0},
+		//tribonacci
+		{"1/(1-z-z^2-z^3)", {1,1,2,4,7,13,24,44,81,149}, false, 0},
+		 //derangements
+		{"exp(-z)/(1-z)", {1,0,1,2,9,44,265,1854,14833,133496}, true, 0},
+		 //permutations with all cycle lengths > 2
+		{"exp(-z-z^2/2)/(1-z)", {1,0,0,2,6,24,160,1140,8988,80864}, true, 0},
+		{"exp(-z^2/2-z)/(1-z)", {1,0,0,2,6,24,160,1140,8988,80864}, true, 0},
 		//permutations with all cycle lengths > 3
-		{"exp(-z-z^2/2-z^3/3)/(1-z)", 20, {1, 0, 0, 0, 6, 24, 120, 720, 6300, 58464, 586656, 6384960, 76471560, 994831200, 13939507296, 209097854784, 3345235180560, 56866395720960, 1023601917024000, 19448577603454464}, true, 0},
-		{"exp(-(z+z^2/2+z^3/3))/(1-z)", 20, {1, 0, 0, 0, 6, 24, 120, 720, 6300, 58464, 586656, 6384960, 76471560, 994831200, 13939507296, 209097854784, 3345235180560, 56866395720960, 1023601917024000, 19448577603454464}, true, 0},
+		{"exp(-z-z^2/2-z^3/3)/(1-z)", {1, 0, 0, 0, 6, 24, 120, 720, 6300, 58464, 586656, 6384960, 76471560, 994831200, 13939507296, 209097854784, 3345235180560, 56866395720960, 1023601917024000, 19448577603454464}, true, 0},
+		{"exp(-(z+z^2/2+z^3/3))/(1-z)", {1, 0, 0, 0, 6, 24, 120, 720, 6300, 58464, 586656, 6384960, 76471560, 994831200, 13939507296, 209097854784, 3345235180560, 56866395720960, 1023601917024000, 19448577603454464}, true, 0},
 		//surjections onto 5-element set
-		{"(exp(z)-1)^5", 20, {0, 0, 0, 0, 0, 120, 1800, 16800, 126000, 834120, 5103000, 29607600, 165528000, 901020120, 4809004200, 25292030400, 131542866000, 678330198120, 3474971465400, 17710714165200}, true, 0},
-		{"-(1-exp(z))^5", 20, {0, 0, 0, 0, 0, 120, 1800, 16800, 126000, 834120, 5103000, 29607600, 165528000, 901020120, 4809004200, 25292030400, 131542866000, 678330198120, 3474971465400, 17710714165200}, true, 0},
+		{"(exp(z)-1)^5", {0, 0, 0, 0, 0, 120, 1800, 16800, 126000, 834120, 5103000, 29607600, 165528000, 901020120, 4809004200, 25292030400, 131542866000, 678330198120, 3474971465400, 17710714165200}, true, 0},
+		{"-(1-exp(z))^5", {0, 0, 0, 0, 0, 120, 1800, 16800, 126000, 834120, 5103000, 29607600, 165528000, 901020120, 4809004200, 25292030400, 131542866000, 678330198120, 3474971465400, 17710714165200}, true, 0},
 		//Set partitions/bell numbers
-		{"exp(exp(z)-1)", 20, {1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597, 27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159, 5832742205057}, true, 0},
+		{"exp(exp(z)-1)", {1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597, 27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159, 5832742205057}, true, 0},
 		//surjections
-		{"1/(2-exp(z))", 18, {1, 1, 3, 13, 75, 541, 4683, 47293, 545835, 7087261, 102247563, 1622632573, 28091567595, 526858348381, 10641342970443, 230283190977853, 5315654681981355, 130370767029135901}, true, 0},
-		{"1/(-exp(z)+2)", 18, {1, 1, 3, 13, 75, 541, 4683, 47293, 545835, 7087261, 102247563, 1622632573, 28091567595, 526858348381, 10641342970443, 230283190977853, 5315654681981355, 130370767029135901}, true, 0},
+		{"1/(2-exp(z))", {1, 1, 3, 13, 75, 541, 4683, 47293, 545835, 7087261, 102247563, 1622632573, 28091567595, 526858348381, 10641342970443, 230283190977853, 5315654681981355, 130370767029135901}, true, 0},
+		{"1/( -exp(z)+2)", {1, 1, 3, 13, 75, 541, 4683, 47293, 545835, 7087261, 102247563, 1622632573, 28091567595, 526858348381, 10641342970443, 230283190977853, 5315654681981355, 130370767029135901}, true, 0},
 		//binary words with < 5 consecutive 1s
-		{"(1-z^5)/(1-2*z+z^6)", 30, {1, 2, 4, 8, 16, 31, 61, 120, 236, 464, 912, 1793, 3525, 6930, 13624, 26784, 52656, 103519, 203513, 400096, 786568, 1546352, 3040048, 5976577, 11749641, 23099186, 45411804, 89277256, 175514464, 345052351}, false, 0},
+		{"(1-z^5)/(1-2*z+z^6)", {1, 2, 4, 8, 16, 31, 61, 120, 236, 464, 912, 1793, 3525, 6930, 13624, 26784, 52656, 103519, 203513, 400096, 786568, 1546352, 3040048, 5976577, 11749641, 23099186, 45411804, 89277256, 175514464, 345052351}, false, 0},
 		//partitions into 1,2,3,4,5
-		{"1/(1-z)*1/(1-z^2)*1/(1-z^3)*1/(1-z^4)*1/(1-z^5)", 53, {1, 1, 2, 3, 5, 7, 10, 13, 18, 23, 30, 37, 47, 57, 70, 84, 101, 119, 141, 164, 192, 221, 255, 291, 333, 377, 427, 480, 540, 603, 674, 748, 831, 918, 1014, 1115, 1226, 1342, 1469, 1602, 1747, 1898, 2062, 2233, 2418, 2611, 2818, 3034, 3266, 3507, 3765, 4033, 4319}, false, 0},
+		{"1/(1-z)*1/(1-z^2)*1/(1-z^3)*1/(1-z^4)*1/(1-z^5)", {1, 1, 2, 3, 5, 7, 10, 13, 18, 23, 30, 37, 47, 57, 70, 84, 101, 119, 141, 164, 192, 221, 255, 291, 333, 377, 427, 480, 540, 603, 674, 748, 831, 918, 1014, 1115, 1226, 1342, 1469, 1602, 1747, 1898, 2062, 2233, 2418, 2611, 2818, 3034, 3266, 3507, 3765, 4033, 4319}, false, 0},
 		//Catalan numbers
-		{"(1-sqrt(1-4*z))/(2*z)", 31, {1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, 208012, 742900, 2674440, 9694845, 35357670, 129644790, 477638700, 1767263190, 6564120420, 24466267020, 91482563640, 343059613650, 1289904147324, 4861946401452, 18367353072152, 69533550916004, 263747951750360, 1002242216651368, 3814986502092304}, false, 1},
+		{"(1-sqrt(1-4*z))/(2*z)", {1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, 208012, 742900, 2674440, 9694845, 35357670, 129644790, 477638700, 1767263190, 6564120420, 24466267020, 91482563640, 343059613650, 1289904147324, 4861946401452, 18367353072152, 69533550916004, 263747951750360, 1002242216651368, 3814986502092304}, false, 1},
+		//Involutions
+		{"exp(z+z^2/2)", {1, 1, 2, 4, 10, 26, 76, 232, 764, 2620, 9496, 35696, 140152, 568504, 2390480, 10349536, 46206736, 211799312, 997313824, 4809701440}, true, 0},
+		//Partitions
+		{"MSET(SEQ_>=1(z))", {1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135, 176, 231, 297, 385, 490, 627, 792, 1002, 1255, 1575, 1958, 2436, 3010, 3718, 4565}, false, 0},
+		{"MSET(SEQ_>=4(z))", {1, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 5, 5, 7, 8, 11, 12, 16, 18, 24, 27, 34, 39, 50, 57, 70, 81, 100, 115}, false, 0},
+		//Strict partitions
+		{"PSET(SEQ_>=1(z))", {1, 1, 1, 2, 2, 3, 4, 5, 6, 8, 10, 12, 15, 18, 22, 27, 32, 38, 46, 54, 64, 76, 89, 104, 122, 142, 165, 192, 222, 256, 296}, false, 0},
+		//Compositions
+		{"SEQ(SEQ_>=1(z))", {1, 1, 2, 4, 8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536}, false, 0},
 };
 
+template<typename T>
+class EqualityChecker {
+public:
+	static bool check_equality(const T a, const T b) {
+		return a == b;
+	}
+};
 
-int main(int argc, char **argv) {
-	auto power_series = parse_power_series_from_string<double>("(1-sqrt(1-4*z))/2", 20, 1.0);
-	double factorial = 1.0;
+template<>
+class EqualityChecker<double> {
+public:
+	static bool check_equality(const double a, const double b) {
+		auto err = std::abs(a-b);
+		if (std::abs(a) > 1) {
+			err = err/std::abs(a);
+		}
+
+		return err < 1e-10;
+	}
+};
+
+template<typename T> bool run_power_series_parsing_test_case(const std::string& formula,
+										const uint32_t fp_size,
+										const std::vector<int64_t>& expected_result,
+										const T unit,
+										const bool exponential,
+										const int64_t sign = 1) {
+	bool ret = true;
+
+	auto power_series = parse_power_series_from_string<T>(formula, fp_size, unit);
+	ret = ret && (power_series.num_coefficients() == expected_result.size());
+
+	T factorial = unit;
 	for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
 		if (ind > 0) {
-			factorial *= ind;
+			factorial = ind*factorial;
 		}
+		T coeff = power_series[ind];
+		if (exponential) {
+			coeff *= factorial;
+		}
+		ret = ret && EqualityChecker<T>::check_equality(coeff, sign*expected_result[ind]*unit);
+	}
+
+	if (!ret) {
+		std::cout << formula << " failed test" << std::endl;
+	}
+	return ret;
+}
+
+template<typename T>
+bool run_power_series_parsing_test_cases(std::vector<PowerSeriesTestcase>& test_cases, const T unit) {
+	bool ret = true;
+	for (auto test_case : test_cases) {
+		auto loc_ret = run_power_series_parsing_test_case<T>(test_case.formula,
+				test_case.expected_result.size()+test_case.additional_offset,
+				test_case.expected_result,
+				unit,
+				test_case.exponential);
+		loc_ret = loc_ret && run_power_series_parsing_test_case<T>("("+test_case.formula+")",
+				test_case.expected_result.size()+test_case.additional_offset,
+				test_case.expected_result,
+				unit,
+				test_case.exponential);
+		loc_ret = loc_ret && run_power_series_parsing_test_case<T>("-("+test_case.formula+")",
+				test_case.expected_result.size()+test_case.additional_offset,
+				test_case.expected_result,
+				unit,
+				test_case.exponential,
+				-1);
+		loc_ret = loc_ret && run_power_series_parsing_test_case<T>(" -( "+test_case.formula+" )",
+				test_case.expected_result.size()+test_case.additional_offset,
+				test_case.expected_result,
+				unit,
+				test_case.exponential,
+				-1);
+		if (!loc_ret) {
+			std::cout << "Test case for " << test_case.formula << " with unit " << unit << " failed" << std::endl;
+		}
+		ret = ret && loc_ret;
+	}
+	return ret;
+}
+
+#define CODING_CONTEST_CONSTANT 1000000007
+
+int main(int argc, char **argv) {
+	/*auto power_series = parse_power_series_from_string<double>("MSET(SEQ_>=1(z))", 30, 1.0);
+	std::cout << power_series << std::endl;
+	for (uint32_t ind = 0; ind < 30; ind++) {
 		std::cout << power_series[ind] << std::endl;
 	}
-	std::cout << power_series << std::endl;
-	return 0;
-	for (auto test_case : test_cases) {
-		auto power_series = parse_power_series_from_string<double>(test_case.formula, test_case.size+test_case.additional_offset, 1.0);
-		assert(power_series.num_coefficients() == test_case.size);
-		assert(test_case.expected_result.size() == test_case.size);
+	return 0;*/
+	std::cout << "Testing double..." << std::endl;
+	auto ret = run_power_series_parsing_test_cases<double>(test_cases, 1.0);
+	std::vector<int64_t> primes = {
+			CODING_CONTEST_CONSTANT,
+			1762687739,
+			1692039463,
+			1921719433,
+			824464787,
+			592147649,
+			418499113,
+			601302311,
+			394187029,
+			719942551,};
+	std::cout << "Testing modulo..." << std::endl;
+	for (auto p: primes) {
+		std::cout << "Testing prime " << p << "..." << std::endl;
+		auto unit = ModLong(1, p);
+		ret = ret && run_power_series_parsing_test_cases<ModLong>(test_cases, unit);
+	}
 
-		double factorial = 1.0;
-		for (uint32_t ind = 0; ind < test_case.size; ind++) {
-			if (ind > 0) {
-				factorial *= ind;
+	std::cout << "Testing Catalan numbers..." << std::endl;
+
+	auto catalan_gf = "(1-sqrt(1-4*z))/(2*z)";
+
+	for (auto p: primes) {
+			std::cout << "Testing prime " << p << " for correct catalan numbers..." << std::endl;
+		uint32_t num_coeffs = 10000;
+		auto res = parse_power_series_from_string<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p));
+
+		auto binomial_generator = BinomialGenerator<ModLong>(2*num_coeffs, ModLong(1, p));
+		for (uint32_t ind = 0; ind < num_coeffs; ind++) {
+			auto c = binomial_generator.get_binomial_coefficient(2*ind, ind)/(ind+1);
+			if (c != res[ind]) {
+				std::cout << "failure in catalan test" << std::endl;
+				ret = false;
 			}
-			double coeff = power_series[ind];
-			if (test_case.exponential) {
-				coeff *= factorial;
-			}
-			auto error = std::abs(coeff-test_case.expected_result[ind]);
-			if (std::abs(coeff) > 1e-10) {
-				error = error/coeff;
-			}
-			assert(error < 1e-10);
 		}
 	}
-	int32_t p = 1000000007;
 
-	for (auto test_case: test_cases) {
-		auto power_series = parse_power_series_from_string<ModLong>(test_case.formula, test_case.size+test_case.additional_offset, ModLong(1, p));
-		assert(power_series.num_coefficients() == test_case.size);
-		assert(test_case.expected_result.size() == test_case.size);
+	std::cout << "Testing derangements..." << std::endl;
+	auto derangements_gf = "exp(-z)/(1-z)";
+	for (auto p: primes) {
+		std::cout << "Testing prime " << p << " for correct derangement numbers..." << std::endl;
+		uint32_t num_coeffs 	 = 10000;
+		auto res 				 = parse_power_series_from_string<ModLong>(derangements_gf, num_coeffs, ModLong(1, p));
+		auto factorial_generator = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
 
-		ModLong factorial = ModLong(1, p);
-		for (uint32_t ind = 0; ind < test_case.size; ind++) {
-			if (ind > 0) {
-				factorial = ind*factorial;
+		ModLong num_derangements = ModLong(1, p);
+
+		for (uint32_t ind = 0; ind < num_coeffs; ind++) {
+			if (res[ind]*factorial_generator.get_factorial(ind) != num_derangements) {
+				std::cout << "derangement error!" << std::endl;
+				ret = false;
 			}
-			ModLong coeff = power_series[ind];
-			if (test_case.exponential) {
-				coeff *= factorial;
+			num_derangements = (ind+1)*num_derangements;
+			if (ind % 2 == 1) {
+				num_derangements = num_derangements+1;
+			} else {
+				num_derangements = num_derangements+(-1);
 			}
-			assert(coeff == ModLong(test_case.expected_result[ind], p));
 		}
 	}
+
+	assert(ret);
+	std::cout << "Success!" << std::endl;
 
 	return 0;
 }
