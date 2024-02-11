@@ -13,6 +13,7 @@
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "string_utils/string_utils.hpp"
+#include "parsing/subset_parsing/subset_parser.hpp"
 
 template<typename T>  class PolishNotationElement {
  public:
@@ -157,6 +158,16 @@ template<typename T> class PolishExp: public PolishNotationElement<T> {
 	}
 };
 
+template<typename T> class PolishLog: public PolishNotationElement<T> {
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		return log(result);
+	}
+};
+
+
 template<typename T> class PolishSqrt: public PolishNotationElement<T> {
 	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
 										const T unit,
@@ -176,7 +187,8 @@ public:
 										const T unit,
 										const size_t fp_size) {
 		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-		return unlabelled_pset(result);
+		auto subset = Subset(arg, result.num_coefficients());
+		return unlabelled_pset(result, subset);
 	}
 };
 
@@ -188,7 +200,34 @@ public:
 										const T unit,
 										const size_t fp_size) {
 		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-		return unlabelled_mset(result);
+		auto subset = Subset(arg, result.num_coefficients());
+		return unlabelled_mset(result, subset);
+	}
+};
+
+template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
+	std::string arg;
+public:
+	PolishLabelledSet(const std::string& additional_arg): arg(additional_arg) {}
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		auto subset = Subset(arg, result.num_coefficients());
+		return labelled_set(result, subset);
+	}
+};
+
+template<typename T> class PolishLabelledCyc: public PolishNotationElement<T> {
+	std::string arg;
+public:
+	PolishLabelledCyc(const std::string& additional_arg): arg(additional_arg) {}
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		auto subset = Subset(arg, result.num_coefficients());
+		return labelled_cyc(result, subset);
 	}
 };
 
@@ -200,25 +239,8 @@ public:
 										const T unit,
 										const size_t fp_size) {
 		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-		if (arg == "") {
-			return unlabelled_sequence(result);
-		}
-
-		if (arg.rfind(">=", 2) == 0) {
-			int32_t num = stoi(arg.substr(2));
-
-			if (num <= 0) {
-				return unlabelled_sequence(result);
-			}
-			std::set<uint32_t> included;
-
-			for (uint32_t ind = (uint32_t) num; ind < fp_size; ind++) {
-				included.insert(ind);
-			}
-			return unlabelled_sequence_subset(result, included);
-		}
-
-		assert(false);
+		auto subset = Subset(arg, result.num_coefficients());
+		return unlabelled_sequence(result, subset);
 	}
 };
 
@@ -265,13 +287,18 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 				return std::make_unique<PolishMset<T>>(parts[1]);
 			} else if (parts[0] == "SEQ") {
 				return std::make_unique<PolishSeq<T>>(parts[1]);
+			} else if (parts[0] == "LSET") {
+				return std::make_unique<PolishLabelledSet<T>>(parts[1]);
+			} else if (parts[0] == "LCYC") {
+				return std::make_unique<PolishLabelledCyc<T>>(parts[1]);
+			} else if (parts[0] == "log") {
+				return std::make_unique<PolishLog<T>>();
 			}
 			assert(false);
 			break;
 		}
 		default:
 			break;
-
 	}
 
 	assert(false);

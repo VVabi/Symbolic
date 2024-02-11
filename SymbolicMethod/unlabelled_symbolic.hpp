@@ -12,19 +12,31 @@
 #include <stdint.h>
 #include "types/power_series.hpp"
 #include "polya/cycle_index.hpp"
+#include "parsing/subset_parsing/subset_parser.hpp"
 
-template <typename T> FormalPowerSeries<T> unlabelled_sequence(FormalPowerSeries<T> a) {
-	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
-	return unit/(unit-a);
-}
-
-template <typename T> FormalPowerSeries<T> unlabelled_sequence_subset(FormalPowerSeries<T> a, std::set<uint32_t> included_indices) {
+template <typename T> FormalPowerSeries<T> unlabelled_sequence(FormalPowerSeries<T> a, const Subset& indices) {
 	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
 	auto ret = FormalPowerSeries<T>::get_zero(unit, a.num_coefficients());
+	auto sign = unit;
+
+	if (indices.negate) {
+		sign = -sign;
+		ret = unit/(unit-a);
+	}
+
+	if (indices.indices.empty()) {
+		return ret;
+	}
+	auto to_handle = indices.indices.size();
 	auto pw = FormalPowerSeries<T>::get_atom(unit, 0, a.num_coefficients());
 	for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
-		if (included_indices.count(ind) == 1) {
-			ret = ret+pw;
+		if (indices.indices.count(ind) == 1) {
+			ret = ret+sign*pw;
+			to_handle--;
+		}
+
+		if (to_handle == 0) {
+			break;
 		}
 		pw = pw*a;
 	}
@@ -32,21 +44,11 @@ template <typename T> FormalPowerSeries<T> unlabelled_sequence_subset(FormalPowe
 	return ret;
 }
 
-template <typename T> FormalPowerSeries<T> unlabelled_sequence_subset_excluded(FormalPowerSeries<T> a, std::set<uint32_t>& excluded_indices) {
-	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
-	auto ret = FormalPowerSeries<T>::get_zero(unit, a.num_coefficients());
-	auto pw = FormalPowerSeries<T>::get_atom(unit, 0, a.num_coefficients());
-	for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
-		if (excluded_indices.count(ind) == 0) {
-			ret = ret+pw;
-		}
-		pw = pw*a;
-	}
-
-	return ret;
+template <typename T> FormalPowerSeries<T> unlabelled_mset_single(FormalPowerSeries<T> a, const uint32_t num_elements) {
+	return symmetric_group_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
 }
 
-template <typename T> FormalPowerSeries<T> unlabelled_mset(FormalPowerSeries<T> a) {
+template <typename T> FormalPowerSeries<T> unlabelled_mset_complete(FormalPowerSeries<T> a) {
 	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
 	FormalPowerSeries<T> exp_argument = a;
 
@@ -58,7 +60,31 @@ template <typename T> FormalPowerSeries<T> unlabelled_mset(FormalPowerSeries<T> 
 	return FormalPowerSeries<T>::get_exp(a.num_coefficients(), unit).substitute(exp_argument);
 }
 
-template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> a) {
+template <typename T> FormalPowerSeries<T> unlabelled_mset(FormalPowerSeries<T> a, const Subset& indices) {
+	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
+	auto ret = FormalPowerSeries<T>::get_zero(unit, a.num_coefficients());
+	auto sign = unit;
+
+	if (indices.negate) {
+		sign = -sign;
+		ret = unlabelled_mset_complete(a);
+	}
+
+	for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
+		if (indices.indices.count(ind) == 1) {
+			ret = ret+sign*unlabelled_mset_single(a, ind);
+		}
+	}
+
+	return ret;
+}
+
+template <typename T> FormalPowerSeries<T> unlabelled_pset_single(FormalPowerSeries<T> a, const uint32_t num_elements) {
+	return pset_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
+}
+
+
+template <typename T> FormalPowerSeries<T> unlabelled_pset_complete(FormalPowerSeries<T> a) {
 	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
 	FormalPowerSeries<T> exp_argument = a;
 	auto sign = -unit;
@@ -71,12 +97,33 @@ template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> 
 	return FormalPowerSeries<T>::get_exp(a.num_coefficients(), unit).substitute(exp_argument);
 }
 
-template <typename T> FormalPowerSeries<T> unlabelled_mset(FormalPowerSeries<T> a, const uint32_t num_elements) {
-	return symmetric_group_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
-}
+template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> a, const Subset& indices) {
+	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
+	auto ret = FormalPowerSeries<T>::get_zero(unit, a.num_coefficients());
+	auto sign = unit;
 
-template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> a, const uint32_t num_elements) {
-	return pset_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
+	if (indices.negate) {
+		sign = -sign;
+		ret = unlabelled_pset_complete(a);
+	}
+
+	if (indices.indices.empty()) {
+		return ret;
+	}
+
+	auto to_handle = indices.indices.size();
+	for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
+		if (indices.indices.count(ind) == 1) {
+			ret = ret+sign*unlabelled_pset_single(a, ind);
+			to_handle--;
+		}
+
+		if (to_handle == 0) {
+			break;
+		}
+	}
+
+	return ret;
 }
 
 #endif /* SYMBOLICMETHOD_UNLABELLED_SYMBOLIC_HPP_ */
