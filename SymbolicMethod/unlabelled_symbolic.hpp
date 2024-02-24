@@ -13,6 +13,7 @@
 #include "types/power_series.hpp"
 #include "polya/cycle_index.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
+#include "numberTheory/euler_phi.hpp"
 
 template <typename T> FormalPowerSeries<T> unlabelled_sequence(FormalPowerSeries<T> a, const Subset& indices) {
 	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
@@ -125,5 +126,53 @@ template <typename T> FormalPowerSeries<T> unlabelled_pset(FormalPowerSeries<T> 
 
 	return ret;
 }
+
+template <typename T> FormalPowerSeries<T> unlabelled_cyc_single(FormalPowerSeries<T> a, const uint32_t num_elements) {
+	return cyclic_group_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));
+}
+
+
+template <typename T> FormalPowerSeries<T> unlabelled_cyc_complete(FormalPowerSeries<T> a) {
+	auto phis = calculate_euler_phi(a.num_coefficients()-1);
+	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
+	auto ret = FormalPowerSeries<T>::get_zero(a[0], a.num_coefficients());
+	FormalPowerSeries<T> log_fps = FormalPowerSeries<T>::get_log(a.num_coefficients(), unit);
+	for (uint32_t k = 1; k < a.num_coefficients(); k++) {
+		auto atom = FormalPowerSeries<T>::get_atom(unit, k, a.num_coefficients());
+		auto arg = -log_fps.substitute(-a.substitute(atom)); //TODO replace by shift function
+		ret = ret + (unit/k)*((phis[k]*unit)*arg);
+	}
+	return ret;
+}
+
+template <typename T> FormalPowerSeries<T> unlabelled_cyc(FormalPowerSeries<T> a, const Subset& indices) {
+	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
+	auto ret = FormalPowerSeries<T>::get_zero(unit, a.num_coefficients());
+	auto sign = unit;
+
+	if (indices.negate) {
+		sign = -sign;
+		ret = unlabelled_cyc_complete(a);
+	}
+
+	if (indices.indices.empty()) {
+		return ret;
+	}
+
+	auto to_handle = indices.indices.size();
+	for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
+		if (indices.indices.count(ind) == 1) {
+			ret = ret+sign*unlabelled_cyc_single(a, ind);
+			to_handle--;
+		}
+
+		if (to_handle == 0) {
+			break;
+		}
+	}
+
+	return ret;
+}
+
 
 #endif /* SYMBOLICMETHOD_UNLABELLED_SYMBOLIC_HPP_ */

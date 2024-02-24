@@ -90,7 +90,6 @@ template<typename T> class PolishUnaryMinus: public PolishNotationElement<T> {
 										const T unit,
 										const size_t fp_size) {
 		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-		std::cout << "unary " << result << std::endl;
 		return -result;
 	}
 };
@@ -205,6 +204,19 @@ public:
 	}
 };
 
+template<typename T> class PolishCyc: public PolishNotationElement<T> {
+	std::string arg;
+public:
+	PolishCyc(const std::string& additional_arg): arg(additional_arg) {}
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		auto subset = Subset(arg, result.num_coefficients());
+		return unlabelled_cyc(result, subset);
+	}
+};
+
 template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
 	std::string arg;
 public:
@@ -285,6 +297,8 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 				return std::make_unique<PolishPset<T>>(parts[1]);
 			} else if (parts[0] == "MSET") {
 				return std::make_unique<PolishMset<T>>(parts[1]);
+			} else if (parts[0] == "CYC") {
+				return std::make_unique<PolishCyc<T>>(parts[1]);
 			} else if (parts[0] == "SEQ") {
 				return std::make_unique<PolishSeq<T>>(parts[1]);
 			} else if (parts[0] == "LSET") {
