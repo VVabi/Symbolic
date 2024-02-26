@@ -14,6 +14,8 @@
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "string_utils/string_utils.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
+#include "SymbolicMethod/unlabelled_symbolic.hpp"
+#include "SymbolicMethod/labelled_symbolic.hpp"
 
 template<typename T>  class PolishNotationElement {
  public:
