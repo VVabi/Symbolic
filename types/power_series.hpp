@@ -271,6 +271,21 @@ template<typename T, bool EXACT> class PowerSeries {
 		return ret;
 	}
 
+	PowerSeries substitute_exponent(const uint32_t exponent) {
+		auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
+		auto coeffs = std::vector<T>(num_coefficients(), zero);
+
+		uint32_t ind = 0;
+		while (ind*exponent < coeffs.size()) {
+			coeffs[ind*exponent] = this->coefficients[ind];
+			ind++;
+		}
+
+		auto ret = PowerSeries(std::move(coeffs));
+		return ret;
+	}
+
+
 	static PowerSeries get_atom(const T value, const size_t idx, const uint32_t size) {
 		auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
 		if (idx < size) {

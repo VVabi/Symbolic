@@ -23,11 +23,11 @@ template<typename T> class FactorialGenerator {
 		}
 	}
 
-	T get_factorial(const uint32_t n) {
+	T get_factorial(const uint32_t n) const {
 		return factorials.at(n);
 	}
 
-	T get_inv_factorial(const uint32_t n) {
+	T get_inv_factorial(const uint32_t n) const {
 		return 1/get_factorial(n);
 	}
 };

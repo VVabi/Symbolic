@@ -20,8 +20,9 @@ template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uin
 	assert (args.size() >= n);
 
 	auto ret = FormalPowerSeries<T>::get_zero(unit, num_coeffs);
-	std::function<void(std::vector<PartitionCount>&)> callback = [args, unit, num_coeffs, &ret](std::vector<PartitionCount>& partition){
-		auto conjugacy_class_size = sym_group_conjugacy_class_size<T>(partition, unit);
+	auto factorial_generator = FactorialGenerator<T>(n, unit);
+	std::function<void(std::vector<PartitionCount>&)> callback = [args, unit, num_coeffs, &ret, &factorial_generator](std::vector<PartitionCount>& partition){
+		auto conjugacy_class_size = sym_group_conjugacy_class_size<T>(partition, unit, factorial_generator);
 		auto summand = FormalPowerSeries<T>::get_unit(unit, num_coeffs);
 
 		for (auto partition_part: partition) {
@@ -32,13 +33,13 @@ template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uin
 
 	iterate_partitions(n,  callback);
 
-	return (1/FactorialGenerator<T>(n, unit).get_factorial(n))*ret;
+	return (1/factorial_generator.get_factorial(n))*ret;
 }
 
 template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uint32_t n, FormalPowerSeries<T>& arg, const T unit) {
 	auto args = std::vector<FormalPowerSeries<T>>();
 	for (uint32_t ind = 0; ind < n; ind++) {
-		args.push_back(arg.substitute(FormalPowerSeries<T>::get_atom(unit, ind+1, arg.num_coefficients())));
+		args.push_back(arg.substitute_exponent(ind+1));
 	}
 
 	return symmetric_group_cycle_index(n, args, unit, arg.num_coefficients());
@@ -47,8 +48,9 @@ template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uin
 template <typename T> FormalPowerSeries<T> pset_cycle_index(const uint32_t n, std::vector<FormalPowerSeries<T>>& args, const T unit, const uint32_t num_coeffs) {
 	assert (args.size() >= n);
 	auto ret = FormalPowerSeries<T>::get_zero(unit, num_coeffs);
-	std::function<void(std::vector<PartitionCount>&)> callback = [args, unit, num_coeffs, &ret](std::vector<PartitionCount>& partition){
-		auto conjugacy_class_size = sym_group_conjugacy_class_size<T>(partition, unit);
+	auto factorial_generator = FactorialGenerator<T>(n, unit);
+	std::function<void(std::vector<PartitionCount>&)> callback = [args, unit, num_coeffs, &ret, &factorial_generator](std::vector<PartitionCount>& partition){
+		auto conjugacy_class_size = sym_group_conjugacy_class_size<T>(partition, unit, factorial_generator);
 		auto summand = FormalPowerSeries<T>::get_unit(unit, num_coeffs);
 
 		for (auto partition_part: partition) {
@@ -59,13 +61,13 @@ template <typename T> FormalPowerSeries<T> pset_cycle_index(const uint32_t n, st
 
 	iterate_partitions(n,  callback);
 
-	return (1/FactorialGenerator<T>(n, unit).get_factorial(n))*ret;
+	return (1/factorial_generator.get_factorial(n))*ret;
 }
 
 template <typename T> FormalPowerSeries<T> pset_cycle_index(const uint32_t n, FormalPowerSeries<T>& arg, const T unit) {
 	auto args = std::vector<FormalPowerSeries<T>>();
 	for (uint32_t ind = 0; ind < n; ind++) {
-		args.push_back(arg.substitute(FormalPowerSeries<T>::get_atom(unit, ind+1, arg.num_coefficients())));
+		args.push_back(arg.substitute_exponent(ind+1));
 	}
 
 	return pset_cycle_index(n, args, unit, arg.num_coefficients());
@@ -91,7 +93,7 @@ template <typename T> FormalPowerSeries<T> cyclic_group_cycle_index(const uint32
 		if (n % d != 0) {
 			continue;
 		}
-		args.insert({d, arg.substitute(FormalPowerSeries<T>::get_atom(unit, d, arg.num_coefficients()))});
+		args.insert({d, arg.substitute_exponent(d)});
 	}
 
 	return cyclic_group_cycle_index(n, args, unit, arg.num_coefficients());

@@ -159,6 +159,7 @@ class ModLong {
 		return a/ModLong(b, a.modulus);
 	}
 
+
 	int64_t to_num() const {
 		return value;
 	}
@@ -167,7 +168,6 @@ class ModLong {
 		return modulus;
 	}
 };
-
 
 
 
