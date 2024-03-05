@@ -169,6 +169,16 @@ template<typename T> class PolishLog: public PolishNotationElement<T> {
 };
 
 
+template<typename T> class PolishInvMset: public PolishNotationElement<T> {
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+		auto result = iterate_polish<T>(cmd_list, unit, fp_size);
+		return unlabelled_inv_mset(result);
+	}
+};
+
+
 template<typename T> class PolishSqrt: public PolishNotationElement<T> {
 	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
 										const T unit,
@@ -309,6 +319,9 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 				return std::make_unique<PolishLabelledCyc<T>>(parts[1]);
 			} else if (parts[0] == "log") {
 				return std::make_unique<PolishLog<T>>();
+			} else if (parts[0] == "INVMSET") {
+				assert(parts[1] == "");
+				return std::make_unique<PolishInvMset<T>>();
 			}
 			assert(false);
 			break;

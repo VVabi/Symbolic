@@ -14,6 +14,7 @@
 #include "polya/cycle_index.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "numberTheory/euler_phi.hpp"
+#include "numberTheory/moebius.hpp"
 
 template <typename T> FormalPowerSeries<T> unlabelled_sequence(FormalPowerSeries<T> a, const Subset& indices) {
 	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
@@ -79,6 +80,19 @@ template <typename T> FormalPowerSeries<T> unlabelled_mset(FormalPowerSeries<T> 
 
 	return ret;
 }
+
+template <typename T> FormalPowerSeries<T> unlabelled_inv_mset(FormalPowerSeries<T> a) {
+	auto mu = calculate_moebius(a.num_coefficients()-1);
+	auto unit = RingCompanionHelper<T>::get_unit(a[0]);
+	auto ret = FormalPowerSeries<T>::get_zero(a[0], a.num_coefficients());
+
+	for (uint32_t k = 1; k < a.num_coefficients(); k++)  {
+		ret = ret + (mu[k]*unit)/(k*unit)*log(a.substitute_exponent(k));
+	}
+
+	return ret;
+}
+
 
 template <typename T> FormalPowerSeries<T> unlabelled_pset_single(FormalPowerSeries<T> a, const uint32_t num_elements) {
 	return pset_cycle_index(num_elements, a, RingCompanionHelper<T>::get_unit(a[0]));

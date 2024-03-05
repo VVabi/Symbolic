@@ -14,7 +14,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildProperties="" description="" id="0.999245082" name="Default" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.dockerdpath=,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.connection=unix:///var/run/docker.sock" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="0.999245082" name="Default" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.dockerdpath=,org.eclipse.cdt.docker.launcher.containerbuild.property.enablement=null,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.connection=unix:///var/run/docker.sock,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.image=null" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 					<folderInfo id="0.999245082." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.base.297684842" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base.485702021" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
@@ -30,7 +30,7 @@
 									<listOptionValue builtIn="false" value="/usr/local/include/antlr4-runtime"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.1546745980" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.optimization.level.1071642661" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.1071642661" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1102154854" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.289734333" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
@@ -48,6 +48,78 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.439499010" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.both.asm.option.include.paths.1643695187" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.459989137" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="0.999245082.507943963" name="/" resourcePath="numberTheory">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.1266593606" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base" unusedChildren="">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.254146384" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.478239843"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1394073123" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.337330210">
+								<option id="gnu.cpp.compiler.option.optimization.level.459089130" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.22192198" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.2113997807" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.289734333">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1658442309" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.514416834" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.680938642"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1014417282" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.147816768"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.588559188" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.439499010">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1387950312" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="0.999245082.2092866990" name="/" resourcePath="polya">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.100551655" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base" unusedChildren="">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1483123080" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.478239843"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1924351584" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.337330210">
+								<option id="gnu.cpp.compiler.option.optimization.level.213972719" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1232440072" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.613213740" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.289734333">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1668391579" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.140127422" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.680938642"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.167373498" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.147816768"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1967322887" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.439499010">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1746869456" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="0.999245082.1599778054" name="/" resourcePath="Default">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.825903775" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base" unusedChildren="">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1048567776" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.478239843"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1328347355" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.337330210">
+								<option id="gnu.cpp.compiler.option.optimization.level.769265085" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.372803866" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1736583391" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.289734333">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.357705434" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1753177496" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.680938642"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.895149603" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.147816768"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.587869012" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.439499010">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.768037326" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="0.999245082.2042623057" name="/" resourcePath="SymbolicMethod">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.322521672" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base" unusedChildren="">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.513806203" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.478239843"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.974612975" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.337330210">
+								<option id="gnu.cpp.compiler.option.optimization.level.148930769" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1158268149" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.412171771" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.289734333">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.717134554" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.458600639" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.680938642"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.101186173" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.147816768"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.420813274" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.439499010">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.457920320" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>

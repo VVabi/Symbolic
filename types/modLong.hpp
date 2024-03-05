@@ -160,6 +160,22 @@ class ModLong {
 	}
 
 
+	ModLong pow(const uint32_t exponent) {
+		if (exponent == 0) {
+			return ModLong(1, this->get_modulus());
+		}
+
+		auto partial = pow(exponent/2);
+
+		auto ret = partial*partial;
+
+		if (exponent % 2 == 1) {
+			ret *= *this;
+		}
+
+		return ret;
+	}
+
 	int64_t to_num() const {
 		return value;
 	}
