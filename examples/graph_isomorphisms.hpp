@@ -72,9 +72,9 @@ T calc_num_iso_classes_of_graphs(const uint32_t num_vertices, const T zero, cons
 
 template<typename T>
 FormalPowerSeries<T> get_iso_classes_of_graphs_gf(uint32_t limit, const T zero, const T unit) {
-	auto ret = FormalPowerSeries<T>::get_atom(zero, 0, limit);
+	auto ret = FormalPowerSeries<T>::get_atom(zero, 0, limit+1);
 
-	for (uint32_t ind = 0; ind < limit; ind++) {
+	for (uint32_t ind = 0; ind <= limit; ind++) {
 		std::cout << ind << std::endl;
 		ret[ind] = calc_num_iso_classes_of_graphs(ind, zero, unit);
 	}
@@ -87,6 +87,72 @@ template<typename T>
 FormalPowerSeries<T> get_iso_classes_of_connected_graphs_gf(uint32_t limit, const T zero, const T unit) {
 	auto ret = unlabelled_inv_mset(get_iso_classes_of_graphs_gf(limit, zero, unit));
 	return ret;
+}
+
+template<typename T>
+FormalPowerSeries<T> get_iso_classes_of_graphs_fixed_num_vertices_gf(uint32_t num_vertices, uint32_t max_num_edges, const T zero, const T unit) {
+	auto factorial_generator = FactorialGenerator<T>(num_vertices, unit);
+	FormalPowerSeries<T> ret = FormalPowerSeries<T>::get_zero(unit, max_num_edges+1);
+
+	auto lookup = std::vector<FormalPowerSeries<T>>();
+
+	auto core = FormalPowerSeries<T>::get_atom(unit, 0, ret.num_coefficients())+FormalPowerSeries<T>::get_atom(unit, 1, ret.num_coefficients());
+
+	for (uint32_t exponent = 0; exponent < num_vertices*num_vertices; exponent++) {
+		lookup.push_back(core.pow(exponent));
+	}
+
+	std::function<void(std::vector<PartitionCount>&)> callback = [&ret, &factorial_generator, &lookup, unit, num_vertices](std::vector<PartitionCount>& partition){
+		auto conjugacy_class_size = sym_group_conjugacy_class_size<T>(partition, unit, factorial_generator);
+		auto num_cycles = 0;
+		auto base = FormalPowerSeries<T>::get_atom(unit, 0, ret.num_coefficients())+FormalPowerSeries<T>::get_atom(unit, 1, ret.num_coefficients());
+		auto cycle_counter = std::vector<uint32_t>(num_vertices*num_vertices, 0);
+		for (uint32_t ind = 0; ind < partition.size(); ind++) {
+			auto size 			= partition[ind].num;
+			auto num_occurences = partition[ind].count;
+			num_cycles = size*(num_occurences*(num_occurences-1))/2;
+			auto cycle_size = size;
+			cycle_counter[cycle_size] += num_cycles;
+
+			if (size % 2 == 1) {
+				num_cycles = (size-1)/2*num_occurences;
+				cycle_size = size;
+				cycle_counter[cycle_size] += num_cycles;
+
+			} else {
+				num_cycles = (size-2)/2*num_occurences;
+				cycle_size = size;
+				cycle_counter[cycle_size] += num_cycles;
+
+				num_cycles = num_occurences;
+				cycle_size = size/2;
+				cycle_counter[cycle_size] += num_cycles;
+			}
+
+			for (uint32_t cnt = ind+1; cnt < partition.size(); cnt++) {
+				auto total_num_elements = size*num_occurences*partition[cnt].count*partition[cnt].num;
+				auto orbit_size = std::lcm(size, partition[cnt].num);
+				num_cycles = total_num_elements/orbit_size;
+				cycle_counter[orbit_size] += num_cycles;
+			}
+		}
+		auto loc_contrib = conjugacy_class_size*FormalPowerSeries<T>::get_atom(unit, 0, ret.num_coefficients());
+
+		for (uint32_t cycle_size = 0; cycle_size < cycle_counter.size(); cycle_size++) {
+			num_cycles = cycle_counter[cycle_size];
+			if (num_cycles > 0) {
+				auto term = lookup.at(num_cycles);
+				term.resize(ret.num_coefficients());
+				term = term.substitute_exponent(cycle_size);
+				loc_contrib = loc_contrib*term;
+			}
+		}
+
+		ret = ret+loc_contrib;
+	};
+
+	iterate_partitions(num_vertices, callback);
+	return factorial_generator.get_inv_factorial(num_vertices)*ret;
 }
 
 

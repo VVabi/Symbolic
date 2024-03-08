@@ -80,8 +80,48 @@ void notify_mult() {
 }
 
 int main(int argc, char **argv) {
-	auto gf = get_iso_classes_of_graphs_gf(100, ModLong(0, 1000000007), ModLong(1, 1000000007));
-	std::cout << gf << std::endl;
+	auto unit = ModLong(1, 1000000007);
+	auto zero = ModLong(0, 1000000007);
+
+	auto coeffs = std::vector<FormalPowerSeries<ModLong>>();
+	uint32_t max_num_vertices = 20;
+	uint32_t max_num_edges = (max_num_vertices*(max_num_vertices-1))/2;
+	for (uint32_t num_vertices = 0; num_vertices <= max_num_vertices; num_vertices++) {
+		std::cout << num_vertices << std::endl;
+		auto gf = get_iso_classes_of_graphs_fixed_num_vertices_gf(num_vertices, (num_vertices*(num_vertices-1))/2, zero, unit);
+		gf.resize(max_num_edges+1);
+		coeffs.push_back(gf);
+	}
+	auto bgf = FormalPowerSeries<FormalPowerSeries<ModLong>>(std::move(coeffs));
+	std::cout << bgf << std::endl;
+	auto moebius = calculate_moebius(max_num_vertices);
+	auto ret = FormalPowerSeries<FormalPowerSeries<ModLong>>::get_zero(bgf[max_num_vertices], bgf.num_coefficients());
+	auto funit = FormalPowerSeries<ModLong>::get_atom(unit, 0, max_num_edges+1);
+	for (uint32_t ind = 1; ind <= max_num_vertices; ind++) {
+		std::cout << ind << std::endl;
+		auto coeff = (moebius[ind]*unit)/(ind*unit);
+
+		auto log_arg = bgf;
+
+		for (uint32_t cnt = 0; cnt < log_arg.num_coefficients(); cnt++) {
+			log_arg[cnt] = log_arg[cnt].substitute_exponent(ind);
+		}
+
+		log_arg = log_arg.substitute_exponent(ind);
+
+		auto res = log(log_arg);
+
+		ret = ret+coeff*funit*res;
+	}
+
+	for (uint32_t num_vertices = 0; num_vertices <= max_num_vertices; num_vertices++) {
+		for (uint32_t num_edges = 0; num_edges <= (num_vertices*(num_vertices-1))/2; num_edges++) {
+			std::cout << ret[num_vertices][num_edges].to_num() << " ";
+		}
+		std::cout << std::endl;
+
+		std::cout << ret[num_vertices].evaluate(unit).to_num() << std::endl;
+	}
 	return 0;
 	/*std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	auto prod = power_series*power_series;
@@ -91,69 +131,7 @@ int main(int argc, char **argv) {
 	return 0;*/
 
 	/*auto max_n = 20;
-	auto factorial_generator = FactorialGenerator<ModLong>(100, ModLong(1, 1000000007));
-	FormalPowerSeries<ModLong> ret = FormalPowerSeries<ModLong>::get_zero(ModLong(1, 1000000007), 50);
 
-	auto lookup = std::vector<FormalPowerSeries<ModLong>>();
-
-	auto core = FormalPowerSeries<ModLong>::get_atom(ModLong(1, 1000000007), 0, ret.num_coefficients())+FormalPowerSeries<ModLong>::get_atom(ModLong(1, 1000000007), 1, ret.num_coefficients());
-
-	for (uint32_t exponent = 0; exponent < (max_n*(max_n-1))/2; exponent++) {
-		lookup.push_back(core.pow(exponent));
-	}
-
-	std::function<void(std::vector<PartitionCount>&)> callback = [&ret, &factorial_generator, &lookup](std::vector<PartitionCount>& partition){
-		auto conjugacy_class_size = sym_group_conjugacy_class_size<ModLong>(partition, ModLong(1, 1000000007), factorial_generator);
-		auto num_cycles = 0;
-		auto base = FormalPowerSeries<ModLong>::get_atom(ModLong(1, 1000000007), 0, ret.num_coefficients())+FormalPowerSeries<ModLong>::get_atom(ModLong(1, 1000000007), 1, ret.num_coefficients());
-		//auto loc_contrib = conjugacy_class_size*FormalPowerSeries<ModLong>::get_atom(ModLong(1, 1000000007), 0, ret.num_coefficients());
-		auto cycle_counter = std::vector<uint32_t>(100*100, 0);
-		for (uint32_t ind = 0; ind < partition.size(); ind++) {
-			auto size 			= partition[ind].num;
-			auto num_occurences = partition[ind].count;
-			num_cycles = size*(num_occurences*(num_occurences-1))/2;
-			auto cycle_size = size;
-			cycle_counter[cycle_size] += num_cycles;
-
-			if (size % 2 == 1) {
-				num_cycles = (size-1)/2*num_occurences;
-				cycle_size = size;
-				cycle_counter[cycle_size] += num_cycles;
-
-			} else {
-				num_cycles = (size-2)/2*num_occurences;
-				cycle_size = size;
-				cycle_counter[cycle_size] += num_cycles;
-
-				num_cycles = num_occurences;
-				cycle_size = size/2;
-				cycle_counter[cycle_size] += num_cycles;
-			}
-
-			for (uint32_t cnt = ind+1; cnt < partition.size(); cnt++) {
-				auto total_num_elements = size*num_occurences*partition[cnt].count*partition[cnt].num;
-				auto orbit_size = std::lcm(size, partition[cnt].num);
-				num_cycles = total_num_elements/orbit_size;
-				cycle_counter[orbit_size] += num_cycles;
-			}
-		}
-		auto loc_contrib = conjugacy_class_size*FormalPowerSeries<ModLong>::get_atom(ModLong(1, 1000000007), 0, ret.num_coefficients());
-
-		for (uint32_t cycle_size = 0; cycle_size < cycle_counter.size(); cycle_size++) {
-			num_cycles = cycle_counter[cycle_size];
-			if (num_cycles > 0) {
-				if (num_cycles >= lookup.size()) {
-					std::cout << num_cycles << std::endl;
-				}
-				auto term = lookup[num_cycles];
-				term.resize(ret.num_coefficients());
-				term = term.substitute_exponent(cycle_size);
-				loc_contrib = loc_contrib*term;
-			}
-		}
-
-		ret = ret+loc_contrib;
-	};
 	uint64_t prev_time = 1;
 	for (uint32_t n = 0; n <= max_n; n++) {
 		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();

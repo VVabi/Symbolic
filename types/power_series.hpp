@@ -231,9 +231,9 @@ template<typename T, bool EXACT> class PowerSeries {
 
 			for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
 				auto val_a = a[idx_a];
-				if (val_a == zero) {
+				/*if (val_a == zero) {
 					continue;
-				}
+				}*/
 				if (idx_a >= size) {
 					break;
 				}
@@ -271,6 +271,24 @@ template<typename T, bool EXACT> class PowerSeries {
 			b[ind] = b[ind]*a;
 		}
 		return b;
+	}
+
+	friend PowerSeries operator*(const  int64_t& a, PowerSeries b) {
+		for (uint32_t ind = 0; ind < b.num_coefficients(); ind++) {
+			b[ind] = b[ind]*a;
+		}
+		return b;
+	}
+
+	T evaluate(const T& input) {
+		auto pow = RingCompanionHelper<T>::get_unit(input);
+		auto ret = RingCompanionHelper<T>::get_zero(input);
+
+		for (uint32_t ind = 0; ind < num_coefficients(); ind++) {
+			ret += coefficients[ind]*pow;
+			pow = pow*input;
+		}
+		return ret;
 	}
 
 	PowerSeries invert() const {
@@ -337,6 +355,15 @@ template<typename T, bool EXACT> class PowerSeries {
 		return binv;
 	}
 
+	friend PowerSeries operator/(PowerSeries a, const int64_t b) {
+		auto unit = RingCompanionHelper<T>::get_unit(a[0]);
+		auto inv = unit/(unit*b);
+		for (auto it = a.coefficients.begin(); it != a.coefficients.end(); it++) {
+			*it *= inv;
+		}
+		return a;
+	}
+
 	PowerSeries substitute(const PowerSeries& fp) {
 		auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
 		auto zero_coeffs = std::vector<T>(num_coefficients(), zero);
@@ -379,9 +406,9 @@ template<typename T, bool EXACT> class PowerSeries {
 
 			for (size_t idx_a = 0; idx_a < size_a; idx_a++) {
 				auto val_a = a[idx_a];
-				if (val_a == zero) {
+				/*if (val_a == zero) { //TODO implement == for powerseries
 					continue;
-				}
+				}*/
 				if (idx_a >= size) {
 					break;
 				}
@@ -475,8 +502,6 @@ template<typename T, bool EXACT> class PowerSeries {
 
 	}
 
-
-	//251448847
 	static PowerSeries<T, true> multiply_full(const PowerSeries& a, const PowerSeries& b) {
 		auto ret_coeffs = multiply_full(a.coefficients.data(), a.coefficients.size(), b.coefficients.data(), b.coefficients.size());
 		return PowerSeries<T, true>(std::move(ret_coeffs));
@@ -488,9 +513,9 @@ template<typename T, bool EXACT> class PowerSeries {
 
 			for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
 				auto val_a = a[idx_a];
-				if (val_a == zero) {
+				/*if (val_a == zero) {
 					continue;
-				}
+				}*/
 				if (idx_a >= size) {
 					break;
 				}
@@ -619,5 +644,22 @@ template<typename T> FormalPowerSeries<T> log(const FormalPowerSeries<T> in) {
 	auto log = FormalPowerSeries<T>::get_log(in.num_coefficients(), unit);
 	return log.substitute(in-FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients()));
 }
+
+
+template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
+public:
+	static FormalPowerSeries<T> get_zero(const FormalPowerSeries<T>& in) {
+		return FormalPowerSeries<T>::get_zero(in[0], in.num_coefficients());
+	}
+	static FormalPowerSeries<T> get_unit(const FormalPowerSeries<T>& in) {
+		auto unit = RingCompanionHelper<T>::get_unit(in[0]);
+		return FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients());
+	}
+	static FormalPowerSeries<T> from_string(const std::string& in, const FormalPowerSeries<T>& unit) {
+		assert(false);
+		return FormalPowerSeries<T>::get_zero(in[0], unit.num_coefficients());
+	}
+};
+
 
 #endif /* TYPES_POWER_SERIES_HPP_ */

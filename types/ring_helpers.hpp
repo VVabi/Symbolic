@@ -52,6 +52,4 @@ template<> class RingCompanionHelper<double> {
 	}
 };
 
-
-
 #endif /* TYPES_RING_HELPERS_HPP_ */
