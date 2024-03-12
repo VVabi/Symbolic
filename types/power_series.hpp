@@ -16,37 +16,6 @@
 #include "types/ring_helpers.hpp"
 
 
-template<typename T>
-std::vector<T> multiply_polynomials(std::vector<T>& p, std::vector<T>& q, uint32_t cutoff) {
-	auto zero = RingCompanionHelper<T>::get_zero(p[0]);
-	auto ret = std::vector<T>(std::min((uint32_t) (p.size()+q.size()-1), cutoff), zero);
-
-
-	for (size_t idx_p = 0; idx_p < p.size(); idx_p++) {
-		auto val_p = p[idx_p];
-		if (val_p  == zero) {
-			continue;
-		}
-		if (idx_p >= cutoff) {
-			break;
-		}
-		for (size_t idx_q = 0; idx_q < q.size(); idx_q++) {
-			if (idx_p + idx_q >= cutoff) {
-				break;
-			}
-			ret[idx_p + idx_q] = ret[idx_p + idx_q]+val_p*q[idx_q];
-		}
-	}
-
-	return ret;
-}
-
-
-
-void notify_add();
-void notify_mult();
-
-
 template<typename T, bool EXACT> class PowerSeries {
  private:
 
@@ -83,7 +52,6 @@ template<typename T, bool EXACT> class PowerSeries {
     }
 
 	friend PowerSeries operator+(PowerSeries a, const PowerSeries& b) {
-		notify_add();
 		a.adapt_size_add(b.num_coefficients());
 		auto size = a.num_coefficients();
 		for (size_t idx = 0; idx < size; idx++) {
@@ -122,14 +90,6 @@ template<typename T, bool EXACT> class PowerSeries {
 	}
 
 	PowerSeries pow(const uint32_t exponent) const {
-		//TODO
-		/*auto ret = PowerSeries<T, EXACT>::get_unit(coefficients[0], num_coefficients());
-
-		for (uint32_t ind = 0; ind < exponent; ind++) {
-			ret = ret*(*this);
-		}
-		return ret;*/
-
 		if (exponent == 0) {
 			return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
 		}
@@ -146,7 +106,6 @@ template<typename T, bool EXACT> class PowerSeries {
 	}
 
 	friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
-		notify_add();
 		a.adapt_size_add(b.num_coefficients());
 		auto size = a.num_coefficients();
 		for (size_t idx = 0; idx < size; idx++) {
@@ -164,6 +123,23 @@ template<typename T, bool EXACT> class PowerSeries {
 	void adapt_size_add(const size_t other) {
 		size_t new_size = EXACT ? std::max(other, num_coefficients()) : std::min(other, num_coefficients());
 		resize(new_size);
+	}
+
+	bool operator==(const PowerSeries& other) {
+		if (EXACT) {
+			assert(false);
+		}
+
+		if (other.num_coefficients() != num_coefficients()) {
+			return false;
+		}
+
+		for (uint32_t ind = 0; ind < num_coefficients(); ind++) {
+			if (coefficients[ind] != other[ind]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	friend PowerSeries operator>>(PowerSeries a, const uint32_t shift) {
@@ -194,46 +170,21 @@ template<typename T, bool EXACT> class PowerSeries {
 		return a;
 	}
 	friend PowerSeries operator*(PowerSeries a, const PowerSeries& b) {
-		notify_mult();
-		/*auto size = EXACT ? a.num_coefficients()+b.num_coefficients()-1 : std::min(a.num_coefficients(), b.num_coefficients());
-
-		auto const_a = a[0];
-		auto zero = RingCompanionHelper<T>::get_zero(const_a);
-		std::vector<T> coeffs = std::vector<T>(size, zero);
-
-		for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
-			auto val_a = a[idx_a];
-			if (val_a == zero) {
-				continue;
-			}
-			if (idx_a >= size) {
-				break;
-			}
-			for (size_t idx_b = 0; idx_b < b.num_coefficients(); idx_b++) {
-				if (idx_a + idx_b >= size) {
-					break;
-				}
-				coeffs[idx_a + idx_b] = coeffs[idx_a + idx_b]+val_a*b[idx_b];
-			}
-		}
-
-		auto ret = PowerSeries(std::move(coeffs));
-		return ret;*/
 		if (EXACT) {
 			return convert_polynomial_to_power_series(multiply_full(a, b));
 		}
 		auto size = std::min(a.num_coefficients(), b.num_coefficients());
 
-		if (size < 100) {
+		if (size < 100000) {
 			auto const_a = a[0];
 			auto zero = RingCompanionHelper<T>::get_zero(const_a);
 			std::vector<T> coeffs = std::vector<T>(size, zero);
 
 			for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
 				auto val_a = a[idx_a];
-				/*if (val_a == zero) {
+				if (val_a == zero) {
 					continue;
-				}*/
+				}
 				if (idx_a >= size) {
 					break;
 				}
@@ -406,9 +357,9 @@ template<typename T, bool EXACT> class PowerSeries {
 
 			for (size_t idx_a = 0; idx_a < size_a; idx_a++) {
 				auto val_a = a[idx_a];
-				/*if (val_a == zero) { //TODO implement == for powerseries
+				if (val_a == zero) { //TODO implement == for powerseries
 					continue;
-				}*/
+				}
 				if (idx_a >= size) {
 					break;
 				}
@@ -499,56 +450,11 @@ template<typename T, bool EXACT> class PowerSeries {
 		}
 
 		return ret;
-
 	}
 
 	static PowerSeries<T, true> multiply_full(const PowerSeries& a, const PowerSeries& b) {
 		auto ret_coeffs = multiply_full(a.coefficients.data(), a.coefficients.size(), b.coefficients.data(), b.coefficients.size());
 		return PowerSeries<T, true>(std::move(ret_coeffs));
-
-		auto size = a.num_coefficients()+b.num_coefficients()-1;
-		auto zero = RingCompanionHelper<T>::get_zero(a[0]);
-		if (size < 500000) {
-			std::vector<T> coeffs = std::vector<T>(size, zero);
-
-			for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
-				auto val_a = a[idx_a];
-				/*if (val_a == zero) {
-					continue;
-				}*/
-				if (idx_a >= size) {
-					break;
-				}
-				for (size_t idx_b = 0; idx_b < b.num_coefficients(); idx_b++) {
-					if (idx_a + idx_b >= size) {
-						break;
-					}
-					coeffs[idx_a + idx_b] = coeffs[idx_a + idx_b]+val_a*b[idx_b];
-				}
-			}
-
-			auto ret = PowerSeries<T, true>(std::move(coeffs));
-			return ret;
-		}
-
-		auto midpoint = std::max(a.num_coefficients(), b.num_coefficients())/2;
-		auto a0 = convert_power_series_to_polynomial(a);
-		auto a1 = a0 >> midpoint;
-		a0.resize(midpoint);
-
-		auto b0 = convert_power_series_to_polynomial(b);
-		auto b1 = b0 >> midpoint;
-		b0.resize(midpoint);
-
-
-		auto z0 = PowerSeries<T, true>::multiply_full(a0, b0);
-		auto z2 = PowerSeries<T, true>::multiply_full(a1, b1);
-
-		auto z3 = PowerSeries<T, true>::multiply_full(a0+a1, b0+b1);
-		auto z1 = z3-z2-z0;
-
-		auto ret = (z2 << 2*midpoint) + (z1 << midpoint) + z0;
-		return ret;
 	}
 
 	static PowerSeries get_atom(const T value, const size_t idx, const uint32_t size) {

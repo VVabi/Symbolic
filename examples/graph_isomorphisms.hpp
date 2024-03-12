@@ -155,5 +155,35 @@ FormalPowerSeries<T> get_iso_classes_of_graphs_fixed_num_vertices_gf(uint32_t nu
 	return factorial_generator.get_inv_factorial(num_vertices)*ret;
 }
 
+template<typename T>
+FormalPowerSeries<FormalPowerSeries<T>>
+get_connected_graph_iso_types_by_edge_number(const uint32_t max_num_vertices, const T zero, const T unit) {
+	auto coeffs = std::vector<FormalPowerSeries<T>>();
+	uint32_t max_num_edges = (max_num_vertices*(max_num_vertices-1))/2;
+	for (uint32_t num_vertices = 0; num_vertices <= max_num_vertices; num_vertices++) {
+		auto gf = get_iso_classes_of_graphs_fixed_num_vertices_gf(num_vertices, (num_vertices*(num_vertices-1))/2, zero, unit);
+		gf.resize(max_num_edges+1);
+		coeffs.push_back(gf);
+	}
+	auto bgf = FormalPowerSeries<FormalPowerSeries<T>>(std::move(coeffs));
+	auto moebius = calculate_moebius(max_num_vertices);
+	auto ret = FormalPowerSeries<FormalPowerSeries<T>>::get_zero(bgf[max_num_vertices], bgf.num_coefficients());
+	auto funit = FormalPowerSeries<T>::get_atom(unit, 0, max_num_edges+1);
+	for (uint32_t ind = 1; ind <= max_num_vertices; ind++) {
+		auto coeff = (moebius[ind]*unit)/(ind*unit);
+		auto log_arg = bgf;
+
+		for (uint32_t cnt = 0; cnt < log_arg.num_coefficients(); cnt++) {
+			log_arg[cnt] = log_arg[cnt].substitute_exponent(ind);
+		}
+
+		log_arg = log_arg.substitute_exponent(ind);
+		auto res = log(log_arg);
+		ret = ret+coeff*funit*res;
+	}
+
+	return ret;
+}
+
 
 #endif /* EXAMPLES_GRAPH_ISOMORPHISMS_HPP_ */
