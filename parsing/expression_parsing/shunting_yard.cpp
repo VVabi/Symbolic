@@ -1,8 +1,8 @@
-/*
- * shunting_yard.cpp
- *
- *  Created on: Feb 6, 2024
- *      Author: vabi
+/**
+ * @file shunting_yard.cpp
+ * @author vabi
+ * @date Feb 6, 2024
+ * @brief This file contains the implementation of the Shunting Yard algorithm for parsing mathematical expressions.
  */
 
 #include <stdint.h>
@@ -10,8 +10,23 @@
 #include <vector>
 #include <stack>
 #include <algorithm>
-#include "parsing/expression_parsing/math_lexer.hpp"
 #include <iostream>
+#include "parsing/expression_parsing/math_lexer.hpp"
+
+/**
+ * @brief Returns the precedence of a given mathematical operator.
+ * 
+ * This function takes a character representing a mathematical operator and returns its 
+ * precedence. The precedence is determined based on the standard order of operations: 
+ * exponentiation (^) has the highest precedence, followed by multiplication (*) and 
+ * division (/), and then addition (+) and subtraction (-).
+ *
+ * If the input character is not one of the five recognized operators, the function asserts 
+ * false and returns -1.
+ *
+ * @param op The character representing the operator.
+ * @return The precedence of the operator, or -1 if the operator is not recognized.
+ */
 int32_t get_operator_precedence(char op) {
 	switch (op) {
 		case '+':
@@ -136,9 +151,6 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 	}
 
 	std::reverse(ret.begin(),ret.end());
-	/*for (auto x : ret) {
-		std::cout << x.type << " "  << x.data << std::endl;
-	}*/
 	return ret;
 }
 

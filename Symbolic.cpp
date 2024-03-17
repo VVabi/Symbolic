@@ -1,14 +1,13 @@
 #include <iostream>
+#include <numeric>
+#include <chrono>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "test/parsing/test_power_series_parsing.hpp"
 #include "types/power_series.hpp"
-#include <numeric>
-#include <chrono>
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
 /*#include "types/bigint.hpp"
 #include "types/rationals.hpp"*/
-
 
 int main(int argc, char **argv) {
 	/*auto gf = "1/(1-z-z^2)";

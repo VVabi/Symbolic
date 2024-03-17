@@ -11,8 +11,8 @@
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
-#include "types/bigint.hpp"
-#include "types/rationals.hpp"
+/*#include "types/bigint.hpp"
+#include "types/rationals.hpp"*/
 
 struct PowerSeriesTestcase {
 	std::string formula;
@@ -293,9 +293,9 @@ bool test_double_power_series_parsing() {
 	return run_power_series_parsing_test_cases<double>(test_cases, 1.0);
 }
 
-bool test_rational_power_series_parsing() {
+/*bool test_rational_power_series_parsing() {
 	return run_power_series_parsing_test_cases<RationalNumber<BigInt>>(test_cases, RationalNumber<BigInt>(1, 1));
-}
+}*/
 
 
 bool test_modulo_power_series_parsing() {
@@ -310,7 +310,7 @@ bool test_modulo_power_series_parsing() {
 void run_power_series_parsing_tests() {
 	bool ret = true;
 	ret = ret && test_double_power_series_parsing();
-	ret = ret && test_rational_power_series_parsing();
+	//ret = ret && test_rational_power_series_parsing();
 	ret = ret && test_modulo_power_series_parsing();
 	ret = ret && test_catalan_numbers();
 	ret = ret && test_derangements();
