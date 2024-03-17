@@ -48,8 +48,6 @@ void iterate_partitions_internal(const uint32_t size,
 	iterate_partitions_internal(size, max_value-1, current, callback);
 }
 
-
-
 /**
  * @brief Calculates the sign of a partition.
  * 

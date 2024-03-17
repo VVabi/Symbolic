@@ -185,5 +185,37 @@ get_connected_graph_iso_types_by_edge_number(const uint32_t max_num_vertices, co
 	return ret;
 }
 
+template<typename T>
+FormalPowerSeries<T> get_rooted_trees_gf(const uint32_t size, const T zero, const T unit) {
+	auto ret = FormalPowerSeries<T>::get_atom(zero, 0, size+1);
+	ret[1] = unit;
+	auto f = std::vector<T>(size+1, zero);
+	for (uint32_t ind = 1; ind <= size; ind++) {
+		f[ind] = unit/ind;
+	}
+	for (uint32_t n = 2; n <= size; n++) {
+		T res = zero;
+
+		for (uint32_t k = 0; k <= n-2; k++) {
+			res = res + (k+1)*f[k+1]*ret[n-k-1];
+		}
+
+		res = res/(n-1);
+		ret[n] = res;
+		for (uint32_t k = 1; k <= size/n; k++) {
+			f[k*n] = f[k*n]+res/k;
+		}
+	}
+
+	return ret;
+}
+
+template<typename T>
+FormalPowerSeries<T> get_trees_gf(const uint32_t size, const T zero, const T unit) {
+	auto rooted = get_rooted_trees_gf(size, zero, unit);
+	auto ret = rooted-(rooted*rooted-rooted.substitute_exponent(2))/2;
+	return ret;
+}
+
 
 #endif /* EXAMPLES_GRAPH_ISOMORPHISMS_HPP_ */
