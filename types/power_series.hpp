@@ -12,6 +12,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <algorithm>
 #include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
 
@@ -106,14 +107,7 @@ template<typename T, bool EXACT> class PowerSeries {
 	}
 
 	friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
-		a.adapt_size_add(b.num_coefficients());
-		auto size = a.num_coefficients();
-		for (size_t idx = 0; idx < size; idx++) {
-			if (idx < b.num_coefficients()) {
-				a[idx] = a[idx]-b[idx];
-			}
-		}
-		return a;
+		return a+(-b);
 	}
 
 	void resize(const size_t new_size) {
@@ -175,24 +169,33 @@ template<typename T, bool EXACT> class PowerSeries {
 		}
 		auto size = std::min(a.num_coefficients(), b.num_coefficients());
 
-		if (size < 100000) {
+
+		auto zero = RingCompanionHelper<T>::get_zero(a[0]);
+
+		uint64_t num_zero_a = std::count(a.coefficients.begin(), a.coefficients.end(), zero);
+		uint64_t num_zero_b = std::count(b.coefficients.begin(), b.coefficients.end(), zero);
+
+		//TODO improve the zero check; it should depend on some nicer function on the number of coefficients (n-sqrt(n)?)
+		if (size < 100 || num_zero_a > 49*a.num_coefficients()/50 || num_zero_b > 49*b.num_coefficients()/50) {
 			auto const_a = a[0];
 			auto zero = RingCompanionHelper<T>::get_zero(const_a);
 			std::vector<T> coeffs = std::vector<T>(size, zero);
 
-			for (size_t idx_a = 0; idx_a < a.num_coefficients(); idx_a++) {
-				auto val_a = a[idx_a];
+			auto first 	= num_zero_a > num_zero_b? &a.coefficients : &b.coefficients;
+			auto second = num_zero_a > num_zero_b? &b.coefficients : &a.coefficients;
+			for (size_t idx_a = 0; idx_a < first->size(); idx_a++) {
+				auto val_a = (*first)[idx_a];
 				if (val_a == zero) {
 					continue;
 				}
 				if (idx_a >= size) {
 					break;
 				}
-				for (size_t idx_b = 0; idx_b < b.num_coefficients(); idx_b++) {
+				for (size_t idx_b = 0; idx_b < second->size(); idx_b++) {
 					if (idx_a + idx_b >= size) {
 						break;
 					}
-					coeffs[idx_a + idx_b] = coeffs[idx_a + idx_b]+val_a*b[idx_b];
+					coeffs[idx_a + idx_b] = coeffs[idx_a + idx_b]+val_a*(*second)[idx_b];
 				}
 			}
 
@@ -352,12 +355,14 @@ template<typename T, bool EXACT> class PowerSeries {
 			const T* b, const uint32_t size_b) {
 		auto size = size_a+size_b-1;
 		auto zero = RingCompanionHelper<T>::get_zero(a[0]);
+		//std::cout << "Size " << size_a << " " << size_b << std::endl;
 		if (size < 100) {
+			//std::cout << "base case of size " << size << std::endl;
 			std::vector<T> ret = std::vector<T>(size, zero);
 
 			for (size_t idx_a = 0; idx_a < size_a; idx_a++) {
 				auto val_a = a[idx_a];
-				if (val_a == zero) { //TODO implement == for powerseries
+				if (val_a == zero) {
 					continue;
 				}
 				if (idx_a >= size) {
