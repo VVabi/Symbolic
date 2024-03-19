@@ -210,12 +210,23 @@ FormalPowerSeries<T> get_rooted_trees_gf(const uint32_t size, const T zero, cons
 	return ret;
 }
 
+/**
+ * @brief Returns the generating function for trees up to the given size.
+ * 
+ * This function calculates the generating function for unrooted trees. 
+ * See https://arxiv.org/pdf/2305.03157.pdf for detailed explanations.
+ *
+ * @tparam T The type of the coefficients of the power series.
+ * @param size the size limit up to which to generate.
+ * @param zero The additive identity of type `T`.
+ * @param unit The multiplicative identity of type `T`.
+ * @return The generating function for unrooted trees of the given size.
+ */
 template<typename T>
 FormalPowerSeries<T> get_trees_gf(const uint32_t size, const T zero, const T unit) {
 	auto rooted = get_rooted_trees_gf(size, zero, unit);
 	auto ret = rooted-(rooted*rooted-rooted.substitute_exponent(2))/2;
 	return ret;
 }
-
 
 #endif /* EXAMPLES_GRAPH_ISOMORPHISMS_HPP_ */

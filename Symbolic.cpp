@@ -14,7 +14,9 @@ int main(int argc, char **argv) {
 	auto pw = parse_power_series_from_string(gf, 20, RationalNumber<BigInt>(1, 1));
 	std::cout << pw << std::endl;
 	return 0;*/
-	run_power_series_parsing_tests();
+	auto gf = get_trees_gf(20, ModLong(0, 1000000007), ModLong(1, 1000000007));
+	std::cout << gf << std::endl;
+	//run_power_series_parsing_tests();
 	/*auto unit = RationalNumber<BigInt>(1, 1);
 	auto zero = RationalNumber<BigInt>(0, 1);
 

@@ -43,6 +43,11 @@ int32_t get_operator_precedence(char op) {
 	}
 }
 
+/**
+ * @brief Check if an operator is right associative.
+ * @param op The operator to check.
+ * @return true if the operator is right associative, false otherwise.
+ */
 bool is_right_associative(char op) {
 	switch (op) {
 		case '+':
@@ -59,6 +64,11 @@ bool is_right_associative(char op) {
 	}
 }
 
+/**
+ * @brief Apply the shunting yard algorithm to a list of math lexer elements.
+ * @param input The input list of math lexer elements.
+ * @return The output list of math lexer elements in Polish Notation.
+ */
 std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input) {
 	auto ret 		= std::vector<MathLexerElement>();
 	auto operators 	= std::stack<MathLexerElement>();
