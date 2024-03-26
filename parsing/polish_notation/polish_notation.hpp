@@ -331,6 +331,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 	}
 
 	assert(false);
+	return std::unique_ptr<PolishNotationElement<T>>(nullptr);
 }
 
 

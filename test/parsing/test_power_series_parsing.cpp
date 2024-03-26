@@ -4,7 +4,6 @@
  *  Created on: Feb 26, 2024
  *      Author: vabi
  */
-#ifdef RUN_SYMBOLIC_TESTS
 #include <gtest/gtest.h>
 #include <types/bigint.hpp>
 #include <string>
@@ -312,4 +311,3 @@ TEST(ParsingTests, ModDerangements) {
   EXPECT_EQ(test_derangements(), true);
 }
 
-#endif //RUN_SYMBOLIC_TESTS
