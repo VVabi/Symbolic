@@ -4,15 +4,17 @@
  *  Created on: Feb 26, 2024
  *      Author: vabi
  */
-
+#ifdef RUN_SYMBOLIC_TESTS
+#include <gtest/gtest.h>
+#include <types/bigint.hpp>
 #include <string>
 #include <vector>
 #include <iostream>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
-/*#include "types/bigint.hpp"
-#include "types/rationals.hpp"*/
+#include "types/rationals.hpp"
+#include "types/bigint.hpp"
 
 struct PowerSeriesTestcase {
 	std::string formula;
@@ -143,9 +145,6 @@ public:
 			err = err/std::abs(a);
 		}
 
-		if (err > 1e-10) {
-			std::cout << err << std::endl;
-		}
 		return err < 1e-10;
 	}
 };
@@ -161,7 +160,6 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
 
 	auto power_series = parse_power_series_from_string<T>(formula, fp_size, unit);
 	ret = ret && (power_series.num_coefficients() == expected_output_fp_size);
-
 	T factorial = unit;
 	for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
 		if (ind > 0) {
@@ -171,12 +169,10 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
 		if (exponential) {
 			coeff *= factorial;
 		}
-		ret = ret && EqualityChecker<T>::check_equality(coeff, sign*expected_result[ind]*unit);
+		auto loc_res = EqualityChecker<T>::check_equality(coeff, sign*expected_result[ind]*unit);
+		EXPECT_EQ(loc_res, true) << formula << " with size " << fp_size << " and unit " << unit << " failed at index " << ind << ":\nExpected " << sign*expected_result[ind]*unit << "\nGot " << coeff;
 	}
 
-	if (!ret) {
-		std::cout << formula << " failed test" << std::endl;
-	}
 	return ret;
 }
 
@@ -184,7 +180,6 @@ template<typename T>
 bool run_power_series_parsing_test_cases(std::vector<PowerSeriesTestcase>& test_cases, const T unit) {
 	bool ret = true;
 	for (auto test_case : test_cases) {
-		std::cout << "Testing " << test_case.formula << " with unit " << unit << std::endl;
 		for (uint32_t ind = 1; ind <= test_case.expected_result.size(); ind++) {
 			auto loc_ret = run_power_series_parsing_test_case<T>(test_case.formula,
 					ind+test_case.additional_offset,
@@ -212,9 +207,6 @@ bool run_power_series_parsing_test_cases(std::vector<PowerSeriesTestcase>& test_
 					unit,
 					test_case.exponential,
 					-1);
-			if (!loc_ret) {
-				std::cout << "Test case for " << test_case.formula << " with unit " << unit << " and size " << ind << " failed" << std::endl;
-			}
 			ret = ret && loc_ret;
 		}
 	}
@@ -236,13 +228,11 @@ std::vector<int64_t> get_test_primes() {
 	return primes;
 }
 
-
 bool test_derangements() {
 	bool ret = true;
 	auto derangements_gf = "exp(-z)/(1-z)";
 	auto primes = get_test_primes();
 	for (auto p: primes) {
-		std::cout << "Testing prime " << p << " for correct derangement numbers..." << std::endl;
 		uint32_t num_coeffs 	 = 10000;
 		auto res 				 = parse_power_series_from_string<ModLong>(derangements_gf, num_coeffs, ModLong(1, p));
 		auto factorial_generator = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
@@ -265,13 +255,11 @@ bool test_derangements() {
 	return ret;
 }
 
-
 bool test_catalan_numbers() {
 	bool ret = true;
 	auto catalan_gf = "(1-sqrt(1-4*z))/(2*z)";
 	auto primes = get_test_primes();
 	for (auto p: primes) {
-		std::cout << "Testing prime " << p << " for correct catalan numbers..." << std::endl;
 		uint32_t num_coeffs = 10000;
 		auto res = parse_power_series_from_string<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p));
 
@@ -288,15 +276,13 @@ bool test_catalan_numbers() {
 	return ret;
 }
 
-
 bool test_double_power_series_parsing() {
 	return run_power_series_parsing_test_cases<double>(test_cases, 1.0);
 }
 
-/*bool test_rational_power_series_parsing() {
+bool test_rational_power_series_parsing() {
 	return run_power_series_parsing_test_cases<RationalNumber<BigInt>>(test_cases, RationalNumber<BigInt>(1, 1));
-}*/
-
+}
 
 bool test_modulo_power_series_parsing() {
 	bool ret = true;
@@ -307,21 +293,23 @@ bool test_modulo_power_series_parsing() {
 	return ret;
 }
 
-void run_power_series_parsing_tests() {
-	bool ret = true;
-	ret = ret && test_double_power_series_parsing();
-	//ret = ret && test_rational_power_series_parsing();
-	ret = ret && test_modulo_power_series_parsing();
-	ret = ret && test_catalan_numbers();
-	ret = ret && test_derangements();
-
-	assert(ret);
-	std::cout << "success" << std::endl;
+TEST(ParsingTests, DoublePowerSeriesParsing) {
+  EXPECT_EQ(test_double_power_series_parsing(), true);
 }
 
+TEST(ParsingTests, RationalPowerSeriesParsing) {
+  EXPECT_EQ(test_rational_power_series_parsing(), true);
+}
 
+TEST(ParsingTests, ModPowerSeriesParsing) {
+  EXPECT_EQ(test_modulo_power_series_parsing(), true);
+}
 
+TEST(ParsingTests, ModCatalan) {
+  EXPECT_EQ(test_catalan_numbers(), true);
+}
+TEST(ParsingTests, ModDerangements) {
+  EXPECT_EQ(test_derangements(), true);
+}
 
-
-
-
+#endif //RUN_SYMBOLIC_TESTS

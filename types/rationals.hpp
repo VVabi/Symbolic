@@ -121,7 +121,6 @@ public:
 
 	RationalNumber operator-() const {
 		return RationalNumber(-numerator, denominator);
-
 	}
 };
 
