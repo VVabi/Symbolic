@@ -9,7 +9,7 @@
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
-
+#include <gtest/gtest.h>
 
 
 
@@ -58,17 +58,20 @@ bool test_bigint() {
 }
 
 int main(int argc, char **argv) {
+#ifdef RUN_SYMBOLIC_TESTS
+	testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+#endif
 	/*auto x = BigInt("23")*BigInt("13");
-	auto y = BigInt("23")*BigInt("5");
+	auto y = BigInt("23")*BigInt("5");s
 	std::cout << gcd(x, y) << std::endl;
 	std::cout << lcm(x, y) << std::endl;
 	std::cout << test_bigint() << std::endl;*/
 	/*std::cout << test_bigint() << std::endl;*/
-	run_power_series_parsing_tests();
-	/*auto s = "1/(1-z-z^2)";
-	auto gf = parse_power_series_from_string(s, 10, RationalNumber<BigInt>(1));
-	std::cout << gf << std::endl;*/
-	//auto nums = calc_num_iso_classes_of_graphs(100, RationalNumber<BigInt>(0), RationalNumber<BigInt>(1));
-	//std::cout << nums<< std::endl;
+	//run_power_series_parsing_tests();
+  	std::cout << "RAND_MAX: " << RAND_MAX << '\n'
+              << "INT_MAX: " << INT_MAX << '\n'
+              << "Random value on [0,1]: "
+              << static_cast<double>(std::rand()) / RAND_MAX << '\n';
 	return 0;
 }
