@@ -11,67 +11,10 @@
 #include "numberTheory/moebius.hpp"
 #include <gtest/gtest.h>
 
-
-
-bool test_bigint() {
-	auto x = BigInt("2");
-	auto y = BigInt("3");
-	auto z = BigInt("2");
-
-	bool ret = true;
-
-	ret = ret && (-x == BigInt("-2"));
-	ret = ret && (x-y == BigInt("-1"));
-	ret = ret && (x+y == BigInt("5"));
-
-	ret = ret && (x != y);
-	ret = ret && !(x == y);
-	ret = ret && (x == z);
-	ret = ret && !(x != z);
-
-
-	ret = ret && (-x == BigInt("-2"));
-	x += y;
-
-	ret = ret && (x == BigInt("5"));
-
-	ret = ret && (x*y == BigInt("15"));
-
-	x *= y;
-
-	ret = ret && (x == BigInt("15"));
-
-
-	auto a = BigInt("15");
-	auto b = BigInt("7");
-
-	ret = ret && (a % b == BigInt("1"));
-	ret = ret && (b % a == BigInt("7"));
-	ret = ret && (a % -b == BigInt("1"));
-	ret = ret && (b % -a == BigInt("7"));
-	ret = ret && (-a % b == BigInt("6"));
-	ret = ret && (-b % a == BigInt("8"));
-	ret = ret && (-a % -b == BigInt("6"));
-	ret = ret && (-b % -a == BigInt("8"));
-	ret = ret && (b % b == BigInt("0"));
-	return ret;
-}
-
 int main(int argc, char **argv) {
 #ifdef RUN_SYMBOLIC_TESTS
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 #endif
-	/*auto x = BigInt("23")*BigInt("13");
-	auto y = BigInt("23")*BigInt("5");s
-	std::cout << gcd(x, y) << std::endl;
-	std::cout << lcm(x, y) << std::endl;
-	std::cout << test_bigint() << std::endl;*/
-	/*std::cout << test_bigint() << std::endl;*/
-	//run_power_series_parsing_tests();
-  	std::cout << "RAND_MAX: " << RAND_MAX << '\n'
-              << "INT_MAX: " << INT_MAX << '\n'
-              << "Random value on [0,1]: "
-              << static_cast<double>(std::rand()) / RAND_MAX << '\n';
 	return 0;
 }

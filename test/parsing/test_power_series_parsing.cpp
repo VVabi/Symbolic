@@ -180,7 +180,6 @@ template<typename T>
 bool run_power_series_parsing_test_cases(std::vector<PowerSeriesTestcase>& test_cases, const T unit) {
 	bool ret = true;
 	for (auto test_case : test_cases) {
-		//std::cout << "Testing " << test_case.formula << " with unit " << unit << std::endl;
 		for (uint32_t ind = 1; ind <= test_case.expected_result.size(); ind++) {
 			auto loc_ret = run_power_series_parsing_test_case<T>(test_case.formula,
 					ind+test_case.additional_offset,
@@ -234,7 +233,6 @@ bool test_derangements() {
 	auto derangements_gf = "exp(-z)/(1-z)";
 	auto primes = get_test_primes();
 	for (auto p: primes) {
-		//std::cout << "Testing prime " << p << " for correct derangement numbers..." << std::endl;
 		uint32_t num_coeffs 	 = 10000;
 		auto res 				 = parse_power_series_from_string<ModLong>(derangements_gf, num_coeffs, ModLong(1, p));
 		auto factorial_generator = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
@@ -262,7 +260,6 @@ bool test_catalan_numbers() {
 	auto catalan_gf = "(1-sqrt(1-4*z))/(2*z)";
 	auto primes = get_test_primes();
 	for (auto p: primes) {
-		//std::cout << "Testing prime " << p << " for correct catalan numbers..." << std::endl;
 		uint32_t num_coeffs = 10000;
 		auto res = parse_power_series_from_string<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p));
 
@@ -314,17 +311,5 @@ TEST(ParsingTests, ModCatalan) {
 TEST(ParsingTests, ModDerangements) {
   EXPECT_EQ(test_derangements(), true);
 }
-
-/*void run_power_series_parsing_tests() {
-	bool ret = true;
-	ret = ret && test_double_power_series_parsing();
-	ret = ret && test_rational_power_series_parsing();
-	ret = ret && test_modulo_power_series_parsing();
-	ret = ret && test_catalan_numbers();
-	ret = ret && test_derangements();
-
-	assert(ret);
-	std::cout << "success" << std::endl;
-}*/
 
 #endif //RUN_SYMBOLIC_TESTS
