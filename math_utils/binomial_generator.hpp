@@ -20,8 +20,9 @@
  */
 template<typename T> class BinomialGenerator {
  private:
-	T unit;
-	FactorialGenerator<T> generator;
+    T unit;
+    FactorialGenerator<T> generator;
+
  public:
      /**
      * @brief Constructs a new BinomialGenerator.
@@ -29,9 +30,7 @@ template<typename T> class BinomialGenerator {
      * @param upto The maximum number for which to generate binomial coefficients.
      * @param unit The multiplicative identity of type `T`.
      */
-	BinomialGenerator(const uint32_t upto, const T unit): unit(unit), generator(FactorialGenerator<T>(upto, unit)) {
-
-	}
+    BinomialGenerator(const uint32_t upto, const T unit): unit(unit), generator(FactorialGenerator<T>(upto, unit)) { }
 
     /**
      * @brief Returns the binomial coefficient (n, k).
@@ -40,12 +39,12 @@ template<typename T> class BinomialGenerator {
      * @param k The number of elements to choose.
      * @return The binomial coefficient (n, k)
      */
-	T get_binomial_coefficient(uint32_t n, uint32_t k) {
-		if (k > n) {
-			return 0*unit;
-		}
-		return generator.get_factorial(n)/(generator.get_factorial(k)*generator.get_factorial(n-k));
-	}
+    T get_binomial_coefficient(uint32_t n, uint32_t k) {
+        if (k > n) {
+            return 0*unit;
+        }
+        return generator.get_factorial(n)/(generator.get_factorial(k)*generator.get_factorial(n-k));
+    }
 };
 
 

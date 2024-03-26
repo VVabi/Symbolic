@@ -9,6 +9,9 @@
 #define PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
 
 #include <deque>
+#include <utility>
+#include <memory>
+#include <string>
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/polish_notation/polish_notation.hpp"
@@ -29,19 +32,19 @@
  * @return The parsed power series.
  */
 template<typename T> FormalPowerSeries<T> parse_power_series_from_string(const std::string& input,
-		const uint32_t size,
-		const T unit) {
-	auto formula = parse_math_expression_string(input);
-	auto p = shunting_yard_algorithm(formula);
+        const uint32_t size,
+        const T unit) {
+    auto formula = parse_math_expression_string(input);
+    auto p = shunting_yard_algorithm(formula);
 
-	std::deque<std::unique_ptr<PolishNotationElement<T>>> polish;
+    std::deque<std::unique_ptr<PolishNotationElement<T>>> polish;
 
-	for (MathLexerElement x: p) {
-		polish.push_back(std::move(polish_notation_element_from_lexer<T>(x)));
-	}
+    for (MathLexerElement x : p) {
+        polish.push_back(std::move(polish_notation_element_from_lexer<T>(x)));
+    }
 
-	auto res = iterate_polish<T>(polish, unit, size);
-	return res;
+    auto res = iterate_polish<T>(polish, unit, size);
+    return res;
 }
 
 #endif /* PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_ */

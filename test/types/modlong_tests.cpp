@@ -23,24 +23,24 @@ TEST(TypeTests, ModLong) {
             res = ModLong(x, p)-ModLong(y, p);
             expected = (x-y)%p;
             if (expected < 0) {
-            	expected += p;
+                expected += p;
             }
             EXPECT_EQ(res.to_num(), expected);
 
-			res = -ModLong(x, p);
-			expected = (-x)%p;
-			if (expected < 0) {
-				expected += p;
-			}
-			EXPECT_EQ(res.to_num(), expected);
+            res = -ModLong(x, p);
+            expected = (-x)%p;
+            if (expected < 0) {
+                expected += p;
+            }
+            EXPECT_EQ(res.to_num(), expected);
 
             res = ModLong(x, p)*ModLong(y, p);
             expected = (x*y)%p;
             EXPECT_EQ(res.to_num(), expected);
 
             if (y % p != 0) {
-            	auto z = ModLong(x, p)/ModLong(y, p);
-            	EXPECT_EQ(z*ModLong(y, p), ModLong(x, p));
+                auto z = ModLong(x, p)/ModLong(y, p);
+                EXPECT_EQ(z*ModLong(y, p), ModLong(x, p));
             }
         }
     }

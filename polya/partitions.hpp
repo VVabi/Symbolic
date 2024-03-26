@@ -7,10 +7,12 @@
 
 #ifndef POLYA_PARTITIONS_HPP_
 #define POLYA_PARTITIONS_HPP_
+#include <assert.h>
 #include <stdint.h>
+#include <vector>
 #include <functional>
 #include "math_utils/factorial_generator.hpp"
-#include <assert.h>
+
 
 
 /**
@@ -20,13 +22,13 @@
  * Represents num appearing count times in a partition.
  */
 struct PartitionCount {
-	uint32_t num;
-	uint32_t count;
+    uint32_t num;
+    uint32_t count;
 
-	PartitionCount(uint32_t num, uint32_t count) {
-		this->num = num;
-		this->count = count;
-	}
+    PartitionCount(uint32_t num, uint32_t count) {
+        this->num = num;
+        this->count = count;
+    }
 };
 
 /**
@@ -48,32 +50,32 @@ struct PartitionCount {
  * @return The size of the conjugacy class.
  */
 template<typename T> T sym_group_conjugacy_class_size(const std::vector<PartitionCount>& partition,
-		const T unit,
-		const FactorialGenerator<T>& factorial_generator) {
-	uint32_t size = 0;
+        const T unit,
+        const FactorialGenerator<T>& factorial_generator) {
+    uint32_t size = 0;
 
-	for (auto part: partition) {
-		size += part.num*part.count;
-	}
+    for (auto part : partition) {
+        size += part.num*part.count;
+    }
 
-	T denominator = unit;
-	T numerator = factorial_generator.get_factorial(size);
+    T denominator = unit;
+    T numerator = factorial_generator.get_factorial(size);
 
-	for (auto part: partition) {
-		auto factorial = factorial_generator.get_factorial(part.count);
-		auto pow = unit;
-		for (uint32_t ind = 0; ind < part.count; ind++) {
-			pow = pow*part.num; //TODO!
-		}
+    for (auto part : partition) {
+        auto factorial = factorial_generator.get_factorial(part.count);
+        auto pow = unit;
+        for (uint32_t ind = 0; ind < part.count; ind++) {
+            pow = pow*part.num;  // TODO(vabi) replace with power function
+        }
 
-		denominator = denominator*factorial*pow;
-	}
+        denominator = denominator*factorial*pow;
+    }
 
-	return numerator/denominator;
+    return numerator/denominator;
 }
 
 void iterate_partitions(const uint32_t size, std::function<void(std::vector<PartitionCount>&)> callback);
 int32_t get_partition_sign(const std::vector<PartitionCount>& partition);
 
 
-#endif /* POLYA_PARTITIONS_HPP_ */
+#endif  // POLYA_PARTITIONS_HPP_

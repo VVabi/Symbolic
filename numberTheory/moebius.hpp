@@ -8,8 +8,8 @@
 #ifndef NUMBERTHEORY_MOEBIUS_HPP_
 #define NUMBERTHEORY_MOEBIUS_HPP_
 
-#include <vector>
 #include <stdint.h>
+#include <vector>
 
 std::vector<int32_t> calculate_moebius(uint32_t limit);
 
