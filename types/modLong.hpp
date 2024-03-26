@@ -9,6 +9,7 @@
 #define TYPES_MODLONG_HPP_
 #include <stdint.h>
 #include <assert.h>
+#include <iostream>
 
 template<typename T> struct EuclideanAlgoResult {
 	T gcd;
@@ -50,7 +51,10 @@ class ModLong {
  private:
 	int64_t value;
 	int64_t modulus;
-
+    ModLong() {
+		value = 0;
+		modulus = 1;
+	}
  public:
 	ModLong(int64_t v, int32_t m): value(v % m), modulus(m) {
 		assert(m > 0);

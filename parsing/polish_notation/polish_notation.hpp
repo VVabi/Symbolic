@@ -56,6 +56,16 @@ template<typename T>  class PolishMinus: public PolishNotationElement<T> {
 	}
 };
 
+template<typename T>  class PolishFactorial: public PolishNotationElement<T> {
+	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
+										const T unit,
+										const size_t fp_size) {
+	    auto left  = iterate_polish<T>(cmd_list, unit, fp_size);
+		return left; //TODO
+	}
+};
+
+
 template<typename T>  class PolishTimes: public PolishNotationElement<T> {
 	FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
 										const T unit,
@@ -286,6 +296,8 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 				return std::make_unique<PolishDiv<T>>();
 			} else if (element.data == "^") {
 				return std::make_unique<PolishPow<T>>();
+			} else if (element.data == "!") {
+				return std::make_unique<PolishFactorial<T>>();
 			}
 			break;
 		case UNARY:

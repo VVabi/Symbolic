@@ -72,6 +72,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 				case '*':
 				case '/':
 				case '^':
+				case '!':
 					assert(previous != '(');
 					formula.push_back(MathLexerElement(INFIX, std::string(1, *it)));
 					break;
