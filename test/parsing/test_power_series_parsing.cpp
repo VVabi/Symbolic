@@ -4,7 +4,6 @@
  *  Created on: Feb 26, 2024
  *      Author: vabi
  */
-#ifdef RUN_SYMBOLIC_TESTS
 #include <gtest/gtest.h>
 #include <types/bigint.hpp>
 #include <string>
@@ -327,4 +326,3 @@ TEST(ParsingTests, ModDerangements) {
 	std::cout << "success" << std::endl;
 }*/
 
-#endif //RUN_SYMBOLIC_TESTS

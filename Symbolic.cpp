@@ -58,12 +58,10 @@ bool test_bigint() {
 }
 
 int main(int argc, char **argv) {
-#ifdef RUN_SYMBOLIC_TESTS
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
-#endif
 	/*auto x = BigInt("23")*BigInt("13");
-	auto y = BigInt("23")*BigInt("5");s
+	auto y = BigInt("23")*BigInt("5");
 	std::cout << gcd(x, y) << std::endl;
 	std::cout << lcm(x, y) << std::endl;
 	std::cout << test_bigint() << std::endl;*/
