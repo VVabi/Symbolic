@@ -5,14 +5,15 @@
  *      Author: vabi
  */
 
+#include <types/bigint.hpp>
 #include <string>
 #include <vector>
 #include <iostream>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
-/*#include "types/bigint.hpp"
-#include "types/rationals.hpp"*/
+#include "types/rationals.hpp"
+#include "types/bigint.hpp"
 
 struct PowerSeriesTestcase {
 	std::string formula;
@@ -161,7 +162,6 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
 
 	auto power_series = parse_power_series_from_string<T>(formula, fp_size, unit);
 	ret = ret && (power_series.num_coefficients() == expected_output_fp_size);
-
 	T factorial = unit;
 	for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
 		if (ind > 0) {
@@ -293,9 +293,9 @@ bool test_double_power_series_parsing() {
 	return run_power_series_parsing_test_cases<double>(test_cases, 1.0);
 }
 
-/*bool test_rational_power_series_parsing() {
+bool test_rational_power_series_parsing() {
 	return run_power_series_parsing_test_cases<RationalNumber<BigInt>>(test_cases, RationalNumber<BigInt>(1, 1));
-}*/
+}
 
 
 bool test_modulo_power_series_parsing() {
@@ -310,7 +310,7 @@ bool test_modulo_power_series_parsing() {
 void run_power_series_parsing_tests() {
 	bool ret = true;
 	ret = ret && test_double_power_series_parsing();
-	//ret = ret && test_rational_power_series_parsing();
+	ret = ret && test_rational_power_series_parsing();
 	ret = ret && test_modulo_power_series_parsing();
 	ret = ret && test_catalan_numbers();
 	ret = ret && test_derangements();
