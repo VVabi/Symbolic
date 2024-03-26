@@ -53,6 +53,10 @@
         "any": "cpp",
         "optional": "cpp",
         "iomanip": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "cstring": "cpp",
+        "regex": "cpp"
     }
 }

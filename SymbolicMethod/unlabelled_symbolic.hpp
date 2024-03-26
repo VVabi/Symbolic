@@ -152,8 +152,7 @@ template <typename T> FormalPowerSeries<T> unlabelled_cyc_complete(FormalPowerSe
     auto ret = FormalPowerSeries<T>::get_zero(a[0], a.num_coefficients());
     FormalPowerSeries<T> log_fps = FormalPowerSeries<T>::get_log(a.num_coefficients(), unit);
     for (uint32_t k = 1; k < a.num_coefficients(); k++) {
-        auto atom = FormalPowerSeries<T>::get_atom(unit, k, a.num_coefficients());
-        auto arg = -log_fps.substitute(-a.substitute(atom));  // TODO(vabi) replace by shift function
+        auto arg = -log_fps.substitute(-a.substitute_exponent(k));
         ret = ret + (unit/k)*((phis[k]*unit)*arg);
     }
     return ret;

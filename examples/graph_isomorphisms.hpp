@@ -18,19 +18,6 @@
 #include "types/ring_helpers.hpp"
 #include "types/power_series.hpp"
 
-std::vector<std::string> find_cpp_files(const std::string& directory) {
-    std::vector<std::string> files;
-    std::regex pattern(R"(^(?!foo\.cpp$).+\.cpp$)");
-
-    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-        if (std::regex_match(entry.path().filename().string(), pattern)) {
-            files.push_back(entry.path().string());
-        }
-    }
-
-    return files;
-}
-
 template<typename T>
 T calc_num_iso_classes_of_graphs(const uint32_t num_vertices, const T zero, const T unit) {
     T ret = zero;
