@@ -9,9 +9,10 @@
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
-#include <gtest/gtest.h>
 
 int main(int argc, char **argv) {
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	auto formula = "1/(1-z-z^2)";
+	auto gf = parse_power_series_from_string<RationalNumber<BigInt>>(formula, 10, RationalNumber<BigInt>(1));
+	std::cout << gf << std::endl;
+	return 0;
 }
