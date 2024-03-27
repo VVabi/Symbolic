@@ -28,7 +28,7 @@ class BigInt {
      */
     BigInt(std::string in, uint32_t base = 10) {
         mpz_init(value);
-        mpz_set_str(value, in.c_str(), base);
+        std::cout << mpz_set_str(value, in.c_str(), base) << std::endl;
     }
 
     /**

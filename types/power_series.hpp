@@ -17,6 +17,18 @@
 #include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
 
+class EvalException : public std::exception {
+ private:
+    std::string message;
+
+ public:
+    EvalException(const std::string& message): message(message) {}
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
 
 template<typename T, bool EXACT> class PowerSeries {
  private:
@@ -320,6 +332,9 @@ template<typename T, bool EXACT> class PowerSeries {
 
     PowerSeries substitute(const PowerSeries& fp) {
         auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
+        if (!EXACT && fp[0] != zero) {
+            throw EvalException("Substitution only works for power series with zero constant term");  // TODO specific exception
+        }
         auto zero_coeffs = std::vector<T>(num_coefficients(), zero);
 
         auto ret = PowerSeries(std::move(zero_coeffs));
@@ -550,7 +565,6 @@ template<typename T> FormalPowerSeries<T> log(const FormalPowerSeries<T> in) {
     auto log = FormalPowerSeries<T>::get_log(in.num_coefficients(), unit);
     return log.substitute(in-FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients()));
 }
-
 
 template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
  public:

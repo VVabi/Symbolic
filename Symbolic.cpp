@@ -7,10 +7,24 @@
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
+#include "parsing/expression_parsing/parsing_exceptions.hpp"
 
 int main(int argc, char **argv) {
-    auto formula = "1/(1-z-z^2)";
-    auto gf = parse_power_series_from_string<RationalNumber<BigInt>>(formula, 10, RationalNumber<BigInt>(1));
-    std::cout << gf << std::endl;
+    std::string input;
+    while (true) {
+        std::cout << ">>> ";
+        std::getline(std::cin, input);
+        if (input == "exit") {
+            break;
+        }
+        try {
+            auto x = parse_power_series_from_string<RationalNumber<BigInt>>(input, 50, RationalNumber<BigInt>(1));
+            std::cout << x << std::endl;
+        } catch (ParsingException &e) {
+            std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
+        } catch (EvalException &e) {
+            std::cout << "Evaluation error: " << e.what() << std::endl;
+        }
+    }
     return 0;
 }

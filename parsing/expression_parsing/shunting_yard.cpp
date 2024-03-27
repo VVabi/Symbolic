@@ -13,7 +13,7 @@
 #include <iostream>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
-
+#include "parsing/expression_parsing/parsing_exceptions.hpp"
 /**
  * @brief Returns the precedence of a given mathematical operator.
  * 
@@ -116,7 +116,14 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     operators.pop();
                 }
 
-                assert(operators.top().type == RIGHT_PARENTHESIS);
+                if (operators.size() > 0 && operators.top().type != RIGHT_PARENTHESIS) {
+                    throw ParsingException("Mismatched parentheses", operators.top().position);
+                }
+                
+                if (operators.size() == 0) {
+                    throw ParsingException("Mismatched or missing parentheses", it->position);
+                }
+
                 operators.pop();
                 if (operators.size() > 0) {
                     MathLexerElement next_op = operators.top();
@@ -156,7 +163,9 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 
     while (operators.size() > 0) {
         auto op = operators.top();
-        assert(op.type != RIGHT_PARENTHESIS);
+        if (operators.top().type == RIGHT_PARENTHESIS) {
+            throw ParsingException("Mismatched parentheses", operators.top().position);  // TODO(vabi) pass the position to the lexer element
+        }
         ret.push_back(op);
         operators.pop();
     }

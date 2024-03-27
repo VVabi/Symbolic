@@ -51,7 +51,12 @@ class RationalNumber {
     }
 
     friend std::ostream &operator<<(std::ostream &os, RationalNumber const &tc) {
-        os << tc.numerator << "/" << tc.denominator;
+        T unit = RingCompanionHelper<T>::get_unit(tc.numerator);
+        os << tc.numerator;
+
+        if (tc.denominator != unit) {
+            os << "/" << tc.denominator;
+        }
         return os;
     }
 

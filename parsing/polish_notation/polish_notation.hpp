@@ -19,7 +19,7 @@
 #include "SymbolicMethod/unlabelled_symbolic.hpp"
 #include "SymbolicMethod/labelled_symbolic.hpp"
 
-template<typename T>  class PolishNotationElement {
+template<typename T> class PolishNotationElement {
  public:
     virtual ~PolishNotationElement() { }
     virtual FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
@@ -124,11 +124,11 @@ template<typename T>  class PolishPow: public PolishNotationElement<T> {
         auto current = std::move(cmd_list.front());
         PolishNumber<T>* exponent = dynamic_cast<PolishNumber<T>*>(current.get());  // TODO(vabi) this is bad
         cmd_list.pop_front();
-        auto ret = FormalPowerSeries<T>::get_atom(unit, 0, fp_size);
+        /*auto ret = FormalPowerSeries<T>::get_atom(unit, 0, fp_size);
         for (int32_t ind = 0; ind < exponent->get_num_as_int(); ind++) {
             ret = ret*left;
-        }
-        return ret;
+        }*/
+        return left.pow(exponent->get_num_as_int());
     }
 };
 

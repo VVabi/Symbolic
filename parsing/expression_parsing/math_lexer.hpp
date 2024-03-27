@@ -15,7 +15,8 @@ enum expression_type {INFIX, UNARY, FUNCTION, NUMBER, VARIABLE, LEFT_PARENTHESIS
 struct MathLexerElement {
     expression_type type;
     std::string data;
-    MathLexerElement(expression_type type, std::string data): type(type), data(data) {}
+    int position;
+    MathLexerElement(expression_type type, std::string data, int position): type(type), data(data) , position(position) {}
 };
 
 std::vector<MathLexerElement> parse_math_expression_string(const std::string& input);
