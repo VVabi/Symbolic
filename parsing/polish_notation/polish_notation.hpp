@@ -27,13 +27,13 @@ template<typename T> class PolishNotationElement {
                                     const size_t fp_size) = 0;
 };
 
-
-
-
 template<typename T> FormalPowerSeries<T> iterate_polish(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
         const T unit,
         const size_t fp_size) {
     auto current = std::move(cmd_list.front());
+    if (!current) {  
+        throw EvalException("Expression is not parseable");  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+    }
     cmd_list.pop_front();
     return current->handle_power_series(cmd_list, unit, fp_size);
 }
@@ -115,7 +115,6 @@ template<typename T>  class PolishNumber: public PolishNotationElement<T> {
     }
 };
 
-
 template<typename T>  class PolishPow: public PolishNotationElement<T> {
     FormalPowerSeries<T> handle_power_series(std::deque<std::unique_ptr<PolishNotationElement<T>>>& cmd_list,
                                         const T unit,
@@ -123,11 +122,10 @@ template<typename T>  class PolishPow: public PolishNotationElement<T> {
         auto left  = iterate_polish<T>(cmd_list, unit, fp_size);
         auto current = std::move(cmd_list.front());
         PolishNumber<T>* exponent = dynamic_cast<PolishNumber<T>*>(current.get());  // TODO(vabi) this is bad
+        if (exponent == nullptr) {
+            throw EvalException("Expected number as exponent");  // TODO(vabi) also throw position in original string AND the violating string
+        }
         cmd_list.pop_front();
-        /*auto ret = FormalPowerSeries<T>::get_atom(unit, 0, fp_size);
-        for (int32_t ind = 0; ind < exponent->get_num_as_int(); ind++) {
-            ret = ret*left;
-        }*/
         return left.pow(exponent->get_num_as_int());
     }
 };
@@ -270,7 +268,6 @@ template<typename T> class PolishSeq: public PolishNotationElement<T> {
     }
 };
 
-
 template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element) {
     switch (element.type) {
         case NUMBER:
@@ -325,7 +322,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 assert(parts[1] == "");
                 return std::make_unique<PolishInvMset<T>>();
             }
-            assert(false);
+            throw EvalException("Unknown function: " + element.data);
             break;
         }
         default:

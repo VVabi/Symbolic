@@ -289,11 +289,17 @@ template<typename T, bool EXACT> class PowerSeries {
 
         uint32_t first_nonzero_idx = 0;
         auto zero = RingCompanionHelper<T>::get_zero(a[0]);
-        while (b[first_nonzero_idx] == zero) {
-            assert(a[first_nonzero_idx] == zero);
+        while (first_nonzero_idx < b.num_coefficients() && b[first_nonzero_idx] == zero) {
+            if (first_nonzero_idx >= a.num_coefficients() || a[first_nonzero_idx] != zero) {
+                throw EvalException("Power series not invertible");
+            }
             first_nonzero_idx++;
         }
 
+        if (first_nonzero_idx >= b.num_coefficients()) {
+            throw EvalException("Power series not invertible");
+        }
+        
         if (first_nonzero_idx == 0) {
             auto binv = b.invert();
             auto ret = a*binv;

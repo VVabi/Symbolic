@@ -1,3 +1,5 @@
+#ifndef PARSING_EXCEPTIONS_HPP_
+#define PARSING_EXCEPTIONS_HPP_
 #include <exception>
 #include <string>
 #include <iostream>
@@ -20,3 +22,5 @@ private:
         return position;
     }
 };
+
+#endif  // PARSING_EXCEPTIONS_HPP_

@@ -16,8 +16,9 @@
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/polish_notation/polish_notation.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
+#include "parsing/expression_parsing/parsing_exceptions.hpp"
 
-/**
+ /**
  * @brief Parses a mathematical expression string into a formal power series.
  * 
  * This function takes a string representing a mathematical expression and a size, and parses 
@@ -44,6 +45,9 @@ template<typename T> FormalPowerSeries<T> parse_power_series_from_string(const s
     }
 
     auto res = iterate_polish<T>(polish, unit, size);
+    if (polish.size() > 0) {
+        throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  //TODO(vabi) get proper position
+    }
     return res;
 }
 

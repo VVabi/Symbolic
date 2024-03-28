@@ -40,12 +40,12 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
         } else if (isalpha(*it)) {
             std::string var = "";
 
-            while (isalpha(*it)) {
+            while (isalpha(*it) && it != input.end()) {
                 var = var + *it;
                 it++;
             }
             if (*it == '_') {
-                while (*it != '(') {
+                while (*it != '(' && it != input.end()) {
                     var = var + *it;
                     it++;
                 }

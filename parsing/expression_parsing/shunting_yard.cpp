@@ -164,7 +164,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
     while (operators.size() > 0) {
         auto op = operators.top();
         if (operators.top().type == RIGHT_PARENTHESIS) {
-            throw ParsingException("Mismatched parentheses", operators.top().position);  // TODO(vabi) pass the position to the lexer element
+            throw ParsingException("Mismatched parentheses", operators.top().position);
         }
         ret.push_back(op);
         operators.pop();

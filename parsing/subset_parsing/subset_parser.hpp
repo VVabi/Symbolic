@@ -13,14 +13,42 @@
 #include <algorithm>
 #include "string_utils/string_utils.hpp"
 
+class SubsetArgumentException : public std::exception {
+ private:
+    std::string violating_set_string;
+
+ public:
+    SubsetArgumentException(const std::string& violating_set_string, 
+    const std::string& error_reason): violating_set_string("Set parsing failed with "+error_reason+" for: "+violating_set_string) {}
+
+    const char* what() const noexcept override {
+        return violating_set_string.c_str();
+    }
+};
+
+
 struct Subset {
     // TODO(vabi) this is a quick and dirty implementation
     uint32_t exclusive_max;
     std::set<uint32_t> indices;
     bool negate;
+
+    static int parse_integer_from_str(const std::string& to_parse, const std::string& full_arg) {
+        int num;
+        try {
+            num = stoi(to_parse);
+        } catch (std::invalid_argument& e) {
+            throw SubsetArgumentException(full_arg, "invalid integer \""+to_parse+"\"");
+        } catch (std::out_of_range& e) {
+            throw SubsetArgumentException(full_arg, "integer out of range \""+to_parse+"\"");
+        }
+        return num;
+    }
+
     Subset(const std::string& arg, const uint32_t exclusive_max): exclusive_max(exclusive_max) {
         if (arg.rfind("=", 1) == 0) {
-            auto num = stoi(arg.substr(1));
+            int num;
+            num = parse_integer_from_str(arg.substr(1), arg);
             negate = false;
             if (num >= 0) {
                 indices.insert(num);
@@ -28,9 +56,9 @@ struct Subset {
         } else if (arg.rfind(">", 1) == 0) {
             int32_t num;
             if (arg.rfind(">=", 2) == 0) {
-                num = stoi(arg.substr(2));
+                num = parse_integer_from_str(arg.substr(2), arg);
             } else {
-                num = stoi(arg.substr(1))+1;
+                num = parse_integer_from_str(arg.substr(1), arg)+1;
             }
 
             num = std::max(0, num);
@@ -52,9 +80,9 @@ struct Subset {
         } else if (arg.rfind("<", 1) == 0) {
             int32_t num;
             if (arg.rfind("<=", 2) == 0) {
-                num = stoi(arg.substr(2));
+                num = parse_integer_from_str(arg.substr(2), arg);
             } else {
-                num = stoi(arg.substr(1))-1;
+                num = parse_integer_from_str(arg.substr(1), arg)-1;
             }
             num = std::max(0, num);
             uint32_t sanitized_num = std::min((uint32_t) num, exclusive_max);
@@ -73,17 +101,21 @@ struct Subset {
             }
         } else if (arg.rfind("{", 1) == 0 || arg.rfind("~{", 2) == 0) {
             negate = arg.rfind("~", 1) == 0;
-            assert(arg[arg.length()-1] == '}');
+            if (arg[arg.length()-1] != '}') {
+                throw SubsetArgumentException(arg, "missing closing bracket");
+            }
             auto offset = 2;
             if (negate) {
                 offset = 3;
             }
             auto parts = string_split(arg.substr(offset-1, arg.length()-offset), ',');
             for (auto x : parts) {
-                indices.insert(stoi(x));
+                indices.insert(parse_integer_from_str(x, arg));
             }
         } else {
-            assert(arg.size() == 0);
+            if (arg.length() != 0) {
+                throw SubsetArgumentException(arg, "Unknown start symbol");
+            }
             negate = true;
         }
     }
