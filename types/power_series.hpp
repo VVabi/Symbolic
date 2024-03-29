@@ -21,14 +21,14 @@
 class EvalException : public std::exception {
  private:
     std::string message;
-    uint32_t position;
+    int position;
  public:
-    EvalException(const std::string& message, uint32_t position): position(position), message(message) {}
+    EvalException(const std::string& message, int position): position(position), message(message) {}
 
     const char* what() const noexcept override {
         return message.c_str();
     }
-    uint32_t get_position() const {
+    int get_position() const {
         return position;
     }
 };
@@ -128,7 +128,6 @@ template<typename T, bool EXACT> class PowerSeries {
     }
 
     PowerSeries pow(const BigInt exponent) const {
-        // TODO support exponent < 0
         if (exponent == BigInt(0)) {
             return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
         }
@@ -329,7 +328,7 @@ template<typename T, bool EXACT> class PowerSeries {
         if (first_nonzero_idx >= b.num_coefficients()) {
             throw EvalException("Power series not invertible", -1);
         }
-        
+
         if (first_nonzero_idx == 0) {
             auto binv = b.invert();
             auto ret = a*binv;
@@ -369,7 +368,7 @@ template<typename T, bool EXACT> class PowerSeries {
     PowerSeries substitute(const PowerSeries& fp) {
         auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
         if (!EXACT && fp[0] != zero) {
-            throw EvalException("Substitution only works for power series with zero constant term", -1);  // TODO specific exception
+            throw EvalException("Substitution only works for power series with zero constant term", -1);
         }
         auto zero_coeffs = std::vector<T>(num_coefficients(), zero);
 

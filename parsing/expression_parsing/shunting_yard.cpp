@@ -122,7 +122,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                 if (operators.size() > 0 && operators.top().type != RIGHT_PARENTHESIS) {
                     throw ParsingException("Mismatched parentheses", operators.top().position);
                 }
-                
+
                 if (operators.size() == 0) {
                     throw ParsingException("Mismatched or missing parentheses", it->position);
                 }

@@ -32,11 +32,10 @@ template<typename T> class PolishNotationElement {
 
     virtual T handle_value(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
-                                    const size_t fp_size) = 0; //TODO remove fp_size
+                                    const size_t fp_size) = 0;  // TODO(vabi) remove fp_size
     uint32_t get_position() {
         return position;
     }
-
 };
 
 template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element);
@@ -44,7 +43,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 template<typename T> FormalPowerSeries<T> iterate_polish(std::deque<MathLexerElement>& cmd_list,
         const T unit,
         const size_t fp_size) {
-    if (cmd_list.size() == 0) {  
+    if (cmd_list.size() == 0) {
         throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
     }
     auto current = cmd_list.front();
@@ -56,7 +55,7 @@ template<typename T> FormalPowerSeries<T> iterate_polish(std::deque<MathLexerEle
 template<typename T> T iterate_polish_value(std::deque<MathLexerElement>& cmd_list,
         const T unit,
         const size_t fp_size) {
-    if (cmd_list.size() == 0) {  
+    if (cmd_list.size() == 0) {
         throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
     }
     auto current = cmd_list.front();
@@ -286,7 +285,7 @@ template<typename T>  class PolishFactorial: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         auto left  = iterate_polish_value<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size);
         if (left.get_denominator() != BigInt(1)) {
-            throw EvalException("Expected number as factorial argument", this->get_position()); 
+            throw EvalException("Expected number as factorial argument", this->get_position());
         }
 
         auto numerator = left.get_numerator();
@@ -298,7 +297,7 @@ template<typename T>  class PolishFactorial: public PolishNotationElement<T> {
         if (numerator == 0) {
             return unit;
         }
-        // TODO this is a braindead implementation
+        // TODO(vabi) this is a braindead implementation
         // - use bigint
         // - check for negative values
         auto ret = 1;
@@ -327,7 +326,7 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
         if (exponent.get_denominator() != BigInt(1)) {
             throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
         }
-        return left.pow(exponent.get_numerator()); // TODO unify with the double approach
+        return left.pow(exponent.get_numerator());  // TODO(vabi) unify with the double approach
     }
 
     double handle_value(std::deque<MathLexerElement>& cmd_list,

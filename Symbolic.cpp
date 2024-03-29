@@ -21,7 +21,6 @@ std::string gen_random_string(const int len) {
     for (int i = 0; i < len; ++i) {
         tmp_s += values[rand() % (sizeof(values) - 1)];
     }
-    
     return tmp_s;
 }
 

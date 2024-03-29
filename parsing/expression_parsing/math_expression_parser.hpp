@@ -20,7 +20,7 @@
 #include "parsing/expression_parsing/parsing_exceptions.hpp"
 
 
-template<typename T> 
+template<typename T>
 class ParsingResultWrapper {
  public:
     virtual std::string to_string() = 0;
@@ -28,36 +28,36 @@ class ParsingResultWrapper {
 
 template<typename T>
 class ValueParsingResult : public ParsingResultWrapper<T> {
-    private:
-        T value;
-    
-    public:
-        ValueParsingResult(T value): value(value) {}
-    
-        std::string to_string() override {
-            std::stringstream ss;
-            ss << value;
-            return ss.str();
-        }
+ private:
+    T value;
+
+ public:
+    ValueParsingResult(T value): value(value) {}
+
+    std::string to_string() override {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
 };
 
 template<typename T>
 class PowerSeriesParsingResult : public ParsingResultWrapper<T> {
-    private:
-        FormalPowerSeries<T> power_series;
-    
-    public:
-        PowerSeriesParsingResult(FormalPowerSeries<T> power_series): power_series(power_series) {}
-    
-        std::string to_string() override {
-            std::stringstream ss;
-            ss << power_series;
-            return ss.str();
-        }
+ private:
+    FormalPowerSeries<T> power_series;
 
-        FormalPowerSeries<T> get_power_series() {
-            return power_series;
-        }
+ public:
+    PowerSeriesParsingResult(FormalPowerSeries<T> power_series): power_series(power_series) {}
+
+    std::string to_string() override {
+        std::stringstream ss;
+        ss << power_series;
+        return ss.str();
+    }
+
+    FormalPowerSeries<T> get_power_series() {
+        return power_series;
+    }
 };
 
  /**
@@ -94,16 +94,16 @@ template<typename T> std::unique_ptr<ParsingResultWrapper<T>> parse_power_series
     if (parse_power_series) {
         auto res = iterate_polish<T>(polish, unit, size);
         if (polish.size() > 0) {
-            throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  //TODO(vabi) get proper position
+            throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  // TODO(vabi) get proper position
         }
         return std::make_unique<PowerSeriesParsingResult<T>>(res);
     } else {
         auto res = iterate_polish_value<T>(polish, unit, 1);
         if (polish.size() > 0) {
-            throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  //TODO(vabi) get proper position
+            throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  // TODO(vabi) get proper position
         }
         return std::make_unique<ValueParsingResult<T>>(res);
     }
 }
 
-#endif /* PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_ */
+#endif  // PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

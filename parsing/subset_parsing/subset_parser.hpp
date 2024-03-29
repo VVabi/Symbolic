@@ -18,14 +18,13 @@ class SubsetArgumentException : public std::exception {
     std::string violating_set_string;
 
  public:
-    SubsetArgumentException(const std::string& violating_set_string, 
+    SubsetArgumentException(const std::string& violating_set_string,
     const std::string& error_reason): violating_set_string("Set parsing failed with "+error_reason+" for: "+violating_set_string) {}
 
     const char* what() const noexcept override {
         return violating_set_string.c_str();
     }
 };
-
 
 struct Subset {
     // TODO(vabi) this is a quick and dirty implementation

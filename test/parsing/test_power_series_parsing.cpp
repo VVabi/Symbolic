@@ -166,7 +166,7 @@ class EqualityChecker<double> {
 
 template<typename T> FormalPowerSeries<T> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {
     auto power_series_wrapper = parse_power_series_from_string<T>(formula, fp_size, unit);
-    auto power_series_ptr = dynamic_cast<PowerSeriesParsingResult<T>*>(power_series_wrapper.get()); // TODO this sucks
+    auto power_series_ptr = dynamic_cast<PowerSeriesParsingResult<T>*>(power_series_wrapper.get());  // TODO(vabi) this sucks
     auto power_series = power_series_ptr->get_power_series();
     return power_series;
 }
@@ -180,7 +180,7 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
                                         const int64_t sign = 1) {
     bool ret = true;
     auto power_series = parse_as_power_series(formula, fp_size, unit);
-   
+
     ret = ret && (power_series.num_coefficients() == expected_output_fp_size);
     T factorial = unit;
     for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {

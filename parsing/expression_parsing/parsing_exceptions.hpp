@@ -1,11 +1,11 @@
-#ifndef PARSING_EXCEPTIONS_HPP_
-#define PARSING_EXCEPTIONS_HPP_
+#ifndef PARSING_EXPRESSION_PARSING_PARSING_EXCEPTIONS_HPP_
+#define PARSING_EXPRESSION_PARSING_PARSING_EXCEPTIONS_HPP_
 #include <exception>
 #include <string>
 #include <iostream>
 
 class ParsingException: public std::exception {
-private:
+ private:
     std::string message;
     int position;
  public:
@@ -14,7 +14,7 @@ private:
         this->position = position;
     }
 
-    const char * what () {
+    const char * what() {
         return message.c_str();
     }
 
@@ -23,4 +23,4 @@ private:
     }
 };
 
-#endif  // PARSING_EXCEPTIONS_HPP_
+#endif  // PARSING_EXPRESSION_PARSING_PARSING_EXCEPTIONS_HPP_

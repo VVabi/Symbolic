@@ -122,7 +122,6 @@ class RationalNumber {
     }
 
     RationalNumber pow(BigInt exponent) const {
-        // TODO support negative exponent
         if (exponent == 0) {
             return RationalNumber(RingCompanionHelper<T>::get_unit(numerator), RingCompanionHelper<T>::get_unit(numerator));
         }
