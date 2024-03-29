@@ -35,16 +35,32 @@ int main(int argc, char **argv) {
         if (input == "exit") {
             break;
         }
-
+        int64_t position = -1;
+        bool error = false;
         try {
             auto x = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
             std::cout << x << std::endl;
         } catch (ParsingException &e) {
+            error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
+            position = e.get_position();
         } catch (EvalException &e) {
+            error = true;
             std::cout << "Evaluation error: " << e.what() << std::endl;
+            position = e.get_position();
         } catch (SubsetArgumentException &e) {
+            error = true;
             std::cout << "Subset argument error: " << e.what() << std::endl;
+        }
+
+        if (error) {
+            std::cout << input << std::endl;
+            if (position >= 0) {
+                for (uint32_t i = 0; i < position; i++) {
+                    std::cout << " ";
+                }
+                std::cout << "^ here" << std::endl;
+            }
         }
     }
     return 0;

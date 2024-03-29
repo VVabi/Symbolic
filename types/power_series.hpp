@@ -20,12 +20,15 @@
 class EvalException : public std::exception {
  private:
     std::string message;
-
+    uint32_t position;
  public:
-    EvalException(const std::string& message): message(message) {}
+    EvalException(const std::string& message, uint32_t position): position(position), message(message) {}
 
     const char* what() const noexcept override {
         return message.c_str();
+    }
+    uint32_t get_position() const {
+        return position;
     }
 };
 
@@ -291,13 +294,13 @@ template<typename T, bool EXACT> class PowerSeries {
         auto zero = RingCompanionHelper<T>::get_zero(a[0]);
         while (first_nonzero_idx < b.num_coefficients() && b[first_nonzero_idx] == zero) {
             if (first_nonzero_idx >= a.num_coefficients() || a[first_nonzero_idx] != zero) {
-                throw EvalException("Power series not invertible");
+                throw EvalException("Power series not invertible", -1);
             }
             first_nonzero_idx++;
         }
 
         if (first_nonzero_idx >= b.num_coefficients()) {
-            throw EvalException("Power series not invertible");
+            throw EvalException("Power series not invertible", -1);
         }
         
         if (first_nonzero_idx == 0) {
@@ -339,7 +342,7 @@ template<typename T, bool EXACT> class PowerSeries {
     PowerSeries substitute(const PowerSeries& fp) {
         auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
         if (!EXACT && fp[0] != zero) {
-            throw EvalException("Substitution only works for power series with zero constant term");  // TODO specific exception
+            throw EvalException("Substitution only works for power series with zero constant term", -1);  // TODO specific exception
         }
         auto zero_coeffs = std::vector<T>(num_coefficients(), zero);
 
