@@ -16,6 +16,7 @@
 #include <utility>
 #include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
+#include "types/bigint.hpp"
 
 class EvalException : public std::exception {
  private:
@@ -111,6 +112,10 @@ template<typename T, bool EXACT> class PowerSeries {
             return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
         }
 
+        if (exponent < 0) {
+            return this->invert().pow(-exponent);
+        }
+
         auto partial = pow(exponent/2);
 
         auto ret = partial*partial;
@@ -121,6 +126,28 @@ template<typename T, bool EXACT> class PowerSeries {
 
         return ret;
     }
+
+    PowerSeries pow(const BigInt exponent) const {
+        // TODO support exponent < 0
+        if (exponent == BigInt(0)) {
+            return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
+        }
+
+        if (exponent < 0) {
+            return this->invert().pow(-exponent);
+        }
+
+        auto partial = pow(exponent/BigInt(2));
+
+        auto ret = partial*partial;
+
+        if (exponent % 2 == BigInt(1)) {
+            ret = ret*(*this);
+        }
+
+        return ret;
+    }
+
 
     friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
         return a+(-b);

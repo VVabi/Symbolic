@@ -72,6 +72,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 case '*':
                 case '/':
                 case '^':
+                case '!':
                     if (previous == '(' || previous == ',') {
                         char c = *it;
                         throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", std::distance(input.begin(), it));

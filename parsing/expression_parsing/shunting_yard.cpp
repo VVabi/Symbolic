@@ -38,6 +38,8 @@ int32_t get_operator_precedence(char op) {
             return 1;
         case '^':
             return 2;
+        case '!':
+            return 3;
         default:
             assert(false);
             return -1;
@@ -56,6 +58,7 @@ bool is_right_associative(char op) {
             return true;
         case '-':
         case '/':
+        case '!':
             return false;
         case '^':
             return true;

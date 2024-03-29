@@ -230,6 +230,10 @@ class BigInt {
         return ret;
     }
 
+    bool operator<(const BigInt& rhs) const {
+        return mpz_cmp(value, rhs.value) < 0;
+    }
+
     /**
      * @brief Computes the greatest common divisor (GCD) of two BigInt objects.
      * @param a The first BigInt object.

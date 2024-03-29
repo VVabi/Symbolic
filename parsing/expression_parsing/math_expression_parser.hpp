@@ -38,10 +38,10 @@ template<typename T> FormalPowerSeries<T> parse_power_series_from_string(const s
     auto formula = parse_math_expression_string(input);
     auto p = shunting_yard_algorithm(formula);
 
-    std::deque<std::unique_ptr<PolishNotationElement<T>>> polish;
+    std::deque<MathLexerElement> polish;
 
     for (MathLexerElement x : p) {
-        polish.push_back(std::move(polish_notation_element_from_lexer<T>(x)));
+        polish.push_back(x);
     }
 
     auto res = iterate_polish<T>(polish, unit, size);

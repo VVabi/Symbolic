@@ -6,6 +6,7 @@
 #include <string>
 #include "types/ring_helpers.hpp"
 #include "string_utils/string_utils.hpp"
+#include "types/bigint.hpp"
 
 template <typename T>
 class RationalNumber {
@@ -118,6 +119,27 @@ class RationalNumber {
 
     RationalNumber operator-() const {
         return RationalNumber(-numerator, denominator);
+    }
+
+    RationalNumber pow(BigInt exponent) const {
+        // TODO support negative exponent
+        if (exponent == 0) {
+            return RationalNumber(RingCompanionHelper<T>::get_unit(numerator), RingCompanionHelper<T>::get_unit(numerator));
+        }
+
+        if (exponent < 0) {
+            return RationalNumber(denominator, numerator).pow(-exponent);
+        }
+
+        auto partial = pow(exponent/2);
+
+        auto ret = partial*partial;
+
+        if (exponent % 2 == 1) {
+            ret = ret*(*this);
+        }
+
+        return ret;
     }
 };
 
