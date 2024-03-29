@@ -164,6 +164,13 @@ class EqualityChecker<double> {
     }
 };
 
+template<typename T> FormalPowerSeries<T> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {
+    auto power_series_wrapper = parse_power_series_from_string<T>(formula, fp_size, unit);
+    auto power_series_ptr = dynamic_cast<PowerSeriesParsingResult<T>*>(power_series_wrapper.get()); // TODO this sucks
+    auto power_series = power_series_ptr->get_power_series();
+    return power_series;
+}
+
 template<typename T> bool run_power_series_parsing_test_case(const std::string& formula,
                                         const uint32_t fp_size,
                                         const uint32_t expected_output_fp_size,
@@ -172,8 +179,8 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
                                         const bool exponential,
                                         const int64_t sign = 1) {
     bool ret = true;
-
-    auto power_series = parse_power_series_from_string<T>(formula, fp_size, unit);
+    auto power_series = parse_as_power_series(formula, fp_size, unit);
+   
     ret = ret && (power_series.num_coefficients() == expected_output_fp_size);
     T factorial = unit;
     for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
@@ -249,7 +256,7 @@ bool test_derangements() {
     auto primes = get_test_primes();
     for (auto p : primes) {
         uint32_t num_coeffs         = 10000;
-        auto res                    = parse_power_series_from_string<ModLong>(derangements_gf, num_coeffs, ModLong(1, p));
+        auto res                    = parse_as_power_series<ModLong>(derangements_gf, num_coeffs, ModLong(1, p));
         auto factorial_generator    = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
 
         ModLong num_derangements = ModLong(1, p);
@@ -276,7 +283,7 @@ bool test_catalan_numbers() {
     auto primes = get_test_primes();
     for (auto p : primes) {
         uint32_t num_coeffs = 10000;
-        auto res = parse_power_series_from_string<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p));
+        auto res = parse_as_power_series<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p));
 
         auto binomial_generator = BinomialGenerator<ModLong>(2*num_coeffs, ModLong(1, p));
         for (uint32_t ind = 0; ind < num_coeffs; ind++) {

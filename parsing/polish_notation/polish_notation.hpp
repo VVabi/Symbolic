@@ -32,7 +32,7 @@ template<typename T> class PolishNotationElement {
 
     virtual T handle_value(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
-                                    const size_t fp_size) = 0;
+                                    const size_t fp_size) = 0; //TODO remove fp_size
     uint32_t get_position() {
         return position;
     }

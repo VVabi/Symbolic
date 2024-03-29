@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
         bool error = false;
         try {
             auto x = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
-            std::cout << x << std::endl;
+            std::cout << x->to_string() << std::endl;
         } catch (ParsingException &e) {
             error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
