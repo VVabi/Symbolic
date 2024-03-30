@@ -20,6 +20,7 @@
 #include "SymbolicMethod/labelled_symbolic.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
+#include "parsing/expression_parsing/parsing_wrapper.hpp"
 
 template<typename T> class PolishNotationElement {
     uint32_t position;
@@ -33,6 +34,13 @@ template<typename T> class PolishNotationElement {
     virtual T handle_value(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) = 0;  // TODO(vabi) remove fp_size
+
+    virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        assert(false);
+        return std::unique_ptr<ParsingWrapperType<T>>(nullptr);
+    }
     uint32_t get_position() {
         return position;
     }
@@ -64,6 +72,19 @@ template<typename T> T iterate_polish_value(std::deque<MathLexerElement>& cmd_li
     return element->handle_value(cmd_list, unit, fp_size);
 }
 
+template<typename T> 
+std::unique_ptr<ParsingWrapperType<T>> iterate_wrapped(std::deque<MathLexerElement>& cmd_list,
+        const T unit,
+        const size_t fp_size) {
+    if (cmd_list.size() == 0) {
+        throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+    }
+    auto current = cmd_list.front();
+    cmd_list.pop_front();
+    auto element = polish_notation_element_from_lexer<T>(current);
+    return element->handle_wrapper(cmd_list, unit, fp_size);
+}
+
 template<typename T> class PolishPlus : public PolishNotationElement<T> {
  public:
     PolishPlus(uint32_t position) : PolishNotationElement<T>(position) { }
@@ -81,6 +102,14 @@ template<typename T> class PolishPlus : public PolishNotationElement<T> {
         auto left  = iterate_polish_value<T>(cmd_list, unit, fp_size);
         auto right = iterate_polish_value<T>(cmd_list, unit, fp_size);
         return left+right;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto right = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        return left->get_priority() > right->get_priority() ? left->add(std::move(right)) : right->add(std::move(left));
     }
 };
 
@@ -102,6 +131,15 @@ template<typename T>  class PolishMinus: public PolishNotationElement<T> {
         auto right = iterate_polish_value<T>(cmd_list, unit, fp_size);
         return left-right;
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto right = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        right->unary_minus();
+        return left->get_priority() > right->get_priority() ? left->add(std::move(right)) : right->add(std::move(left));
+    }
 };
 
 template<typename T>  class PolishTimes: public PolishNotationElement<T> {
@@ -121,6 +159,14 @@ template<typename T>  class PolishTimes: public PolishNotationElement<T> {
         auto left  = iterate_polish_value<T>(cmd_list, unit, fp_size);
         auto right = iterate_polish_value<T>(cmd_list, unit, fp_size);
         return left*right;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto right = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        return left->get_priority() > right->get_priority() ? left->mult(std::move(right)) : right->mult(std::move(left));
     }
 };
 
@@ -142,6 +188,14 @@ template<typename T>  class PolishDiv: public PolishNotationElement<T> {
         auto right = iterate_polish_value<T>(cmd_list, unit, fp_size);
         return left/right;
     }
+
+     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto right = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        return left->get_priority() > right->get_priority() ? left->div(std::move(right)) : right->reverse_div(std::move(left));
+    }
 };
 
 template<typename T>  class PolishVariable: public PolishNotationElement<T> {
@@ -160,6 +214,13 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
         throw EvalException("Variable not allowed in this context", this->get_position());
         return unit;
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        auto res = FormalPowerSeries<T>::get_atom(unit, 1, fp_size);  //TODO needs to be replaced by rational function
+        return std::make_unique<PowerSeriesType<T>>(res);
+    }
 };
 
 template<typename T> class PolishUnaryMinus: public PolishNotationElement<T> {
@@ -177,6 +238,14 @@ template<typename T> class PolishUnaryMinus: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         auto result = iterate_polish_value<T>(cmd_list, unit, fp_size);
         return -result;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        result->unary_minus();
+        return result;
     }
 };
 
@@ -198,6 +267,12 @@ template<typename T>  class PolishNumber: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         return RingCompanionHelper<T>::from_string(num_repr, unit);
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+                                        return std::make_unique<ValueType<T>>(RingCompanionHelper<T>::from_string(num_repr, unit));
+                                    }
 };
 
 template<typename T> class PolishInvMset: public PolishNotationElement<T> {
@@ -215,6 +290,13 @@ template<typename T> class PolishInvMset: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         throw EvalException("InvMset not allowed in this context", this->get_position());
         return unit;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        return std::make_unique<PowerSeriesType<T>>(unlabelled_inv_mset(result->as_power_series(fp_size)));
     }
 };
 
@@ -236,6 +318,14 @@ template<typename T> class PolishSqrt: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         throw EvalException("Sqrt of numbers not yet implemented", this->get_position());
         return unit;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto sqrt = FormalPowerSeries<T>::get_sqrt(fp_size, unit);
+        return std::make_unique<PowerSeriesType<T>>(sqrt.substitute(result->as_power_series(fp_size)-unit));
     }
 };
 
@@ -265,6 +355,18 @@ template<typename T>  class PolishPow: public PolishNotationElement<T> {
             throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
         }
         return left.pow(exponent.get_numerator());
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        // TODO(vabi) check for emptyness
+        auto exponent = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, RationalNumber<BigInt>(1), fp_size)->as_value();
+        if (exponent.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
+        }
+        return std::make_unique<PowerSeriesType<T>>(left->as_power_series(fp_size).pow(exponent.get_numerator()));  // TODO this will always return a power series!
     }
 };
 
@@ -309,6 +411,38 @@ template<typename T>  class PolishFactorial: public PolishNotationElement<T> {
         } while (BigInt(n) != numerator);
         ret *= n;
         return unit*ret;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto left  = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+        if (left.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected number as factorial argument", this->get_position());
+        }
+
+        // TODO(vabi) check for emptyness
+        auto numerator = left.get_numerator();
+
+        if (numerator < BigInt(0)) {
+            throw EvalException("Factorial of negative number", this->get_position());
+        }
+
+        if (numerator == 0) {
+            return std::make_unique<ValueType<T>>(unit);
+        }
+        // TODO(vabi) this is a braindead implementation
+        // - use bigint
+        // - check for negative values
+        auto ret = 1;
+        auto n = 1;
+
+        do {
+            ret = ret*n;
+            n = n+1;
+        } while (BigInt(n) != numerator);
+        ret *= n;
+        return std::make_unique<ValueType<T>>(ret*unit);
     }
 };
 
@@ -355,6 +489,18 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
         }
         return ret;
     }
+
+    std::unique_ptr<ParsingWrapperType<double>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const double unit,
+                                    const size_t fp_size) {
+        auto left  = iterate_wrapped<double>(cmd_list, unit, fp_size);
+        // TODO(vabi) check for emptyness
+        auto exponent = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, RationalNumber<BigInt>(1), fp_size)->as_value();
+        if (exponent.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
+        }
+        return std::make_unique<PowerSeriesType<double>>(left->as_power_series(fp_size).pow(exponent.get_numerator())); // TODO this will always return a power series
+    }
 };
 
 
@@ -377,6 +523,14 @@ template<typename T> class PolishExp: public PolishNotationElement<T> {
         auto result = iterate_polish_value<T>(cmd_list, unit, fp_size);
         throw EvalException("Exp of numbers not yet implemented", this->get_position());
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto exp = FormalPowerSeries<T>::get_exp(fp_size, unit);
+        return std::make_unique<PowerSeriesType<T>>(exp.substitute(result->as_power_series(fp_size)));
+    }
 };
 
 template<typename T> class PolishLog: public PolishNotationElement<T> {
@@ -394,6 +548,14 @@ template<typename T> class PolishLog: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         auto result = iterate_polish_value<T>(cmd_list, unit, fp_size);
         throw EvalException("Log of numbers not yet implemented", this->get_position());
+    }
+        
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
+
+        return std::make_unique<PowerSeriesType<T>>(log(result->as_power_series(fp_size)));
     }
 };
 
@@ -417,6 +579,14 @@ template<typename T> class PolishPset: public PolishNotationElement<T> {
         throw EvalException("Pset not allowed for numbers", this->get_position());
         return unit;
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto subset = Subset(arg, result.num_coefficients());
+        return std::make_unique<PowerSeriesType<T>>(unlabelled_pset(result, subset));
+    }
 };
 
 template<typename T> class PolishMset: public PolishNotationElement<T> {
@@ -436,6 +606,14 @@ template<typename T> class PolishMset: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         throw EvalException("Mset not allowed for numbers", this->get_position());
         return unit;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto subset = Subset(arg, result.num_coefficients());
+        return std::make_unique<PowerSeriesType<T>>(unlabelled_mset(result, subset));
     }
 };
 
@@ -457,6 +635,14 @@ template<typename T> class PolishCyc: public PolishNotationElement<T> {
         throw EvalException("Cyc not allowed for numbers", this->get_position());
         return unit;
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto subset = Subset(arg, result.num_coefficients());
+        return std::make_unique<PowerSeriesType<T>>(unlabelled_cyc(result, subset));
+    }
 };
 
 template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
@@ -476,6 +662,14 @@ template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         throw EvalException("LabelledSet not allowed for numbers", this->get_position());
         return unit;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto subset = Subset(arg, result.num_coefficients());
+        return std::make_unique<PowerSeriesType<T>>(labelled_set(result, subset));
     }
 };
 
@@ -497,6 +691,14 @@ template<typename T> class PolishLabelledCyc: public PolishNotationElement<T> {
         throw EvalException("LabelledCyc not allowed for numbers", this->get_position());
         return unit;
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto subset = Subset(arg, result.num_coefficients());
+        return std::make_unique<PowerSeriesType<T>>(labelled_cyc(result, subset));
+    }
 };
 
 template<typename T> class PolishSeq: public PolishNotationElement<T> {
@@ -516,6 +718,14 @@ template<typename T> class PolishSeq: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         throw EvalException("Seq not allowed for numbers", this->get_position());
         return unit;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto subset = Subset(arg, result.num_coefficients());
+        return std::make_unique<PowerSeriesType<T>>(unlabelled_sequence(result, subset));
     }
 };
 

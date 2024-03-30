@@ -166,8 +166,7 @@ class EqualityChecker<double> {
 
 template<typename T> FormalPowerSeries<T> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {
     auto power_series_wrapper = parse_power_series_from_string<T>(formula, fp_size, unit);
-    auto power_series_ptr = dynamic_cast<PowerSeriesParsingResult<T>*>(power_series_wrapper.get());  // TODO(vabi) this sucks
-    auto power_series = power_series_ptr->get_power_series();
+    auto power_series = power_series_wrapper->as_power_series(fp_size);
     return power_series;
 }
 

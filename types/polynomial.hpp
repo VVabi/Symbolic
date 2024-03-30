@@ -1,9 +1,10 @@
 #ifndef TYPES_POLYNOMIAL_HPP_
-#define POLYNOMIALTYPES_POLYNOMIAL_HPP__HPP
+#define TYPES_POLYNOMIAL_HPP_
 
 #include "types/poly_base.hpp"
 #include "types/ring_helpers.hpp"
-
+#include "types/bigint.hpp"
+#include "math_utils/euclidean_algorithm.hpp"
 
 template<typename T> class Polynomial: public PolyBase<T> {
  public:
@@ -207,6 +208,26 @@ template<typename T> class Polynomial: public PolyBase<T> {
         auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
         coeffs[0] = RingCompanionHelper<T>::get_unit(value);
         return Polynomial(std::move(coeffs));
+    }
+
+    friend Polynomial gcd(Polynomial a, Polynomial b) {
+        auto euclidean_algo_result = extended_euclidean_algorithm(a, b);
+        return euclidean_algo_result.gcd;
+    }
+};
+
+template<typename T> class RingCompanionHelper<Polynomial<T>> {
+ public:
+    static Polynomial<T> get_zero(const Polynomial<T>& in) {
+        return Polynomial<T>::get_zero(in[0], 1);
+    }
+    static Polynomial<T> get_unit(const Polynomial<T>& in) {
+        auto unit = RingCompanionHelper<T>::get_unit(in[0]);
+        return Polynomial<T>::get_atom(unit, 0, 1);
+    }
+    static Polynomial<T> from_string(const std::string& in, const Polynomial<T>& unit) {
+        assert(false);
+        return Polynomial<T>::get_zero(in[0], unit.num_coefficients());
     }
 };
 
