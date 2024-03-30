@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
             error = true;
             std::cout << "Evaluation error: " << e.what() << std::endl;
             position = e.get_position();
-        } catch (SubsetArgumentException &e) {
+        } catch (SubsetArgumentException &e) {  // TODO(vabi) integrate into EvalException
             error = true;
             std::cout << "Subset argument error: " << e.what() << std::endl;
         }
