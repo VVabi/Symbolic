@@ -9,6 +9,7 @@
 #define TYPES_MODLONG_HPP_
 #include <stdint.h>
 #include <assert.h>
+#include <types/bigint.hpp>
 
 template<typename T> struct EuclideanAlgoResult {
     T gcd;
@@ -162,6 +163,30 @@ class ModLong {
     ModLong pow(const uint32_t exponent) {
         if (exponent == 0) {
             return ModLong(1, this->get_modulus());
+        }
+
+        if (exponent < 0) {
+            return this->invert().pow(-exponent);
+        }
+
+        auto partial = pow(exponent/2);
+
+        auto ret = partial*partial;
+
+        if (exponent % 2 == 1) {
+            ret *= *this;
+        }
+
+        return ret;
+    }
+
+    ModLong pow(const BigInt exponent) {
+        if (exponent == 0) {
+            return ModLong(1, this->get_modulus());
+        }
+
+        if (exponent < 0) {
+            return this->invert().pow(-exponent);
         }
 
         auto partial = pow(exponent/2);

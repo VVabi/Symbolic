@@ -28,7 +28,7 @@ class BigInt {
      */
     BigInt(std::string in, uint32_t base = 10) {
         mpz_init(value);
-        mpz_set_str(value, in.c_str(), base);
+        std::cout << mpz_set_str(value, in.c_str(), base) << std::endl;
     }
 
     /**
@@ -228,6 +228,10 @@ class BigInt {
         auto ret = BigInt();
         mpz_mod(ret.value, value, rhs.value);
         return ret;
+    }
+
+    bool operator<(const BigInt& rhs) const {
+        return mpz_cmp(value, rhs.value) < 0;
     }
 
     /**

@@ -16,6 +16,22 @@
 #include <utility>
 #include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
+#include "types/bigint.hpp"
+
+class EvalException : public std::exception {
+ private:
+    std::string message;
+    int position;
+ public:
+    EvalException(const std::string& message, int position): position(position), message(message) {}
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+    int get_position() const {
+        return position;
+    }
+};
 
 
 template<typename T, bool EXACT> class PowerSeries {
@@ -96,6 +112,10 @@ template<typename T, bool EXACT> class PowerSeries {
             return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
         }
 
+        if (exponent < 0) {
+            return this->invert().pow(-exponent);
+        }
+
         auto partial = pow(exponent/2);
 
         auto ret = partial*partial;
@@ -106,6 +126,27 @@ template<typename T, bool EXACT> class PowerSeries {
 
         return ret;
     }
+
+    PowerSeries pow(const BigInt exponent) const {
+        if (exponent == BigInt(0)) {
+            return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
+        }
+
+        if (exponent < 0) {
+            return this->invert().pow(-exponent);
+        }
+
+        auto partial = pow(exponent/BigInt(2));
+
+        auto ret = partial*partial;
+
+        if (exponent % 2 == BigInt(1)) {
+            ret = ret*(*this);
+        }
+
+        return ret;
+    }
+
 
     friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
         return a+(-b);
@@ -277,9 +318,15 @@ template<typename T, bool EXACT> class PowerSeries {
 
         uint32_t first_nonzero_idx = 0;
         auto zero = RingCompanionHelper<T>::get_zero(a[0]);
-        while (b[first_nonzero_idx] == zero) {
-            assert(a[first_nonzero_idx] == zero);
+        while (first_nonzero_idx < b.num_coefficients() && b[first_nonzero_idx] == zero) {
+            if (first_nonzero_idx >= a.num_coefficients() || a[first_nonzero_idx] != zero) {
+                throw EvalException("Power series not invertible", -1);
+            }
             first_nonzero_idx++;
+        }
+
+        if (first_nonzero_idx >= b.num_coefficients()) {
+            throw EvalException("Power series not invertible", -1);
         }
 
         if (first_nonzero_idx == 0) {
@@ -320,6 +367,9 @@ template<typename T, bool EXACT> class PowerSeries {
 
     PowerSeries substitute(const PowerSeries& fp) {
         auto zero = RingCompanionHelper<T>::get_zero(coefficients[0]);
+        if (!EXACT && fp[0] != zero) {
+            throw EvalException("Substitution only works for power series with zero constant term", -1);
+        }
         auto zero_coeffs = std::vector<T>(num_coefficients(), zero);
 
         auto ret = PowerSeries(std::move(zero_coeffs));
@@ -550,7 +600,6 @@ template<typename T> FormalPowerSeries<T> log(const FormalPowerSeries<T> in) {
     auto log = FormalPowerSeries<T>::get_log(in.num_coefficients(), unit);
     return log.substitute(in-FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients()));
 }
-
 
 template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
  public:
