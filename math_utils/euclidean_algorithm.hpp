@@ -18,12 +18,11 @@ template<typename T> EuclideanAlgoResult<T> extended_euclidean_algorithm(T a, T 
     T t = unit;
     T r = b;
 
-    
     T oldS = unit;
     T oldT = zero;
     T oldR = a;
 
-    while (r != zero) {
+    while (r != zero) { // TODO this could be sped up by calculating q and r in one step as we already do for eg polynomials
         T quotient = oldR/r;
         T newR = oldR-quotient*r;
         oldR = r;

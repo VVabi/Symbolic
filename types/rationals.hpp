@@ -33,8 +33,7 @@ class RationalNumber {
     }
 
     bool operator==(const RationalNumber &other) const {
-        // TODO(vabi) assuming all rationals are always sanitized!
-        return numerator == other.numerator && denominator == other.denominator;
+        return numerator*other.denominator == denominator*other.numerator;
     }
 
     bool operator!=(const RationalNumber &other) const {
@@ -45,7 +44,7 @@ class RationalNumber {
         sanitize();
     }
 
-    RationalNumber(T x) {
+    RationalNumber(T x): numerator(x), denominator(x) { // TODO find better solutions
         numerator = x;
         if (x != RingCompanionHelper<T>::get_zero(x)) {
             denominator = x / x;
@@ -56,17 +55,17 @@ class RationalNumber {
 
     friend std::ostream &operator<<(std::ostream &os, RationalNumber const &tc) {
         T unit = RingCompanionHelper<T>::get_unit(tc.numerator);
-        os << tc.numerator;
+        os << "(" << tc.numerator << ")";
 
         if (tc.denominator != unit) {
-            os << "/" << tc.denominator;
+            os << "/(" << tc.denominator << ")";
         }
         return os;
     }
 
     RationalNumber &operator*=(const RationalNumber &rhs) {
-        numerator *= rhs.numerator;
-        denominator *= rhs.denominator;
+        numerator = numerator*rhs.numerator;  //TODO implement *= for polynomials
+        denominator = denominator*rhs.denominator;
         sanitize();
         return *this;
     }
@@ -104,7 +103,7 @@ class RationalNumber {
 
     RationalNumber &operator+=(const RationalNumber &rhs) {
         numerator = numerator * rhs.denominator + denominator * rhs.numerator;
-        denominator *= rhs.denominator;
+        denominator = denominator*rhs.denominator;  //TODO implement *= for Polynomials
         sanitize();
         return *this;
     }

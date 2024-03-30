@@ -55,6 +55,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
     friend Polynomial operator+(Polynomial a, const Polynomial& b) {
         a.resize(std::max(a.num_coefficients(), b.num_coefficients()));
         add_raw(a.coefficients.data(), a.num_coefficients(), b.coefficients.data(), b.num_coefficients());
+        a.sanitize();
         return a;
     }
 
@@ -90,13 +91,17 @@ template<typename T> class Polynomial: public PolyBase<T> {
     }
 
     friend Polynomial operator*(Polynomial a, const Polynomial& b) {
-        return multiply_full_raw(a.coefficients.data(), a.num_coefficients(), b.coefficients.data(), b.num_coefficients());
+        auto data = multiply_full_raw(a.coefficients.data(), a.degree()+1, b.coefficients.data(), b.degree()+1);
+        auto ret =  Polynomial<T>(std::move(data));
+        ret.sanitize();
+        return ret;
     }
 
     friend Polynomial operator*(const T& a, Polynomial b) {
         for (uint32_t ind = 0; ind < b.num_coefficients(); ind++) {
             b[ind] = b[ind]*a;
         }
+        b.sanitize();
         return b;
     }
 
@@ -104,6 +109,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
         for (uint32_t ind = 0; ind < b.num_coefficients(); ind++) {
             b[ind] = b[ind]*a;
         }
+        b.sanitize();
         return b;
     }
 

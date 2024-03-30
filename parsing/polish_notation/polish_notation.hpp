@@ -218,8 +218,8 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
-        auto res = FormalPowerSeries<T>::get_atom(unit, 1, fp_size);  //TODO needs to be replaced by rational function
-        return std::make_unique<PowerSeriesType<T>>(res);
+        auto res = Polynomial<T>::get_atom(unit, 1, fp_size);  //TODO needs to be replaced by rational function
+        return std::make_unique<RationalFunctionType<T>>(res);
     }
 };
 
@@ -366,7 +366,9 @@ template<typename T>  class PolishPow: public PolishNotationElement<T> {
         if (exponent.get_denominator() != BigInt(1)) {
             throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
         }
-        return std::make_unique<PowerSeriesType<T>>(left->as_power_series(fp_size).pow(exponent.get_numerator()));  // TODO this will always return a power series!
+
+        left->pow(exponent.get_numerator());
+        return left;
     }
 };
 
@@ -499,7 +501,9 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
         if (exponent.get_denominator() != BigInt(1)) {
             throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
         }
-        return std::make_unique<PowerSeriesType<double>>(left->as_power_series(fp_size).pow(exponent.get_numerator())); // TODO this will always return a power series
+
+        left->pow(exponent.get_numerator());
+        return left;
     }
 };
 
@@ -723,7 +727,7 @@ template<typename T> class PolishSeq: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
-        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);  // TODO this might be a rational function   
         auto subset = Subset(arg, result.num_coefficients());
         return std::make_unique<PowerSeriesType<T>>(unlabelled_sequence(result, subset));
     }

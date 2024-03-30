@@ -13,13 +13,8 @@
 
 
 int main(int argc, char **argv) {
-    auto input = "(1+z)*(1+z^2)";
+    auto input = "(1-z-z^2)/(1+z-z^15)";
     auto res = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
-    auto a = Polynomial<RationalNumber<BigInt>>(std::move(res->as_power_series(20).copy_coefficients()));
-    input = "(1+z)*(1+z^3)";
-    res = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
-    auto b = Polynomial<RationalNumber<BigInt>>(std::move(res->as_power_series(20).copy_coefficients()));
-
-    auto x = gcd(a, b);
-    std::cout << x << std::endl;
+    std::cout << res->to_string() << std::endl;
+    return 0;
 }
