@@ -17,8 +17,11 @@ class RationalNumber {
  public:
     void sanitize() {
         T greatest_common_div = gcd(numerator, denominator);
-        numerator = numerator / greatest_common_div;
-        denominator = denominator / greatest_common_div;
+        auto zero = RingCompanionHelper<T>::get_zero(numerator);
+        if (greatest_common_div != zero) {
+            numerator = numerator / greatest_common_div;
+            denominator = denominator / greatest_common_div;
+        }
     }
 
     T get_numerator() const {
