@@ -13,8 +13,7 @@
 
 
 int main(int argc, char **argv) {
-    auto input = "(1-z-z^2)/(1+z-z^15)";
-    auto res = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
-    std::cout << res->to_string() << std::endl;
+    auto num = calc_num_iso_classes_of_graphs<RationalNumber<BigInt>>(10, BigInt(0), BigInt(1));
+    std::cout << num << std::endl;
     return 0;
 }

@@ -733,6 +733,84 @@ template<typename T> class PolishSeq: public PolishNotationElement<T> {
     }
 };
 
+template<typename T> class PolishLandau: public PolishNotationElement<T> {
+ public:
+    PolishLandau(uint32_t position): PolishNotationElement<T>(position) {}
+    FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    T handle_value(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_rational_function();  
+        auto deg = result.get_numerator().degree();
+        if (deg <= 0) {
+            deg = 1;
+        }
+        return std::make_unique<PowerSeriesType<T>>(PowerSeries<T>::get_zero(unit, deg));
+    }
+};
+
+template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
+    bool as_egf;
+ public:
+    PolishCoefficient(uint32_t position, bool as_egf): PolishNotationElement<T>(position), as_egf(as_egf) {}
+    FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    T handle_value(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
+        auto number = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(0), fp_size)->as_value();   
+        if (number.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number as coefficient index", this->get_position());
+        }
+
+        auto idx = number.get_numerator();
+
+        if (idx < 0) {
+            throw EvalException("Expected natural number as coefficient index", this->get_position());
+        }
+        
+        if (idx > BigInt(INT32_MAX)) {
+            throw EvalException("Coefficient index too large", this->get_position());
+        }
+
+        auto int_idx = idx.as_int64();
+
+        if (int_idx >= result.num_coefficients()) {
+             throw EvalException("Coefficient index out of bounds", this->get_position());
+        }
+
+        T ret = result[idx.as_int64()];
+        if (this->as_egf) {
+            auto generator = FactorialGenerator<T>(int_idx, unit);
+            auto factorial = generator.get_factorial(int_idx);
+            ret = ret*factorial;
+        }
+        return std::make_unique<ValueType<T>>(ret);
+    }
+};
+
 template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element) {
     switch (element.type) {
         case NUMBER:
@@ -788,6 +866,15 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             } else if (parts[0] == "INVMSET") {
                 assert(parts[1] == "");
                 return std::make_unique<PolishInvMset<T>>(element.position);
+            } else if (parts[0] == "O") {
+                assert(parts[1] == "");
+                return std::make_unique<PolishLandau<T>>(element.position);
+            } else if (parts[0] == "coeff") {
+                assert(parts[1] == "");
+                return std::make_unique<PolishCoefficient<T>>(element.position, false);
+            } else if (parts[0] == "egfcoeff") {
+                assert(parts[1] == "");
+                return std::make_unique<PolishCoefficient<T>>(element.position, true);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
             break;

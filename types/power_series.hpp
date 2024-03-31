@@ -41,7 +41,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
     friend std::ostream& operator<<(std::ostream& os, PowerSeries const & tc) {
         auto pw = 0;
         for (auto x : tc.coefficients) {
-            os << x << "*z^" << pw << "+";
+            os << "(" << x << ")" << "*z^" << pw << "+";
             pw++;
         }
         os << "O(z^" << pw << ")";
@@ -86,7 +86,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return a+(-b);
     }
 
-    bool operator==(const PowerSeries& other) {
+    bool operator==(const PowerSeries& other) const {
         if (other.num_coefficients() != this->num_coefficients()) {
             return false;
         }

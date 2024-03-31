@@ -160,14 +160,58 @@ class RingCompanionHelper<RationalNumber<T>> {
 
     static RationalNumber<T> from_string(const std::string &in,
                                         const RationalNumber<T> &unit) {
+        // TODO this function does not do what it is supposed to do:
+        // - parse input for non-ints
+        // - for ints, parse as bigint
         auto parts = string_split(in, '/');
         auto x = std::stoi(parts[0]);
         if (parts.size() == 1) {
             return RationalNumber<T>(x, 1);
         }
-        auto y = std::stoi(parts[0]);
+        auto y = std::stoi(parts[1]);
         return RationalNumber<T>(x, y);
     }
 };
+
+template <>
+class RingCompanionHelper<RationalNumber<BigInt>> {
+ public:
+    static RationalNumber<BigInt> get_zero(const RationalNumber<BigInt> &in) {
+        return RationalNumber<BigInt>(0, 1);
+    }
+
+    static RationalNumber<BigInt> get_unit(const RationalNumber<BigInt> &in) {
+        return RationalNumber<BigInt>(1, 1);
+    }
+
+    static RationalNumber<BigInt> from_string(const std::string &in,
+                                        const RationalNumber<BigInt> &unit) {
+        // TODO this function does not do what it is supposed to do:
+        // - parse input for non-ints
+        // - for ints, parse as bigint
+        auto parts = string_split(in, '/');
+        auto x = BigInt(parts[0]);
+        if (parts.size() == 1) {
+            return RationalNumber<BigInt>(x, 1);
+        }
+        auto y = BigInt(parts[1]);
+        return RationalNumber<BigInt>(x, y);
+    }
+};
+
+template<>
+inline void RationalNumber<BigInt>::sanitize() {
+    BigInt greatest_common_div = gcd(numerator, denominator);
+    auto zero = RingCompanionHelper<BigInt>::get_zero(numerator);
+    if (greatest_common_div != zero) {
+        numerator = numerator / greatest_common_div;
+        denominator = denominator / greatest_common_div;
+    }
+
+    if (denominator < 0) {
+        denominator = -denominator;
+        numerator = -numerator;
+    }
+}
 
 #endif  // TYPES_RATIONALS_HPP_

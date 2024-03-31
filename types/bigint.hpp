@@ -28,7 +28,9 @@ class BigInt {
      */
     BigInt(std::string in, uint32_t base = 10) {
         mpz_init(value);
-        std::cout << mpz_set_str(value, in.c_str(), base) << std::endl;
+        if (mpz_set_str(value, in.c_str(), base) != 0) {
+            throw std::runtime_error("Error parsing BigInt from string"); // TODO
+        }
     }
 
     /**
@@ -234,6 +236,10 @@ class BigInt {
         return mpz_cmp(value, rhs.value) < 0;
     }
 
+    bool operator>(const BigInt& rhs) const {
+        return rhs < *this;
+    }
+
     /**
      * @brief Computes the greatest common divisor (GCD) of two BigInt objects.
      * @param a The first BigInt object.
@@ -256,6 +262,13 @@ class BigInt {
         auto ret = BigInt();
         mpz_lcm(ret.value, a.value, b.value);
         return ret;
+    }
+
+    int64_t as_int64() const {
+        if (!mpz_fits_slong_p(value)) {
+            throw std::runtime_error("BigInt value is too large to fit in a 64-bit integer");
+        }
+        return mpz_get_si(value);
     }
 };
 

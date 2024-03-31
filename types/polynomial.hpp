@@ -18,7 +18,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
                 os << "+";
             }
             first = false;
-            os << x << "*z^" << pw;
+            os << "(" << x << ")" << "*z^" << pw;
             pw++;
         }
         return os;
