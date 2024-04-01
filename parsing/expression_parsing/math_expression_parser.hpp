@@ -46,6 +46,10 @@ template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_f
         polish.push_back(x);
     }
     auto res = iterate_wrapped<T>(polish, unit, size);
+
+    if (polish.size() != 0) {
+        throw ParsingException("Parsing error: Unconsumed tokens", polish.front().position);
+    }
     return res;
 }
 

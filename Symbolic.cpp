@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         int64_t position = -1;
         bool error = false;
         try {
-            auto x = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
+            auto x = parse_power_series_from_string<ModLong>(input, 20, ModLong(1, 13));
             std::cout << x->to_string() << std::endl;
         } catch (ParsingException &e) {
             error = true;

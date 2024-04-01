@@ -31,8 +31,9 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
         if (isdigit(current)) {
             std::string num = "";
 
-            while (isdigit(*it)) {
+            while (isdigit(*it) || *it == '.' || *it =='e' || (*it == '-' && previous == 'e') || (*it == '+' && previous == 'e')) {
                 num = num+*it;
+                previous = *it;
                 it++;
             }
             formula.push_back(MathLexerElement(NUMBER, num, std::distance(input.begin(), it)));

@@ -760,6 +760,74 @@ template<typename T> class PolishLandau: public PolishNotationElement<T> {
     }
 };
 
+
+template<typename T> class PolishMod: public PolishNotationElement<T> {
+ public:
+    PolishMod(uint32_t position): PolishNotationElement<T>(position) {}
+    FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    T handle_value(std::deque<MathLexerElement>& cmd_list,
+                                        const T unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        throw EvalException("Cannot use mod", this->get_position());
+    }
+};
+
+
+template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
+ public:
+    PolishMod(uint32_t position): PolishNotationElement<ModLong>(position) {}
+    FormalPowerSeries<ModLong> handle_power_series(std::deque<MathLexerElement>& cmd_list,
+                                        const ModLong unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    ModLong handle_value(std::deque<MathLexerElement>& cmd_list,
+                                        const ModLong unit,
+                                        const size_t fp_size) {
+        throw EvalException("Not implemented", -1);
+    }
+
+    std::unique_ptr<ParsingWrapperType<ModLong>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const ModLong unit,
+                                    const size_t fp_size) {
+        auto argument   = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+        auto mod        = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+
+        if (mod.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number as modulus", this->get_position());
+        }
+
+        auto modulus = mod.get_numerator().as_int64(); // TODO potential overflow issues
+
+        if (modulus <= 0) {
+            throw EvalException("Expected natural number as modulus", this->get_position());
+        }
+
+        if (modulus != unit.get_modulus()) {
+            throw EvalException("Modulus mismatch", this->get_position()); // TODO return violating values as well
+        }
+
+        auto a = argument.get_numerator().as_int64(); // TODO potential overflow issues
+        auto b = argument.get_denominator().as_int64(); // TODO potential overflow issues
+
+
+        auto result = ModLong(a, modulus)/ModLong(b, modulus);
+        return std::make_unique<ValueType<ModLong>>(result);
+    }
+};
+
 template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
     bool as_egf;
  public:
@@ -875,6 +943,9 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             } else if (parts[0] == "egfcoeff") {
                 assert(parts[1] == "");
                 return std::make_unique<PolishCoefficient<T>>(element.position, true);
+            } else if (parts[0] == "Mod") {
+                assert(parts[1] == "");
+                return std::make_unique<PolishMod<T>>(element.position);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
             break;
