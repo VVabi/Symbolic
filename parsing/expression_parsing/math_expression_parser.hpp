@@ -53,4 +53,12 @@ template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_f
     return res;
 }
 
+enum class Datatype {
+    DYNAMIC,
+    DOUBLE,
+    RATIONAL,
+    MOD
+};
+
+std::string parse_formula(const std::string& input, const Datatype type);
 #endif  // PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

@@ -10,6 +10,7 @@ add_executable(Symbolic
         numberTheory/euler_phi.cpp
         parsing/expression_parsing/math_lexer.cpp
         parsing/expression_parsing/shunting_yard.cpp
+        parsing/expression_parsing/math_expression_parser.cpp
 )
 
 add_executable(Symbolic_tests
@@ -20,6 +21,7 @@ add_executable(Symbolic_tests
         numberTheory/euler_phi.cpp
         parsing/expression_parsing/math_lexer.cpp
         parsing/expression_parsing/shunting_yard.cpp
+        parsing/expression_parsing/math_expression_parser.cpp
         test/parsing/test_power_series_parsing.cpp
         test/types/bigint_tests.cpp
         test/types/modlong_tests.cpp
@@ -34,6 +36,7 @@ add_executable(Symbolic_playground
         numberTheory/euler_phi.cpp
         parsing/expression_parsing/math_lexer.cpp
         parsing/expression_parsing/shunting_yard.cpp
+        parsing/expression_parsing/math_expression_parser.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

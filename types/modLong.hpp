@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "types/bigint.hpp"
 #include "math_utils/euclidean_algorithm.hpp"
+#include "parsing/expression_parsing/parsing_exceptions.hpp"
 
 class ModLong {
  private:
@@ -184,6 +185,9 @@ template<> class RingCompanionHelper<ModLong> {
         return ModLong(1, in.get_modulus());
     }
     static ModLong from_string(const std::string& in, const ModLong& unit) {
+        if (in.find('.') != std::string::npos || in.find('e') != std::string::npos) {
+            throw std::invalid_argument("Cannot parse as ModLong: " + in);
+        }
         return ModLong(std::stoi(in), unit.get_modulus());
     }
 };

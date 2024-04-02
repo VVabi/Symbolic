@@ -81,7 +81,7 @@ class ValueType: public ParsingWrapperType<T> {
     }
 };
 
-double pow_double_big(double base, BigInt exponent) {
+inline double pow_double_big(double base, BigInt exponent) {
     if (exponent == 0) {
         return 1;
     }

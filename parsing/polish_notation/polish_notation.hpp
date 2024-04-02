@@ -271,7 +271,12 @@ template<typename T>  class PolishNumber: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
-                                        return std::make_unique<ValueType<T>>(RingCompanionHelper<T>::from_string(num_repr, unit));
+                                        try {
+                                            return std::make_unique<ValueType<T>>(RingCompanionHelper<T>::from_string(num_repr, unit));
+                                        } catch (std::invalid_argument& e) {
+                                            throw EvalException(e.what(), this->get_position());
+                                            return std::unique_ptr<ValueType<T>>(nullptr);
+                                        }
                                     }
 };
 
@@ -779,7 +784,7 @@ template<typename T> class PolishMod: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
-        throw EvalException("Cannot use mod", this->get_position());
+        throw EvalException("Cannot use mod for this datatype", this->get_position());
     }
 };
 
@@ -815,13 +820,12 @@ template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 
-        if (modulus != unit.get_modulus()) {
+        /*if (modulus != unit.get_modulus()) {   // TODO
             throw EvalException("Modulus mismatch", this->get_position()); // TODO return violating values as well
-        }
+        }*/
 
         auto a = argument.get_numerator().as_int64(); // TODO potential overflow issues
         auto b = argument.get_denominator().as_int64(); // TODO potential overflow issues
-
 
         auto result = ModLong(a, modulus)/ModLong(b, modulus);
         return std::make_unique<ValueType<ModLong>>(result);
