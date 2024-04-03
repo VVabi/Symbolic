@@ -44,14 +44,7 @@ class RationalNumber {
         sanitize();
     }
 
-    RationalNumber(T x): numerator(x), denominator(x) { // TODO find better solutions
-        numerator = x;
-        if (x != RingCompanionHelper<T>::get_zero(x)) {
-            denominator = x / x;
-        } else {
-            denominator = RingCompanionHelper<T>::get_unit(x);
-        }
-    }
+    RationalNumber(T x): numerator(x), denominator(RingCompanionHelper<T>::get_unit(x)) {}
 
     friend std::ostream &operator<<(std::ostream &os, RationalNumber const &tc) {
         T unit = RingCompanionHelper<T>::get_unit(tc.numerator);
@@ -64,7 +57,7 @@ class RationalNumber {
     }
 
     RationalNumber &operator*=(const RationalNumber &rhs) {
-        numerator = numerator*rhs.numerator;  //TODO implement *= for polynomials
+        numerator = numerator*rhs.numerator;  // TODO(vabi): implement *= for polynomials
         denominator = denominator*rhs.denominator;
         sanitize();
         return *this;
@@ -103,7 +96,7 @@ class RationalNumber {
 
     RationalNumber &operator+=(const RationalNumber &rhs) {
         numerator = numerator * rhs.denominator + denominator * rhs.numerator;
-        denominator = denominator*rhs.denominator;  //TODO implement *= for Polynomials
+        denominator = denominator*rhs.denominator;  // TODO(vabi): implement *= for Polynomials
         sanitize();
         return *this;
     }
@@ -160,16 +153,7 @@ class RingCompanionHelper<RationalNumber<T>> {
 
     static RationalNumber<T> from_string(const std::string &in,
                                         const RationalNumber<T> &unit) {
-        // TODO this function does not do what it is supposed to do:
-        // - parse input for non-ints
-        // - for ints, parse as bigint
-        auto parts = string_split(in, '/');
-        auto x = std::stoi(parts[0]);
-        if (parts.size() == 1) {
-            return RationalNumber<T>(x, 1);
-        }
-        auto y = std::stoi(parts[1]);
-        return RationalNumber<T>(x, y);
+        throw std::runtime_error("Not implemented");
     }
 };
 

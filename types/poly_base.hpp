@@ -1,13 +1,13 @@
 #ifndef TYPES_POLY_BASE_HPP_
 #define TYPES_POLY_BASE_HPP_
 
+#include <algorithm>
 #include <vector>
 #include "types/ring_helpers.hpp"
 
 template<typename T>
 void add_raw(T* a, const uint32_t size_a,
              const T* b, const uint32_t size_b) {
-
         for (uint32_t idx = 0; idx < std::min(size_a, size_b); idx++) {
             a[idx] = a[idx]+b[idx];
         }

@@ -4,10 +4,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <types/polynomial.hpp>
+#include <random>
+#include "types/polynomial.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
-#include <random>
 
 TEST(TypeTests, PolyDiv) {
     std::random_device rd;
@@ -20,7 +20,7 @@ TEST(TypeTests, PolyDiv) {
 
             auto a = std::vector<RationalNumber<BigInt>>();
             auto b = std::vector<RationalNumber<BigInt>>();
-        
+
             for (uint32_t ind = 0; ind < sizea; ind++) {
                 a.push_back(RationalNumber<BigInt>(dist(gen), 1));
             }
@@ -30,7 +30,7 @@ TEST(TypeTests, PolyDiv) {
 
             auto x = Polynomial<RationalNumber<BigInt>>(std::move(a));
             auto y = Polynomial<RationalNumber<BigInt>>(std::move(b));
-            
+
             if (y.degree() < 0) {
                 continue;
             }

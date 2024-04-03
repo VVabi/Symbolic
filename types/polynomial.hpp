@@ -1,6 +1,10 @@
 #ifndef TYPES_POLYNOMIAL_HPP_
 #define TYPES_POLYNOMIAL_HPP_
 
+#include <utility>
+#include <vector>
+#include <algorithm>
+#include <string>
 #include "types/poly_base.hpp"
 #include "types/ring_helpers.hpp"
 #include "types/bigint.hpp"
@@ -119,7 +123,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
         }
 
         if (exponent < 0) {
-            assert(false);  // TODO throw proper exception
+            assert(false);  // TODO(vabi) throw proper exception
         }
 
         auto partial = pow(exponent/2);
@@ -174,7 +178,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
     friend std::pair<Polynomial, Polynomial> polynomial_div(Polynomial a, const Polynomial& b) {
         Polynomial<T> zero = Polynomial::get_zero(a.coefficients[0], 1);
         if (b == zero) {
-            assert(false);  // TODO throw proper exception
+            throw(std::runtime_error("Division by zero"));  // TODO(vabi) throw proper exception
         }
         auto q = zero;
         auto r = a;

@@ -1,3 +1,4 @@
+#include <vector>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 
 Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
@@ -28,7 +29,7 @@ ModLong infer_mod_unit(std::deque<MathLexerElement> input) {
         input.pop_front();
     }
 
-    throw EvalException("No Mod found", -1); // should be unreachable 
+    throw EvalException("No Mod found", -1);  // should be unreachable
 }
 
 
@@ -45,7 +46,7 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
             return iterate_wrapped<ModLong>(input, unit, 20)->to_string();
     }
 
-    return ""; // Unreachable
+    return "";  // Unreachable
 }
 
 std::string parse_formula(const std::string& input, const Datatype type) {

@@ -73,7 +73,7 @@ template<typename T> T iterate_polish_value(std::deque<MathLexerElement>& cmd_li
     return element->handle_value(cmd_list, unit, fp_size);
 }
 
-template<typename T> 
+template<typename T>
 std::unique_ptr<ParsingWrapperType<T>> iterate_wrapped(std::deque<MathLexerElement>& cmd_list,
         const T unit,
         const size_t fp_size) {
@@ -219,7 +219,7 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
-        auto res = Polynomial<T>::get_atom(unit, 1, fp_size);  //TODO needs to be replaced by rational function
+        auto res = Polynomial<T>::get_atom(unit, 1, fp_size);
         return std::make_unique<RationalFunctionType<T>>(res);
     }
 };
@@ -254,6 +254,7 @@ template<typename T> class PolishUnaryMinus: public PolishNotationElement<T> {
 template<typename T>  class PolishNumber: public PolishNotationElement<T> {
  private:
     std::string num_repr;
+
  public:
     PolishNumber(std::string num_repr, uint32_t position): PolishNotationElement<T>(position), num_repr(num_repr) { }
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -486,6 +487,7 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
 
 template<typename T> class PolishPowerSeriesFunction: public PolishNotationElement<T> {
     PowerSeriesBuiltinFunctionType type;
+
  public:
     PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position) : type(type), PolishNotationElement<T>(position) { }
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -515,6 +517,7 @@ template<typename T> class PolishPowerSeriesFunction: public PolishNotationEleme
 template<typename T> class PolishPset: public PolishNotationElement<T> {
  private:
     std::string arg;
+
  public:
     PolishPset(std::string arg, uint32_t position) : PolishNotationElement<T>(position), arg(arg) { }
         FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -543,6 +546,7 @@ template<typename T> class PolishPset: public PolishNotationElement<T> {
 
 template<typename T> class PolishMset: public PolishNotationElement<T> {
     std::string arg;
+
  public:
     PolishMset(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -571,6 +575,7 @@ template<typename T> class PolishMset: public PolishNotationElement<T> {
 
 template<typename T> class PolishCyc: public PolishNotationElement<T> {
     std::string arg;
+
  public:
     PolishCyc(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -599,6 +604,7 @@ template<typename T> class PolishCyc: public PolishNotationElement<T> {
 
 template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
     std::string arg;
+
  public:
     PolishLabelledSet(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -627,6 +633,7 @@ template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
 
 template<typename T> class PolishLabelledCyc: public PolishNotationElement<T> {
     std::string arg;
+
  public:
     PolishLabelledCyc(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -655,6 +662,7 @@ template<typename T> class PolishLabelledCyc: public PolishNotationElement<T> {
 
 template<typename T> class PolishSeq: public PolishNotationElement<T> {
     std::string arg;
+
  public:
     PolishSeq(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -675,7 +683,7 @@ template<typename T> class PolishSeq: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
-        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);  // TODO this might be a rational function   
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);  // TODO(vabi) this might be a rational function
         auto subset = Subset(arg, result.num_coefficients());
         return std::make_unique<PowerSeriesType<T>>(unlabelled_sequence(result, subset));
     }
@@ -699,7 +707,7 @@ template<typename T> class PolishLandau: public PolishNotationElement<T> {
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
-        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_rational_function();  
+        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_rational_function();
         auto deg = result.get_numerator().degree();
         if (deg <= 0) {
             deg = 1;
@@ -757,26 +765,27 @@ template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 
-        auto modulus = mod.get_numerator().as_int64(); // TODO potential overflow issues
+        auto modulus_num = mod.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
 
-        if (modulus <= 0) {
+        if (modulus_num <= 0) {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 
-        /*if (modulus != unit.get_modulus()) {   // TODO
-            throw EvalException("Modulus mismatch", this->get_position()); // TODO return violating values as well
+        /*if (modulus != unit.get_modulus()) {   // TODO(vabi): reenable this check
+            throw EvalException("Modulus mismatch", this->get_position()); // TODO(vabi) return violating values as well
         }*/
 
-        auto a = argument.get_numerator().as_int64(); // TODO potential overflow issues
-        auto b = argument.get_denominator().as_int64(); // TODO potential overflow issues
+        auto a = argument.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+        auto b = argument.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
 
-        auto result = ModLong(a, modulus)/ModLong(b, modulus);
+        auto result = ModLong(a, modulus_num)/ModLong(b, modulus_num);
         return std::make_unique<ValueType<ModLong>>(result);
     }
 };
 
 template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
     bool as_egf;
+
  public:
     PolishCoefficient(uint32_t position, bool as_egf): PolishNotationElement<T>(position), as_egf(as_egf) {}
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
@@ -795,7 +804,7 @@ template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
-        auto number = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(0), fp_size)->as_value();   
+        auto number = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(0), fp_size)->as_value();
         if (number.get_denominator() != BigInt(1)) {
             throw EvalException("Expected natural number as coefficient index", this->get_position());
         }
@@ -805,7 +814,7 @@ template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
         if (idx < 0) {
             throw EvalException("Expected natural number as coefficient index", this->get_position());
         }
-        
+
         if (idx > BigInt(INT32_MAX)) {
             throw EvalException("Coefficient index too large", this->get_position());
         }
@@ -866,7 +875,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SQRT, element.position);
             } else if (parts[0] == "log") {
                 return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::LOG, element.position);
-            }else if (parts[0] == "PSET") {
+            } else if (parts[0] == "PSET") {
                 return std::make_unique<PolishPset<T>>(parts[1], element.position);
             } else if (parts[0] == "MSET") {
                 return std::make_unique<PolishMset<T>>(parts[1], element.position);

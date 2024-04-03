@@ -7,8 +7,10 @@
 
 #ifndef TYPES_MODLONG_HPP_
 #define TYPES_MODLONG_HPP_
+
 #include <stdint.h>
 #include <assert.h>
+#include <string>
 #include "types/bigint.hpp"
 #include "math_utils/euclidean_algorithm.hpp"
 #include "parsing/expression_parsing/parsing_exceptions.hpp"

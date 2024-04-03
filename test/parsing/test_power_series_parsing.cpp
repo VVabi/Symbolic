@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <utility>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
@@ -183,7 +184,7 @@ template<typename T> std::pair<FormalPowerSeries<T>, std::string> parse_as_power
     return std::make_pair(power_series, string_rep);
 }
 
-template<typename T> 
+template<typename T>
 bool check_power_series_near_equality(const FormalPowerSeries<T>& a, const FormalPowerSeries<T>& b) {
     if (a.num_coefficients() != b.num_coefficients()) {
         return false;
@@ -225,11 +226,7 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
     auto string_rep = parsing_result.second;
 
     auto checker = parse_as_power_series(string_rep, fp_size, unit);
-    /*std::cout << formula << std::endl;
-    std::cout << checker.first << std::endl;
-    std::cout << power_series << std::endl;*/
     EXPECT_EQ(check_power_series_near_equality(checker.first, power_series), true) << "Parsing failed for " << formula << " with size " << fp_size << " and unit " << unit;
-    //EXPECT_EQ(checker.second, string_rep);
 
     return ret;
 }

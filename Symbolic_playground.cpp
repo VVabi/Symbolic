@@ -1,5 +1,6 @@
 #include <iostream>
 #include <numeric>
+#include <random>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "test/parsing/test_power_series_parsing.hpp"
 #include "types/power_series.hpp"
@@ -9,7 +10,7 @@
 #include "numberTheory/moebius.hpp"
 #include "parsing/expression_parsing/parsing_exceptions.hpp"
 #include "types/polynomial.hpp"
-#include <random>
+
 
 
 int main(int argc, char **argv) {

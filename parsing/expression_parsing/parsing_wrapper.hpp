@@ -1,6 +1,10 @@
-#ifndef TYPES_PARSING_WRAPPER_HPP_
-#define TYPES_PARSING_WRAPPER_HPP_
+#ifndef PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
+#define PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
@@ -8,7 +12,7 @@
 template<typename T>
 using RationalFunction = RationalNumber<Polynomial<T>>;
 
-template<typename T> 
+template<typename T>
 class ParsingWrapperType {
  public:
     virtual T as_value() = 0;
@@ -30,6 +34,7 @@ template<typename T>
 class ValueType: public ParsingWrapperType<T> {
  private:
     T value;
+
  public:
     ValueType(T value): value(value) {}
 
@@ -115,16 +120,17 @@ template<typename T>
 class PowerSeriesType: public ParsingWrapperType<T> {
  private:
     FormalPowerSeries<T> value;
+
  public:
     PowerSeriesType(FormalPowerSeries<T> value): value(value) {}
 
     T as_value() {
-        assert(false); //  TODO throw exception
+        assert(false);  // TODO(vabi) throw proper exception
         return value[0];
     }
 
     RationalFunction<T> as_rational_function() {
-        assert(false); //  TODO throw exception
+        assert(false);  // TODO(vabi) throw proper exception
         return RingCompanionHelper<RationalFunction<T>>::get_zero(Polynomial<T>(value.copy_coefficients()));
     }
 
@@ -177,11 +183,12 @@ template<typename T>
 class RationalFunctionType: public ParsingWrapperType<T> {
  private:
     RationalFunction<T> value;
+
  public:
     RationalFunctionType(RationalFunction<T> value): value(value) {}
 
     T as_value() {
-        assert(false); //  TODO throw exception
+        assert(false);  // TODO(vabi) throw exception
         return value.get_numerator()[0];
     }
 
@@ -242,4 +249,4 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     }
 };
 
-#endif  // TYPES_PARSING_WRAPPER_HPP_
+#endif  // PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_

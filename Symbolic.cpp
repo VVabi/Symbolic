@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         int64_t position = -1;
         bool error = false;
         try {
-            auto x = parse_formula(input, Datatype::DYNAMIC); 
+            auto x = parse_formula(input, Datatype::DYNAMIC);
             std::cout << x << std::endl;
         } catch (ParsingException &e) {
             error = true;

@@ -29,7 +29,7 @@ class BigInt {
     BigInt(std::string in, uint32_t base = 10) {
         mpz_init(value);
         if (mpz_set_str(value, in.c_str(), base) != 0) {
-            throw std::runtime_error("Error parsing BigInt from string"); // TODO
+            throw std::runtime_error("Error parsing BigInt from string");  // TODO(vabi): throw proper exception
         }
     }
 

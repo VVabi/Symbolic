@@ -1,5 +1,5 @@
-#ifndef EUCLIDEAN_ALGORITHM_HPP
-#define EUCLIDEAN_ALGORITHM_HPP
+#ifndef MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
+#define MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
 
 #include "types/ring_helpers.hpp"
 
@@ -22,7 +22,7 @@ template<typename T> EuclideanAlgoResult<T> extended_euclidean_algorithm(T a, T 
     T oldT = zero;
     T oldR = a;
 
-    while (r != zero) { // TODO this could be sped up by calculating q and r in one step as we already do for eg polynomials
+    while (r != zero) {  // TODO(vabi) this could be sped up by calculating q and r in one step as we already do for eg polynomials
         T quotient = oldR/r;
         T newR = oldR-quotient*r;
         oldR = r;
@@ -40,4 +40,4 @@ template<typename T> EuclideanAlgoResult<T> extended_euclidean_algorithm(T a, T 
     return EuclideanAlgoResult<T>(oldR, oldS, oldT);
 }
 
-#endif // EUCLIDEAN_ALGORITHM_HPP
+#endif  // MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
