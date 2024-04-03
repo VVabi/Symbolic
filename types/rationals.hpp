@@ -186,9 +186,6 @@ class RingCompanionHelper<RationalNumber<BigInt>> {
 
     static RationalNumber<BigInt> from_string(const std::string &in,
                                         const RationalNumber<BigInt> &unit) {
-        // TODO this function does not do what it is supposed to do:
-        // - parse input for non-ints
-        // - for ints, parse as bigint
         auto parts = string_split(in, '/');
         auto x = BigInt(parts[0]);
         if (parts.size() == 1) {

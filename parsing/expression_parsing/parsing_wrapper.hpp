@@ -3,7 +3,7 @@
 
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
-
+#include "functions/power_series_functions.hpp"
 
 template<typename T>
 using RationalFunction = RationalNumber<Polynomial<T>>;
@@ -20,6 +20,7 @@ class ParsingWrapperType {
     virtual std::unique_ptr<ParsingWrapperType<T>> mult(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
     virtual std::unique_ptr<ParsingWrapperType<T>> div(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
     virtual std::unique_ptr<ParsingWrapperType<T>> reverse_div(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
+    virtual std::unique_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) = 0;
     virtual void unary_minus() = 0;
     virtual std::string to_string() = 0;
     virtual void pow(const BigInt& exponent) = 0;
@@ -79,15 +80,24 @@ class ValueType: public ParsingWrapperType<T> {
     std::unique_ptr<ParsingWrapperType<T>> reverse_div(std::unique_ptr<ParsingWrapperType<T>> other) {
         return std::make_unique<ValueType<T>>(other->as_value()/value);
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+        throw std::runtime_error("Cannot apply power series function to a constant for non-double types");
+    }
 };
+
+template<>
+inline std::unique_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    return std::make_unique<ValueType<double>>(evaluate_power_series_function_double(value, type));
+}
 
 inline double pow_double_big(double base, BigInt exponent) {
     if (exponent == 0) {
         return 1;
     }
-    /*if (exponent < 0) { // TODO 
-        return 1/pow(base, -exponent);
-    }*/
+    if (exponent < 0) {
+        return 1.0/pow_double_big(base, -exponent);
+    }
     double partial = pow_double_big(base, exponent/2);
     double ret = partial*partial;
     if (exponent % 2 == 1) {
@@ -101,6 +111,67 @@ inline void ValueType<double>::pow(const BigInt& exponent) {
     value = pow_double_big(value, exponent);
 }
 
+template<typename T>
+class PowerSeriesType: public ParsingWrapperType<T> {
+ private:
+    FormalPowerSeries<T> value;
+ public:
+    PowerSeriesType(FormalPowerSeries<T> value): value(value) {}
+
+    T as_value() {
+        assert(false); //  TODO throw exception
+        return value[0];
+    }
+
+    RationalFunction<T> as_rational_function() {
+        assert(false); //  TODO throw exception
+        return RingCompanionHelper<RationalFunction<T>>::get_zero(Polynomial<T>(value.copy_coefficients()));
+    }
+
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+        return value;
+    }
+
+    int get_priority() {
+        return 2;
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> add(std::unique_ptr<ParsingWrapperType<T>> other) {
+        return std::make_unique<PowerSeriesType<T>>(value + other->as_power_series(value.num_coefficients()));
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> mult(std::unique_ptr<ParsingWrapperType<T>> other) {
+        return std::make_unique<PowerSeriesType<T>>(value*other->as_power_series(value.num_coefficients()));
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> div(std::unique_ptr<ParsingWrapperType<T>> other) {
+        return std::make_unique<PowerSeriesType<T>>(value/other->as_power_series(value.num_coefficients()));
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> reverse_div(std::unique_ptr<ParsingWrapperType<T>> other) {
+        return std::make_unique<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+        auto unit = RingCompanionHelper<T>::get_unit(value[0]);
+        auto ps = evaluate_power_series_function<T>(value, type, unit, fp_size);
+        return std::make_unique<PowerSeriesType<T>>(ps);
+    }
+
+    void unary_minus() {
+        value = -value;
+    }
+
+    void pow(const BigInt& exponent) {
+        value = value.pow(exponent);
+    }
+
+    std::string to_string() {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
+};
 
 template<typename T>
 class RationalFunctionType: public ParsingWrapperType<T> {
@@ -150,60 +221,10 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return std::make_unique<RationalFunctionType<T>>(other->as_rational_function()/value);
     }
 
-    void unary_minus() {
-        value = -value;
-    }
-
-    void pow(const BigInt& exponent) {
-        value = value.pow(exponent);
-    }
-
-    std::string to_string() {
-        std::stringstream ss;
-        ss << value;
-        return ss.str();
-    }
-};
-
-template<typename T>
-class PowerSeriesType: public ParsingWrapperType<T> {
- private:
-    FormalPowerSeries<T> value;
- public:
-    PowerSeriesType(FormalPowerSeries<T> value): value(value) {}
-
-    T as_value() {
-        assert(false); //  TODO throw exception
-        return value[0];
-    }
-
-    RationalFunction<T> as_rational_function() {
-        assert(false); //  TODO throw exception
-        return RingCompanionHelper<RationalFunction<T>>::get_zero(Polynomial<T>(value.copy_coefficients()));
-    }
-
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
-        return value;
-    }
-
-    int get_priority() {
-        return 2;
-    }
-
-    std::unique_ptr<ParsingWrapperType<T>> add(std::unique_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(value + other->as_power_series(value.num_coefficients()));
-    }
-
-    std::unique_ptr<ParsingWrapperType<T>> mult(std::unique_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(value*other->as_power_series(value.num_coefficients()));
-    }
-
-    std::unique_ptr<ParsingWrapperType<T>> div(std::unique_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(value/other->as_power_series(value.num_coefficients()));
-    }
-
-    std::unique_ptr<ParsingWrapperType<T>> reverse_div(std::unique_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
+    std::unique_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+        auto unit = RingCompanionHelper<T>::get_unit(value.get_numerator()[0]);
+        auto ps = evaluate_power_series_function<T>(this->as_power_series(fp_size), type, unit, fp_size);
+        return std::make_unique<PowerSeriesType<T>>(ps);
     }
 
     void unary_minus() {
@@ -220,9 +241,5 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return ss.str();
     }
 };
-
-
-
-
 
 #endif  // TYPES_PARSING_WRAPPER_HPP_

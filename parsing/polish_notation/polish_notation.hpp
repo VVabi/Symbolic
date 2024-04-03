@@ -21,6 +21,7 @@
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "functions/power_series_functions.hpp"
 
 template<typename T> class PolishNotationElement {
     uint32_t position;
@@ -305,35 +306,6 @@ template<typename T> class PolishInvMset: public PolishNotationElement<T> {
     }
 };
 
-
-template<typename T> class PolishSqrt: public PolishNotationElement<T> {
- public:
-    PolishSqrt(uint32_t position) : PolishNotationElement<T>(position) { }
-    FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
-                                        const T unit,
-                                        const size_t fp_size) {
-        auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-        result = result - unit;
-        auto sqrt = FormalPowerSeries<T>::get_sqrt(fp_size, unit);
-        return sqrt.substitute(result);
-    }
-
-    T handle_value(std::deque<MathLexerElement>& cmd_list,
-                                        const T unit,
-                                        const size_t fp_size) {
-        throw EvalException("Sqrt of numbers not yet implemented", this->get_position());
-        return unit;
-    }
-
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                    const T unit,
-                                    const size_t fp_size) {
-        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
-        auto sqrt = FormalPowerSeries<T>::get_sqrt(fp_size, unit);
-        return std::make_unique<PowerSeriesType<T>>(sqrt.substitute(result->as_power_series(fp_size)-unit));
-    }
-};
-
 template<typename T>  class PolishPow: public PolishNotationElement<T> {
  public:
     PolishPow(uint32_t position) : PolishNotationElement<T>(position) { }
@@ -512,62 +484,33 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
     }
 };
 
-
-
-
-template<typename T> class PolishExp: public PolishNotationElement<T> {
+template<typename T> class PolishPowerSeriesFunction: public PolishNotationElement<T> {
+    PowerSeriesBuiltinFunctionType type;
  public:
-    PolishExp(uint32_t position) : PolishNotationElement<T>(position) { }
+    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position) : type(type), PolishNotationElement<T>(position) { }
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
-        auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-        auto exp = FormalPowerSeries<T>::get_exp(fp_size,  unit);
-        return exp.substitute(result);
+        throw std::runtime_error("Not implemented");
     }
 
     T handle_value(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
-        auto result = iterate_polish_value<T>(cmd_list, unit, fp_size);
-        throw EvalException("Exp of numbers not yet implemented", this->get_position());
+        throw std::runtime_error("Not implemented");
     }
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
-        auto exp = FormalPowerSeries<T>::get_exp(fp_size, unit);
-        return std::make_unique<PowerSeriesType<T>>(exp.substitute(result->as_power_series(fp_size)));
+        try {
+            return result->power_series_function(type, fp_size);
+        } catch (std::runtime_error& e) {
+            throw EvalException(e.what(), this->get_position());
+        }
     }
 };
-
-template<typename T> class PolishLog: public PolishNotationElement<T> {
- public:
-    PolishLog(uint32_t position) : PolishNotationElement<T>(position) { }
-    FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
-                                        const T unit,
-                                        const size_t fp_size) {
-        auto result = iterate_polish<T>(cmd_list, unit, fp_size);
-        return log(result);
-    }
-
-    T handle_value(std::deque<MathLexerElement>& cmd_list,
-                                        const T unit,
-                                        const size_t fp_size) {
-        auto result = iterate_polish_value<T>(cmd_list, unit, fp_size);
-        throw EvalException("Log of numbers not yet implemented", this->get_position());
-    }
-        
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                    const T unit,
-                                    const size_t fp_size) {
-        auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
-
-        return std::make_unique<PowerSeriesType<T>>(log(result->as_power_series(fp_size)));
-    }
-};
-
 
 template<typename T> class PolishPset: public PolishNotationElement<T> {
  private:
@@ -918,10 +861,12 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             }
 
             if (parts[0] == "exp") {
-                return std::make_unique<PolishExp<T>>(element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::EXP, element.position);
             } else if (parts[0] == "sqrt") {
-                return std::make_unique<PolishSqrt<T>>(element.position);
-            } else if (parts[0] == "PSET") {
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SQRT, element.position);
+            } else if (parts[0] == "log") {
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::LOG, element.position);
+            }else if (parts[0] == "PSET") {
                 return std::make_unique<PolishPset<T>>(parts[1], element.position);
             } else if (parts[0] == "MSET") {
                 return std::make_unique<PolishMset<T>>(parts[1], element.position);
@@ -933,8 +878,6 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 return std::make_unique<PolishLabelledSet<T>>(parts[1], element.position);
             } else if (parts[0] == "LCYC") {
                 return std::make_unique<PolishLabelledCyc<T>>(parts[1], element.position);
-            } else if (parts[0] == "log") {
-                return std::make_unique<PolishLog<T>>(element.position);
             } else if (parts[0] == "INVMSET") {
                 assert(parts[1] == "");
                 return std::make_unique<PolishInvMset<T>>(element.position);

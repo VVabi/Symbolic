@@ -312,10 +312,10 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return a;
     }
 
-    PowerSeries substitute(const PowerSeries& fp) {
+    PowerSeries substitute(const PowerSeries& fp, bool allow_constant_term = false) {
         auto zero = RingCompanionHelper<T>::get_zero(this->coefficients[0]);
-        if (fp[0] != zero) {
-            throw EvalException("Substitution only works for power series with zero constant term", -1);
+        if (!allow_constant_term && fp[0] != zero) {
+            throw std::runtime_error("Substitution only works for power series with zero constant term");
         }
         auto zero_coeffs = std::vector<T>(this->num_coefficients(), zero);
 
