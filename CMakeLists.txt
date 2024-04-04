@@ -25,6 +25,7 @@ add_executable(Symbolic_tests
         parsing/expression_parsing/math_expression_parser.cpp
         functions/power_series_functions.cpp
         test/parsing/test_power_series_parsing.cpp
+        test/parsing/test_value_parsing.cpp
         test/types/bigint_tests.cpp
         test/types/modlong_tests.cpp
         test/types/polynomial_tests.cpp

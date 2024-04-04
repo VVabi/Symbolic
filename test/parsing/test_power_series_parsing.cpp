@@ -18,6 +18,7 @@
 #include "types/modLong.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
+#include "test/parsing/equality_checker.hpp"
 
 struct PowerSeriesTestcase {
     std::string formula;
@@ -145,39 +146,6 @@ std::vector<PowerSeriesTestcase> test_cases = {
 
         // necklaces with 3 colors
         {"CYC(3*z)", {0, 3, 6, 11, 24, 51, 130, 315, 834, 2195, 5934, 16107, 44368, 122643, 341802, 956635, 2690844, 7596483, 21524542, 61171659, 174342216, 498112275, 1426419858, 4093181691}, false},
-};
-
-template<typename T>
-class EqualityChecker {
- public:
-    static bool check_equality(const T a, const T b) {
-        return a == b;
-    }
-
-    static bool check_equality_relaxed(const T a, const T b) {
-        return a == b;
-    }
-};
-
-template<>
-class EqualityChecker<double> {
- public:
-    static bool check_equality(const double a, const double b) {
-        return check_near_equal(a, b, 1e-10);
-    }
-
-    static bool check_equality_relaxed(const double a, const double b) {
-        return check_near_equal(a, b, 1e-5);
-    }
-
-    static bool check_near_equal(const double a, const double b, const double eps) {
-            auto err = std::abs(a-b);
-        if (std::abs(a) > 1) {
-            err = err/std::abs(a);
-        }
-
-        return err < eps;
-    }
 };
 
 template<typename T> std::pair<FormalPowerSeries<T>, std::string> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {

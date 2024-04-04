@@ -9,6 +9,7 @@
 #define PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
 
 #include <memory>
+#include <cmath>
 #include <deque>
 #include <string>
 #include <utility>
@@ -476,13 +477,8 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
                                     const size_t fp_size) {
         auto left  = iterate_wrapped<double>(cmd_list, unit, fp_size);
         // TODO(vabi) check for emptyness
-        auto exponent = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, RationalNumber<BigInt>(1), fp_size)->as_value();
-        if (exponent.get_denominator() != BigInt(1)) {
-            throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
-        }
-
-        left->pow(exponent.get_numerator());
-        return left;
+        auto exponent = iterate_wrapped<double>(cmd_list, 1.0, fp_size)->as_value();
+        return std::make_unique<ValueType<double>>(std::pow(left->as_value(), exponent));
     }
 };
 

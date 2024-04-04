@@ -10,6 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iomanip>
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
@@ -154,6 +155,7 @@ class ValueType: public ParsingWrapperType<T> {
 
     std::string to_string() {
         std::stringstream ss;
+        ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
         ss << value;
         return ss.str();
     }
@@ -177,6 +179,11 @@ class ValueType: public ParsingWrapperType<T> {
         throw std::runtime_error("Cannot apply power series function to a constant for non-double types");
     }
 };
+
+template<>
+inline std::unique_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    return std::make_unique<ValueType<double>>(evaluate_power_series_function_double(value, type));
+}
 
 /**
  * @brief double to the power of a BigInt.

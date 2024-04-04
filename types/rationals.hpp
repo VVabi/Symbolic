@@ -173,7 +173,10 @@ class RingCompanionHelper<RationalNumber<BigInt>> {
 
     static RationalNumber<BigInt> from_string(const std::string &in,
                                         const RationalNumber<BigInt> &unit) {
-        auto parts = string_split(in, '/');
+        auto loc_str = in;
+        loc_str.erase(remove(loc_str.begin(), loc_str.end(), '('), loc_str.end());
+        loc_str.erase(remove(loc_str.begin(), loc_str.end(), ')'), loc_str.end());
+        auto parts = string_split(loc_str, '/');
         auto x = BigInt(parts[0]);
         if (parts.size() == 1) {
             return RationalNumber<BigInt>(x, 1);
