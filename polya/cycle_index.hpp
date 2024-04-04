@@ -1,8 +1,9 @@
-/*
- * cycle_index.hpp
- *
- *  Created on: Feb 3, 2024
- *      Author: vabi
+/**
+ * @file cycle_index.hpp
+ * @brief This file contains the declarations and definitions of functions related to cycle index calculations.
+ * 
+ * @date Feb 3, 2024
+ * @author vabi
  */
 
 #ifndef POLYA_CYCLE_INDEX_HPP_

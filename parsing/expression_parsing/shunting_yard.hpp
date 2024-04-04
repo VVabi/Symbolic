@@ -1,8 +1,8 @@
-/*
- * shunting_yard.hpp
- *
- *  Created on: Feb 6, 2024
- *      Author: vabi
+/**
+ * @file shunting_yard.hpp
+ * @brief Header file for the Shunting Yard algorithm used in expression parsing.
+ * @date Feb 6, 2024
+ * @author vabi
  */
 
 #ifndef PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_

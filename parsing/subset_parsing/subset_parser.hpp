@@ -1,8 +1,10 @@
-/*
- * subset_parser.hpp
- *
- *  Created on: Feb 11, 2024
- *      Author: vabi
+/**
+ * @file subset_parser.hpp
+ * @brief This file contains the definition of the Subset class and the SubsetArgumentException class.
+ * The Subset class represents a subset of integers and provides methods for parsing and manipulating subsets.
+ * The SubsetArgumentException class is an exception class that is thrown when there is an error parsing a subset.
+ * @date Feb 11, 2024
+ * @author vabi
  */
 
 #ifndef PARSING_SUBSET_PARSING_SUBSET_PARSER_HPP_

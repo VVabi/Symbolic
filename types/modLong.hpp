@@ -1,8 +1,11 @@
-/*
- * modLong.hpp
- *
- *  Created on: Jan 11, 2024
- *      Author: vabi
+/**
+ * @file modLong.hpp
+ * @brief Header file for the ModLong class.
+ * 
+ * This file contains the declaration of the ModLong class, which represents an integer modulo a given modulus.
+ * 
+ * @date Jan 11, 2024
+ * @author vabi
  */
 
 #ifndef TYPES_MODLONG_HPP_

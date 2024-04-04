@@ -1,9 +1,8 @@
-/*
- * graph_isomorphisms.hpp
- *
- *  Created on: Mar 5, 2024
- *      Author: vabi
+/**
+ * @file graph_isomorphisms.hpp
+ * @brief This file contains the definition of the function calc_num_iso_classes_of_graphs.
  */
+
 
 #ifndef EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
 #define EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
@@ -13,11 +12,22 @@
 #include <utility>
 #include <numeric>
 #include <string>
-#include "polya/partitions.hpp"
-#include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
 #include "types/power_series.hpp"
 
+
+/**
+ * @brief Calculates the number of isomorphism classes of graphs.
+ * 
+ * This function calculates the number of isomorphism classes of graphs with a given number of vertices via the Polya
+ * enumeration theorem.
+ * 
+ * @tparam T The type of the result.
+ * @param num_vertices The number of vertices in the graphs.
+ * @param zero The zero value of type T.
+ * @param unit The unit value of type T.
+ * @return The number of isomorphism classes of graphs.
+ */
 template<typename T>
 T calc_num_iso_classes_of_graphs(const uint32_t num_vertices, const T zero, const T unit) {
     T ret = zero;
@@ -69,6 +79,17 @@ T calc_num_iso_classes_of_graphs(const uint32_t num_vertices, const T zero, cons
     return ret;
 }
 
+/** 
+ * @brief Calculates the g.f. of isomorphism classes of graphs.
+ * 
+ * Get the generating functions for the iso classes of graphs: coefficient of z^i is the number of isomorphism classes of graphs with i vertices.
+ *
+ * @tparam T The type of the elements in the generating function.
+ * @param limit The limit parameter that determines the number of graphs to consider.
+ * @param zero The zero value of type T.
+ * @param unit The unit value of type T.
+ * @return Generating function for the isomorphism classes of graphs.
+ */
 template<typename T>
 FormalPowerSeries<T> get_iso_classes_of_graphs_gf(uint32_t limit, const T zero, const T unit) {
     auto ret = FormalPowerSeries<T>::get_atom(zero, 0, limit+1);
@@ -81,13 +102,37 @@ FormalPowerSeries<T> get_iso_classes_of_graphs_gf(uint32_t limit, const T zero, 
     return ret;
 }
 
-
+/** 
+ * @brief Calculates the g.f. of isomorphism classes of connecnted graphs.
+ * 
+ * Get the generating functions for the iso classes of connected graphs: 
+ * coefficient of z^i is the number of isomorphism classes of graphs with i vertices.
+ *
+ * @tparam T The type of the elements in the generating function.
+ * @param limit The limit parameter that determines the number of graphs to consider.
+ * @param zero The zero value of type T.
+ * @param unit The unit value of type T.
+ * @return Generating function for the isomorphism classes of connected graphs.
+ */
 template<typename T>
 FormalPowerSeries<T> get_iso_classes_of_connected_graphs_gf(uint32_t limit, const T zero, const T unit) {
     auto ret = unlabelled_inv_mset(get_iso_classes_of_graphs_gf(limit, zero, unit));
     return ret;
 }
 
+
+/** 
+ * @brief Calculates the g.f. of isomorphism classes with a fixed number of vertices by number of edges.
+ * 
+ * Get the generating functions for the iso classes of graphs: 
+ * coefficient of z^i is the number of isomorphism classes of graphs with i edges and num_vertices vertices.
+ *
+ * @tparam T The type of the elements in the generating function.
+ * @param max_num_edges the maximal number of edges to consider.
+ * @param zero The zero value of type T.
+ * @param unit The unit value of type T.
+ * @return Generating function for the isomorphism classes of connected graphs.
+ */
 template<typename T>
 FormalPowerSeries<T> get_iso_classes_of_graphs_fixed_num_vertices_gf(uint32_t num_vertices, uint32_t max_num_edges, const T zero, const T unit) {
     auto factorial_generator = FactorialGenerator<T>(num_vertices, unit);
@@ -154,6 +199,19 @@ FormalPowerSeries<T> get_iso_classes_of_graphs_fixed_num_vertices_gf(uint32_t nu
     return factorial_generator.get_inv_factorial(num_vertices)*ret;
 }
 
+/** 
+ * @brief calculates the b.g.f of the number of iso classes of graphs by number of edges and number of vertices.
+ * 
+ * Get the generating functions for the iso classes of connected graphs: 
+ * coefficient of z^i w^k is the number of isomorphism classes of graphs with i edges and k vertices.
+ *
+ * @tparam T The type of the elements in the generating function.
+ * @param max_num_vertices the maximal number of vertices to consider.
+ * @param zero The zero value of type T.
+ * @param unit The unit value of type T.
+ * @return Bivariate generating function for the isomorphism classes of connected graphs. The inner variable is the number of edges, the outer
+ * the number of vertices.
+ */
 template<typename T>
 FormalPowerSeries<FormalPowerSeries<T>>
 get_connected_graph_iso_types_by_edge_number(const uint32_t max_num_vertices, const T zero, const T unit) {
@@ -184,6 +242,18 @@ get_connected_graph_iso_types_by_edge_number(const uint32_t max_num_vertices, co
     return ret;
 }
 
+/** 
+ * @brief Calculates the generating function for the number of isomorphism classes of rooted trees.
+ * 
+ * Get the generating functions for the iso classes of rooted trees: 
+ * coefficient of z^i is the number of isomorphism classes of rooted trees on i vertices.
+ *
+ * @tparam T The type of the elements in the generating function.
+ * @param size the maximal size of the trees to consider.
+ * @param zero The zero value of type T.
+ * @param unit The unit value of type T.
+ * @return Generating function for the isomorphism classes of rooted trees.
+ */
 template<typename T>
 FormalPowerSeries<T> get_rooted_trees_gf(const uint32_t size, const T zero, const T unit) {
     auto ret = FormalPowerSeries<T>::get_atom(zero, 0, size+1);

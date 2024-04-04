@@ -1,8 +1,12 @@
-/*
- * test_power_series_parsing.cpp
+/**
+ * @file test_power_series_parsing.cpp
+ * @brief Unit tests for power series parsing.
  *
- *  Created on: Feb 26, 2024
- *      Author: vabi
+ * This file contains the implementation of unit tests for power series parsing.
+ * It tests the parsing of various power series formulas and verifies the expected results.
+ *
+ * @author vabi
+ * @date Feb 26, 2024
  */
 #include <gtest/gtest.h>
 #include <string>
@@ -14,7 +18,6 @@
 #include "types/modLong.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
-#include "test/parsing/test_power_series_parsing.hpp"
 
 struct PowerSeriesTestcase {
     std::string formula;

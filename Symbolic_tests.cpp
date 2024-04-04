@@ -1,3 +1,7 @@
+/**
+ * @file Symbolic_tests.cpp
+ * @brief Test entry point.
+ */
 #include <gtest/gtest.h>
 
 int main(int argc, char **argv) {

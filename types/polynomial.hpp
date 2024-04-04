@@ -1,3 +1,8 @@
+/**
+ * @file polynomial.hpp
+ * @brief Defines the Polynomial class and related functions.
+ */
+
 #ifndef TYPES_POLYNOMIAL_HPP_
 #define TYPES_POLYNOMIAL_HPP_
 
