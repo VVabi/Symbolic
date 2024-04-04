@@ -17,8 +17,11 @@ class RationalNumber {
  public:
     void sanitize() {
         T greatest_common_div = gcd(numerator, denominator);
-        numerator = numerator / greatest_common_div;
-        denominator = denominator / greatest_common_div;
+        auto zero = RingCompanionHelper<T>::get_zero(numerator);
+        if (greatest_common_div != zero) {
+            numerator = numerator / greatest_common_div;
+            denominator = denominator / greatest_common_div;
+        }
     }
 
     T get_numerator() const {
@@ -30,8 +33,7 @@ class RationalNumber {
     }
 
     bool operator==(const RationalNumber &other) const {
-        // TODO(vabi) assuming all rationals are always sanitized!
-        return numerator == other.numerator && denominator == other.denominator;
+        return numerator*other.denominator == denominator*other.numerator;
     }
 
     bool operator!=(const RationalNumber &other) const {
@@ -42,28 +44,21 @@ class RationalNumber {
         sanitize();
     }
 
-    RationalNumber(T x) {
-        numerator = x;
-        if (x != RingCompanionHelper<T>::get_zero(x)) {
-            denominator = x / x;
-        } else {
-            denominator = RingCompanionHelper<T>::get_unit(x);
-        }
-    }
+    RationalNumber(T x): numerator(x), denominator(RingCompanionHelper<T>::get_unit(x)) {}
 
     friend std::ostream &operator<<(std::ostream &os, RationalNumber const &tc) {
         T unit = RingCompanionHelper<T>::get_unit(tc.numerator);
-        os << tc.numerator;
+        os << "(" << tc.numerator << ")";
 
         if (tc.denominator != unit) {
-            os << "/" << tc.denominator;
+            os << "/(" << tc.denominator << ")";
         }
         return os;
     }
 
     RationalNumber &operator*=(const RationalNumber &rhs) {
-        numerator *= rhs.numerator;
-        denominator *= rhs.denominator;
+        numerator = numerator*rhs.numerator;  // TODO(vabi): implement *= for polynomials
+        denominator = denominator*rhs.denominator;
         sanitize();
         return *this;
     }
@@ -101,7 +96,7 @@ class RationalNumber {
 
     RationalNumber &operator+=(const RationalNumber &rhs) {
         numerator = numerator * rhs.denominator + denominator * rhs.numerator;
-        denominator *= rhs.denominator;
+        denominator = denominator*rhs.denominator;  // TODO(vabi): implement *= for Polynomials
         sanitize();
         return *this;
     }
@@ -158,14 +153,46 @@ class RingCompanionHelper<RationalNumber<T>> {
 
     static RationalNumber<T> from_string(const std::string &in,
                                         const RationalNumber<T> &unit) {
-        auto parts = string_split(in, '/');
-        auto x = std::stoi(parts[0]);
-        if (parts.size() == 1) {
-            return RationalNumber<T>(x, 1);
-        }
-        auto y = std::stoi(parts[0]);
-        return RationalNumber<T>(x, y);
+        throw std::runtime_error("Not implemented");
     }
 };
+
+template <>
+class RingCompanionHelper<RationalNumber<BigInt>> {
+ public:
+    static RationalNumber<BigInt> get_zero(const RationalNumber<BigInt> &in) {
+        return RationalNumber<BigInt>(0, 1);
+    }
+
+    static RationalNumber<BigInt> get_unit(const RationalNumber<BigInt> &in) {
+        return RationalNumber<BigInt>(1, 1);
+    }
+
+    static RationalNumber<BigInt> from_string(const std::string &in,
+                                        const RationalNumber<BigInt> &unit) {
+        auto parts = string_split(in, '/');
+        auto x = BigInt(parts[0]);
+        if (parts.size() == 1) {
+            return RationalNumber<BigInt>(x, 1);
+        }
+        auto y = BigInt(parts[1]);
+        return RationalNumber<BigInt>(x, y);
+    }
+};
+
+template<>
+inline void RationalNumber<BigInt>::sanitize() {
+    BigInt greatest_common_div = gcd(numerator, denominator);
+    auto zero = RingCompanionHelper<BigInt>::get_zero(numerator);
+    if (greatest_common_div != zero) {
+        numerator = numerator / greatest_common_div;
+        denominator = denominator / greatest_common_div;
+    }
+
+    if (denominator < 0) {
+        denominator = -denominator;
+        numerator = -numerator;
+    }
+}
 
 #endif  // TYPES_RATIONALS_HPP_

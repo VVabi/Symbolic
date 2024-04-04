@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <utility>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
@@ -149,27 +150,53 @@ class EqualityChecker {
     static bool check_equality(const T a, const T b) {
         return a == b;
     }
+
+    static bool check_equality_relaxed(const T a, const T b) {
+        return a == b;
+    }
 };
 
 template<>
 class EqualityChecker<double> {
  public:
     static bool check_equality(const double a, const double b) {
-        auto err = std::abs(a-b);
+        return check_near_equal(a, b, 1e-10);
+    }
+
+    static bool check_equality_relaxed(const double a, const double b) {
+        return check_near_equal(a, b, 1e-5);
+    }
+
+    static bool check_near_equal(const double a, const double b, const double eps) {
+            auto err = std::abs(a-b);
         if (std::abs(a) > 1) {
             err = err/std::abs(a);
         }
 
-        return err < 1e-10;
+        return err < eps;
     }
 };
 
-template<typename T> FormalPowerSeries<T> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {
+template<typename T> std::pair<FormalPowerSeries<T>, std::string> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {
     auto power_series_wrapper = parse_power_series_from_string<T>(formula, fp_size, unit);
-    auto power_series_ptr = dynamic_cast<PowerSeriesParsingResult<T>*>(power_series_wrapper.get());  // TODO(vabi) this sucks
-    auto power_series = power_series_ptr->get_power_series();
-    return power_series;
+    auto power_series = power_series_wrapper->as_power_series(fp_size);
+    auto string_rep = power_series_wrapper->to_string();
+    return std::make_pair(power_series, string_rep);
 }
+
+template<typename T>
+bool check_power_series_near_equality(const FormalPowerSeries<T>& a, const FormalPowerSeries<T>& b) {
+    if (a.num_coefficients() != b.num_coefficients()) {
+        return false;
+    }
+    for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
+        if (!EqualityChecker<T>::check_equality_relaxed(a[ind], b[ind])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 template<typename T> bool run_power_series_parsing_test_case(const std::string& formula,
                                         const uint32_t fp_size,
@@ -179,8 +206,9 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
                                         const bool exponential,
                                         const int64_t sign = 1) {
     bool ret = true;
-    auto power_series = parse_as_power_series(formula, fp_size, unit);
+    auto parsing_result = parse_as_power_series(formula, fp_size, unit);
 
+    auto power_series = parsing_result.first;
     ret = ret && (power_series.num_coefficients() == expected_output_fp_size);
     T factorial = unit;
     for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
@@ -194,6 +222,11 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
         auto loc_res = EqualityChecker<T>::check_equality(coeff, sign*expected_result[ind]*unit);
         EXPECT_EQ(loc_res, true) << formula << " with size " << fp_size << " and unit " << unit << " failed at index " << ind << ":\nExpected " << sign*expected_result[ind]*unit << "\nGot " << coeff;
     }
+
+    auto string_rep = parsing_result.second;
+
+    auto checker = parse_as_power_series(string_rep, fp_size, unit);
+    EXPECT_EQ(check_power_series_near_equality(checker.first, power_series), true) << "Parsing failed for " << formula << " with size " << fp_size << " and unit " << unit;
 
     return ret;
 }
@@ -256,7 +289,7 @@ bool test_derangements() {
     auto primes = get_test_primes();
     for (auto p : primes) {
         uint32_t num_coeffs         = 10000;
-        auto res                    = parse_as_power_series<ModLong>(derangements_gf, num_coeffs, ModLong(1, p));
+        auto res                    = parse_as_power_series<ModLong>(derangements_gf, num_coeffs, ModLong(1, p)).first;
         auto factorial_generator    = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
 
         ModLong num_derangements = ModLong(1, p);
@@ -283,7 +316,7 @@ bool test_catalan_numbers() {
     auto primes = get_test_primes();
     for (auto p : primes) {
         uint32_t num_coeffs = 10000;
-        auto res = parse_as_power_series<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p));
+        auto res = parse_as_power_series<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p)).first;
 
         auto binomial_generator = BinomialGenerator<ModLong>(2*num_coeffs, ModLong(1, p));
         for (uint32_t ind = 0; ind < num_coeffs; ind++) {

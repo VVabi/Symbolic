@@ -37,8 +37,8 @@ int main(int argc, char **argv) {
         int64_t position = -1;
         bool error = false;
         try {
-            auto x = parse_power_series_from_string<RationalNumber<BigInt>>(input, 20, RationalNumber<BigInt>(1));
-            std::cout << x->to_string() << std::endl;
+            auto x = parse_formula(input, Datatype::DYNAMIC);
+            std::cout << x << std::endl;
         } catch (ParsingException &e) {
             error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
@@ -52,14 +52,12 @@ int main(int argc, char **argv) {
             std::cout << "Subset argument error: " << e.what() << std::endl;
         }
 
-        if (error) {
+        if (error && position >= 0) {
             std::cout << input << std::endl;
-            if (position >= 0) {
-                for (uint32_t i = 0; i < position; i++) {
-                    std::cout << " ";
-                }
-                std::cout << "^ here" << std::endl;
+            for (uint32_t i = 0; i < position; i++) {
+                std::cout << " ";
             }
+            std::cout << "^ here" << std::endl;
         }
     }
     return 0;

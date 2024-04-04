@@ -7,45 +7,13 @@
 
 #ifndef TYPES_MODLONG_HPP_
 #define TYPES_MODLONG_HPP_
+
 #include <stdint.h>
 #include <assert.h>
-#include <types/bigint.hpp>
-
-template<typename T> struct EuclideanAlgoResult {
-    T gcd;
-    T bezouta;
-    T bezoutb;
-
-    EuclideanAlgoResult(T gcd, T ba, T bb): gcd(gcd), bezouta(ba), bezoutb(bb) {}
-};
-
-
-template<typename T> EuclideanAlgoResult<T> extended_euclidean_algorithm(T a, T b) {
-    T s = 0;
-    T t = 1;
-    T r = b;
-
-    T oldS = 1;
-    T oldT = 0;
-    T oldR = a;
-
-    while (r != 0) {
-        T quotient = oldR/r;
-        T newR = oldR-quotient*r;
-        oldR = r;
-        r = newR;
-
-        T newS = oldS-quotient*s;
-        oldS = s;
-        s = newS;
-
-        T newT = oldT-quotient*t;
-        oldT = t;
-        t = newT;
-    }
-
-    return EuclideanAlgoResult<T>(oldR, oldS, oldT);
-}
+#include <string>
+#include "types/bigint.hpp"
+#include "math_utils/euclidean_algorithm.hpp"
+#include "parsing/expression_parsing/parsing_exceptions.hpp"
 
 class ModLong {
  private:
@@ -210,6 +178,21 @@ class ModLong {
 };
 
 
+template<> class RingCompanionHelper<ModLong> {
+ public:
+    static ModLong get_zero(const ModLong& in) {
+        return ModLong(0, in.get_modulus());
+    }
+    static ModLong get_unit(const ModLong& in) {
+        return ModLong(1, in.get_modulus());
+    }
+    static ModLong from_string(const std::string& in, const ModLong& unit) {
+        if (in.find('.') != std::string::npos || in.find('e') != std::string::npos) {
+            throw std::invalid_argument("Cannot parse as ModLong: " + in);
+        }
+        return ModLong(std::stoi(in), unit.get_modulus());
+    }
+};
 
 
 #endif /* TYPES_MODLONG_HPP_ */

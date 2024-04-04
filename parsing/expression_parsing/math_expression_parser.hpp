@@ -18,47 +18,7 @@
 #include "parsing/polish_notation/polish_notation.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
 #include "parsing/expression_parsing/parsing_exceptions.hpp"
-
-
-template<typename T>
-class ParsingResultWrapper {
- public:
-    virtual std::string to_string() = 0;
-};
-
-template<typename T>
-class ValueParsingResult : public ParsingResultWrapper<T> {
- private:
-    T value;
-
- public:
-    ValueParsingResult(T value): value(value) {}
-
-    std::string to_string() override {
-        std::stringstream ss;
-        ss << value;
-        return ss.str();
-    }
-};
-
-template<typename T>
-class PowerSeriesParsingResult : public ParsingResultWrapper<T> {
- private:
-    FormalPowerSeries<T> power_series;
-
- public:
-    PowerSeriesParsingResult(FormalPowerSeries<T> power_series): power_series(power_series) {}
-
-    std::string to_string() override {
-        std::stringstream ss;
-        ss << power_series;
-        return ss.str();
-    }
-
-    FormalPowerSeries<T> get_power_series() {
-        return power_series;
-    }
-};
+#include "parsing/expression_parsing/parsing_wrapper.hpp"
 
  /**
  * @brief Parses a mathematical expression string into a formal power series.
@@ -74,7 +34,7 @@ class PowerSeriesParsingResult : public ParsingResultWrapper<T> {
  * @param unit The multiplicative identity of type `T`.
  * @return The parsed power series.
  */
-template<typename T> std::unique_ptr<ParsingResultWrapper<T>> parse_power_series_from_string(const std::string& input,
+template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
     auto formula = parse_math_expression_string(input);
@@ -82,28 +42,23 @@ template<typename T> std::unique_ptr<ParsingResultWrapper<T>> parse_power_series
 
     std::deque<MathLexerElement> polish;
 
-    bool parse_power_series = false;
     for (MathLexerElement x : p) {
         polish.push_back(x);
-
-        if (x.type == VARIABLE) {
-            parse_power_series = true;
-        }
     }
+    auto res = iterate_wrapped<T>(polish, unit, size);
 
-    if (parse_power_series) {
-        auto res = iterate_polish<T>(polish, unit, size);
-        if (polish.size() > 0) {
-            throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  // TODO(vabi) get proper position
-        }
-        return std::make_unique<PowerSeriesParsingResult<T>>(res);
-    } else {
-        auto res = iterate_polish_value<T>(polish, unit, 1);
-        if (polish.size() > 0) {
-            throw ParsingException("Expressions not linked together; are you missing an operator?", 0);  // TODO(vabi) get proper position
-        }
-        return std::make_unique<ValueParsingResult<T>>(res);
+    if (polish.size() != 0) {
+        throw ParsingException("Parsing error: Unconsumed tokens", polish.front().position);
     }
+    return res;
 }
 
+enum class Datatype {
+    DYNAMIC,
+    DOUBLE,
+    RATIONAL,
+    MOD
+};
+
+std::string parse_formula(const std::string& input, const Datatype type);
 #endif  // PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
