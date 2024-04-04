@@ -1,8 +1,9 @@
-/*
- * string_utils.hpp
+/**
+ * @file string_utils.hpp
+ * @brief This file contains utility functions for string manipulation.
  *
- *  Created on: Feb 8, 2024
- *      Author: vabi
+ * @date Feb 8, 2024
+ * @author vabi
  */
 
 #ifndef STRING_UTILS_STRING_UTILS_HPP_

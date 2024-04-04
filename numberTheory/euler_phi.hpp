@@ -1,8 +1,6 @@
-/*
- * euler_phi.hpp
- *
- *  Created on: Feb 24, 2024
- *      Author: vabi
+/**
+ * @file euler_phi.hpp
+ * @brief Header file for calculating Euler's totient function.
  */
 
 #ifndef NUMBERTHEORY_EULER_PHI_HPP_

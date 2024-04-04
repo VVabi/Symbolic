@@ -1,4 +1,7 @@
-// (c) 2024 vabi. All rights reserved.
+/**
+ * @file rationals.hpp
+ * @brief This file contains the RationalNumber class and its helper functions.
+ */
 
 #ifndef TYPES_RATIONALS_HPP_
 #define TYPES_RATIONALS_HPP_

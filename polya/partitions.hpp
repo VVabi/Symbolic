@@ -1,19 +1,18 @@
-/*
- * partitions.hpp
+/**
+ * @file partitions.hpp
+ * @brief This file contains the declarations of functions and structures related to partitions and conjugacy classes.
  *
- *  Created on: Feb 3, 2024
- *      Author: vabi
+ * This file provides functions to calculate the size of a conjugacy class in the symmetric group, iterate over partitions, and get the sign of a partition.
  */
 
 #ifndef POLYA_PARTITIONS_HPP_
 #define POLYA_PARTITIONS_HPP_
+
 #include <assert.h>
 #include <stdint.h>
 #include <vector>
 #include <functional>
 #include "math_utils/factorial_generator.hpp"
-
-
 
 /**
  * @struct PartitionCount
@@ -22,9 +21,14 @@
  * Represents num appearing count times in a partition.
  */
 struct PartitionCount {
-    uint32_t num;
-    uint32_t count;
+    uint32_t num; /**< The number appearing in the partition. */
+    uint32_t count; /**< The number of times the number appears in the partition. */
 
+    /**
+     * @brief Constructor for PartitionCount.
+     * @param num The number appearing in the partition.
+     * @param count The number of times the number appears in the partition.
+     */
     PartitionCount(uint32_t num, uint32_t count) {
         this->num = num;
         this->count = count;
@@ -74,8 +78,25 @@ template<typename T> T sym_group_conjugacy_class_size(const std::vector<Partitio
     return numerator/denominator;
 }
 
+/**
+ * @brief Iterates over partitions of a given size and calls a callback function for each partition.
+ * 
+ * This function generates all partitions of a given size and calls the provided callback function for each partition.
+ * The partitions are represented as vectors of `PartitionCount` structures.
+ *
+ * @param size The size of the partitions to be generated.
+ * @param callback The callback function to be called for each partition.
+ */
 void iterate_partitions(const uint32_t size, std::function<void(std::vector<PartitionCount>&)> callback);
-int32_t get_partition_sign(const std::vector<PartitionCount>& partition);
 
+/**
+ * @brief Calculates the sign of a partition.
+ * 
+ * This function calculates the sign of a conjugacy class in the symmetric group.
+ *
+ * @param partition The partition for which the sign is to be calculated.
+ * @return The sign of the partition (-1 or 1).
+ */
+int32_t get_partition_sign(const std::vector<PartitionCount>& partition);
 
 #endif  // POLYA_PARTITIONS_HPP_

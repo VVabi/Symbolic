@@ -1,8 +1,8 @@
-/*
- * polish_notation.hpp
- *
- *  Created on: Jan 30, 2024
- *      Author: vabi
+/**
+ * @file polish_notation.hpp
+ * @brief Header file for Polish Notation parsing and evaluation.
+ * @date Jan 30, 2024
+ * @author vabi
  */
 
 #ifndef PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
@@ -42,6 +42,7 @@ template<typename T> class PolishNotationElement {
         assert(false);
         return std::unique_ptr<ParsingWrapperType<T>>(nullptr);
     }
+
     uint32_t get_position() {
         return position;
     }

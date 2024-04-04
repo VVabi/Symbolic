@@ -1,8 +1,6 @@
-/*
- * power_series.hpp
- *
- *  Created on: Jan 26, 2024
- *      Author: vabi
+/**
+ * @file power_series.hpp
+ * @brief Definition of the PowerSeries class.
  */
 
 #ifndef TYPES_POWER_SERIES_HPP_
@@ -19,7 +17,11 @@
 #include "types/bigint.hpp"
 #include "types/poly_base.hpp"
 
-class EvalException : public std::exception {
+/**
+ * @class EvalException
+ * @brief Exception class for evaluation errors.
+ */
+class EvalException : public std::exception {  // TODO(vabi) replace by a more specific exception
  private:
     std::string message;
     int position;
@@ -34,10 +36,25 @@ class EvalException : public std::exception {
     }
 };
 
-
+/**
+ * @class PowerSeries
+ * @brief Represents a power series with coefficients of type T.
+ * @tparam T The type of the coefficients.
+ */
 template<typename T> class PowerSeries: public PolyBase<T> {
  public:
+    /**
+     * @brief Constructs a PowerSeries object with the given coefficients.
+     * @param coeffs The coefficients of the power series.
+     */
     PowerSeries(std::vector<T>&& coeffs): PolyBase<T>(std::move(coeffs)) {}
+
+    /**
+     * @brief Overloaded stream insertion operator for PowerSeries objects.
+     * @param os The output stream.
+     * @param tc The PowerSeries object to be inserted.
+     * @return The modified output stream.
+     */
     friend std::ostream& operator<<(std::ostream& os, PowerSeries const & tc) {
         auto pw = 0;
         for (auto x : tc.coefficients) {
@@ -48,44 +65,11 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return os;
     }
 
-    friend PowerSeries operator+(PowerSeries a, const PowerSeries& b) {
-        a.resize(std::min(a.num_coefficients(), b.num_coefficients()));
-        add_raw(a.coefficients.data(), a.num_coefficients(), b.coefficients.data(), b.num_coefficients());
-        return a;
-    }
-
-    friend PowerSeries operator+(PowerSeries a, const T b) {
-        a[0] = a[0]+b;
-        return a;
-    }
-
-    friend PowerSeries operator+(const T& a, const PowerSeries& b) {
-        return b+a;
-    }
-
-
-    PowerSeries operator-() const {
-        std::vector<T> coeffs = std::vector<T>();
-        coeffs.reserve(this->num_coefficients());
-        for (auto it = this->coefficients.begin(); it < this->coefficients.end(); it++) {
-            coeffs.push_back(-*it);
-        }
-        return PowerSeries(std::move(coeffs));
-    }
-
-    friend PowerSeries operator-(PowerSeries a, const T b) {
-        a[0] = a[0]-b;
-        return a;
-    }
-
-    friend PowerSeries operator-(const T& a, const PowerSeries& b) {
-        return -(b-a);
-    }
-
-    friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
-        return a+(-b);
-    }
-
+    /**
+     * @brief Overloaded equality operator for PowerSeries objects.
+     * @param other The PowerSeries object to compare with.
+     * @return True if the PowerSeries objects are equal, false otherwise.
+     */
     bool operator==(const PowerSeries& other) const {
         if (other.num_coefficients() != this->num_coefficients()) {
             return false;
@@ -99,6 +83,89 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return true;
     }
 
+    /**
+     * @brief Overloaded addition operator for PowerSeries objects.
+     * @param a The first PowerSeries object.
+     * @param b The second PowerSeries object.
+     * @return The sum of the two PowerSeries objects.
+     */
+    friend PowerSeries operator+(PowerSeries a, const PowerSeries& b) {
+        a.resize(std::min(a.num_coefficients(), b.num_coefficients()));
+        add_raw(a.coefficients.data(), a.num_coefficients(), b.coefficients.data(), b.num_coefficients());
+        return a;
+    }
+
+    /**
+     * @brief Overloaded addition operator for PowerSeries objects.
+     * @param a The first PowerSeries object.
+     * @param b The second coefficient.
+     * @return The sum of the PowerSeries object and the coefficient.
+     */
+    friend PowerSeries operator+(PowerSeries a, const T b) {
+        a[0] = a[0]+b;
+        return a;
+    }
+
+    /**
+     * @brief Overloaded addition operator for PowerSeries objects.
+     * @param a The first coefficient.
+     * @param b The second PowerSeries object.
+     * @return The sum of the coefficient and the PowerSeries object.
+     */
+    friend PowerSeries operator+(const T& a, const PowerSeries& b) {
+        return b+a;
+    }
+
+    /**
+     * @brief Overloaded negation operator for PowerSeries objects.
+     * @return The negated PowerSeries object.
+     */
+    PowerSeries operator-() const {
+        std::vector<T> coeffs = std::vector<T>();
+        coeffs.reserve(this->num_coefficients());
+        for (auto it = this->coefficients.begin(); it < this->coefficients.end(); it++) {
+            coeffs.push_back(-*it);
+        }
+        return PowerSeries(std::move(coeffs));
+    }
+
+    /**
+     * @brief Overloaded subtraction operator for PowerSeries objects.
+     * @param a The first PowerSeries object.
+     * @param b The second coefficient.
+     * @return The difference between the PowerSeries object and the coefficient.
+     */
+    friend PowerSeries operator-(PowerSeries a, const T b) {
+        a[0] = a[0]-b;
+        return a;
+    }
+
+    /**
+     * @brief Overloaded subtraction operator for PowerSeries objects.
+     * @param a The first coefficient.
+     * @param b The second PowerSeries object.
+     * @return The difference between the coefficient and the PowerSeries object.
+     */
+    friend PowerSeries operator-(const T& a, const PowerSeries& b) {
+        return -(b-a);
+    }
+
+    /**
+     * @brief Overloaded subtraction operator for PowerSeries objects.
+     * @param a The first PowerSeries object.
+     * @param b The second PowerSeries object.
+     * @return The difference between the two PowerSeries objects.
+     */
+    friend PowerSeries operator-(PowerSeries a, const PowerSeries& b) {
+        return a+(-b);
+    }
+
+    /**
+     * @brief Overloaded right shift operator for PowerSeries objects.
+     * @param a The PowerSeries object to be shifted.
+     * @param shift The number of positions to shift.
+     * @return The shifted PowerSeries object.
+     */
     friend PowerSeries operator>>(PowerSeries a, const uint32_t shift) {
         auto num_coefficients = (int64_t) a.num_coefficients()-(int64_t) shift;
 
@@ -112,6 +179,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return a;
     }
 
+    /**
+     * @brief Overloaded left shift operator for PowerSeries objects.
+     * @param a The PowerSeries object to be shifted.
+     * @param shift The number of positions to shift.
+     * @return The shifted PowerSeries object.
+     */
     friend PowerSeries operator<<(PowerSeries a, const uint32_t shift) {
         auto num_coefficients = a.num_coefficients()+shift;
 
@@ -127,6 +200,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return a;
     }
 
+    /**
+     * @brief Overloaded multiplication operator for PowerSeries objects.
+     * @param a The first PowerSeries object.
+     * @param b The second PowerSeries object.
+     * @return The product of the two PowerSeries objects.
+     */
     friend PowerSeries operator*(PowerSeries a, const PowerSeries& b) {
         auto size = std::min(a.num_coefficients(), b.num_coefficients());
 
@@ -181,6 +260,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return ret;
     }
 
+    /**
+     * @brief Overloaded multiplication operator for PowerSeries objects.
+     * @param a The coefficient.
+     * @param b The PowerSeries object.
+     * @return The product of the coefficient and the PowerSeries object.
+     */
     friend PowerSeries operator*(const T& a, PowerSeries b) {
         for (uint32_t ind = 0; ind < b.num_coefficients(); ind++) {
             b[ind] = b[ind]*a;
@@ -188,6 +273,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return b;
     }
 
+    /**
+     * @brief Overloaded multiplication operator for PowerSeries objects.
+     * @param a The coefficient.
+     * @param b The PowerSeries object.
+     * @return The product of the coefficient and the PowerSeries object.
+     */
     friend PowerSeries operator*(const int64_t& a, PowerSeries b) {
         for (uint32_t ind = 0; ind < b.num_coefficients(); ind++) {
             b[ind] = b[ind]*a;
@@ -195,6 +286,11 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return b;
     }
 
+    /**
+     * @brief Calculates the power of the PowerSeries object.
+     * @param exponent The exponent.
+     * @return The PowerSeries object raised to the given exponent.
+     */
     PowerSeries pow(const uint32_t exponent) const {
         if (exponent == 0) {
             return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
@@ -215,6 +311,11 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return ret;
     }
 
+    /**
+     * @brief Calculates the power of the PowerSeries object.
+     * @param exponent The exponent.
+     * @return The PowerSeries object raised to the given exponent.
+     */
     PowerSeries pow(const BigInt exponent) const {
         if (exponent == BigInt(0)) {
             return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
@@ -235,8 +336,10 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return ret;
     }
 
-
-
+    /**
+     * @brief Calculates the inverse of the PowerSeries object.
+     * @return The inverse of the PowerSeries object.
+     */
     PowerSeries invert() const {
         auto inv_coefficients = std::vector<T>();
         inv_coefficients.reserve(this->num_coefficients());
@@ -262,6 +365,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return PowerSeries(std::move(inv_coefficients));
     }
 
+    /**
+     * @brief Overloaded division operator for PowerSeries objects.
+     * @param a The numerator PowerSeries object.
+     * @param b The denominator PowerSeries object.
+     * @return The result of dividing the numerator by the denominator.
+     */
     friend PowerSeries operator/(PowerSeries a, const PowerSeries& b) {
         uint32_t first_nonzero_idx = 0;
         auto zero = RingCompanionHelper<T>::get_zero(a[0]);
@@ -289,12 +398,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return ret;
     }
 
-    PowerSeries shift(uint32_t shift_size) const {
-        assert(shift_size < this->num_coefficients());
-        auto new_coeffs = std::vector<T>(this->coefficients.begin()+shift_size, this->coefficients.end());
-        return PowerSeries(std::move(new_coeffs));
-    }
-
+    /**
+     * @brief Overloaded division operator for PowerSeries objects.
+     * @param a The numerator coefficient.
+     * @param b The denominator PowerSeries object.
+     * @return The result of dividing the numerator by the denominator.
+     */
     friend PowerSeries operator/(const T a, const PowerSeries& b) {
         auto binv = b.invert();
         for (auto it = binv.coefficients.begin(); it != binv.coefficients.end(); it++) {
@@ -303,6 +412,12 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return binv;
     }
 
+    /**
+     * @brief Overloaded division operator for PowerSeries objects.
+     * @param a The numerator PowerSeries object.
+     * @param b The denominator coefficient.
+     * @return The result of dividing the numerator by the denominator.
+     */
     friend PowerSeries operator/(PowerSeries a, const int64_t b) {
         auto unit = RingCompanionHelper<T>::get_unit(a[0]);
         auto inv = unit/(unit*b);
@@ -312,6 +427,26 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return a;
     }
 
+    /**
+     * @brief Shifts the PowerSeries object by the specified number of positions.
+     * @param shift_size The number of positions to shift.
+     * @return The shifted PowerSeries object.
+     */
+    PowerSeries shift(uint32_t shift_size) const {
+        assert(shift_size < this->num_coefficients());
+        auto new_coeffs = std::vector<T>(this->coefficients.begin()+shift_size, this->coefficients.end());
+        return PowerSeries(std::move(new_coeffs));
+    }
+
+    /**
+     * @brief Substitute another power series for the variable.
+     * 
+     * This function substitutes another power series for the variable in the power series.
+     * 
+     * @param fp The power series to substitute.
+     * @param allow_constant_term Whether to allow a non-zero constant term in the power series to substitute.
+     * @return The power series after substitution.
+    */
     PowerSeries substitute(const PowerSeries& fp, bool allow_constant_term = false) {
         auto zero = RingCompanionHelper<T>::get_zero(this->coefficients[0]);
         if (!allow_constant_term && fp[0] != zero) {
@@ -334,6 +469,11 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return ret;
     }
 
+    /**
+     * @brief replace z by z^exponent
+     * @param exponent The exponent
+     * @return The power series after substitution.
+    */
     PowerSeries substitute_exponent(const uint32_t exponent) {
         auto zero = RingCompanionHelper<T>::get_zero(this->coefficients[0]);
         auto coeffs = std::vector<T>(this->num_coefficients(), zero);

@@ -1,7 +1,11 @@
+/**
+ * @file Symbolic.cpp
+ * @brief Main repl entry point.
+ */
+
 #include <iostream>
 #include <numeric>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
-#include "test/parsing/test_power_series_parsing.hpp"
 #include "types/power_series.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"

@@ -1,8 +1,6 @@
-/*
- * moebius.hpp
- *
- *  Created on: Mar 5, 2024
- *      Author: vabi
+/**
+ * @file moebius.hpp
+ * @brief This file contains the declaration of the calculate_moebius function.
  */
 
 #ifndef NUMBERTHEORY_MOEBIUS_HPP_
