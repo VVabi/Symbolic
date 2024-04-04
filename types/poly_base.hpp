@@ -5,6 +5,18 @@
 #include <vector>
 #include "types/ring_helpers.hpp"
 
+/**
+ * @brief Adds two arrays element-wise.
+ * 
+ * This function adds two arrays `a` and `b` element-wise and stores the result in `a`.
+ * The size of the arrays is specified by `size_a` and `size_b`.
+ * 
+ * @tparam T The type of the elements in the arrays.
+ * @param a Pointer to the first array.
+ * @param size_a The size of the first array.
+ * @param b Pointer to the second array.
+ * @param size_b The size of the second array.
+ */
 template<typename T>
 void add_raw(T* a, const uint32_t size_a,
              const T* b, const uint32_t size_b) {
@@ -13,6 +25,18 @@ void add_raw(T* a, const uint32_t size_a,
         }
 }
 
+#define KARATSUBA_THRESHOLD 100  // TODO(vabi): benchmark and adapt this parameter
+
+/**
+ * @brief Core multiplication algorithm for polynomials. Uses Karatrsuba multiplication.
+ * 
+ * @tparam T The type of the elements in the arrays.
+ * @param a Pointer to the first array.
+ * @param size_a The size of the first array.
+ * @param b Pointer to the second array.
+ * @param size_b The size of the second array.
+ * @return The result of the multiplication as a new array.
+ */
 template<typename T>
 std::vector<T> multiply_full_raw(const T* a, const uint32_t size_a,
                              const T* b, const uint32_t size_b) {
@@ -29,7 +53,7 @@ std::vector<T> multiply_full_raw(const T* a, const uint32_t size_a,
     assert(size_a != 0 || size_b != 0);
     auto size = size_a+size_b-1;
     auto zero = RingCompanionHelper<T>::get_zero(a[0]);
-    if (size < 100) {
+    if (size < KARATSUBA_THRESHOLD) {
         std::vector<T> ret = std::vector<T>(size, zero);
 
         for (size_t idx_a = 0; idx_a < size_a; idx_a++) {
@@ -128,31 +152,72 @@ std::vector<T> multiply_full_raw(const T* a, const uint32_t size_a,
     return ret;
 }
 
+/**
+ * @brief Base class for polynomial objects.
+ * 
+ * This class provides a base implementation for polynomial objects.
+ * It stores the coefficients of the polynomial in a vector.
+ * 
+ * @tparam T The type of the coefficients.
+ */
 template<typename T> class PolyBase {
  protected:
     std::vector<T> coefficients;
 
  public:
+    /**
+     * @brief Constructs a PolyBase object with the given coefficients.
+     * 
+     * @param coeffs The coefficients of the polynomial.
+     */
     PolyBase(std::vector<T>&& coeffs) {
         this->coefficients = std::vector<T>(coeffs);
     }
 
+    /**
+     * @brief Returns a copy of the coefficients.
+     * 
+     * @return A copy of the coefficients.
+     */
     std::vector<T>  copy_coefficients() const {
         return coefficients;
     }
 
+    /**
+     * @brief Returns the number of coefficients in the polynomial.
+     * 
+     * @return The number of coefficients in the polynomial.
+     */
     size_t num_coefficients() const {
         return coefficients.size();
     }
 
+    /**
+     * @brief Accesses the coefficient at the specified index.
+     * 
+     * @param idx The index of the coefficient to access.
+     * @return A reference to the coefficient at the specified index.
+     */
     T& operator[](const int idx) {
         return this->coefficients.at(idx);  // TODO(vabi) has this any performance impacts
     }
 
+    /**
+     * @brief Accesses the coefficient at the specified index (const version).
+     * 
+     * @param idx The index of the coefficient to access.
+     * @return The coefficient at the specified index.
+     */
     T operator[](const int idx) const {
         return this->coefficients.at(idx);  // TODO(vabi) has this any performance impacts
     }
 
+    /**
+     * @brief Evaluates the polynomial at the given input value.
+     * 
+     * @param input The input value at which to evaluate the polynomial.
+     * @return The result of the polynomial evaluation.
+     */
     T evaluate(const T& input) {
         auto pow = RingCompanionHelper<T>::get_unit(input);
         auto ret = RingCompanionHelper<T>::get_zero(input);
@@ -164,6 +229,14 @@ template<typename T> class PolyBase {
         return ret;
     }
 
+    /**
+     * @brief Resizes the polynomial to the specified size.
+     * 
+     * If the new size is larger than the current size, the additional coefficients are set to zero.
+     * If the new size is smaller than the current size, the extra coefficients are discarded.
+     * 
+     * @param new_size The new size of the polynomial.
+     */
     void resize(const size_t new_size) {
         this->coefficients.resize(new_size, RingCompanionHelper<T>::get_zero(this->coefficients[0]));
     }

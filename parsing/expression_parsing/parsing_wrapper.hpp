@@ -1,3 +1,8 @@
+/**
+ * @file parsing_wrapper.hpp
+ * @brief This file contains the declaration of the ParsingWrapperType class and its derived classes.
+ */
+
 #ifndef PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
 #define PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
 
@@ -9,33 +14,115 @@
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
 
+/**
+ * @brief Alias for RationalFunction type.
+ * @tparam T The underlying type of the RationalFunction.
+ */
 template<typename T>
 using RationalFunction = RationalNumber<Polynomial<T>>;
 
+/**
+ * @class ParsingWrapperType
+ * @brief Abstract base class for parsing wrapper types.
+ * @tparam T The underlying type of the parsing wrapper.
+ */
 template<typename T>
 class ParsingWrapperType {
  public:
+    /**
+     * @brief Convert the parsing wrapper to a value of type T.
+     * @return The value of type T.
+     */
     virtual T as_value() = 0;
+
+    /**
+     * @brief Convert the parsing wrapper to a rational function.
+     * @return The rational function.
+     */
     virtual RationalFunction<T> as_rational_function() = 0;
+
+    /**
+     * @brief Convert the parsing wrapper to a power series.
+     * @param num_coeffs The number of coefficients in the power series.
+     * @return The power series.
+     */
     virtual PowerSeries<T> as_power_series(uint32_t num_coeffs) = 0;
+
+    /**
+     * @brief Get the priority of the parsing wrapper.
+     * @return The priority.
+     */
     virtual int get_priority() = 0;
 
+    /**
+     * @brief Add another parsing wrapper to this parsing wrapper.
+     * @param other The other parsing wrapper.
+     * @return The result of the addition.
+     */
     virtual std::unique_ptr<ParsingWrapperType<T>> add(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
+
+    /**
+     * @brief Multiply another parsing wrapper with this parsing wrapper.
+     * @param other The other parsing wrapper.
+     * @return The result of the multiplication.
+     */
     virtual std::unique_ptr<ParsingWrapperType<T>> mult(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
+
+    /**
+     * @brief Divide this parsing wrapper by another parsing wrapper.
+     * @param other The other parsing wrapper.
+     * @return The result of the division.
+     */
     virtual std::unique_ptr<ParsingWrapperType<T>> div(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
+
+    /**
+     * @brief Divide another parsing wrapper by this parsing wrapper.
+     * @param other The other parsing wrapper.
+     * @return The result of the reverse division.
+     */
     virtual std::unique_ptr<ParsingWrapperType<T>> reverse_div(std::unique_ptr<ParsingWrapperType<T>> other) = 0;
+
+    /**
+     * @brief Apply a power series function to this parsing wrapper.
+     * @param type The type of the power series function.
+     * @param fp_size The size of the fixed point representation.
+     * @return The result of the power series function.
+     */
     virtual std::unique_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) = 0;
+
+    /**
+     * @brief Apply unary minus to this parsing wrapper.
+     */
     virtual void unary_minus() = 0;
+
+    /**
+     * @brief Convert the parsing wrapper to a string representation.
+     * @return The string representation.
+     */
     virtual std::string to_string() = 0;
+
+    /**
+     * @brief Raise the parsing wrapper to a given exponent.
+     * @param exponent The exponent.
+     */
     virtual void pow(const BigInt& exponent) = 0;
 };
 
+/**
+ * @class ValueType
+ * @brief Class representing a parsing wrapper for a value of type T.
+ * @tparam T The underlying type of the parsing wrapper.
+ */
 template<typename T>
 class ValueType: public ParsingWrapperType<T> {
  private:
     T value;
 
  public:
+    /**
+     * @brief Construct a ValueType object with the given value.
+     * @param value The value.
+     */
     ValueType(T value): value(value) {}
 
     T as_value() {
@@ -91,11 +178,12 @@ class ValueType: public ParsingWrapperType<T> {
     }
 };
 
-template<>
-inline std::unique_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
-    return std::make_unique<ValueType<double>>(evaluate_power_series_function_double(value, type));
-}
-
+/**
+ * @brief double to the power of a BigInt.
+ * @param base The base value.
+ * @param exponent The exponent.
+ * @return The result of the power series function.
+ */
 inline double pow_double_big(double base, BigInt exponent) {
     if (exponent == 0) {
         return 1;
@@ -111,11 +199,20 @@ inline double pow_double_big(double base, BigInt exponent) {
     return ret;
 }
 
+/**
+ * @brief Specialization of the pow function for double values.
+ * @param exponent The exponent.
+ */
 template <>
 inline void ValueType<double>::pow(const BigInt& exponent) {
     value = pow_double_big(value, exponent);
 }
 
+/**
+ * @class PowerSeriesType
+ * @brief Class representing a parsing wrapper for a power series.
+ * @tparam T The underlying type of the parsing wrapper.
+ */
 template<typename T>
 class PowerSeriesType: public ParsingWrapperType<T> {
  private:
@@ -179,6 +276,11 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 };
 
+/**
+ * @class RationalFunctionType
+ * @brief Class representing a parsing wrapper for a rational function.
+ * @tparam T The underlying type of the parsing wrapper.
+ */
 template<typename T>
 class RationalFunctionType: public ParsingWrapperType<T> {
  private:
