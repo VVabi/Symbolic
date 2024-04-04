@@ -1,3 +1,9 @@
+
+/**
+ * @file power_series_functions.hpp
+ * @brief Contains functions for working with power series and evaluating built-in power series functions.
+ */
+
 #ifndef FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
 #define FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
 

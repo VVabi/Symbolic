@@ -1,3 +1,8 @@
+/**
+ * @file poly_base.hpp
+ * @brief Header file for the PolyBase class and related functions.
+ */
+
 #ifndef TYPES_POLY_BASE_HPP_
 #define TYPES_POLY_BASE_HPP_
 
