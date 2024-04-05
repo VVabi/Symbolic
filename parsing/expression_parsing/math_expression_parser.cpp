@@ -46,7 +46,7 @@ ModLong infer_mod_unit(std::deque<MathLexerElement> input) {
         auto x = input.front();
 
         if (x.type == FUNCTION && x.data == "Mod") {
-            auto num = iterate_wrapped<ModLong>(input, ModLong(1, 1), 20)->as_value();
+            auto num = iterate_wrapped<ModLong>(input, ModLong(0, 1), 20)->as_value();
             return RingCompanionHelper<ModLong>::get_unit(num);
         }
         input.pop_front();
@@ -109,3 +109,17 @@ std::string parse_formula(const std::string& input, const Datatype type) {
     return parse_formula_internal(polish, type);
 }
 
+// currently needed for tests
+ModLong parse_modlong_value(const std::string& input) {
+    auto formula = parse_math_expression_string(input);
+    auto p = shunting_yard_algorithm(formula);
+
+    std::deque<MathLexerElement> polish;
+
+    for (MathLexerElement x : p) {
+        polish.push_back(x);
+    }
+
+    auto unit = infer_mod_unit(polish);
+    return iterate_wrapped<ModLong>(polish, unit, 20)->as_value();
+}

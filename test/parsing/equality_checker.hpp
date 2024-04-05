@@ -1,3 +1,6 @@
+#ifndef TEST_PARSING_EQUALITY_CHECKER_HPP_
+#define TEST_PARSING_EQUALITY_CHECKER_HPP_
+
 #include <algorithm>
 
 template<typename T>
@@ -32,3 +35,5 @@ class EqualityChecker<double> {
         return err < eps;
     }
 };
+
+#endif  // TEST_PARSING_EQUALITY_CHECKER_HPP_

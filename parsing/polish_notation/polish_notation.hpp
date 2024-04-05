@@ -448,37 +448,29 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
     double handle_value(std::deque<MathLexerElement>& cmd_list,
                                         const double unit,
                                         const size_t fp_size) {
-        auto left  = iterate_polish_value<double>(cmd_list, unit, fp_size);
-        // TODO(vabi) check for emptyness
-        auto exponent = iterate_polish_value<RationalNumber<BigInt>>(cmd_list, RationalNumber<BigInt>(1), fp_size);
-        if (exponent.get_denominator() != BigInt(1)) {
-            throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
-        }
-        return this->pow(left, exponent.get_numerator());
-    }
-
-    double pow(double base, BigInt exponent) {
-        if (exponent == 0) {
-            return 1;
-        }
-        /*if (exponent < 0) { // TODO 
-            return 1/pow(base, -exponent);
-        }*/
-        double partial = pow(base, exponent/2);
-        double ret = partial*partial;
-        if (exponent % 2 == 1) {
-            ret = ret*base;
-        }
-        return ret;
+        throw std::runtime_error("Not implemented");
     }
 
     std::unique_ptr<ParsingWrapperType<double>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const double unit,
                                     const size_t fp_size) {
-        auto left  = iterate_wrapped<double>(cmd_list, unit, fp_size);
         // TODO(vabi) check for emptyness
-        auto exponent = iterate_wrapped<double>(cmd_list, 1.0, fp_size)->as_value();
-        return std::make_unique<ValueType<double>>(std::pow(left->as_value(), exponent));
+        auto left  = iterate_wrapped<double>(cmd_list, unit, fp_size);
+        auto saver = cmd_list;
+        // TODO(vabi) properly fix this abomination to properly support both doubles and bigints...
+        try {
+            auto exponent = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, RationalNumber<BigInt>(1), fp_size)->as_value();
+            if (exponent.get_denominator() != BigInt(1)) {
+                throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
+            }
+            left->pow(exponent.get_numerator());
+            return left;
+        } catch (std::runtime_error& e) {  // TODO(vabi) create a specific type error
+            cmd_list = saver;  // careful here, the above call probably already consumed some tokens, so we need to restore the cmd list
+            auto exponent = iterate_wrapped<double>(cmd_list, 1.0, fp_size)->as_value();
+            left->pow(exponent);
+            return left;
+        }
     }
 };
 
@@ -768,9 +760,9 @@ template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 
-        /*if (modulus != unit.get_modulus()) {   // TODO(vabi): reenable this check
-            throw EvalException("Modulus mismatch", this->get_position()); // TODO(vabi) return violating values as well
-        }*/
+        if (unit.get_modulus() != 1 && modulus_num != unit.get_modulus()) {
+            throw EvalException("Modulus mismatch", this->get_position());  // TODO(vabi) return violating values as well
+        }
 
         auto a = argument.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
         auto b = argument.get_denominator().as_int64();  // TODO(vabi) potential overflow issues

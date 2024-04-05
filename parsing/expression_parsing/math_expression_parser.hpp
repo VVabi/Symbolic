@@ -61,4 +61,6 @@ enum class Datatype {
 };
 
 std::string parse_formula(const std::string& input, const Datatype type);
+
+ModLong parse_modlong_value(const std::string& input);
 #endif  // PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
