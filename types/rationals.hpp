@@ -91,6 +91,12 @@ class RationalNumber {
         return RationalNumber(numerator, denominator);
     }
 
+    friend RationalNumber operator/(RationalNumber a, const T b) {
+        auto numerator = a.numerator;
+        auto denominator = a.denominator * b;
+        return RationalNumber(numerator, denominator);
+    }
+
     friend RationalNumber operator/(const int64_t b, RationalNumber a) {
         auto numerator = a.denominator * b;
         auto denominator = a.numerator;

@@ -1,6 +1,6 @@
 /**
  * @file test_value_parsing.cpp
- * @brief Unit tests for power series parsing.
+ * @brief Unit tests for value parsing.
  *
  * Unit tests for value parsing.
  *
