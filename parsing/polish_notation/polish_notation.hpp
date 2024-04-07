@@ -13,6 +13,8 @@
 #include <deque>
 #include <string>
 #include <utility>
+#include "exceptions/invalid_function_arg_exception.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "string_utils/string_utils.hpp"
@@ -39,10 +41,7 @@ template<typename T> class PolishNotationElement {
 
     virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
-                                    const size_t fp_size) {
-        assert(false);
-        return std::unique_ptr<ParsingWrapperType<T>>(nullptr);
-    }
+                                    const size_t fp_size) = 0;
 
     uint32_t get_position() {
         return position;
@@ -85,7 +84,13 @@ std::unique_ptr<ParsingWrapperType<T>> iterate_wrapped(std::deque<MathLexerEleme
     auto current = cmd_list.front();
     cmd_list.pop_front();
     auto element = polish_notation_element_from_lexer<T>(current);
-    return element->handle_wrapper(cmd_list, unit, fp_size);
+    try {
+        return element->handle_wrapper(cmd_list, unit, fp_size);
+    } catch (ParsingTypeException& e) {
+        throw EvalException(e.what(), element->get_position());
+    } catch (DatatypeInternalException&e ) {
+        throw EvalException(e.what(), element->get_position());
+    }
 }
 
 template<typename T> class PolishPlus : public PolishNotationElement<T> {
@@ -343,6 +348,7 @@ template<typename T>  class PolishPow: public PolishNotationElement<T> {
         auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
         // TODO(vabi) check for emptyness
         auto exponent = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, RationalNumber<BigInt>(1), fp_size)->as_value();
+
         if (exponent.get_denominator() != BigInt(1)) {
             throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
         }
@@ -760,13 +766,6 @@ template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 
-        // TODO(vabi) we want to use this function also for finding out in the first place what the modulus is;
-        // the below solution does this, but is a bit crappy.
-        // Maybe we should completely ditch this check and rely on the checks inside the mod type for modulus consistency?
-        if (unit.get_modulus() != 1 && modulus_num != unit.get_modulus()) {
-            throw EvalException("Modulus mismatch", this->get_position());  // TODO(vabi) return violating values as well
-        }
-
         auto a = argument.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
         auto b = argument.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
 
@@ -852,7 +851,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             if (element.data == "-") {
                 return std::make_unique<PolishUnaryMinus<T>>(element.position);
             }
-            assert(false);
+            throw EvalException("Unknown unary operator: " + element.data, element.position);
             break;
         case FUNCTION: {
             auto parts = string_split(element.data, '_');
@@ -880,19 +879,29 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             } else if (parts[0] == "LCYC") {
                 return std::make_unique<PolishLabelledCyc<T>>(parts[1], element.position);
             } else if (parts[0] == "INVMSET") {
-                assert(parts[1] == "");
+                if (parts[1] != "") {
+                    throw InvalidFunctionArgException("InvMset does not take subscript arguments, found: "+parts[1], element.position);
+                }
                 return std::make_unique<PolishInvMset<T>>(element.position);
             } else if (parts[0] == "O") {
-                assert(parts[1] == "");
+                if (parts[1] != "") {
+                    throw InvalidFunctionArgException("O() does not take subscript arguments, found: "+parts[1], element.position);
+                }
                 return std::make_unique<PolishLandau<T>>(element.position);
             } else if (parts[0] == "coeff") {
-                assert(parts[1] == "");
+                if (parts[1] != "") {
+                    throw InvalidFunctionArgException("coeff does not take subscript arguments, found: "+parts[1], element.position);
+                }
                 return std::make_unique<PolishCoefficient<T>>(element.position, false);
             } else if (parts[0] == "egfcoeff") {
-                assert(parts[1] == "");
+                if (parts[1] != "") {
+                    throw InvalidFunctionArgException("egfcoeff does not take subscript arguments, found: "+parts[1], element.position);
+                }
                 return std::make_unique<PolishCoefficient<T>>(element.position, true);
             } else if (parts[0] == "Mod") {
-                assert(parts[1] == "");
+                if (parts[1] != "") {
+                    throw InvalidFunctionArgException("Mod does not take subscript arguments, found: "+parts[1], element.position);
+                }
                 return std::make_unique<PolishMod<T>>(element.position);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
@@ -902,7 +911,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             break;
     }
 
-    assert(false);
+    throw EvalException("Unknown element type", element.position);
     return std::unique_ptr<PolishNotationElement<T>>(nullptr);
 }
 

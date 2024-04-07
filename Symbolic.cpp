@@ -5,13 +5,16 @@
 
 #include <iostream>
 #include <numeric>
+#include "exceptions/invalid_function_arg_exception.hpp"
+#include "exceptions/parsing_type_exception.hpp"
+#include "exceptions/unreachable_exception.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/power_series.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
+#include "exceptions/parsing_exceptions.hpp"
 
 std::string gen_random_string(const int len) {
     static const char values[] =
@@ -54,6 +57,17 @@ int main(int argc, char **argv) {
         } catch (SubsetArgumentException &e) {  // TODO(vabi) integrate into EvalException
             error = true;
             std::cout << "Subset argument error: " << e.what() << std::endl;
+        } catch (InvalidFunctionArgException& e) {
+            error = true;
+            std::cout << e.what() << std::endl;
+            position = e.get_position();
+        } catch (ReachedUnreachableException &e) {
+            error = true;
+            std::cout << "Reached supposedly unreachable code: " << e.what() << std::endl;
+        } catch (ParsingTypeException& e) {
+            error = true;
+            std::cout << "Datatype exception: " << e.what() << std::endl;
+            std::cout << "This indicates a bug in error catching; unfortunately no further details are available" << std::endl;
         }
 
         if (error && position >= 0) {

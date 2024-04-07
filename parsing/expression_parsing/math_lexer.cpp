@@ -7,8 +7,7 @@
 
 #include <iostream>
 #include "parsing/expression_parsing/math_lexer.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
-
+#include "exceptions/parsing_exceptions.hpp"
 /**
  * @brief Parses a mathematical expression string into a vector of lexer elements.
  * 

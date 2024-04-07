@@ -12,7 +12,6 @@
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
 #include "types/polynomial.hpp"
 
 

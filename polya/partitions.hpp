@@ -8,7 +8,6 @@
 #ifndef POLYA_PARTITIONS_HPP_
 #define POLYA_PARTITIONS_HPP_
 
-#include <assert.h>
 #include <stdint.h>
 #include <vector>
 #include <functional>

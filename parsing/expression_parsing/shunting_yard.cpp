@@ -6,24 +6,17 @@
  */
 
 #include <stdint.h>
-#include <assert.h>
 #include <vector>
 #include <stack>
 #include <algorithm>
 #include <iostream>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
+#include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/unreachable_exception.hpp"
+
 /**
  * @brief Returns the precedence of a given mathematical operator.
- * 
- * This function takes a character representing a mathematical operator and returns its 
- * precedence. The precedence is determined based on the standard order of operations: 
- * exponentiation (^) has the highest precedence, followed by multiplication (*) and 
- * division (/), and then addition (+) and subtraction (-).
- *
- * If the input character is not one of the five recognized operators, the function asserts 
- * false and returns -1.
  *
  * @param op The character representing the operator.
  * @return The precedence of the operator, or -1 if the operator is not recognized.
@@ -41,7 +34,7 @@ int32_t get_operator_precedence(char op) {
         case '!':
             return 3;
         default:
-            assert(false);
+            throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
             return -1;
     }
 }
@@ -63,7 +56,7 @@ bool is_right_associative(char op) {
         case '^':
             return true;
         default:
-            assert(false);
+            throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
             return false;
     }
 }
