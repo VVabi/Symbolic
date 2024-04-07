@@ -235,13 +235,13 @@ template<typename T> class Polynomial: public PolyBase<T> {
     }
 };
 
-template<typename T>   
+template<typename T>
 Polynomial<T> gcd(Polynomial<T> a, Polynomial<T> b) {
     auto euclidean_algo_result = extended_euclidean_algorithm(a, b);
     return euclidean_algo_result.gcd;
 }
 
-template<>   
+template<>
 inline Polynomial<RationalNumber<BigInt>> gcd(Polynomial<RationalNumber<BigInt>> a, Polynomial<RationalNumber<BigInt>> b) {
     auto euclidean_algo_result = extended_euclidean_algorithm(a, b);
     euclidean_algo_result.gcd = euclidean_algo_result.gcd/euclidean_algo_result.gcd[0];
