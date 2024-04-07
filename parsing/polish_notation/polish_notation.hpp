@@ -465,7 +465,7 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
             }
             left->pow(exponent.get_numerator());
             return left;
-        } catch (std::runtime_error& e) {  // TODO(vabi) create a specific type error
+        } catch (std::exception& e) {  // TODO(vabi) create a specific type error
             cmd_list = saver;  // careful here, the above call probably already consumed some tokens, so we need to restore the cmd list
             auto exponent = iterate_wrapped<double>(cmd_list, 1.0, fp_size)->as_value();
             left->pow(exponent);
@@ -760,6 +760,9 @@ template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 
+        // TODO(vabi) we want to use this function also for finding out in the first place what the modulus is;
+        // the below solution does this, but is a bit crappy.
+        // Maybe we should completely ditch this check and rely on the checks inside the mod type for modulus consistency?
         if (unit.get_modulus() != 1 && modulus_num != unit.get_modulus()) {
             throw EvalException("Modulus mismatch", this->get_position());  // TODO(vabi) return violating values as well
         }
