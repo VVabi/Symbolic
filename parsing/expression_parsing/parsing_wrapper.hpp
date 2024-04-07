@@ -10,6 +10,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iomanip>
+#include <limits>
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
@@ -106,6 +108,8 @@ class ParsingWrapperType {
      * @param exponent The exponent.
      */
     virtual void pow(const BigInt& exponent) = 0;
+
+    virtual void pow(const double& exponent) = 0;
 };
 
 /**
@@ -154,6 +158,7 @@ class ValueType: public ParsingWrapperType<T> {
 
     std::string to_string() {
         std::stringstream ss;
+        ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
         ss << value;
         return ss.str();
     }
@@ -164,6 +169,10 @@ class ValueType: public ParsingWrapperType<T> {
 
     void pow(const BigInt& exponent) {
         value = value.pow(exponent);
+    }
+
+    void pow(const double& exponent) {
+        throw EvalException("Cannot raise type to a non-integer power", -1);
     }
 
     std::unique_ptr<ParsingWrapperType<T>> div(std::unique_ptr<ParsingWrapperType<T>> other) {
@@ -177,6 +186,16 @@ class ValueType: public ParsingWrapperType<T> {
         throw std::runtime_error("Cannot apply power series function to a constant for non-double types");
     }
 };
+
+template<>
+inline std::unique_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    return std::make_unique<ValueType<double>>(evaluate_power_series_function_double(value, type));
+}
+
+template<>
+inline void ValueType<double>::pow(const double& exponent) {
+    value = std::pow(value, exponent);
+}
 
 /**
  * @brief double to the power of a BigInt.
@@ -269,6 +288,10 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         value = value.pow(exponent);
     }
 
+    void pow(const double& exponent) {
+        throw EvalException("Cannot raise a power series to a non-integer power", -1);
+    }
+
     std::string to_string() {
         std::stringstream ss;
         ss << value;
@@ -342,6 +365,10 @@ class RationalFunctionType: public ParsingWrapperType<T> {
 
     void pow(const BigInt& exponent) {
         value = value.pow(exponent);
+    }
+
+    void pow(const double& exponent) {
+        throw EvalException("Cannot raise a rational function to a non-integer power", -1);
     }
 
     std::string to_string() {

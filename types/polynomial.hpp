@@ -13,6 +13,7 @@
 #include "types/poly_base.hpp"
 #include "types/ring_helpers.hpp"
 #include "types/bigint.hpp"
+#include "types/rationals.hpp"
 #include "math_utils/euclidean_algorithm.hpp"
 
 template<typename T> class Polynomial: public PolyBase<T> {
@@ -202,6 +203,14 @@ template<typename T> class Polynomial: public PolyBase<T> {
         return polynomial_div(a, b).first;
     }
 
+    friend Polynomial operator/(Polynomial a, const T& b) {
+        for (uint32_t ind = 0; ind < a.num_coefficients(); ind++) {
+            a[ind] = a[ind]/b;
+        }
+
+        return a;
+    }
+
     friend Polynomial operator%(Polynomial a, const Polynomial& b) {
         return polynomial_div(a, b).second;
     }
@@ -224,12 +233,20 @@ template<typename T> class Polynomial: public PolyBase<T> {
         coeffs[0] = RingCompanionHelper<T>::get_unit(value);
         return Polynomial(std::move(coeffs));
     }
-
-    friend Polynomial gcd(Polynomial a, Polynomial b) {
-        auto euclidean_algo_result = extended_euclidean_algorithm(a, b);
-        return euclidean_algo_result.gcd;
-    }
 };
+
+template<typename T>
+Polynomial<T> gcd(Polynomial<T> a, Polynomial<T> b) {
+    auto euclidean_algo_result = extended_euclidean_algorithm(a, b);
+    return euclidean_algo_result.gcd;
+}
+
+template<>
+inline Polynomial<RationalNumber<BigInt>> gcd(Polynomial<RationalNumber<BigInt>> a, Polynomial<RationalNumber<BigInt>> b) {
+    auto euclidean_algo_result = extended_euclidean_algorithm(a, b);
+    euclidean_algo_result.gcd = euclidean_algo_result.gcd/euclidean_algo_result.gcd[0];
+    return euclidean_algo_result.gcd;
+}
 
 template<typename T> class RingCompanionHelper<Polynomial<T>> {
  public:

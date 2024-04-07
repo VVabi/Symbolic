@@ -91,6 +91,12 @@ class RationalNumber {
         return RationalNumber(numerator, denominator);
     }
 
+    friend RationalNumber operator/(RationalNumber a, const T b) {
+        auto numerator = a.numerator;
+        auto denominator = a.denominator * b;
+        return RationalNumber(numerator, denominator);
+    }
+
     friend RationalNumber operator/(const int64_t b, RationalNumber a) {
         auto numerator = a.denominator * b;
         auto denominator = a.numerator;
@@ -173,7 +179,10 @@ class RingCompanionHelper<RationalNumber<BigInt>> {
 
     static RationalNumber<BigInt> from_string(const std::string &in,
                                         const RationalNumber<BigInt> &unit) {
-        auto parts = string_split(in, '/');
+        auto loc_str = in;
+        loc_str.erase(remove(loc_str.begin(), loc_str.end(), '('), loc_str.end());
+        loc_str.erase(remove(loc_str.begin(), loc_str.end(), ')'), loc_str.end());
+        auto parts = string_split(loc_str, '/');
         auto x = BigInt(parts[0]);
         if (parts.size() == 1) {
             return RationalNumber<BigInt>(x, 1);
