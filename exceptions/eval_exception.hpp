@@ -13,7 +13,7 @@
  * @class EvalException
  * @brief Exception class for evaluation errors.
  */
-class EvalException : public std::exception {  // TODO(vabi) replace by a more specific exception
+class EvalException : public std::exception {
  private:
     std::string message;
     int position;
