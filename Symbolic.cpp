@@ -16,20 +16,6 @@
 #include "numberTheory/moebius.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
-std::string gen_random_string(const int len) {
-    static const char values[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz"
-        "!@#$%^&*()_+{}|:<>?[]/.,;'-=`~";
-    std::string tmp_s;
-    tmp_s.reserve(len);
-
-    for (int i = 0; i < len; ++i) {
-        tmp_s += values[rand() % (sizeof(values) - 1)];
-    }
-    return tmp_s;
-}
 
 int main(int argc, char **argv) {
     std::string input;
@@ -49,17 +35,6 @@ int main(int argc, char **argv) {
         } catch (ParsingException &e) {
             error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
-            position = e.get_position();
-        } catch (EvalException &e) {
-            error = true;
-            std::cout << "Evaluation error: " << e.what() << std::endl;
-            position = e.get_position();
-        } catch (SubsetArgumentException &e) {  // TODO(vabi) integrate into EvalException
-            error = true;
-            std::cout << "Subset argument error: " << e.what() << std::endl;
-        } catch (InvalidFunctionArgException& e) {
-            error = true;
-            std::cout << e.what() << std::endl;
             position = e.get_position();
         } catch (ReachedUnreachableException &e) {
             error = true;

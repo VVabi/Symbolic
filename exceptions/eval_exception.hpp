@@ -8,24 +8,16 @@
 
 #include <exception>
 #include <string>
+#include "exceptions/parsing_exceptions.hpp"
 
 /**
  * @class EvalException
  * @brief Exception class for evaluation errors.
  */
-class EvalException : public std::exception {
+class EvalException : public ParsingException {
  private:
-    std::string message;
-    int position;
  public:
-    EvalException(const std::string& message, int position): position(position), message(message) {}
-
-    const char* what() const noexcept override {
-        return message.c_str();
-    }
-    int get_position() const {
-        return position;
-    }
+    EvalException(const std::string& message, int position): ParsingException(message, position) {}
 };
 
 #endif  // EXCEPTIONS_EVAL_EXCEPTION_HPP_

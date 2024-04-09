@@ -16,7 +16,7 @@ class ReachedUnreachableException: public std::exception {
 
  public:
     /**
-     * @brief Constructs a ParsingException object with the given error message and position.
+     * @brief Constructs a ReachedUnreachableException object with the given error message and position.
      * 
      * @param message The error message.
      * @param position The position where the error occurred.

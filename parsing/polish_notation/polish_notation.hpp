@@ -90,6 +90,13 @@ std::unique_ptr<ParsingWrapperType<T>> iterate_wrapped(std::deque<MathLexerEleme
         throw EvalException(e.what(), element->get_position());
     } catch (DatatypeInternalException&e ) {
         throw EvalException(e.what(), element->get_position());
+    } catch (SubsetArgumentException& e) {
+        auto pos = element->get_position();
+        auto underscore_occurence = current.data.find("_");
+        if (underscore_occurence != std::string::npos) {
+            pos += underscore_occurence;
+        }
+        throw EvalException(e.what(), pos);
     }
 }
 
@@ -860,6 +867,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 parts.push_back("");
             }
 
+            // TODO(vabi) handle parts[1] != "" error for exp, sqrt, etc.
             if (parts[0] == "exp") {
                 return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::EXP, element.position);
             } else if (parts[0] == "sqrt") {

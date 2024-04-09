@@ -39,7 +39,7 @@ class ParsingException: public std::exception {
      * 
      * @return The error message.
      */
-    const char * what() {
+    virtual const char * what() {
         return message.c_str();
     }
 
@@ -48,7 +48,7 @@ class ParsingException: public std::exception {
      * 
      * @return The position where the error occurred.
      */
-    int get_position() const {
+    virtual int get_position() const {
         return position;
     }
 };
