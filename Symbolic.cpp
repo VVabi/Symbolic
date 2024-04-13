@@ -16,7 +16,6 @@
 #include "numberTheory/moebius.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
-
 int main(int argc, char **argv) {
     std::string input;
     uint32_t count = 0;
