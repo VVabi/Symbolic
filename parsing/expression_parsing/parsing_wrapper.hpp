@@ -241,12 +241,12 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     PowerSeriesType(FormalPowerSeries<T> value): value(value) {}
 
     T as_value() {
-        assert(false);  // TODO(vabi) throw proper exception
+        throw ParsingTypeException("Cannot convert a power series to a value");
         return value[0];
     }
 
     RationalFunction<T> as_rational_function() {
-        assert(false);  // TODO(vabi) throw proper exception
+        throw ParsingTypeException("Cannot convert a rational function to a value");
         return RingCompanionHelper<RationalFunction<T>>::get_zero(Polynomial<T>(value.copy_coefficients()));
     }
 
@@ -313,7 +313,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     RationalFunctionType(RationalFunction<T> value): value(value) {}
 
     T as_value() {
-        assert(false);  // TODO(vabi) throw exception
+        throw ParsingTypeException("Cannot convert a rational function to a value");
         return value.get_numerator()[0];
     }
 

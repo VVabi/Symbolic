@@ -5,28 +5,16 @@
 
 #include <iostream>
 #include <numeric>
+#include "exceptions/invalid_function_arg_exception.hpp"
+#include "exceptions/parsing_type_exception.hpp"
+#include "exceptions/unreachable_exception.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/power_series.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
-
-std::string gen_random_string(const int len) {
-    static const char values[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz"
-        "!@#$%^&*()_+{}|:<>?[]/.,;'-=`~";
-    std::string tmp_s;
-    tmp_s.reserve(len);
-
-    for (int i = 0; i < len; ++i) {
-        tmp_s += values[rand() % (sizeof(values) - 1)];
-    }
-    return tmp_s;
-}
+#include "exceptions/parsing_exceptions.hpp"
 
 int main(int argc, char **argv) {
     std::string input;
@@ -47,13 +35,13 @@ int main(int argc, char **argv) {
             error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
             position = e.get_position();
-        } catch (EvalException &e) {
+        } catch (ReachedUnreachableException &e) {
             error = true;
-            std::cout << "Evaluation error: " << e.what() << std::endl;
-            position = e.get_position();
-        } catch (SubsetArgumentException &e) {  // TODO(vabi) integrate into EvalException
+            std::cout << "Reached supposedly unreachable code: " << e.what() << std::endl;
+        } catch (ParsingTypeException& e) {
             error = true;
-            std::cout << "Subset argument error: " << e.what() << std::endl;
+            std::cout << "Datatype exception: " << e.what() << std::endl;
+            std::cout << "This indicates a bug in error catching; unfortunately no further details are available" << std::endl;
         }
 
         if (error && position >= 0) {

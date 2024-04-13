@@ -18,7 +18,9 @@
 #include "numberTheory/euler_phi.hpp"
 
 template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uint32_t n, std::vector<FormalPowerSeries<T>>& args, const T unit, const uint32_t num_coeffs) {
-    assert(args.size() >= n);
+    if (args.size() < n) {
+        throw std::runtime_error("Not enough arguments for symmetric group cycle index");
+    }
 
     auto ret = FormalPowerSeries<T>::get_zero(unit, num_coeffs);
     auto factorial_generator = FactorialGenerator<T>(n, unit);
@@ -47,7 +49,9 @@ template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uin
 }
 
 template <typename T> FormalPowerSeries<T> pset_cycle_index(const uint32_t n, std::vector<FormalPowerSeries<T>>& args, const T unit, const uint32_t num_coeffs) {
-    assert(args.size() >= n);
+    if (args.size() < n) {
+        throw std::runtime_error("Not enough arguments for pset cycle index");
+    }
     auto ret = FormalPowerSeries<T>::get_zero(unit, num_coeffs);
     auto factorial_generator = FactorialGenerator<T>(n, unit);
     std::function<void(std::vector<PartitionCount>&)> callback = [args, unit, num_coeffs, &ret, &factorial_generator](std::vector<PartitionCount>& partition){

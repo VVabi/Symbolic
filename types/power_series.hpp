@@ -12,29 +12,11 @@
 #include <string>
 #include <algorithm>
 #include <utility>
+#include "exceptions/eval_exception.hpp"
 #include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
 #include "types/bigint.hpp"
 #include "types/poly_base.hpp"
-
-/**
- * @class EvalException
- * @brief Exception class for evaluation errors.
- */
-class EvalException : public std::exception {  // TODO(vabi) replace by a more specific exception
- private:
-    std::string message;
-    int position;
- public:
-    EvalException(const std::string& message, int position): position(position), message(message) {}
-
-    const char* what() const noexcept override {
-        return message.c_str();
-    }
-    int get_position() const {
-        return position;
-    }
-};
 
 /**
  * @class PowerSeries
@@ -167,16 +149,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
      * @return The shifted PowerSeries object.
      */
     friend PowerSeries operator>>(PowerSeries a, const uint32_t shift) {
-        auto num_coefficients = (int64_t) a.num_coefficients()-(int64_t) shift;
-
-        assert(num_coefficients > 0);  // TODO(vabi) how to handle this?
-
-        for (uint32_t ind = 0; ind < num_coefficients; ind++) {
-            a[ind] = a[ind+shift];
-        }
-
-        a.resize(num_coefficients);
-        return a;
+        return a.shift(shift);
     }
 
     /**
@@ -255,7 +228,10 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         z0.resize(size);
         auto shifted_z1 = (z1 << midpoint);
         auto ret = shifted_z1+z0;
-        assert(ret.num_coefficients() >= size);
+
+        if (ret.num_coefficients() > size) {
+            throw std::runtime_error("Multiplication failed");
+        }
         ret.resize(size);
         return ret;
     }
@@ -433,7 +409,9 @@ template<typename T> class PowerSeries: public PolyBase<T> {
      * @return The shifted PowerSeries object.
      */
     PowerSeries shift(uint32_t shift_size) const {
-        assert(shift_size < this->num_coefficients());
+        if (shift_size >= this->num_coefficients()) {
+            throw DatatypeInternalException("Powerseries shift size too large");
+        }
         auto new_coeffs = std::vector<T>(this->coefficients.begin()+shift_size, this->coefficients.end());
         return PowerSeries(std::move(new_coeffs));
     }
@@ -583,7 +561,7 @@ template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
         return FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients());
     }
     static FormalPowerSeries<T> from_string(const std::string& in, const FormalPowerSeries<T>& unit) {
-        assert(false);
+        throw std::runtime_error("Not implemented");
         return FormalPowerSeries<T>::get_zero(in[0], unit.num_coefficients());
     }
 };

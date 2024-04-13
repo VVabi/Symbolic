@@ -7,8 +7,7 @@
 
 #include <iostream>
 #include "parsing/expression_parsing/math_lexer.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
-
+#include "exceptions/parsing_exceptions.hpp"
 /**
  * @brief Parses a mathematical expression string into a vector of lexer elements.
  * 
@@ -27,7 +26,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 
     while (it != input.end()) {
         char current = *it;
-
+        auto distance = std::distance(input.begin(), it);
         if (isdigit(current)) {
             std::string num = "";
 
@@ -36,7 +35,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 previous = *it;
                 it++;
             }
-            formula.push_back(MathLexerElement(NUMBER, num, std::distance(input.begin(), it)));
+            formula.push_back(MathLexerElement(NUMBER, num, distance));
             it--;
         } else if (isalpha(*it)) {
             std::string var = "";
@@ -50,12 +49,12 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                     var = var + *it;
                     it++;
                 }
-                formula.push_back(MathLexerElement(FUNCTION, var, std::distance(input.begin(), it)));
+                formula.push_back(MathLexerElement(FUNCTION, var, distance));
             } else {
                 if (*it == '(') {
-                    formula.push_back(MathLexerElement(FUNCTION, var, std::distance(input.begin(), it)));
+                    formula.push_back(MathLexerElement(FUNCTION, var, distance));
                 } else {
-                    formula.push_back(MathLexerElement(VARIABLE, var, std::distance(input.begin(), it)));
+                    formula.push_back(MathLexerElement(VARIABLE, var, distance));
                 }
             }
             it--;
@@ -64,10 +63,10 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 case '+':
                 case '-':
                     if (previous == '(' || previous == ',') {
-                        formula.push_back(MathLexerElement(NUMBER, "0", std::distance(input.begin(), it)));
-                        formula.push_back(MathLexerElement(INFIX, std::string(1, *it), std::distance(input.begin(), it)));
+                        formula.push_back(MathLexerElement(NUMBER, "0", distance));
+                        formula.push_back(MathLexerElement(INFIX, std::string(1, *it), distance));
                     } else {
-                        formula.push_back(MathLexerElement(INFIX, std::string(1, *it), std::distance(input.begin(), it)));
+                        formula.push_back(MathLexerElement(INFIX, std::string(1, *it), distance));
                     }
                     break;
                 case '*':
@@ -76,23 +75,23 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 case '!':
                     if (previous == '(' || previous == ',') {
                         char c = *it;
-                        throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", std::distance(input.begin(), it));
+                        throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", distance);
                     }
-                    formula.push_back(MathLexerElement(INFIX, std::string(1, *it), std::distance(input.begin(), it)));
+                    formula.push_back(MathLexerElement(INFIX, std::string(1, *it), distance));
                     break;
                 case '(':
-                    formula.push_back(MathLexerElement(LEFT_PARENTHESIS, "", std::distance(input.begin(), it)));
+                    formula.push_back(MathLexerElement(LEFT_PARENTHESIS, "", distance));
                     break;
                 case ')':
-                    formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, "", std::distance(input.begin(), it)));
+                    formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, "", distance));
                     break;
                 case ',':
-                    formula.push_back(MathLexerElement(SEPARATOR, "", std::distance(input.begin(), it)));
+                    formula.push_back(MathLexerElement(SEPARATOR, "", distance));
                     break;
                 case ' ':
                     break;
                 default:
-                    throw ParsingException("Unknown symbol "+std::string(&(*it), 1), std::distance(input.begin(), it));
+                    throw ParsingException("Unknown symbol "+std::string(&(*it), 1), distance);
             }
         }
         if (*it != ' ') {

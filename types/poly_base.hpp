@@ -55,7 +55,10 @@ std::vector<T> multiply_full_raw(const T* a, const uint32_t size_a,
         return std::vector<T>({zero});
     }
 
-    assert(size_a != 0 || size_b != 0);
+    if (size_a == 0 && size_b == 0) {
+        throw std::runtime_error("Multiplying two empty arrays");
+    }
+
     auto size = size_a+size_b-1;
     auto zero = RingCompanionHelper<T>::get_zero(a[0]);
     if (size < KARATSUBA_THRESHOLD) {

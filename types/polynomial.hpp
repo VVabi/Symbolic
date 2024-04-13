@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include "exceptions/datatype_internal_exception.hpp"
 #include "types/poly_base.hpp"
 #include "types/ring_helpers.hpp"
 #include "types/bigint.hpp"
@@ -129,7 +130,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
         }
 
         if (exponent < 0) {
-            assert(false);  // TODO(vabi) throw proper exception
+            throw DatatypeInternalException("Negative exponents not supported for polynomials");
         }
 
         auto partial = pow(exponent/2);
@@ -258,7 +259,7 @@ template<typename T> class RingCompanionHelper<Polynomial<T>> {
         return Polynomial<T>::get_atom(unit, 0, 1);
     }
     static Polynomial<T> from_string(const std::string& in, const Polynomial<T>& unit) {
-        assert(false);
+        throw std::runtime_error("Not implemented");
         return Polynomial<T>::get_zero(in[0], unit.num_coefficients());
     }
 };

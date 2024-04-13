@@ -12,11 +12,10 @@
 #define TYPES_MODLONG_HPP_
 
 #include <stdint.h>
-#include <assert.h>
 #include <string>
 #include "types/bigint.hpp"
 #include "math_utils/euclidean_algorithm.hpp"
-#include "parsing/expression_parsing/parsing_exceptions.hpp"
+#include "exceptions/datatype_internal_exception.hpp"
 
 class ModLong {
  private:
@@ -25,10 +24,12 @@ class ModLong {
 
  public:
     ModLong(int64_t v, int32_t m): value(v % m), modulus(m) {
-        assert(m > 0);
+        if (m <= 0) {
+            throw DatatypeInternalException("Modulus must be positive");
+        }
 
         if (value < 0) {
-            value += modulus;
+           value += modulus;
         }
     }
 
@@ -37,26 +38,31 @@ class ModLong {
         return os;
     }
 
+    void verify_modulus(int32_t other) const {
+        if (other != modulus) {
+            throw DatatypeInternalException("Modulus mismatch: " + std::to_string(modulus) + " != " + std::to_string(other));
+        }
+    }
+
     bool operator==(const ModLong& other) const {
-        assert(other.modulus == modulus);
+        verify_modulus(other.modulus);
         return value == other.value;
     }
 
     bool operator!=(const ModLong& other) const {
-        assert(other.modulus == modulus);
+        verify_modulus(other.modulus);
         return value != other.value;
     }
 
-
     ModLong& operator+=(const ModLong& rhs) {
-        assert(rhs.modulus == modulus);
+        verify_modulus(rhs.modulus);
         value += rhs.value;
         value = value % modulus;
         return *this;
     }
 
     ModLong& operator-=(const ModLong& rhs) {
-        assert(rhs.modulus == modulus);
+        verify_modulus(rhs.modulus);
         value -= rhs.value;
         value += modulus;
         value = value % modulus;
@@ -64,7 +70,7 @@ class ModLong {
     }
 
     ModLong& operator*=(const ModLong& rhs) {
-        assert(rhs.modulus == modulus);
+        verify_modulus(rhs.modulus);
         value *= rhs.value;
         value = value % modulus;
         return *this;
@@ -108,15 +114,17 @@ class ModLong {
     }
 
     ModLong invert() const {
-        assert(value != 0);
+        if (value == 0) {
+            throw DatatypeInternalException("Cannot invert zero");
+        }
         auto res = extended_euclidean_algorithm<int64_t>(value, modulus);
-        assert(res.gcd == 1);
+        if (res.gcd != 1) {
+            throw DatatypeInternalException("Cannot invert: " + std::to_string(value) + " and " + std::to_string(modulus) + " are not coprime");
+        }
         return ModLong(res.bezouta, modulus);
     }
 
     friend ModLong operator/(ModLong a, const ModLong& b) {
-        assert(a.modulus == b.modulus);
-        assert(b.value != 0);
         auto binv = b.invert();
         a *= binv;
         return a;

@@ -69,7 +69,7 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
         case Datatype::DYNAMIC:
              // needs to be resolved on a higher level
              // TODO(vabi): would be nicer to split this enum into two enums: "Dynamic" and "fixed" and "double"/"rational"/"mod"
-            assert(false);
+            throw std::runtime_error("Dynamic type not allowed here");
         case Datatype::DOUBLE:
             return iterate_wrapped<double>(input, 1.0, 20)->to_string();
         case Datatype::RATIONAL:

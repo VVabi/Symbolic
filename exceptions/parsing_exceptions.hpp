@@ -1,10 +1,10 @@
 /**
- * @file math_lexer.hpp
+ * @file parsing_exceptions.hpp
  * @brief Custom parsing exception class.
  */
 
-#ifndef PARSING_EXPRESSION_PARSING_PARSING_EXCEPTIONS_HPP_
-#define PARSING_EXPRESSION_PARSING_PARSING_EXCEPTIONS_HPP_
+#ifndef EXCEPTIONS_PARSING_EXCEPTIONS_HPP_
+#define EXCEPTIONS_PARSING_EXCEPTIONS_HPP_
 
 #include <exception>
 #include <string>
@@ -39,7 +39,7 @@ class ParsingException: public std::exception {
      * 
      * @return The error message.
      */
-    const char * what() {
+    virtual const char * what() {
         return message.c_str();
     }
 
@@ -48,9 +48,9 @@ class ParsingException: public std::exception {
      * 
      * @return The position where the error occurred.
      */
-    int get_position() const {
+    virtual int get_position() const {
         return position;
     }
 };
 
-#endif  // PARSING_EXPRESSION_PARSING_PARSING_EXCEPTIONS_HPP_
+#endif  // EXCEPTIONS_PARSING_EXCEPTIONS_HPP_
