@@ -267,7 +267,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
      * @param exponent The exponent.
      * @return The PowerSeries object raised to the given exponent.
      */
-    PowerSeries pow(const uint32_t exponent) const {
+    PowerSeries pow(const int32_t exponent) const {
         if (exponent == 0) {
             return PowerSeries::get_unit(this->coefficients[0], this->num_coefficients());
         }

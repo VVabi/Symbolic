@@ -491,7 +491,7 @@ template<typename T> class PolishPowerSeriesFunction: public PolishNotationEleme
     PowerSeriesBuiltinFunctionType type;
 
  public:
-    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position) : type(type), PolishNotationElement<T>(position) { }
+    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position) : PolishNotationElement<T>(position), type(type) { }
     FormalPowerSeries<T> handle_power_series(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
@@ -819,7 +819,11 @@ template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
 
         auto int_idx = idx.as_int64();
 
-        if (int_idx >= result.num_coefficients()) {
+        if (int_idx < 0) {
+            throw EvalException("Coefficient index negative", this->get_position());
+        }
+
+        if (static_cast<size_t>(int_idx) >= result.num_coefficients()) {
              throw EvalException("Coefficient index out of bounds", this->get_position());
         }
 
