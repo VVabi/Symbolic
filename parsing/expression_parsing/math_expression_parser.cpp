@@ -7,6 +7,8 @@
 #include <vector>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 
+
+#define POWERSERIES_DEFAULT_PRECISION 20
 /**
  * @brief Infers the datatype from the lexer elements.
  * 
@@ -46,7 +48,7 @@ ModLong infer_mod_unit(std::deque<MathLexerElement> input) {
         auto x = input.front();
 
         if (x.type == FUNCTION && x.data == "Mod") {
-            auto num = iterate_wrapped<ModLong>(input, ModLong(0, 1), 20)->as_value();
+            auto num = iterate_wrapped<ModLong>(input, ModLong(0, 1), POWERSERIES_DEFAULT_PRECISION)->as_value();
             return RingCompanionHelper<ModLong>::get_unit(num);
         }
         input.pop_front();
@@ -71,12 +73,12 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
              // TODO(vabi): would be nicer to split this enum into two enums: "Dynamic" and "fixed" and "double"/"rational"/"mod"
             throw std::runtime_error("Dynamic type not allowed here");
         case Datatype::DOUBLE:
-            return iterate_wrapped<double>(input, 1.0, 20)->to_string();
+            return iterate_wrapped<double>(input, 1.0, POWERSERIES_DEFAULT_PRECISION)->to_string();
         case Datatype::RATIONAL:
-            return iterate_wrapped<RationalNumber<BigInt>>(input, RationalNumber(BigInt(1)), 20)->to_string();
+            return iterate_wrapped<RationalNumber<BigInt>>(input, RationalNumber(BigInt(1)), POWERSERIES_DEFAULT_PRECISION)->to_string();
         case Datatype::MOD:
             auto unit = infer_mod_unit(input);
-            return iterate_wrapped<ModLong>(input, unit, 20)->to_string();
+            return iterate_wrapped<ModLong>(input, unit, POWERSERIES_DEFAULT_PRECISION)->to_string();
     }
 
     return "";  // Unreachable

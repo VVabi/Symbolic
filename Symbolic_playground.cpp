@@ -14,10 +14,9 @@
 #include "numberTheory/moebius.hpp"
 #include "types/polynomial.hpp"
 
-
-
 int main(int argc, char **argv) {
-    auto num = calc_num_iso_classes_of_graphs<RationalNumber<BigInt>>(10, BigInt(0), BigInt(1));
-    std::cout << num << std::endl;
+    auto t = "coeff(Mod(1, 1000000007)/(1-z-z^2)+O(z^100000), 99999)";
+    auto res = parse_formula(t, Datatype::DYNAMIC);
+    std::cout << res << std::endl;
     return 0;
 }

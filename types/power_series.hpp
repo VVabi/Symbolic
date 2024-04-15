@@ -313,11 +313,46 @@ template<typename T> class PowerSeries: public PolyBase<T> {
     }
 
     /**
+     * @brief Recursive Newton Inversion Algorithm from http://www.cecm.sfu.ca/CAG/theses/haoze.pdf
+     * @param n The current iteration size.
+     * @return the result of the newton step
+     */
+    PowerSeries RNI(uint32_t n) const {
+        if (n == 1) {
+            auto ycoeffs = std::vector<T>();
+            ycoeffs.push_back(1/this->coefficients[0]);
+            auto y = PowerSeries(std::move(ycoeffs));
+            return y;
+        }
+
+        auto zero = RingCompanionHelper<T>::get_zero(this->coefficients[0]);
+        auto unit = RingCompanionHelper<T>::get_unit(this->coefficients[0]);
+
+        auto y = RNI((n+1)/2);
+        auto bcoeff = std::vector<T>();
+        for (uint32_t ind = 0; ind < n; ind++) {
+            bcoeff.push_back(ind < this->num_coefficients()? this->coefficients[ind] : zero);
+        }
+
+        auto b = PowerSeries(std::move(bcoeff));
+
+        y.resize(n);
+
+        y = y+y*(unit-y*b);
+
+        return y;
+    }
+
+    /**
      * @brief Calculates the inverse of the PowerSeries object.
      * @return The inverse of the PowerSeries object.
      */
     PowerSeries invert() const {
-        auto inv_coefficients = std::vector<T>();
+        auto n = this->num_coefficients();
+        return RNI(n);
+
+        // the naive implementation
+        /*auto inv_coefficients = std::vector<T>();
         inv_coefficients.reserve(this->num_coefficients());
         auto inv_first = 1/this->coefficients[0];
         inv_coefficients.push_back(inv_first);
@@ -338,7 +373,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
             }
         }
 
-        return PowerSeries(std::move(inv_coefficients));
+        return PowerSeries(std::move(inv_coefficients));*/
     }
 
     /**
