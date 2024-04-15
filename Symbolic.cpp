@@ -15,8 +15,11 @@
 #include "examples/graph_isomorphisms.hpp"
 #include "numberTheory/moebius.hpp"
 #include "exceptions/parsing_exceptions.hpp"
+#include "cpp_utils/unused.hpp"
 
 int main(int argc, char **argv) {
+    UNUSED(argc);
+    UNUSED(argv);
     std::string input;
     uint32_t count = 0;
     while (true) {

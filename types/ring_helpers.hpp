@@ -10,6 +10,7 @@
 #define TYPES_RING_HELPERS_HPP_
 
 #include <string>
+#include "cpp_utils/unused.hpp"
 
 template<typename T> class RingCompanionHelper {
  public:
@@ -19,6 +20,7 @@ template<typename T> class RingCompanionHelper {
      * @return The zero element of the ring.
      */
     static T get_zero(const T& in) {
+        UNUSED(in);
         return 0;
     }
 
@@ -28,6 +30,7 @@ template<typename T> class RingCompanionHelper {
      * @return The unit element of the ring.
      */
     static T get_unit(const T& in) {
+        UNUSED(in);
         return 1;
     }
 
@@ -50,6 +53,7 @@ template<> class RingCompanionHelper<double> {
      * @return The zero element of the ring.
      */
     static double get_zero(const double& in) {
+        UNUSED(in);
         return 0.0;
     }
 
@@ -59,6 +63,7 @@ template<> class RingCompanionHelper<double> {
      * @return The unit element of the ring.
      */
     static double get_unit(const double& in) {
+        UNUSED(in);
         return 1.0;
     }
 
@@ -69,6 +74,7 @@ template<> class RingCompanionHelper<double> {
      * @return The converted ring element.
      */
     static double from_string(const std::string& in, const double& unit) {
+        UNUSED(unit);
         return stod(in);
     }
 };

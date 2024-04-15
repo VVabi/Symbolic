@@ -15,6 +15,7 @@
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
+#include "cpp_utils/unused.hpp"
 
 /**
  * @brief Alias for RationalFunction type.
@@ -172,6 +173,7 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     void pow(const double& exponent) {
+        UNUSED(exponent);
         throw EvalException("Cannot raise type to a non-integer power", -1);
     }
 
@@ -183,12 +185,15 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     std::unique_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+        UNUSED(type);
+        UNUSED(fp_size);
         throw std::runtime_error("Cannot apply power series function to a constant for non-double types");
     }
 };
 
 template<>
 inline std::unique_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    UNUSED(fp_size);
     return std::make_unique<ValueType<double>>(evaluate_power_series_function_double(value, type));
 }
 
@@ -251,6 +256,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+        UNUSED(num_coeffs);
         return value;
     }
 
@@ -289,6 +295,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     void pow(const double& exponent) {
+        UNUSED(exponent);
         throw EvalException("Cannot raise a power series to a non-integer power", -1);
     }
 
@@ -368,6 +375,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     }
 
     void pow(const double& exponent) {
+        UNUSED(exponent);
         throw EvalException("Cannot raise a rational function to a non-integer power", -1);
     }
 
