@@ -139,7 +139,7 @@ class ModLong {
     }
 
 
-    ModLong pow(const uint32_t exponent) {
+    ModLong pow(const int32_t exponent) {
         if (exponent == 0) {
             return ModLong(1, this->get_modulus());
         }

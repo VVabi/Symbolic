@@ -21,10 +21,10 @@ TEST(TypeTests, PolyDiv) {
             auto a = std::vector<RationalNumber<BigInt>>();
             auto b = std::vector<RationalNumber<BigInt>>();
 
-            for (uint32_t ind = 0; ind < sizea; ind++) {
+            for (int32_t ind = 0; ind < sizea; ind++) {
                 a.push_back(RationalNumber<BigInt>(dist(gen), 1));
             }
-            for (uint32_t ind = 0; ind < sizeb; ind++) {
+            for (int32_t ind = 0; ind < sizeb; ind++) {
                 b.push_back(RationalNumber<BigInt>(dist(gen), 1));
             }
 

@@ -15,6 +15,8 @@
 #include "types/polynomial.hpp"
 
 int main(int argc, char **argv) {
+    UNUSED(argc);
+    UNUSED(argv);
     auto t = "coeff(Mod(1, 1000000007)/(1-z-z^2)+O(z^100000), 99999)";
     auto res = parse_formula(t, Datatype::DYNAMIC);
     std::cout << res << std::endl;

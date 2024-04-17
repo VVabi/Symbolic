@@ -10,6 +10,7 @@
 #include "types/ring_helpers.hpp"
 #include "string_utils/string_utils.hpp"
 #include "types/bigint.hpp"
+#include "cpp_utils/unused.hpp"
 
 template <typename T>
 class RationalNumber {
@@ -170,15 +171,18 @@ template <>
 class RingCompanionHelper<RationalNumber<BigInt>> {
  public:
     static RationalNumber<BigInt> get_zero(const RationalNumber<BigInt> &in) {
+        UNUSED(in);
         return RationalNumber<BigInt>(0, 1);
     }
 
     static RationalNumber<BigInt> get_unit(const RationalNumber<BigInt> &in) {
+        UNUSED(in);
         return RationalNumber<BigInt>(1, 1);
     }
 
     static RationalNumber<BigInt> from_string(const std::string &in,
                                         const RationalNumber<BigInt> &unit) {
+        UNUSED(unit);
         auto loc_str = in;
         loc_str.erase(remove(loc_str.begin(), loc_str.end(), '('), loc_str.end());
         loc_str.erase(remove(loc_str.begin(), loc_str.end(), ')'), loc_str.end());
