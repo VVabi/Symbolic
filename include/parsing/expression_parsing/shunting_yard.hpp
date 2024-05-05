@@ -5,8 +5,8 @@
  * @author vabi
  */
 
-#ifndef PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_
-#define PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_
+#ifndef INCLUDE_PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_
+#define INCLUDE_PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_
 #include <vector>
 #include "parsing/expression_parsing/math_lexer.hpp"
 
@@ -14,4 +14,4 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 
 
 
-#endif /* PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_ */
+#endif /* INCLUDE_PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_ */

@@ -3,8 +3,8 @@
  * @brief Defines the Polynomial class and related functions.
  */
 
-#ifndef TYPES_POLYNOMIAL_HPP_
-#define TYPES_POLYNOMIAL_HPP_
+#ifndef INCLUDE_TYPES_POLYNOMIAL_HPP_
+#define INCLUDE_TYPES_POLYNOMIAL_HPP_
 
 #include <utility>
 #include <vector>
@@ -264,4 +264,4 @@ template<typename T> class RingCompanionHelper<Polynomial<T>> {
     }
 };
 
-#endif  // TYPES_POLYNOMIAL_HPP_
+#endif  // INCLUDE_TYPES_POLYNOMIAL_HPP_

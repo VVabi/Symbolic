@@ -3,8 +3,8 @@
  * @brief Custom parsing exception class.
  */
 
-#ifndef EXCEPTIONS_EVAL_EXCEPTION_HPP_
-#define EXCEPTIONS_EVAL_EXCEPTION_HPP_
+#ifndef INCLUDE_EXCEPTIONS_EVAL_EXCEPTION_HPP_
+#define INCLUDE_EXCEPTIONS_EVAL_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
@@ -20,4 +20,4 @@ class EvalException : public ParsingException {
     EvalException(const std::string& message, int position): ParsingException(message, position) {}
 };
 
-#endif  // EXCEPTIONS_EVAL_EXCEPTION_HPP_
+#endif  // INCLUDE_EXCEPTIONS_EVAL_EXCEPTION_HPP_

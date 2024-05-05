@@ -3,8 +3,8 @@
  * @brief This file contains the RationalNumber class and its helper functions.
  */
 
-#ifndef TYPES_RATIONALS_HPP_
-#define TYPES_RATIONALS_HPP_
+#ifndef INCLUDE_TYPES_RATIONALS_HPP_
+#define INCLUDE_TYPES_RATIONALS_HPP_
 
 #include <string>
 #include "types/ring_helpers.hpp"
@@ -211,4 +211,4 @@ inline void RationalNumber<BigInt>::sanitize() {
     }
 }
 
-#endif  // TYPES_RATIONALS_HPP_
+#endif  // INCLUDE_TYPES_RATIONALS_HPP_

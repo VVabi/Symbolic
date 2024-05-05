@@ -3,8 +3,8 @@
  * @brief Custom parsing exception class.
  */
 
-#ifndef EXCEPTIONS_PARSING_TYPE_EXCEPTION_HPP_
-#define EXCEPTIONS_PARSING_TYPE_EXCEPTION_HPP_
+#ifndef INCLUDE_EXCEPTIONS_PARSING_TYPE_EXCEPTION_HPP_
+#define INCLUDE_EXCEPTIONS_PARSING_TYPE_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
@@ -36,4 +36,4 @@ class ParsingTypeException: public std::exception {
 };
 
 
-#endif  // EXCEPTIONS_PARSING_TYPE_EXCEPTION_HPP_
+#endif  // INCLUDE_EXCEPTIONS_PARSING_TYPE_EXCEPTION_HPP_

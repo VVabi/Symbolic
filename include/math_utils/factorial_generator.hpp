@@ -5,8 +5,8 @@
  * @brief Factorial generator implementation.
  */
 
-#ifndef MATH_UTILS_FACTORIAL_GENERATOR_HPP_
-#define MATH_UTILS_FACTORIAL_GENERATOR_HPP_
+#ifndef INCLUDE_MATH_UTILS_FACTORIAL_GENERATOR_HPP_
+#define INCLUDE_MATH_UTILS_FACTORIAL_GENERATOR_HPP_
 #include <stdint.h>
 #include <vector>
 
@@ -59,4 +59,4 @@ class FactorialGenerator {
 
 
 
-#endif /* MATH_UTILS_FACTORIAL_GENERATOR_HPP_ */
+#endif /* INCLUDE_MATH_UTILS_FACTORIAL_GENERATOR_HPP_ */

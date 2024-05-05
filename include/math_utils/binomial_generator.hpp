@@ -5,8 +5,8 @@
  * @brief Generator for binomial coefficients.
  */
 
-#ifndef MATH_UTILS_BINOMIAL_GENERATOR_HPP_
-#define MATH_UTILS_BINOMIAL_GENERATOR_HPP_
+#ifndef INCLUDE_MATH_UTILS_BINOMIAL_GENERATOR_HPP_
+#define INCLUDE_MATH_UTILS_BINOMIAL_GENERATOR_HPP_
 
 #include "math_utils/factorial_generator.hpp"
 
@@ -50,4 +50,4 @@ template<typename T> class BinomialGenerator {
 
 
 
-#endif /* MATH_UTILS_BINOMIAL_GENERATOR_HPP_ */
+#endif /* INCLUDE_MATH_UTILS_BINOMIAL_GENERATOR_HPP_ */

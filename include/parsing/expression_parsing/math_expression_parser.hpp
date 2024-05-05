@@ -5,8 +5,8 @@
  * @brief Parsing mathematical expressions entry point.
  */
 
-#ifndef PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
-#define PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
+#ifndef INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
+#define INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
 
 #include <deque>
 #include <utility>
@@ -63,4 +63,4 @@ enum class Datatype {
 std::string parse_formula(const std::string& input, const Datatype type);
 
 ModLong parse_modlong_value(const std::string& input);
-#endif  // PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
+#endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

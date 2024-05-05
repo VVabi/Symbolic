@@ -1,5 +1,5 @@
-#ifndef TEST_PARSING_EQUALITY_CHECKER_HPP_
-#define TEST_PARSING_EQUALITY_CHECKER_HPP_
+#ifndef INCLUDE_TYPES_EQUALITY_CHECKER_HPP_
+#define INCLUDE_TYPES_EQUALITY_CHECKER_HPP_
 
 #include <algorithm>
 
@@ -36,4 +36,4 @@ class EqualityChecker<double> {
     }
 };
 
-#endif  // TEST_PARSING_EQUALITY_CHECKER_HPP_
+#endif  // INCLUDE_TYPES_EQUALITY_CHECKER_HPP_

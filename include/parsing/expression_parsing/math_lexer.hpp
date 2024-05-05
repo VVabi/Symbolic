@@ -3,8 +3,8 @@
  * @brief Header file for the math lexer module.
  */
 
-#ifndef PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
-#define PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
+#ifndef INCLUDE_PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
+#define INCLUDE_PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
 
 #include <string>
 #include <vector>
@@ -48,4 +48,4 @@ struct MathLexerElement {
  */
 std::vector<MathLexerElement> parse_math_expression_string(const std::string& input);
 
-#endif  // PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
+#endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_

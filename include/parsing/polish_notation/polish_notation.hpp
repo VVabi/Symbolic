@@ -5,8 +5,8 @@
  * @author vabi
  */
 
-#ifndef PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
-#define PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
+#ifndef INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
+#define INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
 
 #include <memory>
 #include <cmath>
@@ -573,4 +573,4 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
     return std::unique_ptr<PolishNotationElement<T>>(nullptr);
 }
 
-#endif  // PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
+#endif  // INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_

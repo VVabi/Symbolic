@@ -5,8 +5,8 @@
  *      Author: vabi
  */
 
-#ifndef SYMBOLICMETHOD_LABELLED_SYMBOLIC_HPP_
-#define SYMBOLICMETHOD_LABELLED_SYMBOLIC_HPP_
+#ifndef INCLUDE_SYMBOLIC_METHOD_LABELLED_SYMBOLIC_HPP_
+#define INCLUDE_SYMBOLIC_METHOD_LABELLED_SYMBOLIC_HPP_
 
 #include <stdint.h>
 #include <set>
@@ -91,4 +91,4 @@ template <typename T> FormalPowerSeries<T> labelled_cyc(FormalPowerSeries<T> a, 
     return ret;
 }
 
-#endif /* SYMBOLICMETHOD_LABELLED_SYMBOLIC_HPP_ */
+#endif /* INCLUDE_SYMBOLIC_METHOD_LABELLED_SYMBOLIC_HPP_ */

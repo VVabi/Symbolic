@@ -6,8 +6,8 @@
  * as well as converting a string to a ring element. Types need to implement this for usage in power series.
  */
 
-#ifndef TYPES_RING_HELPERS_HPP_
-#define TYPES_RING_HELPERS_HPP_
+#ifndef INCLUDE_TYPES_RING_HELPERS_HPP_
+#define INCLUDE_TYPES_RING_HELPERS_HPP_
 
 #include <string>
 #include "cpp_utils/unused.hpp"
@@ -79,4 +79,4 @@ template<> class RingCompanionHelper<double> {
     }
 };
 
-#endif /* TYPES_RING_HELPERS_HPP_ */
+#endif /* INCLUDE_TYPES_RING_HELPERS_HPP_ */

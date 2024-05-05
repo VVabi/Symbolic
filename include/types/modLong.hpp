@@ -8,8 +8,8 @@
  * @author vabi
  */
 
-#ifndef TYPES_MODLONG_HPP_
-#define TYPES_MODLONG_HPP_
+#ifndef INCLUDE_TYPES_MODLONG_HPP_
+#define INCLUDE_TYPES_MODLONG_HPP_
 
 #include <stdint.h>
 #include <string>
@@ -206,4 +206,4 @@ template<> class RingCompanionHelper<ModLong> {
 };
 
 
-#endif /* TYPES_MODLONG_HPP_ */
+#endif /* INCLUDE_TYPES_MODLONG_HPP_ */

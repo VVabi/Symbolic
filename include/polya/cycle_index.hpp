@@ -6,8 +6,8 @@
  * @author vabi
  */
 
-#ifndef POLYA_CYCLE_INDEX_HPP_
-#define POLYA_CYCLE_INDEX_HPP_
+#ifndef INCLUDE_POLYA_CYCLE_INDEX_HPP_
+#define INCLUDE_POLYA_CYCLE_INDEX_HPP_
 
 #include <map>
 #include <vector>
@@ -105,4 +105,4 @@ template <typename T> FormalPowerSeries<T> cyclic_group_cycle_index(const uint32
 }
 
 
-#endif  // POLYA_CYCLE_INDEX_HPP_
+#endif  // INCLUDE_POLYA_CYCLE_INDEX_HPP_

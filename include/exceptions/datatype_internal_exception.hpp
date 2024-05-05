@@ -3,8 +3,8 @@
  * @brief Custom parsing exception class.
  */
 
-#ifndef EXCEPTIONS_DATATYPE_INTERNAL_EXCEPTION_HPP_
-#define EXCEPTIONS_DATATYPE_INTERNAL_EXCEPTION_HPP_
+#ifndef INCLUDE_EXCEPTIONS_DATATYPE_INTERNAL_EXCEPTION_HPP_
+#define INCLUDE_EXCEPTIONS_DATATYPE_INTERNAL_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
@@ -24,4 +24,4 @@ class DatatypeInternalException : public std::exception {  // TODO(vabi) replace
     }
 };
 
-#endif  // EXCEPTIONS_DATATYPE_INTERNAL_EXCEPTION_HPP_
+#endif  // INCLUDE_EXCEPTIONS_DATATYPE_INTERNAL_EXCEPTION_HPP_

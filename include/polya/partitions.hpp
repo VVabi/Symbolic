@@ -5,8 +5,8 @@
  * This file provides functions to calculate the size of a conjugacy class in the symmetric group, iterate over partitions, and get the sign of a partition.
  */
 
-#ifndef POLYA_PARTITIONS_HPP_
-#define POLYA_PARTITIONS_HPP_
+#ifndef INCLUDE_POLYA_PARTITIONS_HPP_
+#define INCLUDE_POLYA_PARTITIONS_HPP_
 
 #include <stdint.h>
 #include <vector>
@@ -98,4 +98,4 @@ void iterate_partitions(const uint32_t size, std::function<void(std::vector<Part
  */
 int32_t get_partition_sign(const std::vector<PartitionCount>& partition);
 
-#endif  // POLYA_PARTITIONS_HPP_
+#endif  // INCLUDE_POLYA_PARTITIONS_HPP_

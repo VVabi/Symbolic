@@ -3,8 +3,8 @@
  * @brief Definition of the PowerSeries class.
  */
 
-#ifndef TYPES_POWER_SERIES_HPP_
-#define TYPES_POWER_SERIES_HPP_
+#ifndef INCLUDE_TYPES_POWER_SERIES_HPP_
+#define INCLUDE_TYPES_POWER_SERIES_HPP_
 
 #include <vector>
 #include <iterator>
@@ -602,4 +602,4 @@ template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
 };
 
 
-#endif  // TYPES_POWER_SERIES_HPP_
+#endif  // INCLUDE_TYPES_POWER_SERIES_HPP_

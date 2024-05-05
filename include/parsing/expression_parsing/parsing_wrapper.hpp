@@ -3,8 +3,8 @@
  * @brief This file contains the declaration of the ParsingWrapperType class and its derived classes.
  */
 
-#ifndef PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
-#define PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
+#ifndef INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
+#define INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
 
 #include <memory>
 #include <string>
@@ -386,4 +386,4 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     }
 };
 
-#endif  // PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
+#endif  // INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_

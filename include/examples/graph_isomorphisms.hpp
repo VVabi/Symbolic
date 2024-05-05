@@ -4,8 +4,8 @@
  */
 
 
-#ifndef EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
-#define EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
+#ifndef INCLUDE_EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
+#define INCLUDE_EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
 
 #include <stdint.h>
 #include <vector>
@@ -298,4 +298,4 @@ FormalPowerSeries<T> get_trees_gf(const uint32_t size, const T zero, const T uni
     return ret;
 }
 
-#endif  // EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
+#endif  // INCLUDE_EXAMPLES_GRAPH_ISOMORPHISMS_HPP_

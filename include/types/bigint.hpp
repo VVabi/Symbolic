@@ -5,8 +5,8 @@
  * @author vabi
  */
 
-#ifndef TYPES_BIGINT_HPP_
-#define TYPES_BIGINT_HPP_
+#ifndef INCLUDE_TYPES_BIGINT_HPP_
+#define INCLUDE_TYPES_BIGINT_HPP_
 
 #include <gmp.h>
 #include <stdint.h>
@@ -272,4 +272,4 @@ class BigInt {
     }
 };
 
-#endif  // TYPES_BIGINT_HPP_
+#endif  // INCLUDE_TYPES_BIGINT_HPP_

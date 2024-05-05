@@ -3,8 +3,8 @@
  * @brief Custom parsing exception class.
  */
 
-#ifndef EXCEPTIONS_INVALID_FUNCTION_ARG_EXCEPTION_HPP_
-#define EXCEPTIONS_INVALID_FUNCTION_ARG_EXCEPTION_HPP_
+#ifndef INCLUDE_EXCEPTIONS_INVALID_FUNCTION_ARG_EXCEPTION_HPP_
+#define INCLUDE_EXCEPTIONS_INVALID_FUNCTION_ARG_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
@@ -23,4 +23,4 @@ class InvalidFunctionArgException: public ParsingException  {
 };
 
 
-#endif  // EXCEPTIONS_INVALID_FUNCTION_ARG_EXCEPTION_HPP_
+#endif  // INCLUDE_EXCEPTIONS_INVALID_FUNCTION_ARG_EXCEPTION_HPP_

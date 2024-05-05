@@ -3,8 +3,8 @@
  * @brief Header file for the PolyBase class and related functions.
  */
 
-#ifndef TYPES_POLY_BASE_HPP_
-#define TYPES_POLY_BASE_HPP_
+#ifndef INCLUDE_TYPES_POLY_BASE_HPP_
+#define INCLUDE_TYPES_POLY_BASE_HPP_
 
 #include <algorithm>
 #include <vector>
@@ -250,4 +250,4 @@ template<typename T> class PolyBase {
     }
 };
 
-#endif  // TYPES_POLY_BASE_HPP_
+#endif  // INCLUDE_TYPES_POLY_BASE_HPP_

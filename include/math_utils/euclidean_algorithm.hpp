@@ -3,8 +3,8 @@
  * @brief Contains the definition of the Euclidean algorithm and related structures.
  */
 
-#ifndef MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
-#define MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
+#ifndef INCLUDE_MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
+#define INCLUDE_MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
 
 #include "types/ring_helpers.hpp"
 
@@ -66,4 +66,4 @@ template<typename T> EuclideanAlgoResult<T> extended_euclidean_algorithm(T a, T 
     return EuclideanAlgoResult<T>(oldR, oldS, oldT);
 }
 
-#endif  // MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_
+#endif  // INCLUDE_MATH_UTILS_EUCLIDEAN_ALGORITHM_HPP_

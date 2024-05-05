@@ -4,8 +4,8 @@
  * @brief Contains functions for working with power series and evaluating built-in power series functions.
  */
 
-#ifndef FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
-#define FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
+#ifndef INCLUDE_FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
+#define INCLUDE_FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
 
 #include "types/power_series.hpp"
 
@@ -73,4 +73,4 @@ FormalPowerSeries<T> evaluate_power_series_function(
     return power_series.substitute(in-expansion_point);
 }
 
-#endif  // FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
+#endif  // INCLUDE_FUNCTIONS_POWER_SERIES_FUNCTIONS_HPP_
