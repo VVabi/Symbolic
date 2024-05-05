@@ -13,7 +13,7 @@
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
-#include "numberTheory/moebius.hpp"
+#include "number_theory/moebius.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "cpp_utils/unused.hpp"
 

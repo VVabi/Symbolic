@@ -4,7 +4,7 @@
  * @date Feb 6, 2024
  * @brief Euler totient function calculation.
  */
-#include "numberTheory/euler_phi.hpp"
+#include "number_theory/euler_phi.hpp"
 #include <stdint.h>
 #include <vector>
 

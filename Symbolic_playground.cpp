@@ -11,7 +11,7 @@
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
 #include "examples/graph_isomorphisms.hpp"
-#include "numberTheory/moebius.hpp"
+#include "number_theory/moebius.hpp"
 #include "types/polynomial.hpp"
 
 int main(int argc, char **argv) {

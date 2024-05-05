@@ -16,7 +16,7 @@
 #include "types/modLong.hpp"
 #include "types/rationals.hpp"
 #include "types/bigint.hpp"
-#include "test/parsing/equality_checker.hpp"
+#include "types/equality_checker.hpp"
 
 
 TEST(ParsingTests, RationalFunctionParsing) {

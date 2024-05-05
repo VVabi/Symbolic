@@ -5,7 +5,7 @@
  * @brief This file contains the implementation of a function to calculate the Möbius function for all numbers up to a given limit.
  */
 
-#include "numberTheory/moebius.hpp"
+#include "number_theory/moebius.hpp"
 #include <stdint.h>
 #include <vector>
 

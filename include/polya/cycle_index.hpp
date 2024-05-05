@@ -15,7 +15,7 @@
 #include "types/power_series.hpp"
 #include "math_utils/factorial_generator.hpp"
 #include "polya/partitions.hpp"
-#include "numberTheory/euler_phi.hpp"
+#include "number_theory/euler_phi.hpp"
 
 template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uint32_t n, std::vector<FormalPowerSeries<T>>& args, const T unit, const uint32_t num_coeffs) {
     if (args.size() < n) {
