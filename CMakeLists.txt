@@ -1,47 +1,48 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(Symbolic VERSION 0.1.0 LANGUAGES C CXX)
 include_directories(include)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_executable(Symbolic 
-        Symbolic.cpp
-        string_utils/string_utils.cpp
-        polya/partitions.cpp
-        number_theory/moebius.cpp
-        number_theory/euler_phi.cpp
-        parsing/expression_parsing/math_lexer.cpp
-        parsing/expression_parsing/shunting_yard.cpp
-        parsing/expression_parsing/math_expression_parser.cpp
-        functions/power_series_functions.cpp
+        src/Symbolic.cpp
+        src/string_utils/string_utils.cpp
+        src/polya/partitions.cpp
+        src/number_theory/moebius.cpp
+        src/number_theory/euler_phi.cpp
+        src/parsing/expression_parsing/math_lexer.cpp
+        src/parsing/expression_parsing/shunting_yard.cpp
+        src/parsing/expression_parsing/math_expression_parser.cpp
+        src/functions/power_series_functions.cpp
 )
 
 add_executable(Symbolic_tests
-        Symbolic_tests.cpp
-        string_utils/string_utils.cpp
-        polya/partitions.cpp
-        number_theory/moebius.cpp
-        number_theory/euler_phi.cpp
-        parsing/expression_parsing/math_lexer.cpp
-        parsing/expression_parsing/shunting_yard.cpp
-        parsing/expression_parsing/math_expression_parser.cpp
-        functions/power_series_functions.cpp
-        test/parsing/test_power_series_parsing.cpp
-        test/parsing/test_value_parsing.cpp
-        test/parsing/test_rational_function_parsing.cpp
-        test/types/bigint_tests.cpp
-        test/types/modlong_tests.cpp
-        test/types/polynomial_tests.cpp
+        src/Symbolic_tests.cpp
+        src/string_utils/string_utils.cpp
+        src/polya/partitions.cpp
+        src/number_theory/moebius.cpp
+        src/number_theory/euler_phi.cpp
+        src/parsing/expression_parsing/math_lexer.cpp
+        src/parsing/expression_parsing/shunting_yard.cpp
+        src/parsing/expression_parsing/math_expression_parser.cpp
+        src/functions/power_series_functions.cpp
+        src/test/parsing/test_power_series_parsing.cpp
+        src/test/parsing/test_value_parsing.cpp
+        src/test/parsing/test_rational_function_parsing.cpp
+        src/test/types/bigint_tests.cpp
+        src/test/types/modlong_tests.cpp
+        src/test/types/polynomial_tests.cpp
 )
 
 add_executable(Symbolic_playground
-        Symbolic_playground.cpp
-        string_utils/string_utils.cpp
-        polya/partitions.cpp
-        number_theory/moebius.cpp
-        number_theory/euler_phi.cpp
-        parsing/expression_parsing/math_lexer.cpp
-        parsing/expression_parsing/shunting_yard.cpp
-        parsing/expression_parsing/math_expression_parser.cpp
-        functions/power_series_functions.cpp
+        src/Symbolic_playground.cpp
+        src/string_utils/string_utils.cpp
+        src/polya/partitions.cpp
+        src/number_theory/moebius.cpp
+        src/number_theory/euler_phi.cpp
+        src/parsing/expression_parsing/math_lexer.cpp
+        src/parsing/expression_parsing/shunting_yard.cpp
+        src/parsing/expression_parsing/math_expression_parser.cpp
+        src/functions/power_series_functions.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
