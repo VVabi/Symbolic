@@ -1,0 +1,6 @@
+#ifndef INCLUDE_CPP_UTILS_UNUSED_HPP_
+#define INCLUDE_CPP_UTILS_UNUSED_HPP_
+
+#define UNUSED(x) (void)(x)
+
+#endif  // INCLUDE_CPP_UTILS_UNUSED_HPP_

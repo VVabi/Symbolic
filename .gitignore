@@ -30,7 +30,4 @@
 *.exe
 *.out
 *.app
-/Default/
-/Debug/
-/Test/
 /build/
