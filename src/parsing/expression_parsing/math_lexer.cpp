@@ -6,8 +6,10 @@
  */
 
 #include <iostream>
+#include <map>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "exceptions/parsing_exceptions.hpp"
+
 /**
  * @brief Parses a mathematical expression string into a vector of lexer elements.
  * 
@@ -18,7 +20,7 @@
  * @param input The mathematical expression string to parse.
  * @return A vector of `MathLexerElement` objects representing the parsed expression.
  */
-std::vector<MathLexerElement> parse_math_expression_string(const std::string& input) {
+std::vector<MathLexerElement> parse_math_expression_string(const std::string& input, const std::map<std::string, std::vector<MathLexerElement>>& variables) {
     std::vector<MathLexerElement> formula;
 
     char previous = '(';
@@ -54,7 +56,18 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 if (*it == '(') {
                     formula.push_back(MathLexerElement(FUNCTION, var, distance));
                 } else {
-                    formula.push_back(MathLexerElement(VARIABLE, var, distance));
+                    auto pos = variables.find(var);
+                    if (pos == variables.end()) {
+                        formula.push_back(MathLexerElement(VARIABLE, var, distance));
+                    } else {
+                        formula.push_back(MathLexerElement(LEFT_PARENTHESIS, "", distance));
+                        for (auto x : pos->second) {
+                            auto y = x;
+                            y.position = distance;
+                            formula.push_back(y);
+                        }
+                        formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, "", distance));
+                    }
                 }
             }
             it--;

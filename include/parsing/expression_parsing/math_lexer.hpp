@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 /**
  * @brief Enum representing the type of an expression element.
@@ -46,6 +47,7 @@ struct MathLexerElement {
  * @param input The input math expression string.
  * @return A vector of MathLexerElement objects representing the parsed math expression.
  */
-std::vector<MathLexerElement> parse_math_expression_string(const std::string& input);
+std::vector<MathLexerElement> parse_math_expression_string(const std::string& input, 
+                                            const std::map<std::string, std::vector<MathLexerElement>>& variables);
 
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_
