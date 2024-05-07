@@ -103,7 +103,9 @@ std::string parse_formula(const std::string& input, const Datatype type, std::ma
     
     std::string input_string = "";
     std::string variable = "";
+    uint32_t offset = 0;
     if (parts.size() == 2) {
+        offset += parts[0].size()+1;
         std::string::iterator end_pos = std::remove(parts[0].begin(), parts[0].end(), ' ');
         parts[0].erase(end_pos, parts[0].end());
         variable = parts[0]; //TODO check this is a valid variable name
@@ -112,7 +114,7 @@ std::string parse_formula(const std::string& input, const Datatype type, std::ma
         input_string = parts[0];
     }
 
-    auto formula = parse_math_expression_string(input_string, variables);
+    auto formula = parse_math_expression_string(input_string, variables, offset);
 
     if (variable.size() > 0) {
         variables[variable] = formula;
@@ -132,14 +134,14 @@ std::string parse_formula(const std::string& input, const Datatype type, std::ma
     } else {
         ret = parse_formula_internal(polish, type);
     }
-    auto ans = parse_math_expression_string(ret, variables);
+    auto ans = parse_math_expression_string(ret, variables, 0);
     variables["ANS"] = ans;
     return ret;
 }
 
 // currently needed for tests
 ModLong parse_modlong_value(const std::string& input) {
-    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>());
+    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;

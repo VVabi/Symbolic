@@ -20,7 +20,9 @@
  * @param input The mathematical expression string to parse.
  * @return A vector of `MathLexerElement` objects representing the parsed expression.
  */
-std::vector<MathLexerElement> parse_math_expression_string(const std::string& input, const std::map<std::string, std::vector<MathLexerElement>>& variables) {
+std::vector<MathLexerElement> parse_math_expression_string(const std::string& input, 
+                                                           const std::map<std::string, std::vector<MathLexerElement>>& variables,
+                                                           const uint32_t position_offset) {
     std::vector<MathLexerElement> formula;
 
     char previous = '(';
@@ -28,7 +30,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 
     while (it != input.end()) {
         char current = *it;
-        auto distance = std::distance(input.begin(), it);
+        auto distance = std::distance(input.begin(), it)+position_offset;
         if (isdigit(current)) {
             std::string num = "";
 
