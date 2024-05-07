@@ -20,20 +20,9 @@
 template<typename T> class Polynomial: public PolyBase<T> {
  public:
     Polynomial(std::vector<T>&& coeffs): PolyBase<T>(std::move(coeffs)) {}
-    friend std::ostream& operator<<(std::ostream& os, Polynomial const & tc) {
-        auto pw = 0;
 
-        bool first = true;
-        for (auto x : tc.coefficients) {
-            if (!first) {
-                os << "+";
-            }
-            first = false;
-            os << "(" << x << ")" << "*z^" << pw;
-            pw++;
-        }
-        return os;
-    }
+    template<typename S>
+    friend std::ostream& operator<<(std::ostream& os, Polynomial<S> const & tc);
 
     bool operator==(const Polynomial& other) const {
         uint32_t num_common_coeffs = std::min(this->num_coefficients(), other.num_coefficients());
@@ -259,6 +248,61 @@ template<typename T> class RingCompanionHelper<Polynomial<T>> {
         throw std::runtime_error("Not implemented");
         return Polynomial<T>::get_zero(in[0], unit.num_coefficients());
     }
+
+    static bool brackets_required(const Polynomial<T>& in) {
+        UNUSED(in);
+        return true;
+    }
 };
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, Polynomial<T> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+    return os;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, Polynomial<RationalNumber<BigInt>> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first && x.get_numerator() >= RingCompanionHelper<BigInt>::get_zero(x.get_numerator())) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+    return os;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, Polynomial<double> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first && x >= 0.0) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+    return os;
+}
+
+
 
 #endif  // INCLUDE_TYPES_POLYNOMIAL_HPP_

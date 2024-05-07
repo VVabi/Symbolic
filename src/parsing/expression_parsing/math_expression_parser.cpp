@@ -85,6 +85,34 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
     return "";  // Unreachable
 }
 
+
+/**
+ * @brief Verifies if a given string is a valid variable name.
+ *
+ * This function checks if the provided string is a valid variable name by ensuring that:
+ * - The string is not empty.
+ * - The first character is not a digit.
+ * - All characters are either digits, lowercase letters, or uppercase letters.
+ *
+ * @param name The string to be verified as a variable name.
+ * @return True if the string is a valid variable name, false otherwise.
+ */
+bool verify_variable_name(const std::string& name) {
+    if (name.size() == 0) {
+        return false;
+    }
+    if (name[0] >= '0' && name[0] <= '9') {
+        return false;
+    }
+    for (char c : name) {
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 /**
  * @brief Parses the math expression formula based on the given datatype.
  * 
@@ -108,7 +136,10 @@ std::string parse_formula(const std::string& input, const Datatype type, std::ma
         offset += parts[0].size()+1;
         std::string::iterator end_pos = std::remove(parts[0].begin(), parts[0].end(), ' ');
         parts[0].erase(end_pos, parts[0].end());
-        variable = parts[0]; //TODO check this is a valid variable name
+        variable = parts[0];
+        if (!verify_variable_name(variable)) {
+            throw ParsingException("Invalid variable name: "+variable, 0);
+        }
         input_string = parts[1];
     } else {
         input_string = parts[0];

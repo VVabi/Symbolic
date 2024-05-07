@@ -240,6 +240,10 @@ class BigInt {
         return rhs < *this;
     }
 
+    bool operator>=(const BigInt& rhs) const {
+        return rhs < *this || rhs == *this;
+    }
+
     /**
      * @brief Computes the greatest common divisor (GCD) of two BigInt objects.
      * @param a The first BigInt object.

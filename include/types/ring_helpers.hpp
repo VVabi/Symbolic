@@ -43,6 +43,11 @@ template<typename T> class RingCompanionHelper {
     static T from_string(const std::string& in, const T& unit) {
         return stoi(in);
     }
+
+    static bool brackets_required(const T& in) {
+        UNUSED(in);
+        return false;
+    }
 };
 
 template<> class RingCompanionHelper<double> {
