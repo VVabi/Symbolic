@@ -120,6 +120,7 @@ bool verify_variable_name(const std::string& name) {
  * 
  * @param input The input math expression formula as a string.
  * @param type The datatype to parse the formula as.
+ * @param variables The map of variable names to their respective values, represented as list of lexer elements.
  * @return The parsed formula as a string.
  */
 std::string parse_formula(const std::string& input, const Datatype type, std::map<std::string, std::vector<MathLexerElement>>& variables) {
@@ -128,7 +129,7 @@ std::string parse_formula(const std::string& input, const Datatype type, std::ma
     if (parts.size() > 2) {
         throw ParsingException("Too many '=' signs", -1);
     }
-    
+
     std::string input_string = "";
     std::string variable = "";
     uint32_t offset = 0;

@@ -56,13 +56,13 @@ class RationalNumber {
         bool numerator_brackets     = RingCompanionHelper<T>::brackets_required(tc.numerator);
         bool denominator_brackets   = RingCompanionHelper<T>::brackets_required(tc.denominator);
 
-        if(numerator_brackets) {
+        if (numerator_brackets) {
             os << "(";
         }
 
         os << tc.numerator;
 
-        if(numerator_brackets) {
+        if (numerator_brackets) {
             os << ")";
         }
 
@@ -71,7 +71,7 @@ class RationalNumber {
             os << "/";
             if (denominator_brackets) {
                 os << "(";
-            } 
+            }
 
             os << tc.denominator;
 

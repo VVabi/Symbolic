@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <vector>
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/polish_notation/polish_notation.hpp"

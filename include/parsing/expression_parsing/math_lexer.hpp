@@ -47,7 +47,7 @@ struct MathLexerElement {
  * @param input The input math expression string.
  * @return A vector of MathLexerElement objects representing the parsed math expression.
  */
-std::vector<MathLexerElement> parse_math_expression_string(const std::string& input, 
+std::vector<MathLexerElement> parse_math_expression_string(const std::string& input,
                                             const std::map<std::string, std::vector<MathLexerElement>>& variables,
                                             const uint32_t position_offset);
 
