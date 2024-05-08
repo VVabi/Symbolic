@@ -12,6 +12,7 @@
 #include <string>
 #include <algorithm>
 #include <utility>
+#include "types/rationals.hpp"
 #include "exceptions/eval_exception.hpp"
 #include "types/modLong.hpp"
 #include "types/ring_helpers.hpp"
@@ -31,21 +32,8 @@ template<typename T> class PowerSeries: public PolyBase<T> {
      */
     PowerSeries(std::vector<T>&& coeffs): PolyBase<T>(std::move(coeffs)) {}
 
-    /**
-     * @brief Overloaded stream insertion operator for PowerSeries objects.
-     * @param os The output stream.
-     * @param tc The PowerSeries object to be inserted.
-     * @return The modified output stream.
-     */
-    friend std::ostream& operator<<(std::ostream& os, PowerSeries const & tc) {
-        auto pw = 0;
-        for (auto x : tc.coefficients) {
-            os << "(" << x << ")" << "*z^" << pw << "+";
-            pw++;
-        }
-        os << "O(z^" << pw << ")";
-        return os;
-    }
+    template<typename S>
+    friend std::ostream& operator<<(std::ostream& os, PowerSeries<S> const & tc);
 
     /**
      * @brief Overloaded equality operator for PowerSeries objects.
@@ -599,7 +587,64 @@ template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
         throw std::runtime_error("Not implemented");
         return FormalPowerSeries<T>::get_zero(in[0], unit.num_coefficients());
     }
+
+    static bool brackets_required(const FormalPowerSeries<T>& in) {
+        UNUSED(in);
+        return true;
+    }
 };
 
+/**
+ * @brief Overloaded stream insertion operator for PowerSeries objects.
+ * @param os The output stream.
+ * @param tc The PowerSeries object to be inserted.
+ * @return The modified output stream.
+ */
+template<typename T>
+std::ostream& operator<<(std::ostream& os, PowerSeries<T> const & tc) {
+    auto pw = 0;
+    for (auto x : tc.coefficients) {
+        os << x << "*z^" << pw << "+";
+        pw++;
+    }
+    os << "O(z^" << pw << ")";
+    return os;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, PowerSeries<RationalNumber<BigInt>> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first && x.get_numerator() >= BigInt(0)) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+
+    os << "+O(z^" << pw << ")";
+    return os;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, PowerSeries<double> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first && x >= 0.0) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+
+    os << "+O(z^" << pw << ")";
+    return os;
+}
 
 #endif  // INCLUDE_TYPES_POWER_SERIES_HPP_

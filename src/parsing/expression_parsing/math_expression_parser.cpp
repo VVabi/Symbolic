@@ -5,6 +5,7 @@
  */
 
 #include <vector>
+#include <map>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 
 
@@ -84,6 +85,34 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
     return "";  // Unreachable
 }
 
+
+/**
+ * @brief Verifies if a given string is a valid variable name.
+ *
+ * This function checks if the provided string is a valid variable name by ensuring that:
+ * - The string is not empty.
+ * - The first character is not a digit.
+ * - All characters are either digits, lowercase letters, or uppercase letters.
+ *
+ * @param name The string to be verified as a variable name.
+ * @return True if the string is a valid variable name, false otherwise.
+ */
+bool verify_variable_name(const std::string& name) {
+    if (name.size() == 0) {
+        return false;
+    }
+    if (name[0] >= '0' && name[0] <= '9') {
+        return false;
+    }
+    for (char c : name) {
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 /**
  * @brief Parses the math expression formula based on the given datatype.
  * 
@@ -91,10 +120,37 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
  * 
  * @param input The input math expression formula as a string.
  * @param type The datatype to parse the formula as.
+ * @param variables The map of variable names to their respective values, represented as list of lexer elements.
  * @return The parsed formula as a string.
  */
-std::string parse_formula(const std::string& input, const Datatype type) {
-    auto formula = parse_math_expression_string(input);
+std::string parse_formula(const std::string& input, const Datatype type, std::map<std::string, std::vector<MathLexerElement>>& variables) {
+    auto parts = string_split(input, '=');
+
+    if (parts.size() > 2) {
+        throw ParsingException("Too many '=' signs", -1);
+    }
+
+    std::string input_string = "";
+    std::string variable = "";
+    uint32_t offset = 0;
+    if (parts.size() == 2) {
+        offset += parts[0].size()+1;
+        std::string::iterator end_pos = std::remove(parts[0].begin(), parts[0].end(), ' ');
+        parts[0].erase(end_pos, parts[0].end());
+        variable = parts[0];
+        if (!verify_variable_name(variable)) {
+            throw ParsingException("Invalid variable name: "+variable, 0);
+        }
+        input_string = parts[1];
+    } else {
+        input_string = parts[0];
+    }
+
+    auto formula = parse_math_expression_string(input_string, variables, offset);
+
+    if (variable.size() > 0) {
+        variables[variable] = formula;
+    }
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;
@@ -103,17 +159,21 @@ std::string parse_formula(const std::string& input, const Datatype type) {
         polish.push_back(x);
     }
 
+    std::string ret;
     if (type == Datatype::DYNAMIC) {
         auto actual_type = infer_datatype_from_lexer(p);
-        return parse_formula_internal(polish, actual_type);
+        ret = parse_formula_internal(polish, actual_type);
+    } else {
+        ret = parse_formula_internal(polish, type);
     }
-
-    return parse_formula_internal(polish, type);
+    auto ans = parse_math_expression_string(ret, variables, 0);
+    variables["ANS"] = ans;
+    return ret;
 }
 
 // currently needed for tests
 ModLong parse_modlong_value(const std::string& input) {
-    auto formula = parse_math_expression_string(input);
+    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;

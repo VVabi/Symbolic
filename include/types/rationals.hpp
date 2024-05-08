@@ -52,10 +52,32 @@ class RationalNumber {
 
     friend std::ostream &operator<<(std::ostream &os, RationalNumber const &tc) {
         T unit = RingCompanionHelper<T>::get_unit(tc.numerator);
-        os << "(" << tc.numerator << ")";
+
+        bool numerator_brackets     = RingCompanionHelper<T>::brackets_required(tc.numerator);
+        bool denominator_brackets   = RingCompanionHelper<T>::brackets_required(tc.denominator);
+
+        if (numerator_brackets) {
+            os << "(";
+        }
+
+        os << tc.numerator;
+
+        if (numerator_brackets) {
+            os << ")";
+        }
+
 
         if (tc.denominator != unit) {
-            os << "/(" << tc.denominator << ")";
+            os << "/";
+            if (denominator_brackets) {
+                os << "(";
+            }
+
+            os << tc.denominator;
+
+            if (denominator_brackets) {
+                os << ")";
+            }
         }
         return os;
     }

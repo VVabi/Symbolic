@@ -13,6 +13,8 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <map>
+#include <vector>
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/polish_notation/polish_notation.hpp"
@@ -37,7 +39,7 @@
 template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
-    auto formula = parse_math_expression_string(input);
+    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;
@@ -60,7 +62,7 @@ enum class Datatype {
     MOD
 };
 
-std::string parse_formula(const std::string& input, const Datatype type);
+std::string parse_formula(const std::string& input, const Datatype type, std::map<std::string, std::vector<MathLexerElement>>& variables);
 
 ModLong parse_modlong_value(const std::string& input);
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

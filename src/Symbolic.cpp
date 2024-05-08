@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <numeric>
+#include <map>
 #include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "exceptions/unreachable_exception.hpp"
@@ -22,6 +23,7 @@ int main(int argc, char **argv) {
     UNUSED(argv);
     std::string input;
     uint32_t count = 0;
+    auto variables = std::map<std::string, std::vector<MathLexerElement>>();
     while (true) {
         count++;
         std::cout << ">>> ";
@@ -32,7 +34,7 @@ int main(int argc, char **argv) {
         int64_t position = -1;
         bool error = false;
         try {
-            auto x = parse_formula(input, Datatype::DYNAMIC);
+            auto x = parse_formula(input, Datatype::DYNAMIC, variables);
             std::cout << x << std::endl;
         } catch (ParsingException &e) {
             error = true;

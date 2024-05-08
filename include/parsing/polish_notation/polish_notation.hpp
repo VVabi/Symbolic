@@ -131,7 +131,8 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
                                         const T unit,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
-        auto res = Polynomial<T>::get_atom(unit, 1, fp_size);
+        UNUSED(fp_size);
+        auto res = Polynomial<T>::get_atom(unit, 1);
         return std::make_unique<RationalFunctionType<T>>(res);
     }
 };

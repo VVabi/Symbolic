@@ -20,20 +20,9 @@
 template<typename T> class Polynomial: public PolyBase<T> {
  public:
     Polynomial(std::vector<T>&& coeffs): PolyBase<T>(std::move(coeffs)) {}
-    friend std::ostream& operator<<(std::ostream& os, Polynomial const & tc) {
-        auto pw = 0;
 
-        bool first = true;
-        for (auto x : tc.coefficients) {
-            if (!first) {
-                os << "+";
-            }
-            first = false;
-            os << "(" << x << ")" << "*z^" << pw;
-            pw++;
-        }
-        return os;
-    }
+    template<typename S>
+    friend std::ostream& operator<<(std::ostream& os, Polynomial<S> const & tc);
 
     bool operator==(const Polynomial& other) const {
         uint32_t num_common_coeffs = std::min(this->num_coefficients(), other.num_coefficients());
@@ -183,7 +172,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
     }
 
     friend std::pair<Polynomial, Polynomial> polynomial_div(Polynomial a, const Polynomial& b) {
-        Polynomial<T> zero = Polynomial::get_zero(a.coefficients[0], 1);
+        Polynomial<T> zero = Polynomial::get_zero(a.coefficients[0]);
         if (b == zero) {
             throw(std::runtime_error("Division by zero"));  // TODO(vabi) throw proper exception
         }
@@ -191,7 +180,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
         auto r = a;
         while (r != zero && r.degree() >= b.degree()) {
             auto c = r.coefficients[r.degree()]/b.coefficients[b.degree()];
-            auto t = Polynomial::get_atom(c, r.degree()-b.degree(), r.degree()-b.degree()+1);
+            auto t = Polynomial::get_atom(c, r.degree()-b.degree());
             q = q+t;
             r = r-t*b;
             r.sanitize();
@@ -216,22 +205,19 @@ template<typename T> class Polynomial: public PolyBase<T> {
         return polynomial_div(a, b).second;
     }
 
-    static Polynomial get_atom(const T value, const size_t idx, const uint32_t size) {
-        auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
-        if (idx < size) {
-            coeffs[idx] = value;
-        }
+    static Polynomial get_atom(const T value, const size_t idx) {
+        auto coeffs = std::vector<T>(idx+1, RingCompanionHelper<T>::get_zero(value));
+        coeffs[idx] = value;
         return Polynomial(std::move(coeffs));
     }
 
-    static Polynomial get_zero(const T value, const uint32_t size) {
-        auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
+    static Polynomial get_zero(const T value) {
+        auto coeffs = std::vector<T>(1, RingCompanionHelper<T>::get_zero(value));
         return Polynomial(std::move(coeffs));
     }
 
-    static Polynomial get_unit(const T value, const uint32_t size) {
-        auto coeffs = std::vector<T>(size, RingCompanionHelper<T>::get_zero(value));
-        coeffs[0] = RingCompanionHelper<T>::get_unit(value);
+    static Polynomial get_unit(const T value) {
+        auto coeffs = std::vector<T>(1, RingCompanionHelper<T>::get_unit(value));
         return Polynomial(std::move(coeffs));
     }
 };
@@ -252,16 +238,71 @@ inline Polynomial<RationalNumber<BigInt>> gcd(Polynomial<RationalNumber<BigInt>>
 template<typename T> class RingCompanionHelper<Polynomial<T>> {
  public:
     static Polynomial<T> get_zero(const Polynomial<T>& in) {
-        return Polynomial<T>::get_zero(in[0], 1);
+        return Polynomial<T>::get_zero(in[0]);
     }
     static Polynomial<T> get_unit(const Polynomial<T>& in) {
         auto unit = RingCompanionHelper<T>::get_unit(in[0]);
-        return Polynomial<T>::get_atom(unit, 0, 1);
+        return Polynomial<T>::get_atom(unit, 0);
     }
     static Polynomial<T> from_string(const std::string& in, const Polynomial<T>& unit) {
         throw std::runtime_error("Not implemented");
         return Polynomial<T>::get_zero(in[0], unit.num_coefficients());
     }
+
+    static bool brackets_required(const Polynomial<T>& in) {
+        UNUSED(in);
+        return true;
+    }
 };
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, Polynomial<T> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+    return os;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, Polynomial<RationalNumber<BigInt>> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first && x.get_numerator() >= RingCompanionHelper<BigInt>::get_zero(x.get_numerator())) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+    return os;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, Polynomial<double> const & tc) {
+    auto pw = 0;
+
+    bool first = true;
+    for (auto x : tc.coefficients) {
+        if (!first && x >= 0.0) {
+            os << "+";
+        }
+        first = false;
+        os  << x << "*z^" << pw;
+        pw++;
+    }
+    return os;
+}
+
+
 
 #endif  // INCLUDE_TYPES_POLYNOMIAL_HPP_
