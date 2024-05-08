@@ -24,6 +24,19 @@
 template<typename T>
 using RationalFunction = RationalNumber<Polynomial<T>>;
 
+template<typename T>
+PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, const uint32_t num_coefficients) {
+    auto num = in.get_numerator();
+    auto den = in.get_denominator();
+
+    auto num_ps = FormalPowerSeries<T>(num.copy_coefficients());
+    auto den_ps = FormalPowerSeries<T>(den.copy_coefficients());
+
+    num_ps.resize(num_coefficients);
+    den_ps.resize(num_coefficients);
+    return num_ps/den_ps;
+}
+
 /**
  * @class ParsingWrapperType
  * @brief Abstract base class for parsing wrapper types.
@@ -111,6 +124,11 @@ class ParsingWrapperType {
     virtual void pow(const BigInt& exponent) = 0;
 
     virtual void pow(const double& exponent) = 0;
+
+    virtual std::unique_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) = 0;
+    virtual std::unique_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) = 0;
+
+    virtual std::unique_ptr<ParsingWrapperType<T>> evaluate_at(std::unique_ptr<ParsingWrapperType<T>> input) = 0;
 };
 
 /**
@@ -188,6 +206,22 @@ class ValueType: public ParsingWrapperType<T> {
         UNUSED(type);
         UNUSED(fp_size);
         throw std::runtime_error("Cannot apply power series function to a constant for non-double types");
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
+        auto numerator_ev = rat_function.get_numerator().evaluate(value);
+        auto denominator_ev = rat_function.get_denominator().evaluate(value);
+        return std::make_unique<ValueType<T>>(numerator_ev/denominator_ev);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
+        UNUSED(power_series);
+        throw std::runtime_error("Cannot evaluate power series at a constant");
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> evaluate_at(std::unique_ptr<ParsingWrapperType<T>> input) {
+        UNUSED(input);
+        return std::make_unique<ValueType<T>>(value);
     }
 };
 
@@ -304,6 +338,32 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         ss << value;
         return ss.str();
     }
+
+    std::unique_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
+        auto ps = rational_function_to_power_series(rat_function, value.num_coefficients());
+        return this->insert_into_power_series(ps);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
+        auto zero = RingCompanionHelper<T>::get_zero(value[0]);
+
+        if (value[0] != zero) {
+            throw std::runtime_error("Cannot insert power_series with non-zero constant term into power series");
+        }
+        auto ret = PowerSeries<T>::get_zero(value[0], value.num_coefficients());
+
+        auto pw = PowerSeries<T>::get_unit(value[0], value.num_coefficients());
+
+        for (uint32_t ind = 0; ind < std::min(power_series.num_coefficients(), value.num_coefficients()); ind++) {
+            ret = ret+power_series[ind]*pw;
+            pw = pw*value;
+        }
+        return std::make_unique<PowerSeriesType<T>>(ret);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> evaluate_at(std::unique_ptr<ParsingWrapperType<T>> input) {
+        return input->insert_into_power_series(value);
+    }
 };
 
 /**
@@ -383,6 +443,52 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         std::stringstream ss;
         ss << value;
         return ss.str();
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
+        UNUSED(rat_function);
+        throw std::runtime_error("Not implemented");
+        return std::unique_ptr<RationalFunctionType<T>>(nullptr);
+        /*auto numerator = rat_function.get_numerator();
+        auto numerator_ev = RationalFunction<T>(Polynomial<T>::get_zero(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
+        auto pw = RationalFunction<T>(Polynomial<T>::get_unit(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
+
+        for (uint32_t ind = 0; ind < numerator.num_coefficients(); ind++) {
+            numerator_ev = numerator_ev+numerator[ind]*pw;
+            pw = pw*value;
+        }
+
+        auto denominator = rat_function.get_denominator();
+        auto denominator_ev = RationalFunction<T>(Polynomial<T>::get_zero(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
+        
+        pw = RationalFunction<T>(Polynomial<T>::get_unit(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
+
+        for (uint32_t ind = 0; ind < denominator.num_coefficients(); ind++) {
+            denominator_ev = denominator_ev+denominator[ind]*pw;
+            pw = pw*value;
+        }
+        return std::make_unique<RationalFunctionType<T>>(numerator_ev/denominator_ev);*/
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
+        auto zero = RingCompanionHelper<T>::get_zero(power_series[0]);
+        auto value_as_power_series = this->as_power_series(power_series.num_coefficients());
+        if (value_as_power_series[0] != zero) {
+            throw std::runtime_error("Cannot insert polynomial with non-zero constant term into power series");
+        }
+        auto ret = PowerSeries<T>::get_zero(zero, power_series.num_coefficients());
+        auto pw = PowerSeries<T>::get_unit(zero, power_series.num_coefficients());
+        
+
+        for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
+            ret = ret + power_series[ind]*pw;
+            pw = pw*value_as_power_series;
+        }
+        return std::make_unique<PowerSeriesType<T>>(ret);
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> evaluate_at(std::unique_ptr<ParsingWrapperType<T>> input) {
+        return input->insert_into_rational_function(value);
     }
 };
 

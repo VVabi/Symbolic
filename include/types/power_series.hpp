@@ -375,13 +375,13 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         auto zero = RingCompanionHelper<T>::get_zero(a[0]);
         while (first_nonzero_idx < b.num_coefficients() && b[first_nonzero_idx] == zero) {
             if (first_nonzero_idx >= a.num_coefficients() || a[first_nonzero_idx] != zero) {
-                throw EvalException("Power series not invertible", -1);
+                throw std::runtime_error("Power series not invertible");
             }
             first_nonzero_idx++;
         }
 
         if (first_nonzero_idx >= b.num_coefficients()) {
-            throw EvalException("Power series not invertible", -1);
+            throw std::runtime_error("Power series not invertible");
         }
 
         if (first_nonzero_idx == 0) {
