@@ -11,6 +11,7 @@
 #include "string_utils/string_utils.hpp"
 #include "types/bigint.hpp"
 #include "cpp_utils/unused.hpp"
+#include "exceptions/datatype_internal_exception.hpp"
 
 template <typename T>
 class RationalNumber {
@@ -45,6 +46,10 @@ class RationalNumber {
     }
 
     RationalNumber(T num, T denom) : numerator(num), denominator(denom) {
+        auto zero = RingCompanionHelper<T>::get_zero(num);
+        if (denominator == zero) {
+            throw DatatypeInternalException("Division by zero");
+        }
         sanitize();
     }
 
@@ -52,10 +57,10 @@ class RationalNumber {
 
     friend std::ostream &operator<<(std::ostream &os, RationalNumber const &tc) {
         T unit = RingCompanionHelper<T>::get_unit(tc.numerator);
-
-        bool numerator_brackets     = RingCompanionHelper<T>::brackets_required(tc.numerator);
+        bool denominator_unit       = tc.denominator == unit;
+        bool numerator_brackets     = RingCompanionHelper<T>::brackets_required(tc.numerator) && !denominator_unit;
         bool denominator_brackets   = RingCompanionHelper<T>::brackets_required(tc.denominator);
-
+        
         if (numerator_brackets) {
             os << "(";
         }
@@ -67,7 +72,7 @@ class RationalNumber {
         }
 
 
-        if (tc.denominator != unit) {
+        if (!denominator_unit) {
             os << "/";
             if (denominator_brackets) {
                 os << "(";

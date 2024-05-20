@@ -375,13 +375,13 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         auto zero = RingCompanionHelper<T>::get_zero(a[0]);
         while (first_nonzero_idx < b.num_coefficients() && b[first_nonzero_idx] == zero) {
             if (first_nonzero_idx >= a.num_coefficients() || a[first_nonzero_idx] != zero) {
-                throw std::runtime_error("Power series not invertible");
+                throw DatatypeInternalException("Power series not invertible");
             }
             first_nonzero_idx++;
         }
 
         if (first_nonzero_idx >= b.num_coefficients()) {
-            throw std::runtime_error("Power series not invertible");
+            throw DatatypeInternalException("Power series not invertible");
         }
 
         if (first_nonzero_idx == 0) {
@@ -451,7 +451,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
     PowerSeries substitute(const PowerSeries& fp, bool allow_constant_term = false) {
         auto zero = RingCompanionHelper<T>::get_zero(this->coefficients[0]);
         if (!allow_constant_term && fp[0] != zero) {
-            throw std::runtime_error("Substitution only works for power series with zero constant term");
+            throw DatatypeInternalException("Substitution only works for power series with zero constant term");
         }
         auto zero_coeffs = std::vector<T>(this->num_coefficients(), zero);
 
