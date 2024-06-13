@@ -146,6 +146,13 @@ std::vector<PowerSeriesTestcase> test_cases = {
 
         // necklaces with 3 colors
         {"CYC(3*z)", {0, 3, 6, 11, 24, 51, 130, 315, 834, 2195, 5934, 16107, 44368, 122643, 341802, 956635, 2690844, 7596483, 21524542, 61171659, 174342216, 498112275, 1426419858, 4093181691}, false, 0},
+
+        // some evals
+        {"eval(1/(1-z), 2*z)", {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384}, false, 0},
+        {"eval(1/(1-z), z/(1-z)+O(z^60))", {1, 1, 2, 4, 8, 16, 32, 64, 128, 256}, false, 0},
+        {"eval(exp(z), z/(1-z))", {1, 1, 3, 13, 73, 501, 4051, 37633}, true, 0},
+        {"eval(exp(z), z/(1-z)+O(z^20))", {1, 1, 3, 13, 73, 501, 4051, 37633, 394353, 4596553, 58941091}, true, 0},
+        {"eval(1/(1-z), CYC(3*z))", {1, 3, 15, 74, 369, 1839, 9188, 45903, 229425, 1146758}, false, 0},
 };
 
 template<typename T> std::pair<FormalPowerSeries<T>, std::string> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {

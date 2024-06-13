@@ -409,6 +409,19 @@ template<typename T> class PolishMod: public PolishNotationElement<T> {
     }
 };
 
+template<typename T> class PolishEval: public PolishNotationElement<T> {
+ public:
+    PolishEval(uint32_t position): PolishNotationElement<T>(position) {}
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto to_evaluate   = iterate_wrapped<T>(cmd_list, unit, fp_size);
+        auto arg        = iterate_wrapped<T>(cmd_list, unit, fp_size);
+
+        return to_evaluate->evaluate_at(std::move(arg));
+    }
+};
 
 template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
  public:
@@ -562,6 +575,11 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                     throw InvalidFunctionArgException("Mod does not take subscript arguments, found: "+parts[1], element.position);
                 }
                 return std::make_unique<PolishMod<T>>(element.position);
+            } else if (parts[0] == "eval") {
+                if (parts[1] != "") {
+                    throw InvalidFunctionArgException("Eval does not take subscript arguments, found: "+parts[1], element.position);
+                }
+                return std::make_unique<PolishEval<T>>(element.position);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
             break;
