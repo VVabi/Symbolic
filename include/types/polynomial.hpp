@@ -174,7 +174,7 @@ template<typename T> class Polynomial: public PolyBase<T> {
     friend std::pair<Polynomial, Polynomial> polynomial_div(Polynomial a, const Polynomial& b) {
         Polynomial<T> zero = Polynomial::get_zero(a.coefficients[0]);
         if (b == zero) {
-            throw(DatatypeInternalException("Division by zero"));  // TODO(vabi) throw proper exception
+            throw(DatatypeInternalException("Division by zero"));
         }
         auto q = zero;
         auto r = a;

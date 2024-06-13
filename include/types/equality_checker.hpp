@@ -31,9 +31,7 @@ class EqualityChecker<double> {
         if (std::abs(a) > 1) {
             err = err/std::abs(a);
         }
-        if (err > eps) {
-            std::cout << "WTF" << std::endl;
-        }
+
         return err < eps;
     }
 };
