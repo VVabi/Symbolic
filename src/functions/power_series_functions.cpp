@@ -21,6 +21,12 @@ double evaluate_power_series_function_double(const double in, const PowerSeriesB
             return log(in);
         case PowerSeriesBuiltinFunctionType::SQRT:
             return sqrt(in);
+        case PowerSeriesBuiltinFunctionType::SIN:
+            return sin(in);
+        case PowerSeriesBuiltinFunctionType::COS:
+            return cos(in);
+        case PowerSeriesBuiltinFunctionType::TAN:
+            return tan(in);
         default:
             throw std::runtime_error("Unknown power series function type");
     }

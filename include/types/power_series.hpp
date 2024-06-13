@@ -526,7 +526,46 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return PowerSeries(std::move(coeffs));
     }
 
-    static PowerSeries get_log(const uint32_t size, const T unit) {  // power series of log(1+z)
+    static PowerSeries get_sin(const uint32_t size, const T unit) {
+        std::vector<T> coeffs = std::vector<T>();
+        auto zero = RingCompanionHelper<T>::get_zero(unit);
+        auto factorial = unit;
+        for (uint32_t ind = 0; ind < size; ind++) {
+            if (ind > 0) {
+                factorial = factorial*ind;
+            }
+            if (ind % 2 == 0) {
+                coeffs.push_back(zero);
+            } else {
+                auto sign = (ind % 4 == 1)? unit : -unit;
+                coeffs.push_back(sign/factorial);
+            }
+        }
+
+        return PowerSeries(std::move(coeffs));
+    }
+
+    static PowerSeries get_cos(const uint32_t size, const T unit) {
+        std::vector<T> coeffs = std::vector<T>();
+        auto zero = RingCompanionHelper<T>::get_zero(unit);
+        auto factorial = unit;
+        for (uint32_t ind = 0; ind < size; ind++) {
+            if (ind > 0) {
+                factorial = factorial*ind;
+            }
+            if (ind % 2 == 1) {
+                coeffs.push_back(zero);
+            } else {
+                auto sign = (ind/2 % 2 == 0)? unit : -unit;
+                coeffs.push_back(sign/factorial);
+            }
+        }
+
+        return PowerSeries(std::move(coeffs));
+    }
+
+
+    static PowerSeries get_log(T& expansion_point, const uint32_t size, const T unit) {  // power series of log(1+z)
         std::vector<T> coeffs = std::vector<T>();
 
         coeffs.push_back(RingCompanionHelper<T>::get_zero(unit));
@@ -535,11 +574,11 @@ template<typename T> class PowerSeries: public PolyBase<T> {
             coeffs.push_back(sign*unit/ind);
             sign = -sign;
         }
-
+        expansion_point = unit;
         return PowerSeries(std::move(coeffs));
     }
 
-    static PowerSeries get_sqrt(const uint32_t size, const T unit) {  //  power series of sqrt(1+z)
+    static PowerSeries get_sqrt(T& expansion_point, const uint32_t size, const T unit) {  //  power series of sqrt(1+z)
         std::vector<T> coeffs = std::vector<T>();
         coeffs.push_back(unit);
 
@@ -557,6 +596,7 @@ template<typename T> class PowerSeries: public PolyBase<T> {
             pow2 = pow2*(unit+unit);
         }
 
+        expansion_point = unit;
         return PowerSeries(std::move(coeffs));
     }
 };
@@ -570,8 +610,9 @@ template<typename T> FormalPowerSeries<T> exp(const FormalPowerSeries<T> in) {
 
 template<typename T> FormalPowerSeries<T> log(const FormalPowerSeries<T> in) {
     auto unit = RingCompanionHelper<T>::get_unit(in[0]);
-    auto log = FormalPowerSeries<T>::get_log(in.num_coefficients(), unit);
-    return log.substitute(in-FormalPowerSeries<T>::get_atom(unit, 0, in.num_coefficients()));
+    T expansion_point = unit;
+    auto log = FormalPowerSeries<T>::get_log(expansion_point, in.num_coefficients(), unit);
+    return log.substitute(in-FormalPowerSeries<T>::get_atom(expansion_point, 0, in.num_coefficients()));
 }
 
 template<typename T> class RingCompanionHelper<FormalPowerSeries<T>> {
