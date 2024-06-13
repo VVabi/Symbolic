@@ -12,6 +12,7 @@
 #include <vector>
 #include <iomanip>
 #include <limits>
+#include <algorithm>
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
@@ -290,8 +291,13 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     PowerSeries<T> as_power_series(uint32_t num_coeffs) {
-        UNUSED(num_coeffs);
-        return value;
+        if (num_coeffs > value.num_coefficients()) {
+            return value;
+        }
+
+        auto coeffs = value.copy_coefficients();
+        coeffs.resize(num_coeffs, RingCompanionHelper<T>::get_zero(value[0]));
+        return PowerSeries<T>(std::move(coeffs));
     }
 
     int get_priority() {
@@ -457,7 +463,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
 
         auto denominator = rat_function.get_denominator();
         auto denominator_ev = RationalFunction<T>(Polynomial<T>::get_zero(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
-        
+
         pw = RationalFunction<T>(Polynomial<T>::get_unit(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
 
         for (uint32_t ind = 0; ind < denominator.num_coefficients(); ind++) {
@@ -475,7 +481,6 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         }
         auto ret = PowerSeries<T>::get_zero(zero, power_series.num_coefficients());
         auto pw = PowerSeries<T>::get_unit(zero, power_series.num_coefficients());
-        
 
         for (uint32_t ind = 0; ind < power_series.num_coefficients(); ind++) {
             ret = ret + power_series[ind]*pw;

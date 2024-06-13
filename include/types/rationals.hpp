@@ -60,7 +60,7 @@ class RationalNumber {
         bool denominator_unit       = tc.denominator == unit;
         bool numerator_brackets     = RingCompanionHelper<T>::brackets_required(tc.numerator) && !denominator_unit;
         bool denominator_brackets   = RingCompanionHelper<T>::brackets_required(tc.denominator);
-        
+
         if (numerator_brackets) {
             os << "(";
         }
