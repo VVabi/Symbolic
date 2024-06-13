@@ -153,6 +153,14 @@ std::vector<PowerSeriesTestcase> test_cases = {
         {"eval(exp(z), z/(1-z))", {1, 1, 3, 13, 73, 501, 4051, 37633}, true, 0},
         {"eval(exp(z), z/(1-z)+O(z^20))", {1, 1, 3, 13, 73, 501, 4051, 37633, 394353, 4596553, 58941091}, true, 0},
         {"eval(1/(1-z), CYC(3*z))", {1, 3, 15, 74, 369, 1839, 9188, 45903, 229425, 1146758}, false, 0},
+
+        // trigonometric functions
+        {"cos(z+z^2)", {1, 0, -1, -6, -11, 20, 179, 798, 841, -10008, -73081}, true, 0},
+        {"sin(z+z^2)", {0, 1, 2, -1, -12, -59, -90, 419, 3304, 13609, 5130}, true, 0},
+        {"sin(z)^2+cos(z)^2", {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, false, 0},
+        {"sin(z+z^3)^2+cos(z+z^3)^2", {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, false, 0},
+        {"tan(z)-sin(z)/cos(z)", {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, false, 0},
+        {"tan(exp(z)-1)-sin(exp(z)-1)/cos(exp(z)-1)", {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, false, 0},
 };
 
 template<typename T> std::pair<FormalPowerSeries<T>, std::string> parse_as_power_series(const std::string& formula, const uint32_t fp_size, const T unit) {
