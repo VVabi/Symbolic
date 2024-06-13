@@ -538,6 +538,12 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SQRT, element.position);
             } else if (parts[0] == "log") {
                 return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::LOG, element.position);
+            } else if (parts[0] == "sin") {
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SIN, element.position);
+            } else if (parts[0] == "cos") {
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::COS, element.position);
+            } else if (parts[0] == "tan") {
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::TAN, element.position);
             } else if (parts[0] == "PSET") {
                 return std::make_unique<PolishPset<T>>(parts[1], element.position);
             } else if (parts[0] == "MSET") {

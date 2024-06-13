@@ -15,7 +15,10 @@
 enum class PowerSeriesBuiltinFunctionType {
     EXP,    /**< Exponential function */
     LOG,    /**< Natural logarithm function */
-    SQRT    /**< Square root function */
+    SQRT,   /**< Square root function */
+    SIN,    /**< Sine function */
+    COS,    /**< Cosine function */
+    TAN     /**< Tangent function */
 };
 
 double evaluate_power_series_function_double(const double in, const PowerSeriesBuiltinFunctionType type);
@@ -42,11 +45,15 @@ FormalPowerSeries<T> get_power_series_function(const PowerSeriesBuiltinFunctionT
         case PowerSeriesBuiltinFunctionType::EXP:
             return FormalPowerSeries<T>::get_exp(fp_size, unit);
         case PowerSeriesBuiltinFunctionType::LOG:
-            expansion_point = unit;
-            return FormalPowerSeries<T>::get_log(fp_size, unit);
+            return FormalPowerSeries<T>::get_log(expansion_point, fp_size, unit);
         case PowerSeriesBuiltinFunctionType::SQRT:
-            expansion_point = unit;
-            return FormalPowerSeries<T>::get_sqrt(fp_size, unit);
+            return FormalPowerSeries<T>::get_sqrt(expansion_point, fp_size, unit);
+        case PowerSeriesBuiltinFunctionType::SIN:
+            return FormalPowerSeries<T>::get_sin(fp_size, unit);
+        case PowerSeriesBuiltinFunctionType::COS:
+            return FormalPowerSeries<T>::get_cos(fp_size, unit);
+        case PowerSeriesBuiltinFunctionType::TAN:
+            return FormalPowerSeries<T>::get_sin(fp_size, unit)/FormalPowerSeries<T>::get_cos(fp_size, unit);
         default:
             throw std::runtime_error("Unknown power series function type");
     }

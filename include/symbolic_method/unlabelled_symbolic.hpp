@@ -150,7 +150,8 @@ template <typename T> FormalPowerSeries<T> unlabelled_cyc_complete(FormalPowerSe
     auto phis = calculate_euler_phi(a.num_coefficients()-1);
     auto unit = RingCompanionHelper<T>::get_unit(a[0]);
     auto ret = FormalPowerSeries<T>::get_zero(a[0], a.num_coefficients());
-    FormalPowerSeries<T> log_fps = FormalPowerSeries<T>::get_log(a.num_coefficients(), unit);
+    auto expansion_point = unit;
+    FormalPowerSeries<T> log_fps = FormalPowerSeries<T>::get_log(expansion_point, a.num_coefficients(), unit);
     for (uint32_t k = 1; k < a.num_coefficients(); k++) {
         auto arg = -log_fps.substitute(-a.substitute_exponent(k));
         ret = ret + (unit/k)*((phis[k]*unit)*arg);
