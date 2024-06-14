@@ -62,7 +62,11 @@ enum class Datatype {
     MOD
 };
 
-std::string parse_formula(const std::string& input, const Datatype type, std::map<std::string, std::vector<MathLexerElement>>& variables);
+std::string parse_formula(const std::string& input,
+                        const Datatype type,
+                        std::map<std::string,
+                        std::vector<MathLexerElement>>& variables,
+                        const uint32_t powerseries_expansion_size);
 
 ModLong parse_modlong_value(const std::string& input);
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

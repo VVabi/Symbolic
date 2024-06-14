@@ -17,10 +17,38 @@
 #include "number_theory/moebius.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "cpp_utils/unused.hpp"
+#include "shell/parameters/parameters.hpp"
+
+bool handle_command(std::string cmd) {
+    auto parts = string_split(cmd, ' ');
+
+    if (parts.size() == 0) {
+        return true;
+    }
+
+    if (parts.size() != 3) {
+        return false;
+    }   
+    
+    try {
+        if (parts[0] == "setparam") {
+            update_parameters(parts[1], parts[2]);
+            return true;
+        }
+    } catch (std::exception& e) {
+        std::cout << "Eception during user command execution " << e.what() << std::endl;
+        return false;
+    }
+
+    return false;
+}
+
 
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
+    initialize_shell_parameters();
+    auto par = get_shell_parameters();
     std::string input;
     uint32_t count = 0;
     auto variables = std::map<std::string, std::vector<MathLexerElement>>();
@@ -33,9 +61,26 @@ int main(int argc, char **argv) {
         }
         int64_t position = -1;
         bool error = false;
+
+        if (input.length() > 0 && input[0] == '#') {
+            if (!handle_command(input.substr(1))) {
+                std::cout << "Invalid command "+input << std::endl;
+            }
+            continue;
+        }
+
+        bool print_result = true;
+
+        if (input.length() > 0 && input[input.length()-1] == ';') {
+            print_result = false;
+            input = input.substr(0, input.length()-1);
+        }
+
         try {
-            auto x = parse_formula(input, Datatype::DYNAMIC, variables);
-            std::cout << x << std::endl;
+            auto x = parse_formula(input, Datatype::DYNAMIC, variables, par->powerseries_expansion_size);
+            if (print_result) {
+                std::cout << x << std::endl;
+            }
         } catch (ParsingException &e) {
             error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;

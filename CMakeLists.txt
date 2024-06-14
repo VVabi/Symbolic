@@ -13,6 +13,7 @@ add_executable(Symbolic
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/functions/power_series_functions.cpp
+        src/shell/parameters/parameters.cpp
 )
 
 add_executable(Symbolic_tests
@@ -25,13 +26,13 @@ add_executable(Symbolic_tests
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/functions/power_series_functions.cpp
+        src/shell/parameters/parameters.cpp
         src/test/parsing/test_power_series_parsing.cpp
         src/test/parsing/test_value_parsing.cpp
         src/test/parsing/test_rational_function_parsing.cpp
         src/test/types/bigint_tests.cpp
         src/test/types/modlong_tests.cpp
-        src/test/types/polynomial_tests.cpp
-)
+        src/test/types/polynomial_tests.cpp)
 
 add_executable(Symbolic_playground
         src/Symbolic_playground.cpp
@@ -43,6 +44,7 @@ add_executable(Symbolic_playground
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/functions/power_series_functions.cpp
+        src/shell/parameters/parameters.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
