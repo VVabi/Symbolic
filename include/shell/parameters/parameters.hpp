@@ -4,9 +4,12 @@
 #include <stdint.h>
 #include <string>
 #include "shell/command_handling.hpp"
+#include "common/common_datatypes.hpp"
 
 struct ShellParameters {
     uint32_t powerseries_expansion_size;
+    Datatype parsing_type;
+    int64_t default_modulus;
 };
 
 void initialize_shell_parameters();

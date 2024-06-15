@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
         }
 
         try {
-            auto x = parse_formula(input, Datatype::DYNAMIC, variables, par->powerseries_expansion_size);
+            auto x = parse_formula(input, par->parsing_type, variables, par->powerseries_expansion_size, par->default_modulus);
             if (print_result) {
                 std::cout << x << std::endl;
             }

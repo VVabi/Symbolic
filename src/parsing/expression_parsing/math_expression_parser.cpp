@@ -42,18 +42,19 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  * @return The inferred mod unit.
  * @throws EvalException if no "Mod" function is found.
  */
-ModLong infer_mod_unit(std::deque<MathLexerElement> input) {
+bool infer_mod_unit(ModLong& unit, std::deque<MathLexerElement> input) {
     while (input.size() > 0) {
         auto x = input.front();
 
         if (x.type == FUNCTION && x.data == "Mod") {
             auto num = iterate_wrapped<ModLong>(input, ModLong(0, 1), 1)->as_value();
-            return RingCompanionHelper<ModLong>::get_unit(num);
+            unit = RingCompanionHelper<ModLong>::get_unit(num);
+            return true;
         }
         input.pop_front();
     }
 
-    throw EvalException("No Mod found", -1);  // should be unreachable if function is used correctly
+    return false;
 }
 
 /**
@@ -66,7 +67,10 @@ ModLong infer_mod_unit(std::deque<MathLexerElement> input) {
  * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a string.
  */
-std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Datatype type, const uint32_t powerseries_expansion_size) {
+std::string parse_formula_internal(std::deque<MathLexerElement>& input, 
+                                    const Datatype type, 
+                                    const uint32_t powerseries_expansion_size,
+                                    const int64_t default_modulus) {
     switch (type) {
         case Datatype::DYNAMIC:
              // needs to be resolved on a higher level
@@ -77,7 +81,10 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input, const Da
         case Datatype::RATIONAL:
             return iterate_wrapped<RationalNumber<BigInt>>(input, RationalNumber(BigInt(1)), powerseries_expansion_size)->to_string();
         case Datatype::MOD:
-            auto unit = infer_mod_unit(input);
+            ModLong unit = ModLong(0, 1);
+            if (!infer_mod_unit(unit, input)) {
+                unit = ModLong(1, default_modulus);
+            }
             return iterate_wrapped<ModLong>(input, unit, powerseries_expansion_size)->to_string();
     }
 
@@ -127,7 +134,8 @@ std::string parse_formula(const std::string& input,
                     const Datatype type, 
                     std::map<std::string, 
                     std::vector<MathLexerElement>>& variables,
-                    const uint32_t powerseries_expansion_size) {
+                    const uint32_t powerseries_expansion_size,
+                    const int64_t default_modulus) {
     auto parts = string_split(input, '=');
 
     if (parts.size() > 2) {
@@ -152,9 +160,6 @@ std::string parse_formula(const std::string& input,
 
     auto formula = parse_math_expression_string(input_string, variables, offset);
 
-    if (variable.size() > 0) {
-        variables[variable] = formula;
-    }
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;
@@ -166,16 +171,20 @@ std::string parse_formula(const std::string& input,
     std::string ret;
     if (type == Datatype::DYNAMIC) {
         auto actual_type = infer_datatype_from_lexer(p);
-        ret = parse_formula_internal(polish, actual_type, powerseries_expansion_size);
+        ret = parse_formula_internal(polish, actual_type, powerseries_expansion_size, default_modulus);
     } else {
-        ret = parse_formula_internal(polish, type, powerseries_expansion_size);
+        ret = parse_formula_internal(polish, type, powerseries_expansion_size, default_modulus);
     }
     auto ans = parse_math_expression_string(ret, variables, 0);
     variables["ANS"] = ans;
+    if (variable.size() > 0) {
+        variables[variable] = ans;
+    }
     return ret;
 }
 
 // currently needed for tests
+// to remove this, fix the from_string implementation of ModLong so that it can actually parse something like Mod(6,17)
 ModLong parse_modlong_value(const std::string& input) {
     auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
     auto p = shunting_yard_algorithm(formula);
@@ -185,7 +194,7 @@ ModLong parse_modlong_value(const std::string& input) {
     for (MathLexerElement x : p) {
         polish.push_back(x);
     }
-
-    auto unit = infer_mod_unit(polish);
+    ModLong unit = ModLong(0, 1);
+    infer_mod_unit(unit, polish);
     return iterate_wrapped<ModLong>(polish, unit, 20)->as_value();
 }

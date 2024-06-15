@@ -15,6 +15,7 @@
 #include <sstream>
 #include <map>
 #include <vector>
+#include "common/common_datatypes.hpp"
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/polish_notation/polish_notation.hpp"
@@ -55,18 +56,12 @@ template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_f
     return res;
 }
 
-enum class Datatype {
-    DYNAMIC,
-    DOUBLE,
-    RATIONAL,
-    MOD
-};
-
 std::string parse_formula(const std::string& input,
                         const Datatype type,
                         std::map<std::string,
                         std::vector<MathLexerElement>>& variables,
-                        const uint32_t powerseries_expansion_size);
+                        const uint32_t powerseries_expansion_size,
+                        const int64_t default_modulus);
 
 ModLong parse_modlong_value(const std::string& input);
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
