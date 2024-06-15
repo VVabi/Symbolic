@@ -18,36 +18,14 @@
 #include "exceptions/parsing_exceptions.hpp"
 #include "cpp_utils/unused.hpp"
 #include "shell/parameters/parameters.hpp"
-
-bool handle_command(std::string cmd) {
-    auto parts = string_split(cmd, ' ');
-
-    if (parts.size() == 0) {
-        return true;
-    }
-
-    if (parts.size() != 3) {
-        return false;
-    }   
-    
-    try {
-        if (parts[0] == "setparam") {
-            update_parameters(parts[1], parts[2]);
-            return true;
-        }
-    } catch (std::exception& e) {
-        std::cout << "Eception during user command execution " << e.what() << std::endl;
-        return false;
-    }
-
-    return false;
-}
+#include "shell/command_handling.hpp"
 
 
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
     initialize_shell_parameters();
+    initialize_command_handler();
     auto par = get_shell_parameters();
     std::string input;
     uint32_t count = 0;
@@ -63,9 +41,7 @@ int main(int argc, char **argv) {
         bool error = false;
 
         if (input.length() > 0 && input[0] == '#') {
-            if (!handle_command(input.substr(1))) {
-                std::cout << "Invalid command "+input << std::endl;
-            }
+            handle_command(input.substr(1));
             continue;
         }
 

@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 #include "shell/parameters/parameters.hpp"
+#include "shell/command_handling.hpp"
 
 static ShellParameters parameters;
 
@@ -14,10 +15,17 @@ const ShellParameters* get_shell_parameters() {
     return &parameters;
 }
 
-void update_parameters(const std::string& parameter_name, const std::string& parameter_value) {
+CommandResult update_parameters(const std::string& parameter_name, const std::string& parameter_value) {
     if (parameter_name == "powerseriesprecision") {
-        parameters.powerseries_expansion_size = std::stoi(parameter_value);
-    } else {
-        throw std::invalid_argument("Invalid parameter name: "+parameter_name);
+        auto value = std::stoi(parameter_value);
+
+        if (value <= 0) {
+            return CommandResult{"Power series precision must be positive", false};
+        }
+        parameters.powerseries_expansion_size = value;
+        auto ret = CommandResult{"Parameter updated", true};
+        return ret;
     }
+
+    return CommandResult{"Unknown parameter", false};
 }
