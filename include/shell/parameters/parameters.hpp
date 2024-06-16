@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 #include "shell/command_handling.hpp"
 #include "common/common_datatypes.hpp"
 
@@ -18,8 +19,8 @@ const ShellParameters* get_shell_parameters();
 
 CommandResult update_parameters(const std::string& parameter_name, const std::string& parameter_value);
 
-CommandResult handle_setparam_command(std::vector<std::string>& args);
+CommandResult handle_setparam_command(std::vector<std::string>& args, const std::string& command_name);
 
-CommandResult handle_getparam_command(std::vector<std::string>& args);
+CommandResult handle_getparam_command(std::vector<std::string>& args, const std::string& command_name);
 
-#endif // INCLUDE_SHELL_PARAMETERS_PARAMETERS_HPP_
+#endif  // INCLUDE_SHELL_PARAMETERS_PARAMETERS_HPP_

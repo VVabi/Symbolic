@@ -6,12 +6,12 @@
 CommandHandler command_handler;
 
 void initialize_command_handler() {
-    command_handler.add_handler("setparam", [](std::vector<std::string>& args) {        
-        return handle_setparam_command(args);
+    command_handler.add_handler(COMMAND_SETPARAM, [](std::vector<std::string>& args, const std::string& command_name) {
+        return handle_setparam_command(args, command_name);
     });
 
-    command_handler.add_handler("getparam", [](std::vector<std::string>& args) {        
-        return handle_getparam_command(args);
+    command_handler.add_handler(COMMAND_GETPARAM, [](std::vector<std::string>& args, const std::string& command_name) {
+        return handle_getparam_command(args, command_name);
     });
 }
 

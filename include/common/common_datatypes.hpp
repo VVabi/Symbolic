@@ -1,5 +1,5 @@
-#ifndef COMMON_DATATYPES_HPP
-#define COMMON_DATATYPES_HPP
+#ifndef INCLUDE_COMMON_COMMON_DATATYPES_HPP_
+#define INCLUDE_COMMON_COMMON_DATATYPES_HPP_
 
 #include <string>
 
@@ -13,4 +13,4 @@ enum class Datatype {
 bool stringToDatatype(const std::string& str, Datatype& datatype);
 std::string datatypeToString(Datatype datatype);
 
-#endif // COMMON_DATATYPES_HPP
+#endif  // INCLUDE_COMMON_COMMON_DATATYPES_HPP_

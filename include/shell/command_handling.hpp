@@ -7,6 +7,8 @@
 #include <functional>
 #include <vector>
 
+#define COMMAND_SETPARAM "setparam"
+#define COMMAND_GETPARAM "getparam"
 
 struct CommandResult {
     std::string result;
@@ -15,13 +17,13 @@ struct CommandResult {
 
 class CommandHandler {
  private:
-    std::map<std::string, std::function<CommandResult(std::vector<std::string>&)>> handlers;
+    std::map<std::string, std::function<CommandResult(std::vector<std::string>&, const std::string& command_name)>> handlers;
 
  public:
     CommandHandler()  = default;
     ~CommandHandler() = default;
 
-    bool add_handler(const std::string& command, std::function<CommandResult(std::vector<std::string>&)> handler) {
+    bool add_handler(const std::string& command, std::function<CommandResult(std::vector<std::string>&, const std::string& command_name)> handler) {
         if (handlers.count(command) > 0) {
             return false;
         }
@@ -46,12 +48,12 @@ class CommandHandler {
             return CommandResult{"Unknown command "+parts[0], false};
         }
 
-        std::vector<std::string> args(parts.begin() + 1, parts.end()); //TODO this is not efficient, but probably not a big deal
-        return handlers[parts[0]](args);
+        std::vector<std::string> args(parts.begin() + 1, parts.end());  // TODO(vabi) this is not efficient, but probably not a big deal
+        return handlers[parts[0]](args, parts[0]);
     }
 };
 
 void initialize_command_handler();
 void handle_command(const std::string& command);
 
-#endif // INCLUDE_SHELL_COMMAND_HANDLING_HPP_
+#endif  // INCLUDE_SHELL_COMMAND_HANDLING_HPP_
