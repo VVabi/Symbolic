@@ -36,7 +36,8 @@ add_executable(Symbolic_tests
         src/test/parsing/test_rational_function_parsing.cpp
         src/test/types/bigint_tests.cpp
         src/test/types/modlong_tests.cpp
-        src/test/types/polynomial_tests.cpp)
+        src/test/types/polynomial_tests.cpp
+        src/test/shell/parameters/parameter_tests.cpp)
 
 add_executable(Symbolic_playground
         src/Symbolic_playground.cpp
