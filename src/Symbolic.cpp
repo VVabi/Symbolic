@@ -17,10 +17,16 @@
 #include "number_theory/moebius.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "cpp_utils/unused.hpp"
+#include "shell/parameters/parameters.hpp"
+#include "shell/command_handling.hpp"
+
 
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
+    initialize_shell_parameters();
+    initialize_command_handler();
+    auto par = get_shell_parameters();
     std::string input;
     uint32_t count = 0;
     auto variables = std::map<std::string, std::vector<MathLexerElement>>();
@@ -33,9 +39,24 @@ int main(int argc, char **argv) {
         }
         int64_t position = -1;
         bool error = false;
+
+        if (input.length() > 0 && input[0] == '#') {
+            handle_command(input.substr(1));
+            continue;
+        }
+
+        bool print_result = true;
+
+        if (input.length() > 0 && input[input.length()-1] == ';') {
+            print_result = false;
+            input = input.substr(0, input.length()-1);
+        }
+
         try {
-            auto x = parse_formula(input, Datatype::DYNAMIC, variables);
-            std::cout << x << std::endl;
+            auto x = parse_formula(input, par->parsing_type, variables, par->powerseries_expansion_size, par->default_modulus);
+            if (print_result) {
+                std::cout << x << std::endl;
+            }
         } catch (ParsingException &e) {
             error = true;
             std::cout << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;

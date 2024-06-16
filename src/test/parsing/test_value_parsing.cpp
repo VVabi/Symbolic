@@ -59,7 +59,7 @@ std::vector<DoubleValueTestCase> double_test_cases = {
 TEST(ParsingTests, DoubleValueParsing) {
     for (const auto& test_case : double_test_cases) {
         auto vars = std::map<std::string, std::vector<MathLexerElement>>();
-        auto result = RingCompanionHelper<double>::from_string(parse_formula(test_case.formula, Datatype::DYNAMIC, vars), 1.0);
+        auto result = RingCompanionHelper<double>::from_string(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 0), 1.0);
         EXPECT_TRUE(EqualityChecker<double>::check_equality(result, test_case.expected_result));
     }
 }
@@ -83,7 +83,7 @@ std::vector<RationalValueTestCase> rational_test_cases = {
 TEST(ParsingTests, RationalValueParsing) {
     for (const auto& test_case : rational_test_cases) {
         auto vars = std::map<std::string, std::vector<MathLexerElement>>();
-        auto result = RingCompanionHelper<RationalNumber<BigInt>>::from_string(parse_formula(test_case.formula, Datatype::DYNAMIC, vars), BigInt(1));
+        auto result = RingCompanionHelper<RationalNumber<BigInt>>::from_string(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 1), BigInt(1));
         EXPECT_TRUE(EqualityChecker<RationalNumber<BigInt>>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
 }
@@ -108,7 +108,7 @@ std::vector<ModValueTestCase> mod_test_cases = {
 TEST(ParsingTests, ModValueParsing) {
     for (const auto& test_case : mod_test_cases) {
         auto vars = std::map<std::string, std::vector<MathLexerElement>>();
-        auto result = parse_modlong_value(parse_formula(test_case.formula, Datatype::DYNAMIC, vars));
+        auto result = parse_modlong_value(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 1));
         EXPECT_TRUE(EqualityChecker<ModLong>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
 }
