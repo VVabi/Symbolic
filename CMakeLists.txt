@@ -14,6 +14,7 @@ add_executable(Symbolic
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/functions/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
+        src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
 )
@@ -29,6 +30,7 @@ add_executable(Symbolic_tests
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/functions/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
+        src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
         src/test/parsing/test_power_series_parsing.cpp
@@ -50,6 +52,7 @@ add_executable(Symbolic_playground
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/functions/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
+        src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
 )
@@ -57,7 +60,7 @@ add_executable(Symbolic_playground
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 TARGET_LINK_LIBRARIES(Symbolic gmp)
-TARGET_LINK_LIBRARIES(Symbolic_tests gtest gmp)
+TARGET_LINK_LIBRARIES(Symbolic_tests pthread gtest gmp)
 TARGET_LINK_LIBRARIES(Symbolic_playground gmp)
 include(CPack)
-SET( CMAKE_CXX_FLAGS  "-std=c++17 -Wall -Werror -Wextra") #-pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-value -Wno-unused-local-typedefs -Wno-unused-private-field")
+SET( CMAKE_CXX_FLAGS  "-std=c++2a -Wall -Werror -Wextra") #-pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-value -Wno-unused-local-typedefs -Wno-unused-private-field")
