@@ -6,6 +6,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/unreachable_exception.hpp"
 
 class FormulaParsingResult {
  public:
@@ -31,6 +33,7 @@ class DefaultShell : public CoreShell {
 
     void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(std::cout, std::cerr, print_result);
+        std::cout << std::endl;
     }
 };
 
@@ -49,6 +52,7 @@ struct ShellInputEvalResult {
     std::string processed_input;
     InputPrefix prefix;
     InputPostfix postfix;
+    bool skip;
 
     bool print_result() {
         return postfix != SUPPRESS_OUTPUT;
@@ -63,8 +67,8 @@ class SuccessfulFormulaParsingResult : public FormulaParsingResult {
     void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
         UNUSED(err_stream);
         if (print_result) {
-            output_stream << result << std::endl;
-        }
+            output_stream << result;
+        } 
     }
 };
 
@@ -78,14 +82,14 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
         for (int32_t i = 0; i < e.get_position(); i++) {
             strm << " ";
         }
-        strm << "^ here" << std::endl;
+        strm << "^ here";
         error_message = strm.str();
     }
 
     void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
         UNUSED(output_stream);
         UNUSED(print_result);
-        err_stream << error_message << std::endl;
+        err_stream << error_message;
     }
 };
 
@@ -143,17 +147,17 @@ class FormulaParser {
 
 class SymbolicShellEvaluator {
  private:
-    std::unique_ptr<CoreShell> core_shell;
+    std::shared_ptr<CoreShell> core_shell;
     FormulaParser parser;
 
     bool is_exit(const std::string& input);
     InputPrefix get_input_prefix(std::string& input);
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
-
  public:
-    SymbolicShellEvaluator(std::unique_ptr<CoreShell> core_shell);
+    SymbolicShellEvaluator(std::shared_ptr<CoreShell> core_shell);
     void run();
+    bool run_single_input();
 };
 
 #endif  // INCLUDE_SHELL_SHELL_HPP_
