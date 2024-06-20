@@ -8,15 +8,6 @@
 #include "exceptions/unreachable_exception.hpp"
 #include "shell/shell.hpp"
 
-
-
-
-
-
-
-
-
-
 bool SymbolicShellEvaluator::is_exit(const std::string& input) {
     return input == "exit";
 }
@@ -51,8 +42,6 @@ ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& i
 SymbolicShellEvaluator::SymbolicShellEvaluator(std::unique_ptr<CoreShell> core_shell) : core_shell(std::move(core_shell)) {
     parser = FormulaParser();
 }
-
-
 
 void SymbolicShellEvaluator::run() {
     while (true) {

@@ -1,13 +1,15 @@
-#ifndef SHELL_SHELL_HPP_
-#define SHELL_SHELL_HPP_
+#ifndef INCLUDE_SHELL_SHELL_HPP_
+#define INCLUDE_SHELL_SHELL_HPP_
 
 #include <memory>
 #include <iostream>
 #include <string>
+#include <map>
+#include <vector>
 
 class FormulaParsingResult {
  public:
-    virtual void print_result(std::ostream& output_stream, bool print_result) = 0;
+    virtual void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) = 0;
 };
 
 
@@ -21,14 +23,14 @@ class CoreShell {
 class DefaultShell : public CoreShell {
  public:
     std::string get_next_input() override {
-        std::string input;
         std::cout << ">>> ";
+        std::string input;
         std::getline(std::cin, input);
         return input;
     }
 
     void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
-        result->print_result(std::cout, print_result);
+        result->print_result(std::cout, std::cerr, print_result);
     }
 };
 
@@ -53,16 +55,13 @@ struct ShellInputEvalResult {
     }
 };
 
-
-
 class SuccessfulFormulaParsingResult : public FormulaParsingResult {
     std::string result;
  public:
-    SuccessfulFormulaParsingResult(std::string result) : result(result) {
+    SuccessfulFormulaParsingResult(std::string result) : result(result) {  }
 
-    }
-
-    void print_result(std::ostream& output_stream, bool print_result) {
+    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
+        UNUSED(err_stream);
         if (print_result) {
             output_stream << result << std::endl;
         }
@@ -72,15 +71,21 @@ class SuccessfulFormulaParsingResult : public FormulaParsingResult {
 class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
     std::string error_message;
  public:
-    FormulaParsingParsingExceptionResult(ParsingException &e) {
+    FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& input) {
         std::stringstream strm;
-        strm << "Parsing error at position " << e.get_position() << ": " << e.what();
+        strm << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
+        strm << input << std::endl;
+        for (int32_t i = 0; i < e.get_position(); i++) {
+            strm << " ";
+        }
+        strm << "^ here" << std::endl;
         error_message = strm.str();
     }
 
-    void print_result(std::ostream& output_stream, bool print_result) {
+    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
+        UNUSED(output_stream);
         UNUSED(print_result);
-        output_stream << error_message << std::endl;
+        err_stream << error_message << std::endl;
     }
 };
 
@@ -93,9 +98,10 @@ class FormulaParsingUnreachableCodeExceptionResult : public FormulaParsingResult
         error_message = strm.str();
     }
 
-    void print_result(std::ostream& output_stream, bool print_result) {
+    void print_result(std::ostream& output_stream, std::ostream& err_stream,  bool print_result) {
         UNUSED(print_result);
-        output_stream << error_message << std::endl;
+        UNUSED(output_stream);
+        err_stream << error_message << std::endl;
     }
 };
 
@@ -108,9 +114,10 @@ class FormulaParsingTypeExceptionResult : public FormulaParsingResult {
         error_message = strm.str();
     }
 
-    void print_result(std::ostream& output_stream, bool print_result) {
+    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
         UNUSED(print_result);
-        output_stream << error_message << std::endl;
+        UNUSED(output_stream);
+        err_stream << error_message << std::endl;
     }
 };
 
@@ -118,16 +125,14 @@ class FormulaParser {
  private:
     std::map<std::string, std::vector<MathLexerElement>> variables = std::map<std::string, std::vector<MathLexerElement>>();
  public:
-    FormulaParser() {
-
-    }
+    FormulaParser() {  }
 
     std::unique_ptr<FormulaParsingResult> parse(const std::string& input, Datatype parsing_type, uint32_t powerseries_expansion_size, uint32_t default_modulus) {
         try {
              auto res = parse_formula(input, parsing_type, variables, powerseries_expansion_size, default_modulus);
              return std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
-            return std::make_unique<FormulaParsingParsingExceptionResult>(e);
+            return std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
         } catch (ReachedUnreachableException &e) {
             return std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
         } catch (ParsingTypeException &e) {
@@ -151,5 +156,4 @@ class SymbolicShellEvaluator {
     void run();
 };
 
-
-#endif  // SHELL_SHELL_HPP_
+#endif  // INCLUDE_SHELL_SHELL_HPP_
