@@ -18,7 +18,7 @@
 #include "shell/parameters/parameters.hpp"
 #include <fstream>
 
-class TestShell: public CoreShell {
+/*class TestShell: public CoreShell {
   public:
     std::stringstream out;
     std::stringstream err;
@@ -48,8 +48,9 @@ class TestShell: public CoreShell {
         out.str("");
         err.str("");
     }
-};
+};*/
 
+bool test_shell_power_series_parsing();
 
 int main(int argc, char **argv) {
     UNUSED(argc);
@@ -57,7 +58,8 @@ int main(int argc, char **argv) {
     
     initialize_shell_parameters();
     initialize_command_handler();
-    auto shell = std::make_shared<TestShell>();
+    test_shell_power_series_parsing();
+    /*auto shell = std::make_shared<TestShell>();
     SymbolicShellEvaluator evaluator(shell);
     
     evaluator.run();
@@ -68,5 +70,5 @@ int main(int argc, char **argv) {
     for (auto& err: shell->errs) {
         std::cerr << err << std::endl;
     }
-    return 0;
+    return 0;*/
 }

@@ -53,9 +53,10 @@ bool SymbolicShellEvaluator::run_single_input() {
         return true;
     }
     switch (result.prefix) {
-        case COMMAND:
+        case COMMAND: {
             handle_command(result.processed_input);
             break;
+        }
         case EXIT:
             return false;
             break;

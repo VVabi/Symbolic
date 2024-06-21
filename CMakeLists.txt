@@ -33,13 +33,15 @@ add_executable(Symbolic_tests
         src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
+        src/test/test_data/power_series_parsing_testdata.cpp
         src/test/parsing/test_power_series_parsing.cpp
         src/test/parsing/test_value_parsing.cpp
         src/test/parsing/test_rational_function_parsing.cpp
         src/test/types/bigint_tests.cpp
         src/test/types/modlong_tests.cpp
         src/test/types/polynomial_tests.cpp
-        src/test/shell/parameters/parameter_tests.cpp)
+        src/test/shell/parameters/parameter_tests.cpp
+        src/test/shell/test_shell.cpp)
 
 add_executable(Symbolic_playground
         src/Symbolic_playground.cpp
@@ -55,12 +57,14 @@ add_executable(Symbolic_playground
         src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
+        src/test/test_data/power_series_parsing_testdata.cpp #TODO remove
+        src/test/shell/test_shell.cpp #TODO remove
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 TARGET_LINK_LIBRARIES(Symbolic gmp)
 TARGET_LINK_LIBRARIES(Symbolic_tests pthread gtest gmp)
-TARGET_LINK_LIBRARIES(Symbolic_playground gmp)
+TARGET_LINK_LIBRARIES(Symbolic_playground gmp pthread gtest)
 include(CPack)
 SET( CMAKE_CXX_FLAGS  "-std=c++2a -Wall -Werror -Wextra") #-pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-value -Wno-unused-local-typedefs -Wno-unused-private-field")

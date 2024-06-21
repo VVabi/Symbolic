@@ -136,11 +136,31 @@ std::string parse_formula(const std::string& input,
                     std::vector<MathLexerElement>>& variables,
                     const uint32_t powerseries_expansion_size,
                     const int64_t default_modulus) {
-    auto parts = string_split(input, '=');
+
+    auto pos = input.find("=");
+    std::vector<std::string> parts;
+
+    //TODO this is an abomination
+    if (pos != std::string::npos) {
+        if (pos == 0) {
+            throw ParsingException("No variable name provided", -1);
+        }
+
+        if (input[pos-1] != '<' && input[pos-1] != '>' && input[pos-1] != '=' && input[pos-1] != '!' && input[pos-1] != '_') {
+            parts.push_back(input.substr(0, pos));
+            parts.push_back(input.substr(pos+1));
+        } else {
+            parts.push_back(input);
+        }
+    } else {
+        parts.push_back(input);
+    }
+
+    /*auto parts = string_split(input, '=');
 
     if (parts.size() > 2) {
         throw ParsingException("Too many '=' signs", -1);
-    }
+    }*/
 
     std::string input_string = "";
     std::string variable = "";
