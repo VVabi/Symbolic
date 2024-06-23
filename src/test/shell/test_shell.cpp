@@ -1,6 +1,6 @@
+#include <gtest/gtest.h>
 #include <sstream>
 #include <fstream>
-#include <gtest/gtest.h>
 #include <string>
 #include <filesystem>
 #include "shell/shell.hpp"
@@ -9,7 +9,7 @@
 #include "cpp_utils/unused.hpp"
 
 class TestShell: public CoreShell {
-  public:
+ public:
     std::stringstream out;
     std::stringstream err;
     std::unique_ptr<std::istream> input_stream;
@@ -38,7 +38,7 @@ class TestShell: public CoreShell {
 
         auto error_string = err.str();
 
-        for (auto str: string_split(error_string, '\n')) {
+        for (auto str : string_split(error_string, '\n')) {
             errs.push_back(str);
         }
 
@@ -55,7 +55,7 @@ void test_shell_power_series_parsing() {
     initialize_command_handler();
     auto test_cases = get_power_series_parsing_test_cases();
 
-    for (const auto& test_case: test_cases) {
+    for (const auto& test_case : test_cases) {
         auto formula = test_case.formula;
         auto expected_result = test_case.expected_result;
         auto exponential = test_case.exponential;
@@ -77,16 +77,14 @@ void test_shell_power_series_parsing() {
         evaluator.run();
 
         for (uint32_t ind = 0; ind < expected_result.size(); ind++) {
-            EXPECT_EQ(shell->outputs[ind+1], std::to_string(expected_result[ind])) << "Failed for " << formula << " at index " << ind << ": Got " << shell->outputs[ind+2] << " Expected " << expected_result[ind]; 
+             EXPECT_EQ(shell->outputs[ind+1], std::to_string(expected_result[ind])) << "Failed for " << formula << " at index " << ind << ": Got " << shell->outputs[ind+2] << " Expected " << expected_result[ind];
         }
     }
 }
 
-
 TEST(ShellTest, PowerSeriesParsing) {
-   test_shell_power_series_parsing();
-} 
-
+    test_shell_power_series_parsing();
+}
 
 void test_shell_explicit_tests() {
     initialize_shell_parameters();
@@ -100,7 +98,7 @@ void test_shell_explicit_tests() {
         }
     }
     std::cout << std::filesystem::current_path() << std::endl;
-    for (auto test_folder: directories) {
+    for (auto test_folder : directories) {
         auto input = std::make_unique<std::ifstream>(test_folder+"/input.txt");
 
         auto shell = std::make_shared<TestShell>(std::move(input));
@@ -111,13 +109,13 @@ void test_shell_explicit_tests() {
         std::ifstream expected_error_output_file(test_folder+"/expected_error_output.txt");
 
         std::string line;
-        auto expected_outputs = std::vector<std::string>();  
-        
+        auto expected_outputs = std::vector<std::string>();
+
         while (std::getline(expected_output_file, line)) {
             expected_outputs.push_back(line);
         }
 
-        auto expected_errors = std::vector<std::string>();  
+        auto expected_errors = std::vector<std::string>();
         while (std::getline(expected_error_output_file, line)) {
             expected_errors.push_back(line);
         }
@@ -137,8 +135,8 @@ void test_shell_explicit_tests() {
 }
 
 TEST(ShellTest, ExplicitTests) {
-   test_shell_explicit_tests();
-} 
+    test_shell_explicit_tests();
+}
 
 void regenerate_outputs() {
     std::string base_folder = "../src/test/shell/test_data/test_case_2";
@@ -151,11 +149,11 @@ void regenerate_outputs() {
     std::ofstream output_file(base_folder+"/expected_output.txt");
     std::ofstream error_file(base_folder+"/expected_error_output.txt");
 
-    for (auto& output: shell->outputs) {
+    for (auto& output : shell->outputs) {
         output_file << output << std::endl;
     }
 
-    for (auto& err: shell->errs) {
+    for (auto& err : shell->errs) {
         error_file << err << std::endl;
     }
     output_file.flush();

@@ -7,6 +7,7 @@
 #include <numeric>
 #include <random>
 #include <map>
+#include <fstream>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/power_series.hpp"
 #include "types/rationals.hpp"
@@ -16,7 +17,7 @@
 #include "types/polynomial.hpp"
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
-#include <fstream>
+
 
 /*class TestShell: public CoreShell {
   public:
@@ -56,10 +57,10 @@ void regenerate_outputs();
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
-    
+
     initialize_shell_parameters();
     initialize_command_handler();
-    //regenerate_outputs();
+    // regenerate_outputs();
     test_shell_explicit_tests();
     /*auto shell = std::make_shared<TestShell>();
     SymbolicShellEvaluator evaluator(shell);

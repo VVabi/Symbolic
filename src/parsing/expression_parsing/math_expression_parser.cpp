@@ -136,11 +136,10 @@ std::string parse_formula(const std::string& input,
                     std::vector<MathLexerElement>>& variables,
                     const uint32_t powerseries_expansion_size,
                     const int64_t default_modulus) {
-
     auto pos = input.find("=");
     std::vector<std::string> parts;
 
-    //TODO this is an abomination
+    // TODO(vabi) this is an abomination
     if (pos != std::string::npos) {
         if (pos == 0) {
             throw ParsingException("No variable name provided", -1);

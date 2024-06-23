@@ -1,9 +1,9 @@
-#ifndef _INCLUDE_TEST_TEST_DATA_POWER_SERIES_PARSING_TESTDATA_HPP
-#define _INCLUDE_TEST_TEST_DATA_POWER_SERIES_PARSING_TESTDATA_HPP
+#ifndef INCLUDE_TEST_TEST_DATA_POWER_SERIES_PARSING_TESTDATA_HPP_
+#define INCLUDE_TEST_TEST_DATA_POWER_SERIES_PARSING_TESTDATA_HPP_
 
+#include <stdint.h>
 #include <vector>
 #include <string>
-#include <stdint.h>
 
 struct PowerSeriesTestcase {
     std::string formula;
@@ -14,4 +14,4 @@ struct PowerSeriesTestcase {
 
 const std::vector<PowerSeriesTestcase>& get_power_series_parsing_test_cases();
 
-#endif  // _INCLUDE_TEST_TEST_DATA_POWER_SERIES_PARSING_TESTDATA_HPP
+#endif  // INCLUDE_TEST_TEST_DATA_POWER_SERIES_PARSING_TESTDATA_HPP_

@@ -73,7 +73,7 @@ class SuccessfulFormulaParsingResult : public FormulaParsingResult {
         UNUSED(err_stream);
         if (print_result) {
             output_stream << result;
-        } 
+        }
     }
 };
 
