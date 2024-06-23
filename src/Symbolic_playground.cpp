@@ -51,14 +51,16 @@
 };*/
 
 bool test_shell_power_series_parsing();
-
+bool test_shell_explicit_tests();
+void regenerate_outputs();
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
     
     initialize_shell_parameters();
     initialize_command_handler();
-    test_shell_power_series_parsing();
+    //regenerate_outputs();
+    test_shell_explicit_tests();
     /*auto shell = std::make_shared<TestShell>();
     SymbolicShellEvaluator evaluator(shell);
     
