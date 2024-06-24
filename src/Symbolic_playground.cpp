@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 
     initialize_shell_parameters();
     initialize_command_handler();
-    // regenerate_outputs();
+    //regenerate_outputs();
     test_shell_explicit_tests();
     /*auto shell = std::make_shared<TestShell>();
     SymbolicShellEvaluator evaluator(shell);

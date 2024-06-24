@@ -97,7 +97,7 @@ void test_shell_explicit_tests() {
             directories.push_back(std::filesystem::absolute(entry.path()).string());
         }
     }
-    std::cout << std::filesystem::current_path() << std::endl;
+
     for (auto test_folder : directories) {
         auto input = std::make_unique<std::ifstream>(test_folder+"/input.txt");
 
@@ -139,7 +139,7 @@ TEST(ShellTest, ExplicitTests) {
 }
 
 void regenerate_outputs() {
-    std::string base_folder = "../src/test/shell/test_data/test_case_2";
+    std::string base_folder = "../src/test/shell/test_data/test_case_wrong_parentheses";
     auto input = std::make_unique<std::ifstream>(base_folder+"/input.txt");
     auto shell = std::make_shared<TestShell>(std::move(input));
     SymbolicShellEvaluator evaluator(shell);
