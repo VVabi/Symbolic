@@ -98,6 +98,6 @@ void initialize_command_handler();
  * @brief Handles the execution of a command.
  * @param command The command to be executed.
  */
-void handle_command(const std::string& command);
+CommandResult handle_command(const std::string& command);
 
 #endif  // INCLUDE_SHELL_COMMAND_HANDLING_HPP_

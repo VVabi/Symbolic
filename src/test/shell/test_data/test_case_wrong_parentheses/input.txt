@@ -1,0 +1,7 @@
+#setparam powerseriesprecision 5
+f = exp(z
+f = 1/1-z-z^2)
+f = exp(z)
+egfcoeff(f, 5
+egfcoeff(f, 5)
+egfcoeff(f, 4)

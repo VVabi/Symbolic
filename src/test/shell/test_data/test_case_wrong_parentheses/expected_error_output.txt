@@ -1,0 +1,14 @@
+Parsing error at position 7: Mismatched or missing parentheses
+f = exp(z
+       ^ here
+Parsing error at position 13: Mismatched parentheses
+f = 1/1-z-z^2)
+             ^ here
+
+Parsing error at position 8: Mismatched or missing parentheses
+egfcoeff(f, 5
+        ^ here
+Parsing error at position 0: Coefficient index out of bounds
+egfcoeff(f, 5)
+^ here
+

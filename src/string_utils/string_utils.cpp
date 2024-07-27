@@ -28,6 +28,7 @@ std::vector<std::string> string_split(const std::string& in, const char delimite
     while (std::getline(f, s, delimiter)) {
         strings.push_back(s);
     }
+
     return strings;
 }
 

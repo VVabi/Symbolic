@@ -15,14 +15,10 @@ void initialize_command_handler() {
     });
 }
 
-void handle_command(const std::string& command) {
+CommandResult handle_command(const std::string& command) {
     auto parts = string_split(command, ' ');
     CommandResult result = command_handler.handle_command(parts);
-    if (!result.success_flag) {
-        std::cout << "Error during command execution: " << result.result << std::endl;
-    } else {
-        std::cout << result.result << std::endl;
-    }
+    return result;
 }
 
 

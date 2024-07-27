@@ -386,9 +386,13 @@ template<typename T> class PolishLandau: public PolishNotationElement<T> {
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_rational_function();
-        auto deg = result.get_numerator().degree();
+        uint32_t deg = result.get_numerator().degree();
         if (deg <= 0) {
             deg = 1;
+        }
+
+        if (deg > fp_size) {
+            deg = fp_size;
         }
         return std::make_unique<PowerSeriesType<T>>(PowerSeries<T>::get_zero(unit, deg));
     }
