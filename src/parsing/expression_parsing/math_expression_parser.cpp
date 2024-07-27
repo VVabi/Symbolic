@@ -139,7 +139,9 @@ std::string parse_formula(const std::string& input,
     auto pos = input.find("=");
     std::vector<std::string> parts;
 
-    // TODO(vabi) this is an abomination
+    // TODO(vabi) this is an abomination unto nuggan
+    // Currently necessary to distinguish between a '=' assignment like in f = 1/(1-z), or an = appearing in a set descriptor
+    // like MSET_>=2(1/(1-z))
     if (pos != std::string::npos) {
         if (pos == 0) {
             throw ParsingException("No variable name provided", -1);
@@ -154,12 +156,6 @@ std::string parse_formula(const std::string& input,
     } else {
         parts.push_back(input);
     }
-
-    /*auto parts = string_split(input, '=');
-
-    if (parts.size() > 2) {
-        throw ParsingException("Too many '=' signs", -1);
-    }*/
 
     std::string input_string = "";
     std::string variable = "";
