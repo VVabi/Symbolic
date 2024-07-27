@@ -87,8 +87,6 @@ TEST(ShellTest, PowerSeriesParsing) {
 }
 
 void test_shell_explicit_tests() {
-    initialize_shell_parameters();
-    initialize_command_handler();
     std::string base_folder = "../src/test/shell/test_data";
 
     std::vector<std::string> directories;
@@ -99,6 +97,8 @@ void test_shell_explicit_tests() {
     }
 
     for (auto test_folder : directories) {
+        initialize_shell_parameters();
+        initialize_command_handler();
         auto input = std::make_unique<std::ifstream>(test_folder+"/input.txt");
 
         auto shell = std::make_shared<TestShell>(std::move(input));
