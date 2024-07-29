@@ -45,7 +45,10 @@ class CmdLineShellOutput : public ShellOutput {
  public:
     void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(std::cout, std::cerr, print_result);
-        std::cout << std::endl;
+        // TODO(vabi): this is architecturally questionable...
+        if (print_result) {
+            std::cout << std::endl;
+        }
     }
 };
 
