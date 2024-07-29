@@ -17,6 +17,7 @@ add_executable(Symbolic
         src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
+        src/options/cmd_line_options.cpp
 )
 
 add_executable(Symbolic_tests
@@ -33,6 +34,7 @@ add_executable(Symbolic_tests
         src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
+        src/options/cmd_line_options.cpp
         src/test/test_data/power_series_parsing_testdata.cpp
         src/test/parsing/test_power_series_parsing.cpp
         src/test/parsing/test_value_parsing.cpp
@@ -57,6 +59,7 @@ add_executable(Symbolic_playground
         src/shell/shell.cpp
         src/shell/command_handling.cpp
         src/common/common_datatypes.cpp
+        src/options/cmd_line_options.cpp
         src/test/test_data/power_series_parsing_testdata.cpp #TODO remove
         src/test/shell/test_shell.cpp #TODO remove
 )

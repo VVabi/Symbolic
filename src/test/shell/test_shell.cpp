@@ -8,18 +8,11 @@
 #include "shell/parameters/parameters.hpp"
 #include "cpp_utils/unused.hpp"
 
-class TestShell: public CoreShell {
+class TestShellInput: public ShellInput {
  public:
-    std::stringstream out;
-    std::stringstream err;
     std::unique_ptr<std::istream> input_stream;
 
-    std::vector<std::string> outputs;
-    std::vector<std::string> errs;
-
-    TestShell(std::unique_ptr<std::istream> in) {
-        out = std::stringstream();
-        err = std::stringstream();
+    TestShellInput(std::unique_ptr<std::istream> in) {
         input_stream = std::move(in);
     }
 
@@ -29,6 +22,20 @@ class TestShell: public CoreShell {
             return input;
         }
         return "exit";
+    }
+};
+
+class TestShellOutput: public ShellOutput {
+ public:
+    std::stringstream out;
+    std::stringstream err;
+
+    std::vector<std::string> outputs;
+    std::vector<std::string> errs;
+
+    TestShellOutput() {
+        out = std::stringstream();
+        err = std::stringstream();
     }
 
     void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) {
@@ -71,13 +78,14 @@ void test_shell_power_series_parsing() {
         for (uint32_t ind = 0; ind < expected_result.size(); ind++) {
             *instream << coeff_function_name + "(f, " + std::to_string(ind) + ")" << std::endl;
         }
-        auto shell = std::make_shared<TestShell>(std::move(instream));
-        SymbolicShellEvaluator evaluator(shell);
+        auto out_shell = std::make_shared<TestShellOutput>();
+        auto in_shell = std::make_shared<TestShellInput>(std::move(instream));
+        SymbolicShellEvaluator evaluator(in_shell, out_shell);
 
         evaluator.run();
 
         for (uint32_t ind = 0; ind < expected_result.size(); ind++) {
-             EXPECT_EQ(shell->outputs[ind+1], std::to_string(expected_result[ind])) << "Failed for " << formula << " at index " << ind << ": Got " << shell->outputs[ind+2] << " Expected " << expected_result[ind];
+             EXPECT_EQ(out_shell->outputs[ind+1], std::to_string(expected_result[ind])) << "Failed for " << formula << " at index " << ind << ": Got " << out_shell->outputs[ind+2] << " Expected " << expected_result[ind];
         }
     }
 }
@@ -99,10 +107,10 @@ void test_shell_explicit_tests() {
     for (auto test_folder : directories) {
         initialize_shell_parameters();
         initialize_command_handler();
-        auto input = std::make_unique<std::ifstream>(test_folder+"/input.txt");
 
-        auto shell = std::make_shared<TestShell>(std::move(input));
-        SymbolicShellEvaluator evaluator(shell);
+        auto shell_input = std::make_shared<FileShellInput>(test_folder+"/input.txt");
+        auto shell_output = std::make_shared<TestShellOutput>();
+        SymbolicShellEvaluator evaluator(shell_input, shell_output);
         evaluator.run();
 
         std::ifstream expected_output_file(test_folder+"/expected_output.txt");
@@ -120,16 +128,16 @@ void test_shell_explicit_tests() {
             expected_errors.push_back(line);
         }
 
-        EXPECT_EQ(expected_outputs.size(), shell->outputs.size()) << "Found different output sizes for " << test_folder;
+        EXPECT_EQ(expected_outputs.size(), shell_output->outputs.size()) << "Found different output sizes for " << test_folder;
 
-        for (size_t i = 0; i < std::min(expected_outputs.size(), shell->outputs.size()); i++) {
-            EXPECT_EQ(expected_outputs[i], shell->outputs[i]) << "Expected " << expected_outputs[i] << " Got " << shell->outputs[i] << " for " << test_folder << " in step " << i;
+        for (size_t i = 0; i < std::min(expected_outputs.size(), shell_output->outputs.size()); i++) {
+            EXPECT_EQ(expected_outputs[i], shell_output->outputs[i]) << "Expected " << expected_outputs[i] << " Got " << shell_output->outputs[i] << " for " << test_folder << " in step " << i;
         }
 
-        EXPECT_EQ(expected_errors.size(), shell->errs.size()) << "Found different error output sizes for " << test_folder;
+        EXPECT_EQ(expected_errors.size(), shell_output->errs.size()) << "Found different error output sizes for " << test_folder;
 
-        for (size_t i = 0; i < std::min(expected_errors.size(), shell->errs.size()); i++) {
-            EXPECT_EQ(expected_errors[i], shell->errs[i]) << "Expected " << expected_errors[i] << " Got " << shell->errs[i] << " for " << test_folder << " in step " << i;
+        for (size_t i = 0; i < std::min(expected_errors.size(), shell_output->errs.size()); i++) {
+            EXPECT_EQ(expected_errors[i], shell_output->errs[i]) << "Expected " << expected_errors[i] << " Got " << shell_output->errs[i] << " for " << test_folder << " in step " << i;
         }
     }
 }
@@ -140,20 +148,21 @@ TEST(ShellTest, ExplicitTests) {
 
 void regenerate_outputs() {
     std::string base_folder = "../src/test/shell/test_data/test_case_wrong_parentheses";
-    auto input = std::make_unique<std::ifstream>(base_folder+"/input.txt");
-    auto shell = std::make_shared<TestShell>(std::move(input));
-    SymbolicShellEvaluator evaluator(shell);
+    auto input              = std::make_unique<std::ifstream>(base_folder+"/input.txt");
+    auto shell_input        = std::make_shared<TestShellInput>(std::move(input));
+    auto shell_output       = std::make_shared<TestShellOutput>();
+    SymbolicShellEvaluator evaluator(shell_input, shell_output);
 
     evaluator.run();
     std::cout << base_folder+"/expected_output.txt" << std::endl;
     std::ofstream output_file(base_folder+"/expected_output.txt");
     std::ofstream error_file(base_folder+"/expected_error_output.txt");
 
-    for (auto& output : shell->outputs) {
+    for (auto& output : shell_output->outputs) {
         output_file << output << std::endl;
     }
 
-    for (auto& err : shell->errs) {
+    for (auto& err : shell_output->errs) {
         error_file << err << std::endl;
     }
     output_file.flush();

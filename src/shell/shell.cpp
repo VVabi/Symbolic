@@ -38,16 +38,12 @@ ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& i
     return {processed_input, prefix, postfix, skip};
 }
 
-SymbolicShellEvaluator::SymbolicShellEvaluator(std::shared_ptr<CoreShell> core_shell) : core_shell(core_shell) {
-    parser = FormulaParser();
-}
-
 void SymbolicShellEvaluator::run() {
     while (run_single_input()) { }
 }
 
 bool SymbolicShellEvaluator::run_single_input() {
-    auto input  = core_shell->get_next_input();
+    auto input  = shell_input->get_next_input();
     auto result = evaluate_input(input);
     if (result.skip) {
         return true;
@@ -63,7 +59,7 @@ bool SymbolicShellEvaluator::run_single_input() {
         case NO_PREFIX:
             auto par = get_shell_parameters();
             auto x = parser.parse(result.processed_input, par->parsing_type, par->powerseries_expansion_size, par->default_modulus);
-            core_shell->handle_output(std::move(x), result.print_result());
+            shell_output->handle_output(std::move(x), result.print_result());
             break;
     }
 

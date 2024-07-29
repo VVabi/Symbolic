@@ -3,31 +3,36 @@
  * @brief Main repl entry point.
  */
 
-#include <iostream>
-#include <numeric>
-#include <map>
-#include "exceptions/invalid_function_arg_exception.hpp"
-#include "exceptions/parsing_type_exception.hpp"
-#include "exceptions/unreachable_exception.hpp"
-#include "parsing/expression_parsing/math_expression_parser.hpp"
-#include "types/power_series.hpp"
-#include "types/rationals.hpp"
-#include "types/bigint.hpp"
-#include "examples/graph_isomorphisms.hpp"
-#include "number_theory/moebius.hpp"
-#include "exceptions/parsing_exceptions.hpp"
-#include "cpp_utils/unused.hpp"
+
+#include <memory>
 #include "shell/parameters/parameters.hpp"
-#include "shell/command_handling.hpp"
 #include "shell/shell.hpp"
+#include "options/cmd_line_options.hpp"
+
+std::shared_ptr<ShellInput> get_shell_input(const CmdLineOptions& opts) {
+    if (opts.input_file.has_value()) {
+        return std::make_shared<FileShellInput>(opts.input_file.value());
+    } else {
+        return std::make_shared<CmdLineShellInput>();
+    }
+}
+
+std::shared_ptr<ShellOutput> get_shell_output(const CmdLineOptions& opts) {
+    if (opts.output_file.has_value()) {
+        return std::make_shared<FileShellOutput>(opts.output_file.value());
+    } else {
+        return std::make_shared<CmdLineShellOutput>();
+    }
+}
 
 int main(int argc, char **argv) {
-    UNUSED(argc);
-    UNUSED(argv);
+    auto opts = parse_cmd_line_args(argc, argv);
     initialize_shell_parameters();
     initialize_command_handler();
 
-    SymbolicShellEvaluator evaluator(std::make_unique<DefaultShell>());
+    auto shell_input    = get_shell_input(opts);
+    auto shell_output   = get_shell_output(opts);
+    SymbolicShellEvaluator evaluator(shell_input, shell_output);
     evaluator.run();
 
     return 0;
