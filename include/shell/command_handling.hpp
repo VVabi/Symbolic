@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <vector>
+#include "shell/shell.hpp"
 
 #define COMMAND_SETPARAM "setparam"
 #define COMMAND_GETPARAM "getparam"
@@ -19,9 +20,27 @@
  * @struct CommandResult
  * @brief Represents the result of a command execution.
  */
-struct CommandResult {
+struct CommandResult : FormulaParsingResult {
     std::string result; /**< The result of the command. */
     bool success_flag; /**< Flag indicating whether the command was executed successfully. */
+
+    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) override {
+        if (success_flag) {
+            if (print_result) {
+                output_stream << result;
+            }
+        } else {
+            err_stream << result;
+        }
+    }
+
+    /**
+     * @brief Constructor for CommandResult.
+     * @param result The result of the command.
+     * @param success_flag Flag indicating whether the command was executed successfully.
+     */
+    CommandResult(const std::string& result, bool success_flag)
+        : result(result), success_flag(success_flag) {}
 };
 
 /**
@@ -77,11 +96,11 @@ class CommandHandler {
      */
     CommandResult handle_command(const std::vector<std::string>& parts) {
         if (parts.size() == 0) {
-            return CommandResult{"Empty command", false};
+            return CommandResult("Empty command", false);
         }
 
         if (handlers.count(parts[0]) == 0) {
-            return CommandResult{"Unknown command "+parts[0], false};
+            return CommandResult("Unknown command "+parts[0], false);
         }
 
         std::vector<std::string> args(parts.begin() + 1, parts.end());  // TODO(vabi) this is not efficient, but probably not a big deal

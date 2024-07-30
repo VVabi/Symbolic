@@ -50,7 +50,8 @@ bool SymbolicShellEvaluator::run_single_input() {
     }
     switch (result.prefix) {
         case COMMAND: {
-            handle_command(result.processed_input);
+            auto res = handle_command(result.processed_input);
+            shell_output->handle_output(std::make_unique<CommandResult>(res), result.print_result());
             break;
         }
         case EXIT:

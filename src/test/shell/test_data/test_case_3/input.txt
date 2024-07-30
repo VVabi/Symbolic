@@ -1,0 +1,3 @@
+#setparam powerseriesprecision 101
+f = LSET(LCYC_>1(z));
+egfcoeff(f, 100)

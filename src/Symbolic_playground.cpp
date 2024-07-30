@@ -18,8 +18,10 @@
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
 
-
+void test_shell_explicit_tests();
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
+
+    test_shell_explicit_tests();
 }
