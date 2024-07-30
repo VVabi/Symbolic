@@ -83,9 +83,13 @@ void test_shell_power_series_parsing() {
         SymbolicShellEvaluator evaluator(in_shell, out_shell);
 
         evaluator.run();
+        EXPECT_EQ(out_shell->outputs.size(), expected_result.size() + 2) << "Failed for " << formula << ": Got " << out_shell->outputs.size() << " Expected " << expected_result.size()+1;
+        EXPECT_EQ(out_shell->outputs[0], "Parameter updated");
+
+        // second element of out_shell->outputs is the power series itself in parsed form; not tested here
 
         for (uint32_t ind = 0; ind < expected_result.size(); ind++) {
-             EXPECT_EQ(out_shell->outputs[ind+1], std::to_string(expected_result[ind])) << "Failed for " << formula << " at index " << ind << ": Got " << out_shell->outputs[ind+2] << " Expected " << expected_result[ind];
+             EXPECT_EQ(out_shell->outputs[ind+2], std::to_string(expected_result[ind])) << "Failed for " << formula << " at index " << ind << ": Got " << out_shell->outputs[ind+1] << " Expected " << expected_result[ind];
         }
     }
 }

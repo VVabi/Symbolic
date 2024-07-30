@@ -18,7 +18,6 @@
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
 
-
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
