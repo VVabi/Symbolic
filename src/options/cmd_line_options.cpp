@@ -8,6 +8,7 @@ CmdLineOptions parse_cmd_line_args(int argc, char **argv) {
     options.output_file     = std::nullopt;
 
     int opt;
+    optind = 0;  // necessary to reset getopt for non-global use (eg in tests)
     while ((opt = getopt(argc, argv, "i:o:h")) != -1) {
         switch (opt) {
             case 'i':
