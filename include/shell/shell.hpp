@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <fstream>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -20,14 +21,17 @@ class FormulaParsingResult {
 };
 
 
-class CoreShell {
+class ShellInput {
  public:
     virtual std::string get_next_input() = 0;
+};
+
+class ShellOutput {
+ public:
     virtual void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
 };
 
-
-class DefaultShell : public CoreShell {
+class CmdLineShellInput : public ShellInput {
  public:
     std::string get_next_input() override {
         std::cout << ">>> ";
@@ -35,10 +39,50 @@ class DefaultShell : public CoreShell {
         std::getline(std::cin, input);
         return input;
     }
+};
 
+class CmdLineShellOutput : public ShellOutput {
+ public:
     void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(std::cout, std::cerr, print_result);
-        std::cout << std::endl;
+        // TODO(vabi): this is architecturally questionable...
+        if (print_result) {
+            std::cout << std::endl;
+        }
+    }
+};
+
+
+class FileShellInput : public ShellInput {
+ public:
+    std::ifstream file_stream;
+    FileShellInput(const std::string& filename): file_stream(filename) {
+        if (!file_stream.is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+    }
+
+    std::string get_next_input() override {
+        std::string input;
+        if (std::getline(file_stream, input)) {
+            return input;
+        }
+        return "exit";
+    }
+};
+
+class FileShellOutput: public ShellOutput {
+ public:
+    std::ofstream file_stream;
+    FileShellOutput(const std::string& filename): file_stream(filename) {
+        if (!file_stream.is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+    }
+
+    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+        result->print_result(file_stream, std::cerr, print_result);
+        file_stream << std::endl;
     }
 };
 
@@ -152,7 +196,8 @@ class FormulaParser {
 
 class SymbolicShellEvaluator {
  private:
-    std::shared_ptr<CoreShell> core_shell;
+    std::shared_ptr<ShellInput> shell_input;
+    std::shared_ptr<ShellOutput> shell_output;
     FormulaParser parser;
 
     bool is_exit(const std::string& input);
@@ -160,7 +205,9 @@ class SymbolicShellEvaluator {
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:
-    SymbolicShellEvaluator(std::shared_ptr<CoreShell> core_shell);
+    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) : shell_input(input), shell_output(output) {
+        parser = FormulaParser();
+    }
     void run();
     bool run_single_input();
 };
