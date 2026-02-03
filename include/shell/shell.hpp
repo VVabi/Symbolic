@@ -7,6 +7,8 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -38,6 +40,36 @@ class CmdLineShellInput : public ShellInput {
         std::string input;
         std::getline(std::cin, input);
         return input;
+    }
+};
+
+class ReadlineShellInput : public ShellInput {
+ public:
+    ReadlineShellInput() {
+        // Configure readline to auto-complete paths when the tab key is hit.
+        rl_bind_key('\t', rl_complete);
+
+        // Enable history
+        using_history();
+    }
+
+    std::string get_next_input() override {
+        char* input = readline(">> ");
+
+        // Check for EOF.
+        if (!input) {
+            return "exit";
+        }
+
+        // Add input to readline history.
+        add_history(input);
+
+        std::string input_str(input);
+
+        // Free buffer that was allocated by readline
+        free(input);
+
+        return input_str;
     }
 };
 

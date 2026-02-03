@@ -68,7 +68,7 @@ add_executable(Symbolic_playground
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-TARGET_LINK_LIBRARIES(Symbolic gmp)
+TARGET_LINK_LIBRARIES(Symbolic gmp readline)
 TARGET_LINK_LIBRARIES(Symbolic_tests pthread gtest gmp)
 TARGET_LINK_LIBRARIES(Symbolic_playground gmp pthread gtest)
 include(CPack)

@@ -3,17 +3,18 @@
  * @brief Main repl entry point.
  */
 
-
 #include <memory>
 #include "shell/parameters/parameters.hpp"
 #include "shell/shell.hpp"
 #include "options/cmd_line_options.hpp"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 std::shared_ptr<ShellInput> get_shell_input(const CmdLineOptions& opts) {
     if (opts.input_file.has_value()) {
         return std::make_shared<FileShellInput>(opts.input_file.value());
     } else {
-        return std::make_shared<CmdLineShellInput>();
+        return std::make_shared<ReadlineShellInput>();
     }
 }
 
