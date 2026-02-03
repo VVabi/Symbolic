@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install cpplint libgmp-dev libreadline-dev libgoogle-test-dev libreadline-dev
+        sudo apt-get install cpplint libgmp-dev libreadline-dev libgtest-dev libreadline-dev
 
     - uses: actions/checkout@v4
 
