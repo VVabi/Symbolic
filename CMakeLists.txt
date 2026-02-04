@@ -69,7 +69,7 @@ add_executable(Symbolic_playground
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 TARGET_LINK_LIBRARIES(Symbolic gmp readline)
-TARGET_LINK_LIBRARIES(Symbolic_tests pthread gtest gmp)
+TARGET_LINK_LIBRARIES(Symbolic_tests pthread gtest gmp readline)
 TARGET_LINK_LIBRARIES(Symbolic_playground gmp pthread gtest)
 include(CPack)
 SET( CMAKE_CXX_FLAGS  "-std=c++2a -Wall -Werror -Wextra") #-pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-value -Wno-unused-local-typedefs -Wno-unused-private-field")
