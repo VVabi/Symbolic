@@ -1,14 +1,14 @@
 #ifndef INCLUDE_SHELL_SHELL_HPP_
 #define INCLUDE_SHELL_SHELL_HPP_
 
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <memory>
 #include <iostream>
 #include <string>
 #include <map>
 #include <vector>
 #include <fstream>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
