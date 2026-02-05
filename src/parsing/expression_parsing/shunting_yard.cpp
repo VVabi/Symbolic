@@ -77,6 +77,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 
     int current_separator_count = 0;
     int last_closed_bracket_separator_count = 0;
+
     for (auto it = input.rbegin(); it != input.rend(); ++it) {
         switch (it->type) {
             case UNARY:
@@ -133,12 +134,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     ret.push_back(op);
                     operators.pop();
                 }
-
-                last_closed_bracket_separator_count = current_separator_count;
-                current_separator_count             = separator_counts.top();
-                separator_counts.pop();
-              
-
+                
                 if (operators.size() > 0 && operators.top().type != RIGHT_PARENTHESIS) {
                     throw ParsingException("Mismatched parentheses", operators.top().position);
                 }
@@ -147,6 +143,16 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     throw ParsingException("Mismatched or missing parentheses", it->position);
                 }
 
+                if (separator_counts.size() == 0) {
+                    throw ParsingException("Mismatched or missing parentheses", it->position);
+                }
+
+
+                last_closed_bracket_separator_count = current_separator_count;
+
+                current_separator_count             = separator_counts.top();
+                separator_counts.pop();
+              
                 operators.pop();
                 if (operators.size() > 0) {
                     MathLexerElement next_op = operators.top();

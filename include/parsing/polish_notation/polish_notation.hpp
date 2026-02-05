@@ -61,9 +61,6 @@ template<typename T> class PolishFunction: public PolishNotationElement<T> {
                                     const T unit,
                                     const size_t fp_size) = 0;
 
-    uint32_t get_position() {
-        return this->position;
-    }
 };
 
 
@@ -439,7 +436,6 @@ template<typename T> class PolishMod: public PolishNotationElement<T> {
 };
 
 template<typename T> class PolishEval: public PolishFunction<T> {
- static const uint32_t EXPECTED_NUM_ARGS = 2;
  public:
     PolishEval(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2) {
     }
@@ -453,6 +449,58 @@ template<typename T> class PolishEval: public PolishFunction<T> {
         return to_evaluate->evaluate_at(std::move(arg));
     }
 };
+
+template<typename T> class PolishFor: public PolishFunction<T> {
+    /*This is a dummy implementation that just sums the values from 'from' to 'to'-1
+      multiplied by the other arguments. Proper implementation will require
+      significant changes to the parsing and evaluation structure.
+    */
+ public:
+    PolishFor(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 3, UINT32_MAX) {
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto from       = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+        auto to         = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+
+        if (from.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number in for", this->get_position());
+        }
+
+        if (to.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number in for", this->get_position());
+        }
+
+        auto from_num   = from.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+        auto to_num     = to.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+
+        if (from_num < 0 || to_num < 0) {
+            throw EvalException("Expected natural number in for", this->get_position());
+        }
+
+        std::vector<std::unique_ptr<ParsingWrapperType<T>>> args;
+        for (int64_t i = 0; i < this->num_args-2; i++) {
+            auto arg = iterate_wrapped<T>(cmd_list, unit, fp_size);
+            args.push_back(std::move(arg));
+        }
+
+        int64_t sum = 0;
+        for (int64_t i = from_num; i < to_num; i++) {
+            sum += i;
+        }
+
+        T res = unit*sum;
+        for (const auto& arg : args) {
+            res = res*arg->as_value();
+        }
+    
+        return std::make_unique<ValueType<T>>(res);
+    }
+};
+
+
 
 template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
  public:
@@ -622,6 +670,9 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                     throw InvalidFunctionArgException("Eval does not take subscript arguments, found: "+parts[1], element.position);
                 }
                 return std::make_unique<PolishEval<T>>(element.position, element.num_separators);
+            } else if (parts[0] == "for") {
+                throw NotImplementedException("for loop not implemented yet", element.position);
+                return std::make_unique<PolishFor<T>>(element.position, element.num_separators);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
             break;
