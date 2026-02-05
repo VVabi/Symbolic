@@ -45,7 +45,7 @@ inline std::string expression_type_to_string(expression_type type) {
             return "SEPARATOR";
     }
 
-    return ""; //unreachable
+    return "";  // unreachable
 }
 
 /**

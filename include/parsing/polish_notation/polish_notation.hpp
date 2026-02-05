@@ -11,6 +11,7 @@
 #include <memory>
 #include <cmath>
 #include <deque>
+#include <vector>
 #include <string>
 #include <utility>
 #include "exceptions/invalid_function_arg_exception.hpp"
@@ -30,7 +31,7 @@
 template<typename T> class PolishNotationElement {
     uint32_t position;
  public:
-    PolishNotationElement(uint32_t position): position(position){ }
+    PolishNotationElement(uint32_t position): position(position) { }
     virtual ~PolishNotationElement() { }
 
     virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
@@ -48,19 +49,17 @@ template<typename T> class PolishFunction: public PolishNotationElement<T> {
     PolishFunction(uint32_t position,
                     uint32_t num_args,
                     uint32_t min_num_args,
-                    uint32_t max_num_args): PolishNotationElement<T>(position), num_args(num_args) { 
-                    if (num_args < min_num_args || num_args > max_num_args) {
-                        throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(num_args)+
-                            ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), position);
-                    }
-
+                    uint32_t max_num_args): PolishNotationElement<T>(position), num_args(num_args) {
+                        if (num_args < min_num_args || num_args > max_num_args) {
+                            throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(num_args)+
+                                ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), position);
+                        }
                     }
     virtual ~PolishFunction() { }
 
     virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) = 0;
-
 };
 
 
@@ -495,7 +494,6 @@ template<typename T> class PolishFor: public PolishFunction<T> {
         for (const auto& arg : args) {
             res = res*arg->as_value();
         }
-    
         return std::make_unique<ValueType<T>>(res);
     }
 };
@@ -608,7 +606,6 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 throw EvalException("Function argument separator count not set for function: " + element.data, element.position);
             }
 
-            std::cout << "Function: " << element.data << ", num_separators: " << element.num_separators << std::endl;  // --- IGNORE ---
             auto parts = string_split(element.data, '_');
 
             if (parts.size() == 1) {
@@ -671,7 +668,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 }
                 return std::make_unique<PolishEval<T>>(element.position, element.num_separators);
             } else if (parts[0] == "for") {
-                throw NotImplementedException("for loop not implemented yet", element.position);
+                throw NotImplementedException();
                 return std::make_unique<PolishFor<T>>(element.position, element.num_separators);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
