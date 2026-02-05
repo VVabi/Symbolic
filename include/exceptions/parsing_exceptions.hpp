@@ -53,11 +53,10 @@ class ParsingException: public std::exception {
     }
 };
 
-class NotImplementedException : public std::logic_error
-{
-public:
+class NotImplementedException : public std::logic_error {
+ public:
     NotImplementedException() : std::logic_error("Function not yet implemented.") {}
-    virtual char const * what() const noexcept override { return std::logic_error::what(); }
+    char const * what() const noexcept override { return std::logic_error::what(); }
 };
 
 #endif  // INCLUDE_EXCEPTIONS_PARSING_EXCEPTIONS_HPP_
