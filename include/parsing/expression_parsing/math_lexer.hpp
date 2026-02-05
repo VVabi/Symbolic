@@ -25,6 +25,29 @@ enum expression_type {
     SEPARATOR               ///< Separator
 };
 
+inline std::string expression_type_to_string(expression_type type) {
+    switch (type) {
+        case INFIX:
+            return "INFIX";
+        case UNARY:
+            return "UNARY";
+        case FUNCTION:
+            return "FUNCTION";
+        case NUMBER:
+            return "NUMBER";
+        case VARIABLE:
+            return "VARIABLE";
+        case LEFT_PARENTHESIS:
+            return "LEFT_PARENTHESIS";
+        case RIGHT_PARENTHESIS:
+            return "RIGHT_PARENTHESIS";
+        case SEPARATOR:
+            return "SEPARATOR";
+    }
+
+    return ""; //unreachable
+}
+
 /**
  * @brief Struct representing an element in a mathematical expression.
  */
@@ -32,6 +55,7 @@ struct MathLexerElement {
     expression_type type;   ///< Type of the element
     std::string data;       ///< Data of the element
     int position;           ///< Position of the element in the input string
+    int num_separators;     ///< Number of separators encountered before this element (used for function argument separation)
 
     /**
      * @brief Constructor for MathLexerElement.
@@ -39,8 +63,12 @@ struct MathLexerElement {
      * @param data The data of the element.
      * @param position The position of the element in the input string.
      */
-    MathLexerElement(expression_type type, std::string data, int position)
-        : type(type), data(data), position(position) {}
+    MathLexerElement(expression_type type, std::string data, int position, int num_separators = -1)
+        : type(type), data(data), position(position), num_separators(num_separators) {}
+
+    void set_num_separators(int num) {
+        num_separators = num;
+    }
 };
 
 /**

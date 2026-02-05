@@ -30,7 +30,7 @@
 template<typename T> class PolishNotationElement {
     uint32_t position;
  public:
-    PolishNotationElement(uint32_t position): position(position) { }
+    PolishNotationElement(uint32_t position): position(position){ }
     virtual ~PolishNotationElement() { }
 
     virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
@@ -41,6 +41,31 @@ template<typename T> class PolishNotationElement {
         return position;
     }
 };
+
+template<typename T> class PolishFunction: public PolishNotationElement<T> {
+ public:
+    uint32_t num_args;
+    PolishFunction(uint32_t position,
+                    uint32_t num_args,
+                    uint32_t min_num_args,
+                    uint32_t max_num_args): PolishNotationElement<T>(position), num_args(num_args) { 
+                    if (num_args < min_num_args || num_args > max_num_args) {
+                        throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(num_args)+
+                            ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), position);
+                    }
+
+                    }
+    virtual ~PolishFunction() { }
+
+    virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) = 0;
+
+    uint32_t get_position() {
+        return this->position;
+    }
+};
+
 
 template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element);
 
@@ -413,9 +438,11 @@ template<typename T> class PolishMod: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishEval: public PolishNotationElement<T> {
+template<typename T> class PolishEval: public PolishFunction<T> {
+ static const uint32_t EXPECTED_NUM_ARGS = 2;
  public:
-    PolishEval(uint32_t position): PolishNotationElement<T>(position) {}
+    PolishEval(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2) {
+    }
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -529,6 +556,11 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             throw EvalException("Unknown unary operator: " + element.data, element.position);
             break;
         case FUNCTION: {
+            if (element.num_separators == -1) {
+                throw EvalException("Function argument separator count not set for function: " + element.data, element.position);
+            }
+
+            std::cout << "Function: " << element.data << ", num_separators: " << element.num_separators << std::endl;  // --- IGNORE ---
             auto parts = string_split(element.data, '_');
 
             if (parts.size() == 1) {
@@ -589,7 +621,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("Eval does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishEval<T>>(element.position);
+                return std::make_unique<PolishEval<T>>(element.position, element.num_separators);
             }
             throw EvalException("Unknown function: " + element.data, element.position);
             break;
