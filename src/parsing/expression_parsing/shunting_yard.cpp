@@ -69,14 +69,10 @@ bool is_right_associative(char op) {
 std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input) {
     auto ret                = std::vector<MathLexerElement>();
     auto operators          = std::stack<MathLexerElement>();
-    auto separator_counts   = std::stack<int>();
+    auto arg_counts   = std::stack<int>();
 
-    /*for (auto it = input.rbegin(); it != input.rend(); ++it) {
-        std::cout << "Element type: " << expression_type_to_string(it->type) << ", data: " << it->data << std::endl;
-    }*/
-
-    int current_separator_count = 0;
-    int last_closed_bracket_separator_count = 0;
+    int current_args_count = 0;
+    int last_closed_bracket_args_count = 0;
 
     for (auto it = input.rbegin(); it != input.rend(); ++it) {
         switch (it->type) {
@@ -85,7 +81,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     MathLexerElement next_op = operators.top();
                     if (next_op.type == FUNCTION) {
                         operators.pop();
-                        next_op.set_num_separators(last_closed_bracket_separator_count);
+                        next_op.set_num_args(last_closed_bracket_args_count);
                         ret.push_back(next_op);
                     } else {
                         break;
@@ -101,12 +97,12 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                 operators.push(*it);
                 break;
             case RIGHT_PARENTHESIS:
-                separator_counts.push(current_separator_count);
-                current_separator_count = 1;
+                arg_counts.push(current_args_count);
+                current_args_count = 1;
                 operators.push(*it);
                 break;
             case SEPARATOR:
-                current_separator_count++;
+                current_args_count++;
 
                 while (operators.size() > 0) {
                     MathLexerElement op = operators.top();
@@ -115,7 +111,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     }
 
                     if (op.type == FUNCTION) {
-                        op.set_num_separators(last_closed_bracket_separator_count);
+                        op.set_num_args(last_closed_bracket_args_count);
                     }
                     ret.push_back(op);
                     operators.pop();
@@ -124,12 +120,12 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
             case LEFT_PARENTHESIS:
             {
                 if (it != input.rbegin() && (it-1)->type == RIGHT_PARENTHESIS) {
-                    current_separator_count = 0;
+                    current_args_count = 0;
                 }
                 while (operators.size() > 0 && operators.top().type != RIGHT_PARENTHESIS) {
                     MathLexerElement op = operators.top();
                     if (op.type == FUNCTION) {
-                        op.set_num_separators(last_closed_bracket_separator_count);
+                        op.set_num_args(last_closed_bracket_args_count);
                     }
                     ret.push_back(op);
                     operators.pop();
@@ -143,22 +139,21 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     throw ParsingException("Mismatched or missing parentheses", it->position);
                 }
 
-                if (separator_counts.size() == 0) {
+                if (arg_counts.size() == 0) {
                     throw ParsingException("Mismatched or missing parentheses", it->position);
                 }
 
+                last_closed_bracket_args_count = current_args_count;
 
-                last_closed_bracket_separator_count = current_separator_count;
-
-                current_separator_count             = separator_counts.top();
-                separator_counts.pop();
+                current_args_count             = arg_counts.top();
+                arg_counts.pop();
 
                 operators.pop();
                 if (operators.size() > 0) {
                     MathLexerElement next_op = operators.top();
                     if (next_op.type == FUNCTION) {
                         operators.pop();
-                        next_op.set_num_separators(last_closed_bracket_separator_count);
+                        next_op.set_num_args(last_closed_bracket_args_count);
                         ret.push_back(next_op);
                     }
                 }
@@ -174,7 +169,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     }
 
                     if (candidate.type == FUNCTION) {
-                        candidate.set_num_separators(last_closed_bracket_separator_count);
+                        candidate.set_num_args(last_closed_bracket_args_count);
                         ret.push_back(candidate);
                         operators.pop();
                         continue;
@@ -195,7 +190,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
     while (operators.size() > 0) {
         auto op = operators.top();
         if (op.type == FUNCTION) {
-            op.set_num_separators(last_closed_bracket_separator_count);
+            op.set_num_args(last_closed_bracket_args_count);
         }
         if (operators.top().type == RIGHT_PARENTHESIS) {
             throw ParsingException("Mismatched parentheses", operators.top().position);
@@ -207,4 +202,3 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
     std::reverse(ret.begin(), ret.end());
     return ret;
 }
-

@@ -55,7 +55,7 @@ struct MathLexerElement {
     expression_type type;   ///< Type of the element
     std::string data;       ///< Data of the element
     int position;           ///< Position of the element in the input string
-    int num_separators;     ///< Number of separators encountered before this element (used for function argument separation)
+    int num_args;     ///< Number of args between current brackets (used for function argument separation)
 
     /**
      * @brief Constructor for MathLexerElement.
@@ -63,11 +63,11 @@ struct MathLexerElement {
      * @param data The data of the element.
      * @param position The position of the element in the input string.
      */
-    MathLexerElement(expression_type type, std::string data, int position, int num_separators = -1)
-        : type(type), data(data), position(position), num_separators(num_separators) {}
+    MathLexerElement(expression_type type, std::string data, int position, int num_args = -1)
+        : type(type), data(data), position(position), num_args(num_args) {}
 
-    void set_num_separators(int num) {
-        num_separators = num;
+    void set_num_args(int num) {
+        num_args = num;
     }
 };
 
