@@ -1,9 +1,9 @@
 /**
  * @file modLong.hpp
  * @brief Header file for the ModLong class.
- * 
+ *
  * This file contains the declaration of the ModLong class, which represents an integer modulo a given modulus.
- * 
+ *
  * @date Jan 11, 2024
  * @author vabi
  */
@@ -201,7 +201,12 @@ template<> class RingCompanionHelper<ModLong> {
         if (in.find('.') != std::string::npos || in.find('e') != std::string::npos) {
             throw std::invalid_argument("Cannot parse as ModLong: " + in);
         }
-        return ModLong(std::stoi(in), unit.get_modulus());
+        BigInt num = BigInt(in);
+        BigInt modulus_num = BigInt(unit.get_modulus());
+        auto res = num % modulus_num;
+
+
+        return ModLong(res.as_int64(), unit.get_modulus());
     }
 };
 
