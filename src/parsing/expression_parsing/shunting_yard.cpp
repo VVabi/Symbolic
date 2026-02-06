@@ -69,7 +69,7 @@ bool is_right_associative(char op) {
 std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input) {
     auto ret                = std::vector<MathLexerElement>();
     auto operators          = std::stack<MathLexerElement>();
-    auto arg_counts   = std::stack<int>();
+    auto arg_counts         = std::stack<int>();
 
     int current_args_count = 0;
     int last_closed_bracket_args_count = 0;
