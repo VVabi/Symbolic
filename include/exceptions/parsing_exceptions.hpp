@@ -12,7 +12,7 @@
 
 /**
  * @brief Custom exception class for parsing errors.
- * 
+ *
  * This class is derived from std::exception and provides additional functionality
  * for handling parsing exceptions. It stores an error message and the position
  * where the error occurred.
@@ -25,7 +25,7 @@ class ParsingException: public std::exception {
  public:
     /**
      * @brief Constructs a ParsingException object with the given error message and position.
-     * 
+     *
      * @param message The error message.
      * @param position The position where the error occurred.
      */
@@ -36,7 +36,7 @@ class ParsingException: public std::exception {
 
     /**
      * @brief Returns the error message associated with the exception.
-     * 
+     *
      * @return The error message.
      */
     virtual const char * what() {
@@ -45,12 +45,18 @@ class ParsingException: public std::exception {
 
     /**
      * @brief Returns the position where the error occurred.
-     * 
+     *
      * @return The position where the error occurred.
      */
     virtual int get_position() const {
         return position;
     }
+};
+
+class NotImplementedException : public std::logic_error {
+ public:
+    NotImplementedException() : std::logic_error("Function not yet implemented.") {}
+    char const * what() const noexcept override { return std::logic_error::what(); }
 };
 
 #endif  // INCLUDE_EXCEPTIONS_PARSING_EXCEPTIONS_HPP_

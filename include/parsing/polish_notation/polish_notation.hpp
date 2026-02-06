@@ -11,6 +11,7 @@
 #include <memory>
 #include <cmath>
 #include <deque>
+#include <vector>
 #include <string>
 #include <utility>
 #include "exceptions/invalid_function_arg_exception.hpp"
@@ -41,6 +42,26 @@ template<typename T> class PolishNotationElement {
         return position;
     }
 };
+
+template<typename T> class PolishFunction: public PolishNotationElement<T> {
+ public:
+    uint32_t num_args;
+    PolishFunction(uint32_t position,
+                    uint32_t num_args,
+                    uint32_t min_num_args,
+                    uint32_t max_num_args): PolishNotationElement<T>(position), num_args(num_args) {
+                        if (num_args < min_num_args || num_args > max_num_args) {
+                            throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(num_args)+
+                                ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), position);
+                        }
+                    }
+    virtual ~PolishFunction() { }
+
+    virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) = 0;
+};
+
 
 template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element);
 
@@ -172,9 +193,9 @@ template<typename T>  class PolishNumber: public PolishNotationElement<T> {
                                     }
 };
 
-template<typename T> class PolishInvMset: public PolishNotationElement<T> {
+template<typename T> class PolishInvMset: public PolishFunction<T> {
  public:
-    PolishInvMset(uint32_t position) : PolishNotationElement<T>(position) { }
+    PolishInvMset(uint32_t position, uint32_t num_args) : PolishFunction<T>(position, num_args, 1, 1) { }
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -269,11 +290,11 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
     }
 };
 
-template<typename T> class PolishPowerSeriesFunction: public PolishNotationElement<T> {
+template<typename T> class PolishPowerSeriesFunction: public PolishFunction<T> {
     PowerSeriesBuiltinFunctionType type;
 
  public:
-    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position) : PolishNotationElement<T>(position), type(type) { }
+    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position, uint32_t num_args) : PolishFunction<T>(position, num_args, 1, 1), type(type) { }
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -287,12 +308,12 @@ template<typename T> class PolishPowerSeriesFunction: public PolishNotationEleme
     }
 };
 
-template<typename T> class PolishPset: public PolishNotationElement<T> {
+template<typename T> class PolishPset: public PolishFunction<T> {
  private:
     std::string arg;
 
  public:
-    PolishPset(std::string arg, uint32_t position) : PolishNotationElement<T>(position), arg(arg) { }
+    PolishPset(std::string arg, uint32_t position, uint32_t num_args) : PolishFunction<T>(position, num_args, 1, 1), arg(arg) { }
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -303,12 +324,11 @@ template<typename T> class PolishPset: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishMset: public PolishNotationElement<T> {
+template<typename T> class PolishMset: public PolishFunction<T> {
     std::string arg;
 
  public:
-    PolishMset(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
-
+    PolishMset(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
@@ -318,12 +338,11 @@ template<typename T> class PolishMset: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishCyc: public PolishNotationElement<T> {
+template<typename T> class PolishCyc: public PolishFunction<T> {
     std::string arg;
 
  public:
-    PolishCyc(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
-
+    PolishCyc(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
@@ -333,11 +352,11 @@ template<typename T> class PolishCyc: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
+template<typename T> class PolishLabelledSet: public PolishFunction<T> {
     std::string arg;
 
  public:
-    PolishLabelledSet(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
+    PolishLabelledSet(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -348,12 +367,11 @@ template<typename T> class PolishLabelledSet: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishLabelledCyc: public PolishNotationElement<T> {
+template<typename T> class PolishLabelledCyc: public PolishFunction<T> {
     std::string arg;
 
  public:
-    PolishLabelledCyc(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
-
+    PolishLabelledCyc(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
@@ -363,12 +381,11 @@ template<typename T> class PolishLabelledCyc: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishSeq: public PolishNotationElement<T> {
+template<typename T> class PolishSeq: public PolishFunction<T> {
     std::string arg;
 
  public:
-    PolishSeq(const std::string& additional_arg, uint32_t position): PolishNotationElement<T>(position), arg(additional_arg) {}
-
+    PolishSeq(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
@@ -378,9 +395,9 @@ template<typename T> class PolishSeq: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishLandau: public PolishNotationElement<T> {
+template<typename T> class PolishLandau: public PolishFunction<T> {
  public:
-    PolishLandau(uint32_t position): PolishNotationElement<T>(position) {}
+    PolishLandau(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1) {}
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -399,9 +416,9 @@ template<typename T> class PolishLandau: public PolishNotationElement<T> {
 };
 
 
-template<typename T> class PolishMod: public PolishNotationElement<T> {
+template<typename T> class PolishMod: public PolishFunction<T> {
  public:
-    PolishMod(uint32_t position): PolishNotationElement<T>(position) {}
+    PolishMod(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2) {}
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -413,9 +430,10 @@ template<typename T> class PolishMod: public PolishNotationElement<T> {
     }
 };
 
-template<typename T> class PolishEval: public PolishNotationElement<T> {
+template<typename T> class PolishEval: public PolishFunction<T> {
  public:
-    PolishEval(uint32_t position): PolishNotationElement<T>(position) {}
+    PolishEval(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2) {
+    }
 
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
@@ -427,9 +445,60 @@ template<typename T> class PolishEval: public PolishNotationElement<T> {
     }
 };
 
-template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
+template<typename T> class PolishFor: public PolishFunction<T> {
+    /*This is a dummy implementation that just sums the values from 'from' to 'to'-1
+      multiplied by the other arguments. Proper implementation will require
+      significant changes to the parsing and evaluation structure.
+    */
  public:
-    PolishMod(uint32_t position): PolishNotationElement<ModLong>(position) {}
+    PolishFor(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 3, UINT32_MAX) {
+    }
+
+    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    const T unit,
+                                    const size_t fp_size) {
+        auto from       = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+        auto to         = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
+
+        if (from.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number in for", this->get_position());
+        }
+
+        if (to.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number in for", this->get_position());
+        }
+
+        auto from_num   = from.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+        auto to_num     = to.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+
+        if (from_num < 0 || to_num < 0) {
+            throw EvalException("Expected natural number in for", this->get_position());
+        }
+
+        std::vector<std::unique_ptr<ParsingWrapperType<T>>> args;
+        for (int64_t i = 0; i < this->num_args-2; i++) {
+            auto arg = iterate_wrapped<T>(cmd_list, unit, fp_size);
+            args.push_back(std::move(arg));
+        }
+
+        int64_t sum = 0;
+        for (int64_t i = from_num; i < to_num; i++) {
+            sum += i;
+        }
+
+        T res = unit*sum;
+        for (const auto& arg : args) {
+            res = res*arg->as_value();
+        }
+        return std::make_unique<ValueType<T>>(res);
+    }
+};
+
+
+
+template<> class PolishMod<ModLong>: public PolishFunction<ModLong> {
+ public:
+    PolishMod(uint32_t position, uint32_t num_args): PolishFunction<ModLong>(position, num_args, 2, 2) {}
 
     std::unique_ptr<ParsingWrapperType<ModLong>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const ModLong unit,
@@ -456,12 +525,11 @@ template<> class PolishMod<ModLong>: public PolishNotationElement<ModLong> {
     }
 };
 
-template<typename T> class PolishCoefficient: public PolishNotationElement<T> {
+template<typename T> class PolishCoefficient: public PolishFunction<T> {
     bool as_egf;
 
  public:
-    PolishCoefficient(uint32_t position, bool as_egf): PolishNotationElement<T>(position), as_egf(as_egf) {}
-
+    PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2), as_egf(as_egf) {}
     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
@@ -529,6 +597,10 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
             throw EvalException("Unknown unary operator: " + element.data, element.position);
             break;
         case FUNCTION: {
+            if (element.num_args == -1) {
+                throw EvalException("Function argument count not set for function: " + element.data, element.position);
+            }
+
             auto parts = string_split(element.data, '_');
 
             if (parts.size() == 1) {
@@ -537,59 +609,61 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
 
             // TODO(vabi) handle parts[1] != "" error for exp, sqrt, etc.
             if (parts[0] == "exp") {
-                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::EXP, element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::EXP, element.position, element.num_args);
             } else if (parts[0] == "sqrt") {
-                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SQRT, element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SQRT, element.position, element.num_args);
             } else if (parts[0] == "log") {
-                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::LOG, element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::LOG, element.position, element.num_args);
             } else if (parts[0] == "sin") {
-                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SIN, element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::SIN, element.position, element.num_args);
             } else if (parts[0] == "cos") {
-                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::COS, element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::COS, element.position, element.num_args);
             } else if (parts[0] == "tan") {
-                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::TAN, element.position);
+                return std::make_unique<PolishPowerSeriesFunction<T>>(PowerSeriesBuiltinFunctionType::TAN, element.position, element.num_args);
             } else if (parts[0] == "PSET") {
-                return std::make_unique<PolishPset<T>>(parts[1], element.position);
+                return std::make_unique<PolishPset<T>>(parts[1], element.position, element.num_args);
             } else if (parts[0] == "MSET") {
-                return std::make_unique<PolishMset<T>>(parts[1], element.position);
+                return std::make_unique<PolishMset<T>>(parts[1], element.position, element.num_args);
             } else if (parts[0] == "CYC") {
-                return std::make_unique<PolishCyc<T>>(parts[1], element.position);
+                return std::make_unique<PolishCyc<T>>(parts[1], element.position, element.num_args);
             } else if (parts[0] == "SEQ") {
-                return std::make_unique<PolishSeq<T>>(parts[1], element.position);
+                return std::make_unique<PolishSeq<T>>(parts[1], element.position, element.num_args);
             } else if (parts[0] == "LSET") {
-                return std::make_unique<PolishLabelledSet<T>>(parts[1], element.position);
+                return std::make_unique<PolishLabelledSet<T>>(parts[1], element.position, element.num_args);
             } else if (parts[0] == "LCYC") {
-                return std::make_unique<PolishLabelledCyc<T>>(parts[1], element.position);
+                return std::make_unique<PolishLabelledCyc<T>>(parts[1], element.position, element.num_args);
             } else if (parts[0] == "INVMSET") {
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("InvMset does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishInvMset<T>>(element.position);
+                return std::make_unique<PolishInvMset<T>>(element.position, element.num_args);
             } else if (parts[0] == "O") {
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("O() does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishLandau<T>>(element.position);
+                return std::make_unique<PolishLandau<T>>(element.position, element.num_args);
             } else if (parts[0] == "coeff") {
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("coeff does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishCoefficient<T>>(element.position, false);
+                return std::make_unique<PolishCoefficient<T>>(element.position, false, element.num_args);
             } else if (parts[0] == "egfcoeff") {
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("egfcoeff does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishCoefficient<T>>(element.position, true);
+                return std::make_unique<PolishCoefficient<T>>(element.position, true, element.num_args);
             } else if (parts[0] == "Mod") {
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("Mod does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishMod<T>>(element.position);
+                return std::make_unique<PolishMod<T>>(element.position, element.num_args);
             } else if (parts[0] == "eval") {
                 if (parts[1] != "") {
                     throw InvalidFunctionArgException("Eval does not take subscript arguments, found: "+parts[1], element.position);
                 }
-                return std::make_unique<PolishEval<T>>(element.position);
+                return std::make_unique<PolishEval<T>>(element.position, element.num_args);
+            } else if (parts[0] == "for") {
+                throw NotImplementedException();
             }
             throw EvalException("Unknown function: " + element.data, element.position);
             break;
