@@ -144,11 +144,10 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                 }
 
                 last_closed_bracket_args_count = current_args_count;
-
                 current_args_count             = arg_counts.top();
                 arg_counts.pop();
-
                 operators.pop();
+
                 if (operators.size() > 0) {
                     MathLexerElement next_op = operators.top();
                     if (next_op.type == FUNCTION) {
