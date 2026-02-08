@@ -164,7 +164,6 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
                                         const size_t fp_size) {
         UNUSED(cmd_list);
         UNUSED(fp_size);
-        UNUSED(unit);
         auto existing_var = variables.find(name);
         if (existing_var == variables.end()) {
             auto res = Polynomial<T>::get_atom(unit, 1);
@@ -173,7 +172,8 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
         auto var = existing_var->second;
         auto ret = std::dynamic_pointer_cast<ParsingWrapperType<T>>(var);
         if (ret != nullptr) {
-            return ret;
+            // We should copy her to avoid modifying the variable in the variables map when applying operations to it
+            return std::make_shared<ParsingWrapperType<T>>(*ret);
         }
 
         /*auto next_attempt = std::dynamic_pointer_cast<ParsingWrapperType<BigInt>>(var);
