@@ -37,7 +37,7 @@
  * @param unit The multiplicative identity of type `T`.
  * @return The parsed power series.
  */
-template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
+template<typename T> std::shared_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
     auto formula = parse_math_expression_string(input, 0);

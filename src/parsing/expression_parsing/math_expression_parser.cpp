@@ -67,7 +67,7 @@ bool infer_mod_unit(ModLong& unit, std::deque<MathLexerElement> input) {
  * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a SymObject.
  */
-std::unique_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& input,
+std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& input,
                                     const Datatype type,
                                     const uint32_t powerseries_expansion_size,
                                     const int64_t default_modulus) {
@@ -183,7 +183,7 @@ std::string parse_formula(const std::string& input,
         polish.push_back(x);
     }
 
-    std::unique_ptr<SymObject> ret;
+    std::shared_ptr<SymObject> ret;
     if (type == Datatype::DYNAMIC) {
         auto actual_type = infer_datatype_from_lexer(p);
         ret = parse_formula_internal(polish, actual_type, powerseries_expansion_size, default_modulus);
@@ -192,7 +192,7 @@ std::string parse_formula(const std::string& input,
     }
 
     auto ret_str = ret->to_string();
-    variables["ANS"] = std::move(ret);
+    variables["ANS"] = ret;
 
     return ret_str;
 }

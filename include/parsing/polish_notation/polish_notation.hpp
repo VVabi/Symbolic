@@ -34,7 +34,7 @@ template<typename T> class PolishNotationElement {
     PolishNotationElement(uint32_t position): position(position) { }
     virtual ~PolishNotationElement() { }
 
-    virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    virtual std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) = 0;
 
@@ -57,16 +57,16 @@ template<typename T> class PolishFunction: public PolishNotationElement<T> {
                     }
     virtual ~PolishFunction() { }
 
-    virtual std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    virtual std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) = 0;
 };
 
 
-template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element);
+template<typename T> std::shared_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element);
 
 template<typename T>
-std::unique_ptr<ParsingWrapperType<T>> iterate_wrapped(std::deque<MathLexerElement>& cmd_list,
+std::shared_ptr<ParsingWrapperType<T>> iterate_wrapped(std::deque<MathLexerElement>& cmd_list,
         const T unit,
         const size_t fp_size) {
     if (cmd_list.size() == 0) {
@@ -95,7 +95,7 @@ template<typename T> class PolishPlus : public PolishNotationElement<T> {
  public:
     PolishPlus(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
         auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -108,7 +108,7 @@ template<typename T>  class PolishMinus: public PolishNotationElement<T> {
  public:
     PolishMinus(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
         auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -122,7 +122,7 @@ template<typename T>  class PolishTimes: public PolishNotationElement<T> {
  public:
     PolishTimes(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
         auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -135,7 +135,7 @@ template<typename T>  class PolishDiv: public PolishNotationElement<T> {
  public:
     PolishDiv(uint32_t position) : PolishNotationElement<T>(position) { }
 
-     std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+     std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
         auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -148,7 +148,7 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
  public:
     PolishVariable(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
@@ -162,7 +162,7 @@ template<typename T> class PolishUnaryMinus: public PolishNotationElement<T> {
  public:
     PolishUnaryMinus(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         const T unit,
                                         const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -179,7 +179,7 @@ template<typename T>  class PolishNumber: public PolishNotationElement<T> {
  public:
     PolishNumber(std::string num_repr, uint32_t position): PolishNotationElement<T>(position), num_repr(num_repr) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
                                         UNUSED(fp_size);
@@ -188,7 +188,7 @@ template<typename T>  class PolishNumber: public PolishNotationElement<T> {
                                             return std::make_unique<ValueType<T>>(RingCompanionHelper<T>::from_string(num_repr, unit));
                                         } catch (std::invalid_argument& e) {
                                             throw EvalException(e.what(), this->get_position());
-                                            return std::unique_ptr<ValueType<T>>(nullptr);
+                                            return std::shared_ptr<ValueType<T>>(nullptr);
                                         }
                                     }
 };
@@ -197,7 +197,7 @@ template<typename T> class PolishInvMset: public PolishFunction<T> {
  public:
     PolishInvMset(uint32_t position, uint32_t num_args) : PolishFunction<T>(position, num_args, 1, 1) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -209,7 +209,7 @@ template<typename T>  class PolishPow: public PolishNotationElement<T> {
  public:
     PolishPow(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto left  = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -229,7 +229,7 @@ template<typename T>  class PolishFactorial: public PolishNotationElement<T> {
  public:
     PolishFactorial(uint32_t position) : PolishNotationElement<T>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto left  = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
@@ -267,7 +267,7 @@ template<> class PolishPow<double>: public PolishNotationElement<double> {
  public:
     PolishPow(uint32_t position) : PolishNotationElement<double>(position) { }
 
-    std::unique_ptr<ParsingWrapperType<double>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<double>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const double unit,
                                     const size_t fp_size) {
         // TODO(vabi) check for emptyness
@@ -296,7 +296,7 @@ template<typename T> class PolishPowerSeriesFunction: public PolishFunction<T> {
  public:
     PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position, uint32_t num_args) : PolishFunction<T>(position, num_args, 1, 1), type(type) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size);
@@ -315,7 +315,7 @@ template<typename T> class PolishPset: public PolishFunction<T> {
  public:
     PolishPset(std::string arg, uint32_t position, uint32_t num_args) : PolishFunction<T>(position, num_args, 1, 1), arg(arg) { }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
@@ -329,7 +329,7 @@ template<typename T> class PolishMset: public PolishFunction<T> {
 
  public:
     PolishMset(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
@@ -343,7 +343,7 @@ template<typename T> class PolishCyc: public PolishFunction<T> {
 
  public:
     PolishCyc(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
@@ -358,7 +358,7 @@ template<typename T> class PolishLabelledSet: public PolishFunction<T> {
  public:
     PolishLabelledSet(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
@@ -372,7 +372,7 @@ template<typename T> class PolishLabelledCyc: public PolishFunction<T> {
 
  public:
     PolishLabelledCyc(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
@@ -386,7 +386,7 @@ template<typename T> class PolishSeq: public PolishFunction<T> {
 
  public:
     PolishSeq(const std::string& additional_arg, uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1), arg(additional_arg) {}
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);  // TODO(vabi) this might be a rational function
@@ -399,7 +399,7 @@ template<typename T> class PolishLandau: public PolishFunction<T> {
  public:
     PolishLandau(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 1, 1) {}
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_rational_function();
@@ -420,7 +420,7 @@ template<typename T> class PolishMod: public PolishFunction<T> {
  public:
     PolishMod(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2) {}
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         UNUSED(cmd_list);
@@ -435,13 +435,13 @@ template<typename T> class PolishEval: public PolishFunction<T> {
     PolishEval(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2) {
     }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto to_evaluate   = iterate_wrapped<T>(cmd_list, unit, fp_size);
         auto arg        = iterate_wrapped<T>(cmd_list, unit, fp_size);
 
-        return to_evaluate->evaluate_at(std::move(arg));
+        return to_evaluate->evaluate_at(arg);
     }
 };
 
@@ -454,7 +454,7 @@ template<typename T> class PolishFor: public PolishFunction<T> {
     PolishFor(uint32_t position, uint32_t num_args): PolishFunction<T>(position, num_args, 3, UINT32_MAX) {
     }
 
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto from       = iterate_wrapped<RationalNumber<BigInt>>(cmd_list, BigInt(1), fp_size)->as_value();
@@ -475,7 +475,7 @@ template<typename T> class PolishFor: public PolishFunction<T> {
             throw EvalException("Expected natural number in for", this->get_position());
         }
 
-        std::vector<std::unique_ptr<ParsingWrapperType<T>>> args;
+        std::vector<std::shared_ptr<ParsingWrapperType<T>>> args;
         for (int64_t i = 0; i < this->num_args-2; i++) {
             auto arg = iterate_wrapped<T>(cmd_list, unit, fp_size);
             args.push_back(std::move(arg));
@@ -500,7 +500,7 @@ template<> class PolishMod<ModLong>: public PolishFunction<ModLong> {
  public:
     PolishMod(uint32_t position, uint32_t num_args): PolishFunction<ModLong>(position, num_args, 2, 2) {}
 
-    std::unique_ptr<ParsingWrapperType<ModLong>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<ModLong>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const ModLong unit,
                                     const size_t fp_size) {
         UNUSED(unit);
@@ -530,7 +530,7 @@ template<typename T> class PolishCoefficient: public PolishFunction<T> {
 
  public:
     PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2), as_egf(as_egf) {}
-    std::unique_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, unit, fp_size)->as_power_series(fp_size);
@@ -569,7 +569,7 @@ template<typename T> class PolishCoefficient: public PolishFunction<T> {
     }
 };
 
-template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element) {
+template<typename T> std::shared_ptr<PolishNotationElement<T>> polish_notation_element_from_lexer(const MathLexerElement element) {
     switch (element.type) {
         case NUMBER:
             return std::make_unique<PolishNumber<T>>(element.data, element.position);
@@ -673,7 +673,7 @@ template<typename T> std::unique_ptr<PolishNotationElement<T>> polish_notation_e
     }
 
     throw EvalException("Unknown element type", element.position);
-    return std::unique_ptr<PolishNotationElement<T>>(nullptr);
+    return std::shared_ptr<PolishNotationElement<T>>(nullptr);
 }
 
 #endif  // INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
