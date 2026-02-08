@@ -164,11 +164,11 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<ValueType<T>>(value + other->as_value());
+        return std::make_shared<ValueType<T>>(value + other->as_value());
     }
 
     std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<ValueType<T>>(value*other->as_value());
+        return std::make_shared<ValueType<T>>(value*other->as_value());
     }
 
     std::string to_string() const {
@@ -192,10 +192,10 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<ValueType<T>>(value/other->as_value());
+        return std::make_shared<ValueType<T>>(value/other->as_value());
     }
     std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<ValueType<T>>(other->as_value()/value);
+        return std::make_shared<ValueType<T>>(other->as_value()/value);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
@@ -207,7 +207,7 @@ class ValueType: public ParsingWrapperType<T> {
     std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
         auto numerator_ev = rat_function.get_numerator().evaluate(value);
         auto denominator_ev = rat_function.get_denominator().evaluate(value);
-        return std::make_unique<ValueType<T>>(numerator_ev/denominator_ev);
+        return std::make_shared<ValueType<T>>(numerator_ev/denominator_ev);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
@@ -217,14 +217,14 @@ class ValueType: public ParsingWrapperType<T> {
 
     std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
         UNUSED(input);
-        return std::make_unique<ValueType<T>>(value);
+        return std::make_shared<ValueType<T>>(value);
     }
 };
 
 template<>
 inline std::shared_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
     UNUSED(fp_size);
-    return std::make_unique<ValueType<double>>(evaluate_power_series_function_double(value, type));
+    return std::make_shared<ValueType<double>>(evaluate_power_series_function_double(value, type));
 }
 
 template<>
@@ -300,25 +300,25 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(value + other->as_power_series(value.num_coefficients()));
+        return std::make_shared<PowerSeriesType<T>>(value + other->as_power_series(value.num_coefficients()));
     }
 
     std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(value*other->as_power_series(value.num_coefficients()));
+        return std::make_shared<PowerSeriesType<T>>(value*other->as_power_series(value.num_coefficients()));
     }
 
     std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(value/other->as_power_series(value.num_coefficients()));
+        return std::make_shared<PowerSeriesType<T>>(value/other->as_power_series(value.num_coefficients()));
     }
 
     std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
+        return std::make_shared<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         auto unit = RingCompanionHelper<T>::get_unit(value[0]);
         auto ps = evaluate_power_series_function<T>(value, type, unit, fp_size);
-        return std::make_unique<PowerSeriesType<T>>(ps);
+        return std::make_shared<PowerSeriesType<T>>(ps);
     }
 
     void unary_minus() {
@@ -359,7 +359,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
             ret = ret+power_series[ind]*pw;
             pw = pw*value;
         }
-        return std::make_unique<PowerSeriesType<T>>(ret);
+        return std::make_shared<PowerSeriesType<T>>(ret);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
@@ -406,25 +406,25 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<RationalFunctionType<T>>(value + other->as_rational_function());
+        return std::make_shared<RationalFunctionType<T>>(value + other->as_rational_function());
     }
 
     std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<RationalFunctionType<T>>(value*other->as_rational_function());
+        return std::make_shared<RationalFunctionType<T>>(value*other->as_rational_function());
     }
 
     std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<RationalFunctionType<T>>(value/other->as_rational_function());
+        return std::make_shared<RationalFunctionType<T>>(value/other->as_rational_function());
     }
 
     std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) {
-        return std::make_unique<RationalFunctionType<T>>(other->as_rational_function()/value);
+        return std::make_shared<RationalFunctionType<T>>(other->as_rational_function()/value);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         auto unit = RingCompanionHelper<T>::get_unit(value.get_numerator()[0]);
         auto ps = evaluate_power_series_function<T>(this->as_power_series(fp_size), type, unit, fp_size);
-        return std::make_unique<PowerSeriesType<T>>(ps);
+        return std::make_shared<PowerSeriesType<T>>(ps);
     }
 
     void unary_minus() {
@@ -465,7 +465,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
             denominator_ev = denominator_ev+Polynomial<T>::get_atom(denominator[ind], 0)*pw;
             pw = pw*value;
         }
-        return std::make_unique<RationalFunctionType<T>>(numerator_ev/denominator_ev);
+        return std::make_shared<RationalFunctionType<T>>(numerator_ev/denominator_ev);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
@@ -481,7 +481,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
             ret = ret + power_series[ind]*pw;
             pw = pw*value_as_power_series;
         }
-        return std::make_unique<PowerSeriesType<T>>(ret);
+        return std::make_shared<PowerSeriesType<T>>(ret);
     }
 
     std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
