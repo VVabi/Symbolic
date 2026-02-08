@@ -48,7 +48,8 @@ template<typename T> std::shared_ptr<ParsingWrapperType<T>> parse_power_series_f
     for (MathLexerElement x : p) {
         polish.push_back(x);
     }
-    auto res = iterate_wrapped<T>(polish, unit, size);
+    auto variables = std::map<std::string, std::shared_ptr<SymObject>>();
+    auto res = iterate_wrapped<T>(polish, variables, unit, size);
 
     if (polish.size() != 0) {
         throw ParsingException("Parsing error: Unconsumed tokens", polish.front().position);
