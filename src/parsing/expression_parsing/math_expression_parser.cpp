@@ -10,9 +10,9 @@
 
 /**
  * @brief Infers the datatype from the lexer elements.
- * 
+ *
  * This function iterates through the lexer elements and determines the datatype based on the element types and data.
- * 
+ *
  * @param lexer The vector of MathLexerElement objects representing the lexer elements.
  * @return The inferred datatype.
  */
@@ -35,9 +35,9 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
 
 /**
  * @brief Infers the mod unit from the input lexer elements.
- * 
+ *
  * This function iterates through the input lexer elements, looks for calls of mods and returns the inferred mod modulus via unit.
- * 
+ *
  * @param input The deque of MathLexerElement objects representing the input lexer elements.
  * @return The inferred mod unit.
  * @throws EvalException if no "Mod" function is found.
@@ -59,15 +59,15 @@ bool infer_mod_unit(ModLong& unit, std::deque<MathLexerElement> input) {
 
 /**
  * @brief Parses a formula based on the given datatype.
- * 
+ *
  * This function parses the formula represented by the input lexer elements based on the given datatype.
- * 
+ *
  * @param input The deque of MathLexerElement objects representing the input lexer elements.
  * @param type The datatype to parse the formula as.
  * @param powerseries_expansion_size number of terms in the power series expansion
- * @return The parsed formula as a string.
+ * @return The parsed formula as a SymObject.
  */
-std::string parse_formula_internal(std::deque<MathLexerElement>& input,
+std::unique_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& input,
                                     const Datatype type,
                                     const uint32_t powerseries_expansion_size,
                                     const int64_t default_modulus) {
@@ -77,18 +77,18 @@ std::string parse_formula_internal(std::deque<MathLexerElement>& input,
              // TODO(vabi): would be nicer to split this enum into two enums: "Dynamic" and "fixed" and "double"/"rational"/"mod"
             throw std::runtime_error("Dynamic type not allowed here");
         case Datatype::DOUBLE:
-            return iterate_wrapped<double>(input, 1.0, powerseries_expansion_size)->to_string();
+            return iterate_wrapped<double>(input, 1.0, powerseries_expansion_size);
         case Datatype::RATIONAL:
-            return iterate_wrapped<RationalNumber<BigInt>>(input, RationalNumber(BigInt(1)), powerseries_expansion_size)->to_string();
+            return iterate_wrapped<RationalNumber<BigInt>>(input, RationalNumber(BigInt(1)), powerseries_expansion_size);
         case Datatype::MOD:
             ModLong unit = ModLong(0, 1);
             if (!infer_mod_unit(unit, input)) {
                 unit = ModLong(1, default_modulus);
             }
-            return iterate_wrapped<ModLong>(input, unit, powerseries_expansion_size)->to_string();
+            return iterate_wrapped<ModLong>(input, unit, powerseries_expansion_size);
     }
 
-    return "";  // Unreachable
+    return nullptr;  // Unreachable
 }
 
 
@@ -121,9 +121,9 @@ bool verify_variable_name(const std::string& name) {
 
 /**
  * @brief Parses the math expression formula based on the given datatype.
- * 
+ *
  * This function parses a math expression formula represented by the input string based on the given datatype.
- * 
+ *
  * @param input The input math expression formula as a string.
  * @param type The datatype to parse the formula as.
  * @param variables The map of variable names to their respective values, represented as list of lexer elements.
@@ -183,19 +183,19 @@ std::string parse_formula(const std::string& input,
         polish.push_back(x);
     }
 
-    std::string ret;
+    std::unique_ptr<SymObject> ret;
     if (type == Datatype::DYNAMIC) {
         auto actual_type = infer_datatype_from_lexer(p);
         ret = parse_formula_internal(polish, actual_type, powerseries_expansion_size, default_modulus);
     } else {
         ret = parse_formula_internal(polish, type, powerseries_expansion_size, default_modulus);
     }
-    auto ans = parse_math_expression_string(ret, variables, 0);
+    auto ans = parse_math_expression_string(ret->to_string(), variables, 0);
     variables["ANS"] = ans;
     if (variable.size() > 0) {
         variables[variable] = ans;
     }
-    return ret;
+    return ret->to_string();
 }
 
 // currently needed for tests

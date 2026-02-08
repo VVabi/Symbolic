@@ -17,6 +17,7 @@
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
 #include "cpp_utils/unused.hpp"
+#include "parsing/sym_object.hpp"
 
 /**
  * @brief Alias for RationalFunction type.
@@ -44,7 +45,7 @@ PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, 
  * @tparam T The underlying type of the parsing wrapper.
  */
 template<typename T>
-class ParsingWrapperType {
+class ParsingWrapperType : public SymObject{
  public:
     /**
      * @brief Convert the parsing wrapper to a value of type T.
@@ -113,12 +114,6 @@ class ParsingWrapperType {
     virtual void unary_minus() = 0;
 
     /**
-     * @brief Convert the parsing wrapper to a string representation.
-     * @return The string representation.
-     */
-    virtual std::string to_string() = 0;
-
-    /**
      * @brief Raise the parsing wrapper to a given exponent.
      * @param exponent The exponent.
      */
@@ -176,7 +171,7 @@ class ValueType: public ParsingWrapperType<T> {
         return std::make_unique<ValueType<T>>(value*other->as_value());
     }
 
-    std::string to_string() {
+    std::string to_string() const {
         std::stringstream ss;
         ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
         ss << value;
@@ -339,7 +334,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         throw EvalException("Cannot raise a power series to a non-integer power", -1);
     }
 
-    std::string to_string() {
+    std::string to_string() const{
         std::stringstream ss;
         ss << value;
         return ss.str();
@@ -445,7 +440,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         throw EvalException("Cannot raise a rational function to a non-integer power", -1);
     }
 
-    std::string to_string() {
+    std::string to_string() const {
         std::stringstream ss;
         ss << value;
         return ss.str();
