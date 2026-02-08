@@ -133,7 +133,7 @@ bool verify_variable_name(const std::string& name) {
 std::string parse_formula(const std::string& input,
                     const Datatype type,
                     std::map<std::string,
-                    std::vector<MathLexerElement>>& variables,
+                    std::shared_ptr<SymObject>>& variables,
                     const uint32_t powerseries_expansion_size,
                     const int64_t default_modulus) {
     auto pos = input.find("=");
@@ -173,7 +173,7 @@ std::string parse_formula(const std::string& input,
         input_string = parts[0];
     }
 
-    auto formula = parse_math_expression_string(input_string, variables, offset);
+    auto formula = parse_math_expression_string(input_string, offset);
 
     auto p = shunting_yard_algorithm(formula);
 
@@ -190,18 +190,17 @@ std::string parse_formula(const std::string& input,
     } else {
         ret = parse_formula_internal(polish, type, powerseries_expansion_size, default_modulus);
     }
-    auto ans = parse_math_expression_string(ret->to_string(), variables, 0);
-    variables["ANS"] = ans;
-    if (variable.size() > 0) {
-        variables[variable] = ans;
-    }
-    return ret->to_string();
+
+    auto ret_str = ret->to_string();
+    variables["ANS"] = std::move(ret);
+
+    return ret_str;
 }
 
 // currently needed for tests
 // to remove this, fix the from_string implementation of ModLong so that it can actually parse something like Mod(6,17)
 ModLong parse_modlong_value(const std::string& input) {
-    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
+    auto formula = parse_math_expression_string(input, 0);
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;

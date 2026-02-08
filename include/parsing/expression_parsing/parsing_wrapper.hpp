@@ -45,7 +45,7 @@ PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, 
  * @tparam T The underlying type of the parsing wrapper.
  */
 template<typename T>
-class ParsingWrapperType : public SymObject{
+class ParsingWrapperType : public SymMathObject {
  public:
     /**
      * @brief Convert the parsing wrapper to a value of type T.
