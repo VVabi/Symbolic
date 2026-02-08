@@ -13,6 +13,7 @@
 #include <deque>
 #include <vector>
 #include <string>
+#include <map>
 #include <utility>
 #include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -153,6 +154,7 @@ template<typename T>  class PolishDiv: public PolishNotationElement<T> {
 
 template<typename T>  class PolishVariable: public PolishNotationElement<T> {
     std::string name;
+
  public:
     PolishVariable(std::string name, uint32_t position) : PolishNotationElement<T>(position), name(name) { }
 
@@ -576,7 +578,7 @@ template<typename T> class PolishCoefficient: public PolishFunction<T> {
  public:
     PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction<T>(position, num_args, 2, 2), as_egf(as_egf) {}
     std::shared_ptr<ParsingWrapperType<T>> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const T unit,
                                     const size_t fp_size) {
         auto result = iterate_wrapped<T>(cmd_list, variables, unit, fp_size)->as_power_series(fp_size);

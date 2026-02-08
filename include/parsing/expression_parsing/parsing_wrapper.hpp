@@ -334,7 +334,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         throw EvalException("Cannot raise a power series to a non-integer power", -1);
     }
 
-    std::string to_string() const{
+    std::string to_string() const {
         std::stringstream ss;
         ss << value;
         return ss.str();
