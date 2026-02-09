@@ -172,8 +172,8 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
         auto var = existing_var->second;
         auto ret = std::dynamic_pointer_cast<ParsingWrapperType<T>>(var);
         if (ret != nullptr) {
-            // We should copy her to avoid modifying the variable in the variables map when applying operations to it
-            return std::make_shared<ParsingWrapperType<T>>(*ret);
+            // We should copy here to avoid modifying the variable in the variables map when applying operations to it
+            return std::dynamic_pointer_cast<ParsingWrapperType<T>>(ret->clone());
         }
 
         /*auto next_attempt = std::dynamic_pointer_cast<ParsingWrapperType<BigInt>>(var);

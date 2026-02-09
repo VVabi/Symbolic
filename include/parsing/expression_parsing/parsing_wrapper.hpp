@@ -219,6 +219,10 @@ class ValueType: public ParsingWrapperType<T> {
         UNUSED(input);
         return std::make_shared<ValueType<T>>(value);
     }
+
+    std::shared_ptr<SymObject> clone() const override {
+        return std::make_shared<ValueType<T>>(value);
+    }
 };
 
 template<>
@@ -273,6 +277,9 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     FormalPowerSeries<T> value;
 
  public:
+    std::shared_ptr<SymObject> clone() const override {
+        return std::make_shared<PowerSeriesType<T>>(value);
+    }
     PowerSeriesType(FormalPowerSeries<T> value): value(value) {}
 
     T as_value() {
@@ -378,6 +385,9 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     RationalFunction<T> value;
 
  public:
+    std::shared_ptr<SymObject> clone() const override {
+        return std::make_shared<RationalFunctionType<T>>(value);
+    }
     RationalFunctionType(RationalFunction<T> value): value(value) {}
 
     T as_value() {

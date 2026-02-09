@@ -441,9 +441,9 @@ template<typename T> class PowerSeries: public PolyBase<T> {
 
     /**
      * @brief Substitute another power series for the variable.
-     * 
+     *
      * This function substitutes another power series for the variable in the power series.
-     * 
+     *
      * @param fp The power series to substitute.
      * @param allow_constant_term Whether to allow a non-zero constant term in the power series to substitute.
      * @return The power series after substitution.
