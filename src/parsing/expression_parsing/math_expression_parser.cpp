@@ -42,7 +42,7 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  * @return The inferred mod unit.
  * @throws EvalException if no "Mod" function is found.
  */
-bool infer_mod_unit(ModLong& unit, std::map<std::string, std::shared_ptr<SymObject>>& variables, std::deque<MathLexerElement> input) {
+/*bool infer_mod_unit(ModLong& unit, std::map<std::string, std::shared_ptr<SymObject>>& variables, std::deque<MathLexerElement> input) {
     while (input.size() > 0) {
         auto x = input.front();
 
@@ -55,7 +55,7 @@ bool infer_mod_unit(ModLong& unit, std::map<std::string, std::shared_ptr<SymObje
     }
 
     return false;
-}
+}*/
 
 /**
  * @brief Parses a formula based on the given datatype.
@@ -72,7 +72,10 @@ std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& 
                                     const Datatype type,
                                     const uint32_t powerseries_expansion_size,
                                     const int64_t default_modulus) {
-    switch (type) {
+    UNUSED(default_modulus);
+    UNUSED(type);
+    return iterate_wrapped(input, variables, powerseries_expansion_size);
+    /*switch (type) {
         case Datatype::DYNAMIC:
              // needs to be resolved on a higher level
              // TODO(vabi): would be nicer to split this enum into two enums: "Dynamic" and "fixed" and "double"/"rational"/"mod"
@@ -80,14 +83,14 @@ std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& 
         case Datatype::DOUBLE:
             return iterate_wrapped<double>(input, variables, 1.0, powerseries_expansion_size);
         case Datatype::RATIONAL:
-            return iterate_wrapped<RationalNumber<BigInt>>(input, variables, RationalNumber(BigInt(1)), powerseries_expansion_size);
+            return iterate_wrapped<RationalNumber<BigInt>>(input, variables, powerseries_expansion_size);
         case Datatype::MOD:
             ModLong unit = ModLong(0, 1);
             if (!infer_mod_unit(unit, variables, input)) {
                 unit = ModLong(1, default_modulus);
             }
             return iterate_wrapped<ModLong>(input, variables, unit, powerseries_expansion_size);
-    }
+    }*/
 
     return nullptr;  // Unreachable
 }
@@ -202,7 +205,7 @@ std::string parse_formula(const std::string& input,
 
 // currently needed for tests
 // to remove this, fix the from_string implementation of ModLong so that it can actually parse something like Mod(6,17)
-ModLong parse_modlong_value(const std::string& input) {
+/*ModLong parse_modlong_value(const std::string& input) {
     auto formula = parse_math_expression_string(input, 0);
     auto p = shunting_yard_algorithm(formula);
 
@@ -215,4 +218,4 @@ ModLong parse_modlong_value(const std::string& input) {
     std::map<std::string, std::shared_ptr<SymObject>> variables;
     infer_mod_unit(unit, variables, polish);
     return iterate_wrapped<ModLong>(polish, variables, unit, 20)->as_value();
-}
+}*/

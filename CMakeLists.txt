@@ -3,7 +3,7 @@ project(Symbolic VERSION 0.1.0 LANGUAGES C CXX)
 include_directories(include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-add_executable(Symbolic 
+add_executable(Symbolic
         src/Symbolic.cpp
         src/string_utils/string_utils.cpp
         src/polya/partitions.cpp
@@ -12,6 +12,7 @@ add_executable(Symbolic
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
+        src/parsing/polish_notation/polish_core.cpp
         src/functions/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
@@ -29,6 +30,7 @@ add_executable(Symbolic_tests
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
+        src/parsing/polish_notation/polish_core.cpp
         src/functions/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
@@ -55,6 +57,7 @@ add_executable(Symbolic_playground
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
+        src/parsing/polish_notation/polish_core.cpp
         src/functions/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp

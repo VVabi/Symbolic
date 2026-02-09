@@ -7,6 +7,7 @@
 #define INCLUDE_TYPES_RATIONALS_HPP_
 
 #include <string>
+#include <algorithm>
 #include "types/ring_helpers.hpp"
 #include "string_utils/string_utils.hpp"
 #include "types/bigint.hpp"

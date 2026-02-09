@@ -18,7 +18,7 @@
 #include "common/common_datatypes.hpp"
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
-#include "parsing/polish_notation/polish_notation.hpp"
+#include "parsing/polish_notation/polish.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
