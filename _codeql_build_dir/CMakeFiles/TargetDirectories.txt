@@ -1,7 +1,0 @@
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/Symbolic.dir
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/Symbolic_tests.dir
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/Symbolic_playground.dir
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/package.dir
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/package_source.dir
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/edit_cache.dir
-/home/runner/work/Symbolic/Symbolic/_codeql_build_dir/CMakeFiles/rebuild_cache.dir
