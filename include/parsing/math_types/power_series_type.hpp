@@ -37,7 +37,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return RingCompanionHelper<RationalFunction<T>>::get_zero(Polynomial<T>(value.copy_coefficients()));
     }
 
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) const {
         if (num_coeffs > value.num_coefficients()) {
             return value;
         }
@@ -119,6 +119,13 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     Datatype get_type() const override;
+
+    T get_coefficient(const uint32_t index) const override {
+        if (index < value.num_coefficients()) {
+            return value[index];
+        }
+        throw ParsingTypeException("Coefficient index out of bounds");
+    }
 };
 
 template <>

@@ -37,3 +37,70 @@ class PolishPowerSeriesFunction: public PolishFunction {
         }
     }
 };
+
+
+class PolishLandau: public PolishFunction {
+ public:
+    PolishLandau(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto result = std::dynamic_pointer_cast<RationalFunctionType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        if (!result) {
+            throw ParsingTypeException("Type error: Expected rational function as argument in Landau function");
+        }
+        uint32_t deg = result->as_rational_function().get_numerator().degree();
+        if (deg <= 0) {
+            deg = 1;
+        }
+
+        if (deg > fp_size) {
+            deg = fp_size;
+        }
+        return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
+    }
+};
+
+class PolishCoefficient: public PolishFunction {
+    bool as_egf;
+
+ public:
+    PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction(position, num_args, 2, 2), as_egf(as_egf) {}
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+
+        if (!result) {
+            throw ParsingTypeException("Type error: Expected mathematical object as argument in coefficient function");
+        }
+
+        auto number = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        if (!number) {
+            throw EvalException("Expected natural number as coefficient index", this->get_position());
+        }
+
+        if (number->as_value().get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number as coefficient index", this->get_position());
+        }
+
+        auto idx = number->as_value().get_numerator();
+
+        if (idx < 0) {
+            throw EvalException("Expected natural number as coefficient index", this->get_position());
+        }
+
+        if (idx > BigInt(INT32_MAX)) {
+            throw EvalException("Coefficient index too large", this->get_position());
+        }
+
+        auto int_idx = idx.as_int64();
+
+        if (int_idx < 0) {
+            throw EvalException("Coefficient index negative", this->get_position());
+        }
+
+        return result->get_coefficient_as_sym_object(int_idx);
+    }
+};

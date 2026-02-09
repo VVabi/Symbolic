@@ -35,7 +35,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return value;
     }
 
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) const {
         auto num = value.get_numerator();
         auto den = value.get_denominator();
 
@@ -135,6 +135,10 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     }
 
     Datatype get_type() const override;
+
+    T get_coefficient(const uint32_t index) const override {
+        return this->as_power_series(index+1)[index];
+    }
 };
 
 template <>

@@ -26,4 +26,6 @@ class SymMathObject: public SymObject {
     virtual void pow(const BigInt& exponent) = 0;
 
     virtual void pow(const double& exponent) = 0;
+
+    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const = 0;
 };

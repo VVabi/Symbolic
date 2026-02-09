@@ -27,6 +27,9 @@ template<typename T>
 using RationalFunction = RationalNumber<Polynomial<T>>;
 
 template<typename T>
+std::shared_ptr<SymMathObject> create_value_type(const T value);
+
+template<typename T>
 PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, const uint32_t num_coefficients) {
     auto num = in.get_numerator();
     auto den = in.get_denominator();
@@ -64,7 +67,7 @@ class ParsingWrapperType : public SymMathObject {
      * @param num_coeffs The number of coefficients in the power series.
      * @return The power series.
      */
-    virtual PowerSeries<T> as_power_series(uint32_t num_coeffs) = 0;
+    virtual PowerSeries<T> as_power_series(uint32_t num_coeffs) const = 0;
 
     /**
      * @brief Get the priority of the parsing wrapper.
@@ -133,6 +136,12 @@ class ParsingWrapperType : public SymMathObject {
 
     virtual std::shared_ptr<SymMathObject> as_double() const {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
+
+    virtual T get_coefficient(const uint32_t index) const = 0;
+
+    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const {
+        return create_value_type(get_coefficient(index));
     }
 };
 

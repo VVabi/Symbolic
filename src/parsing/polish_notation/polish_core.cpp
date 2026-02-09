@@ -100,7 +100,13 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::COS, element.position, element.num_args);
             } else if (element.data == "tan") {
                 return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::TAN, element.position, element.num_args);
-            }
+            } else if (element.data == "O") {
+                return std::make_shared<PolishLandau>(element.position, element.num_args);
+            } else if (element.data == "coeff") {
+                return std::make_shared<PolishCoefficient>(element.position, false, element.num_args);
+            } /*else if (element.data == "egfcoeff") {
+                return std::make_shared<PolishCoefficient>(element.position, true, element.num_args);
+            }*/
         }
         default:
             break;

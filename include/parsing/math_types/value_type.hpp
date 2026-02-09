@@ -37,7 +37,7 @@ class ValueType: public ParsingWrapperType<T> {
         return RationalFunction<T>(Polynomial<T>(std::vector<T>{value}));
     }
 
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) const {
         auto zero = RingCompanionHelper<T>::get_zero(value);
         auto coeffs = std::vector<T>(num_coeffs, zero);
         coeffs[0] = value;
@@ -113,6 +113,14 @@ class ValueType: public ParsingWrapperType<T> {
     std::shared_ptr<SymMathObject> as_double() const override {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
     }
+
+    T get_coefficient(const uint32_t index) const override {
+        if (index == 0) {
+            return value;
+        }
+        auto zero = RingCompanionHelper<T>::get_zero(value);
+        return zero;
+    }
 };
 
 
@@ -178,4 +186,9 @@ inline Datatype ValueType<RationalNumber<BigInt>>::get_type() const {
 template <>
 inline Datatype ValueType<ModLong>::get_type() const {
     return Datatype::MOD;
+}
+
+template<typename T>
+std::shared_ptr<SymMathObject> create_value_type(const T value) {
+    return std::make_shared<ValueType<T>>(value);
 }
