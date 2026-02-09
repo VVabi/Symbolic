@@ -83,7 +83,7 @@ class ValueType: public ParsingWrapperType<T> {
         return std::make_shared<ValueType<T>>(other->as_value()/value);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         UNUSED(type);
         UNUSED(fp_size);
         throw DatatypeInternalException("Cannot apply power series function to a constant for non-double types");
@@ -125,7 +125,7 @@ inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_doub
 }
 
 template<>
-inline std::shared_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+inline std::shared_ptr<SymMathObject> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
     UNUSED(fp_size);
     return std::make_shared<ValueType<double>>(evaluate_power_series_function_double(value, type));
 }

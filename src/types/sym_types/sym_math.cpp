@@ -47,6 +47,10 @@ std::shared_ptr<SymMathObject> sym_binary(std::shared_ptr<SymMathObject> a, std:
         auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(a);
         auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(b->as_double());
         return sym_binary_base<double>(a_casted, b_casted, op_type);
+    } else if (b->get_type() == Datatype::DOUBLE) {
+        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(a->as_double());
+        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(b);
+        return sym_binary_base<double>(a_casted, b_casted, op_type);
     }
 
     throw ParsingTypeException("Type error: Cannot apply binary operation due to type error"); // TODO add types to error message

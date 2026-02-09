@@ -67,7 +67,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return std::make_shared<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         auto unit = RingCompanionHelper<T>::get_unit(value[0]);
         auto ps = evaluate_power_series_function<T>(value, type, unit, fp_size);
         return std::make_shared<PowerSeriesType<T>>(ps);

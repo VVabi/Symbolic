@@ -106,7 +106,7 @@ class ParsingWrapperType : public SymMathObject {
      * @param fp_size The size of the fixed point representation.
      * @return The result of the power series function.
      */
-    virtual std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) = 0;
+    virtual std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) = 0;
 
     /**
      * @brief Apply unary minus to this parsing wrapper.

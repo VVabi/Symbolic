@@ -67,7 +67,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return std::make_shared<RationalFunctionType<T>>(other->as_rational_function()/value);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         auto unit = RingCompanionHelper<T>::get_unit(value.get_numerator()[0]);
         auto ps = evaluate_power_series_function<T>(this->as_power_series(fp_size), type, unit, fp_size);
         return std::make_shared<PowerSeriesType<T>>(ps);

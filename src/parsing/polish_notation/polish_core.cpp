@@ -2,6 +2,7 @@
 #include "exceptions/parsing_exceptions.hpp"
 #include "parsing/polish_notation/polish.hpp"
 #include "parsing/polish_notation/polish_base_math.hpp"
+#include "parsing/polish_notation/polish_functions.hpp"
 #include "parsing/math_types/value_type.hpp"
 #include "parsing/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -69,12 +70,38 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishTimes>(element.position);
             } else if (element.data == "/") {
                 return std::make_shared<PolishDiv>(element.position);
-            } /*else if (element.data == "^") {
+            } else if (element.data == "^") {
                 return std::make_shared<PolishPow>(element.position);
-            } else if (element.data == "!") {
+            } /*else if (element.data == "!") {
                 return std::make_shared<PolishFactorial>(element.position);
             }*/
+
+            throw EvalException("Unknown infix operator: " + element.data, element.position);
             break;
+        case UNARY:
+            if (element.data == "-") {
+                return std::make_shared<PolishUnaryMinus>(element.position);
+            }
+            throw EvalException("Unknown unary operator: " + element.data, element.position);
+            break;
+        case FUNCTION: {
+            if (element.num_args == -1) {
+                throw EvalException("Function argument count not set for function: " + element.data, element.position);
+            }
+            if (element.data == "exp") {
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::EXP, element.position, element.num_args);
+            } else if (element.data == "sqrt") {
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SQRT, element.position, element.num_args);
+            } else if (element.data == "log") {
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::LOG, element.position, element.num_args);
+            } else if (element.data == "sin") {
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SIN, element.position, element.num_args);
+            } else if (element.data == "cos") {
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::COS, element.position, element.num_args);
+            } else if (element.data == "tan") {
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::TAN, element.position, element.num_args);
+            }
+        }
         default:
             break;
     }
