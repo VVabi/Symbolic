@@ -184,7 +184,11 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
         std::string error_msg = "Variable '" + name + "' type mismatch. ";
         error_msg += "Expected type: ParsingWrapperType<" + std::string(typeid(T).name()) + ">, ";
         error_msg += "Actual type: " + std::string(typeid(*var).name());
-        error_msg += " (value: " + var->to_string() + ")";
+        try {
+            error_msg += " (value: " + var->to_string() + ")";
+        } catch (...) {
+            // Ignore if to_string() fails - the type information is more important
+        }
         throw ParsingTypeException(error_msg);
     }
 };
