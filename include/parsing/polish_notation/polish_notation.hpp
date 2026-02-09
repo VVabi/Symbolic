@@ -8,7 +8,9 @@
 #ifndef INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
 #define INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
 
+#include <cxxabi.h>
 #include <memory>
+#include <typeinfo>
 #include <cmath>
 #include <deque>
 #include <vector>
@@ -180,8 +182,16 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
         if (next_attempt != nullptr) {
             return next_attempt;
         }*/
-        throw ParsingTypeException("Variable "+name+" cannot be used in an expression");
-        return nullptr;
+        int status;
+        std::string error_msg = "Variable '" + name + "' type mismatch. ";
+        error_msg += "Expected type: ParsingWrapperType<" + std::string(abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status)) + ">, ";
+        error_msg += "Actual type: " + std::string(abi::__cxa_demangle(typeid(*var).name(), nullptr, nullptr, &status));
+        try {
+            error_msg += " (value: " + var->to_string() + ")";
+        } catch (...) {
+            // Ignore if to_string() fails - the type information is more important
+        }
+        throw ParsingTypeException(error_msg);
     }
 };
 
