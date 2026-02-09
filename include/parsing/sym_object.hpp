@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include "common/common_datatypes.hpp"
 
 class SymMathObject;
 
@@ -11,9 +12,10 @@ class SymObject {
     virtual std::shared_ptr<SymObject> clone() const = 0;
 };
 
-
 class SymMathObject: public SymObject {
  public:
     virtual ~SymMathObject() = default;
     virtual std::shared_ptr<SymObject> clone() const = 0;
+    //virtual std::shared_ptr<SymMathObject> as_type(const Datatype& type) const = 0;
+    virtual Datatype get_type() const = 0;
 };

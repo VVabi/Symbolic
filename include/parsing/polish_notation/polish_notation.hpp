@@ -21,6 +21,9 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
+#include "parsing/math_types/value_type.hpp"
+#include "parsing/math_types/power_series_type.hpp"
+#include "parsing/math_types/rational_function_type.hpp"
 #include "string_utils/string_utils.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "symbolic_method/unlabelled_symbolic.hpp"
@@ -30,6 +33,7 @@
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
 #include "functions/power_series_functions.hpp"
 #include "cpp_utils/unused.hpp"
+
 
 template<typename T> class PolishNotationElement {
     uint32_t position;
