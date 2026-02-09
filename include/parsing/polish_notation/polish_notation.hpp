@@ -15,6 +15,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <typeinfo>
 #include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/power_series.hpp"
@@ -180,7 +181,10 @@ template<typename T>  class PolishVariable: public PolishNotationElement<T> {
         if (next_attempt != nullptr) {
             return next_attempt;
         }*/
-        throw ParsingTypeException("Variable "+name+" cannot be used in an expression");
+        std::string error_msg = "Variable '" + name + "' type mismatch. ";
+        error_msg += "Expected type: ParsingWrapperType<" + std::string(typeid(T).name()) + ">, ";
+        error_msg += "Actual type: " + std::string(typeid(*var).name());
+        throw ParsingTypeException(error_msg);
         return nullptr;
     }
 };
