@@ -12,19 +12,17 @@
 
 /**
  * @brief Parses a mathematical expression string into a vector of lexer elements.
- * 
- * This function takes a string representing a mathematical expression and parses it into 
+ *
+ * This function takes a string representing a mathematical expression and parses it into
  * a vector of `MathLexerElement` objects. Each `MathLexerElement` represents a number, variable or operation
  * in the expression.
  *
  * @param input The mathematical expression string to parse.
- * @param variables the known variables we can substitute
  * @param position_offset offset of distance in input to real distance in original string.
  *         Eg when the original user input is f = 1+z, only the 1+z arrives here, but errors should still be reported relative to f = 1+z.
  * @return A vector of `MathLexerElement` objects representing the parsed expression.
  */
 std::vector<MathLexerElement> parse_math_expression_string(const std::string& input,
-                                                           const std::map<std::string, std::vector<MathLexerElement>>& variables,
                                                            const uint32_t position_offset) {
     std::vector<MathLexerElement> formula;
 
@@ -61,18 +59,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 if (*it == '(') {
                     formula.push_back(MathLexerElement(FUNCTION, var, distance));
                 } else {
-                    auto pos = variables.find(var);
-                    if (pos == variables.end()) {
-                        formula.push_back(MathLexerElement(VARIABLE, var, distance));
-                    } else {
-                        formula.push_back(MathLexerElement(LEFT_PARENTHESIS, "", distance));
-                        for (auto x : pos->second) {
-                            auto y = x;
-                            y.position = distance;
-                            formula.push_back(y);
-                        }
-                        formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, "", distance));
-                    }
+                    formula.push_back(MathLexerElement(VARIABLE, var, distance));
                 }
             }
             it--;
