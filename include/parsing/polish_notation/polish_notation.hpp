@@ -8,15 +8,15 @@
 #ifndef INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
 #define INCLUDE_PARSING_POLISH_NOTATION_POLISH_NOTATION_HPP_
 
+#include <cxxabi.h>
 #include <memory>
+#include <typeinfo>
 #include <cmath>
 #include <deque>
 #include <vector>
 #include <string>
 #include <map>
 #include <utility>
-#include <typeinfo>
-#include <cxxabi.h>
 #include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/power_series.hpp"
