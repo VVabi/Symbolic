@@ -1,5 +1,5 @@
 /**
- * @file bigint.hpp	
+ * @file bigint.hpp
  * @brief Represents a large integer using the GNU Multiple Precision Arithmetic Library (GMP).
  * @date Mar 26, 2024
  * @author vabi
@@ -273,6 +273,10 @@ class BigInt {
             throw std::runtime_error("BigInt value is too large to fit in a 64-bit integer");
         }
         return mpz_get_si(value);
+    }
+
+    double as_double() const {
+        return mpz_get_d(value);
     }
 };
 

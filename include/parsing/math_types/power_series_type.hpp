@@ -9,6 +9,7 @@
 #include <utility>
 #include <string>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 
 /**
  * @class PowerSeriesType

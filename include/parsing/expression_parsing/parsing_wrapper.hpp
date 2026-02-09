@@ -125,6 +125,15 @@ class ParsingWrapperType : public SymMathObject {
     virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) = 0;
 
     virtual std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) = 0;
+
+    virtual std::shared_ptr<SymMathObject> as_modlong(const long& modulus) {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
+    }
+
+    virtual std::shared_ptr<SymMathObject> as_double() const {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
 };
 
 

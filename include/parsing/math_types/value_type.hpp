@@ -9,6 +9,8 @@
 #include <string>
 #include <utility>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "parsing/math_types/rational_function_type.hpp"
+#include "parsing/math_types/power_series_type.hpp"
 
 /**
  * @class ValueType
@@ -108,7 +110,19 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     Datatype get_type() const override;
+    std::shared_ptr<SymMathObject> as_double() const override {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
 };
+
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_double() const {
+    if (value.get_denominator() == BigInt(0)) {
+        throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+    }
+    return std::make_shared<ValueType<double>>(value.get_numerator().as_double()/value.get_denominator().as_double());
+}
 
 template<>
 inline std::shared_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {

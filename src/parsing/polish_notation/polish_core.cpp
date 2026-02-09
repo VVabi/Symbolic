@@ -1,10 +1,9 @@
 #include "types/sym_types/sym_object.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "parsing/polish_notation/polish.hpp"
-#include "cpp_utils/unused.hpp"
-#include "types/bigint.hpp"
-#include "types/rationals.hpp"
+#include "parsing/polish_notation/polish_base_math.hpp"
 #include "parsing/math_types/value_type.hpp"
+#include "parsing/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/sym_types/sym_math.hpp"
 
@@ -23,63 +22,14 @@ class PolishNumber: public PolishNotationElement {
                                         UNUSED(variables);
                                         try {
                                             return std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(num_repr, RationalNumber<BigInt>(1)));
-                                        } catch (std::invalid_argument& e) {
-                                            throw EvalException(e.what(), this->get_position());
-                                            return std::shared_ptr<ValueType<RationalNumber<BigInt>>>(nullptr);
+                                        } catch (std::exception& e) {}
+
+                                        try {
+                                            return std::make_shared<ValueType<double>>(RingCompanionHelper<double>::from_string(num_repr, 1.0));
+                                        } catch (std::exception& e) {
+                                            throw EvalException("Cannot parse number: " + num_repr, this->get_position());
                                         }
                                     }
-};
-
-class PolishPlus : public PolishNotationElement {
- public:
-    PolishPlus(uint32_t position) : PolishNotationElement(position) { }
-
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
-                                        const size_t fp_size) {
-        std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        return sym_add(left, right);
-    }
-};
-
-class PolishMinus : public PolishNotationElement {
- public:
-    PolishMinus(uint32_t position) : PolishNotationElement(position) { }
-
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
-                                        const size_t fp_size) {
-        std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        return sym_subtract(left, right);
-    }
-};
-
-class PolishTimes : public PolishNotationElement {
- public:
-    PolishTimes(uint32_t position) : PolishNotationElement(position) { }
-
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
-                                        const size_t fp_size) {
-        std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        return sym_multiply(left, right);
-    }
-};
-
-class PolishDiv : public PolishNotationElement {
- public:
-    PolishDiv(uint32_t position) : PolishNotationElement(position) { }
-
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
-                                        const size_t fp_size) {
-        std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-        return sym_divide(left, right);
-    }
 };
 
 class PolishVariable: public PolishNotationElement {
@@ -94,9 +44,9 @@ class PolishVariable: public PolishNotationElement {
         UNUSED(fp_size);
         auto existing_var = variables.find(name);
         if (existing_var == variables.end()) {
-            throw ParsingTypeException("Variable '" + name + "' not found in variables map");
-            /*auto res = Polynomial<T>::get_atom(unit, 1);
-            return std::make_shared<RationalFunctionType<T>>(res);*/
+            //throw ParsingTypeException("Variable '" + name + "' not found in variables map");
+            auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
+            return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
         auto var = existing_var->second;
         return var->clone();
