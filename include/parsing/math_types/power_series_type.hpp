@@ -6,6 +6,8 @@
 #include <limits>
 #include <cmath>
 #include <algorithm>
+#include <utility>
+#include <string>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
 
 /**
