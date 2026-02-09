@@ -53,7 +53,7 @@ std::shared_ptr<SymMathObject> sym_binary(std::shared_ptr<SymMathObject> a, std:
         return sym_binary_base<double>(a_casted, b_casted, op_type);
     }
 
-    throw ParsingTypeException("Type error: Cannot apply binary operation due to type error"); // TODO add types to error message
+    throw ParsingTypeException("Type error: Cannot apply binary operation due to type error");  // TODO(vabi) add types to error message
     return nullptr;
 }
 

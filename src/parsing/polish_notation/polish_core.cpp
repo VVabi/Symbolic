@@ -45,7 +45,6 @@ class PolishVariable: public PolishNotationElement {
         UNUSED(fp_size);
         auto existing_var = variables.find(name);
         if (existing_var == variables.end()) {
-            //throw ParsingTypeException("Variable '" + name + "' not found in variables map");
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
@@ -72,7 +71,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishDiv>(element.position);
             } else if (element.data == "^") {
                 return std::make_shared<PolishPow>(element.position);
-            } /*else if (element.data == "!") {
+            }
+            /*else if (element.data == "!") {
                 return std::make_shared<PolishFactorial>(element.position);
             }*/
 
@@ -104,7 +104,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishLandau>(element.position, element.num_args);
             } else if (element.data == "coeff") {
                 return std::make_shared<PolishCoefficient>(element.position, false, element.num_args);
-            } /*else if (element.data == "egfcoeff") {
+            }
+            /*else if (element.data == "egfcoeff") {
                 return std::make_shared<PolishCoefficient>(element.position, true, element.num_args);
             }*/
         }
@@ -131,7 +132,8 @@ std::shared_ptr<SymObject> iterate_wrapped(std::deque<MathLexerElement>& cmd_lis
         throw EvalException(e.what(), element->get_position());
     } catch (DatatypeInternalException&e ) {
         throw EvalException(e.what(), element->get_position());
-    } /*catch (SubsetArgumentException& e) {
+    }
+    /*catch (SubsetArgumentException& e) {
         auto pos = element->get_position();
         auto underscore_occurence = current.data.find("_");
         if (underscore_occurence != std::string::npos) {

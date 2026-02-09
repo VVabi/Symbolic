@@ -10,7 +10,7 @@ class SymMathObject: public SymObject {
     virtual std::shared_ptr<SymObject> clone() const = 0;
     virtual Datatype get_type() const = 0;
 
-    virtual std::shared_ptr<SymMathObject> as_modlong(const long& modulus) {
+    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) {
         UNUSED(modulus);
         throw DatatypeInternalException("Cannot convert to Mod");
     }

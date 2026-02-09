@@ -1,4 +1,9 @@
+#pragma once
 #include <functional>
+#include <memory>
+#include <string>
+#include <deque>
+#include <map>
 #include "types/sym_types/sym_object.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "parsing/polish_notation/polish.hpp"

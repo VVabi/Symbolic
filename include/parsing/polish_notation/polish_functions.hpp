@@ -1,3 +1,9 @@
+#pragma once
+#include <functional>
+#include <memory>
+#include <string>
+#include <deque>
+#include <map>
 #include "parsing/polish_notation/polish.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
 

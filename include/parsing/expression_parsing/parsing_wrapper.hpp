@@ -129,7 +129,7 @@ class ParsingWrapperType : public SymMathObject {
 
     virtual std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) = 0;
 
-    virtual std::shared_ptr<SymMathObject> as_modlong(const long& modulus) {
+    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) {
         UNUSED(modulus);
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
     }
