@@ -208,7 +208,7 @@ class FormulaParsingTypeExceptionResult : public FormulaParsingResult {
 
 class FormulaParser {
  private:
-    std::map<std::string, std::vector<MathLexerElement>> variables = std::map<std::string, std::vector<MathLexerElement>>();
+    std::map<std::string, std::shared_ptr<SymObject>> variables = std::map<std::string, std::shared_ptr<SymObject>>();
  public:
     FormulaParser() {  }
 

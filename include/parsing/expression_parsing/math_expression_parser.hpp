@@ -25,10 +25,10 @@
 
  /**
  * @brief Parses a mathematical expression string into a formal power series.
- * 
- * This function takes a string representing a mathematical expression and a size, and parses 
- * the expression into a formal power series of the given size. The function uses the 
- * Shunting Yard algorithm to convert the expression into Polish Notation, 
+ *
+ * This function takes a string representing a mathematical expression and a size, and parses
+ * the expression into a formal power series of the given size. The function uses the
+ * Shunting Yard algorithm to convert the expression into Polish Notation,
  * and then evaluates the polish notation  expression to obtain the power series.
  *
  * @tparam T The type of the coefficients of the power series.
@@ -37,10 +37,10 @@
  * @param unit The multiplicative identity of type `T`.
  * @return The parsed power series.
  */
-template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
+template<typename T> std::shared_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
-    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
+    auto formula = parse_math_expression_string(input, 0);
     auto p = shunting_yard_algorithm(formula);
 
     std::deque<MathLexerElement> polish;
@@ -48,7 +48,8 @@ template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_f
     for (MathLexerElement x : p) {
         polish.push_back(x);
     }
-    auto res = iterate_wrapped<T>(polish, unit, size);
+    auto variables = std::map<std::string, std::shared_ptr<SymObject>>();
+    auto res = iterate_wrapped<T>(polish, variables, unit, size);
 
     if (polish.size() != 0) {
         throw ParsingException("Parsing error: Unconsumed tokens", polish.front().position);
@@ -59,7 +60,7 @@ template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_f
 std::string parse_formula(const std::string& input,
                         const Datatype type,
                         std::map<std::string,
-                        std::vector<MathLexerElement>>& variables,
+                        std::shared_ptr<SymObject>>& variables,
                         const uint32_t powerseries_expansion_size,
                         const int64_t default_modulus);
 
