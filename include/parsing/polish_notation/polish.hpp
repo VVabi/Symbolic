@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "parsing/sym_object.hpp"
+#include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 
 class PolishNotationElement {

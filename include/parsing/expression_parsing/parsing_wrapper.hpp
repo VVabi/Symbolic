@@ -17,7 +17,7 @@
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
 #include "cpp_utils/unused.hpp"
-#include "parsing/sym_object.hpp"
+#include "types/sym_types/sym_math_object.hpp"
 
 /**
  * @brief Alias for RationalFunction type.
