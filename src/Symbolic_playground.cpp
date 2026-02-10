@@ -18,13 +18,10 @@
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
 
+bool test_derangements();
+
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
-
-    auto res = parse_math_expression_string("1+\"hello\"+z+k+\"hakjd   s\"", 0);
-
-    for (auto x : res) {
-        std::cout << "Type: " << expression_type_to_string(x.type) << ", data: " << x.data << ", position: " << x.position << std::endl;
-    }
+    test_derangements();
 }

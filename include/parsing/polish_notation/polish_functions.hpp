@@ -53,19 +53,49 @@ class PolishLandau: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
-        auto result = std::dynamic_pointer_cast<RationalFunctionType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
-        if (!result) {
-            throw ParsingTypeException("Type error: Expected rational function as argument in Landau function");
-        }
-        uint32_t deg = result->as_rational_function().get_numerator().degree();
-        if (deg <= 0) {
-            deg = 1;
+        auto result = iterate_wrapped(cmd_list, variables, fp_size);
+        auto bigint_result = std::dynamic_pointer_cast<RationalFunctionType<RationalNumber<BigInt>>>(result);
+        if (bigint_result) {
+            uint32_t deg = bigint_result->as_rational_function().get_numerator().degree();
+            if (deg <= 0) {
+                deg = 1;
+            }
+
+            if (deg > fp_size) {
+                deg = fp_size;
+            }
+            return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
         }
 
-        if (deg > fp_size) {
-            deg = fp_size;
+        auto double_result = std::dynamic_pointer_cast<RationalFunctionType<double>>(result);
+
+        if (double_result) {
+            uint32_t deg = double_result->as_rational_function().get_numerator().degree();
+            if (deg <= 0) {
+                deg = 1;
+            }
+
+            if (deg > fp_size) {
+                deg = fp_size;
+            }
+            return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
         }
-        return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
+
+        auto mod_result = std::dynamic_pointer_cast<RationalFunctionType<ModLong>>(result);
+
+        if (mod_result) {
+            uint32_t deg = mod_result->as_rational_function().get_numerator().degree();
+            if (deg <= 0) {
+                deg = 1;
+            }
+
+            if (deg > fp_size) {
+                deg = fp_size;
+            }
+            return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
+        }
+
+        throw ParsingTypeException("Type error: Expected rational function in Landau symbol");
     }
 };
 

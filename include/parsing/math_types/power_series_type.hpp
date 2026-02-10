@@ -172,6 +172,12 @@ inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::a
 }
 
 template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<ModLong>::as_modlong(const int64_t& modulus) const {
+    UNUSED(modulus);
+    return std::make_shared<PowerSeriesType<ModLong>>(value);
+}
+
+template<>
 inline std::shared_ptr<SymMathObject> PowerSeriesType<double>::as_double() const {
     return std::make_shared<PowerSeriesType<double>>(value);
 }

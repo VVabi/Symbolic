@@ -187,6 +187,12 @@ inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt
     return std::make_shared<RationalFunctionType<double>>(new_rat_function);
 }
 
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<ModLong>::as_modlong(const int64_t& modulus) const {
+    UNUSED(modulus);
+    return std::make_shared<RationalFunctionType<ModLong>>(value);
+}
+
 
 template<>
 inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {

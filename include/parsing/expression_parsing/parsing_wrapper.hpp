@@ -159,7 +159,6 @@ class ParsingWrapperType : public SymMathObject {
         return create_value_type(coeff);
     }
 
-
     std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) {
         return symbolic_method_internal(op, fp_size, subset);
     }

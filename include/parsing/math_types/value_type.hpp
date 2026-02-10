@@ -140,6 +140,12 @@ inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_modl
 }
 
 template<>
+inline std::shared_ptr<SymMathObject> ValueType<ModLong>::as_modlong(const int64_t& modulus) const {
+    UNUSED(modulus);
+    return std::make_shared<ValueType<ModLong>>(value);
+}
+
+template<>
 inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_double() const {
     if (value.get_denominator() == BigInt(0)) {
         throw EvalException("Cannot convert rational function with zero denominator to double", -1);
