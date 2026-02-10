@@ -2,8 +2,8 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <deque>
 #include <map>
+#include "common/lexer_deque.hpp"
 #include "parsing/polish_notation/polish.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
@@ -23,7 +23,7 @@ class PolishFunction: public PolishNotationElement {
                     }
     virtual ~PolishFunction() { }
 
-    virtual std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    virtual std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) = 0;
 };
@@ -34,7 +34,7 @@ class PolishPowerSeriesFunction: public PolishFunction {
  public:
     PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position, uint32_t num_args) : PolishFunction(position, num_args, 1, 1), type(type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto result = iterate_wrapped(cmd_list, variables, fp_size);
@@ -52,7 +52,7 @@ class PolishLandau: public PolishFunction {
  public:
     PolishLandau(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto result = iterate_wrapped(cmd_list, variables, fp_size);
@@ -106,7 +106,7 @@ class PolishCoefficient: public PolishFunction {
 
  public:
     PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction(position, num_args, 2, 2), as_egf(as_egf) {}
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                     std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
@@ -151,7 +151,7 @@ class PolishSymbolicMethodOperator: public PolishFunction {
     PolishSymbolicMethodOperator(uint32_t position,
         uint32_t num_args,
         const SymbolicMethodOperator op): PolishFunction(position, num_args, 1, 2), op(op) {}
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
@@ -180,7 +180,7 @@ class PolishEval: public PolishFunction {
     PolishEval(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {
     }
 
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto to_evaluate   = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
@@ -202,7 +202,7 @@ class PolishMod: public PolishFunction {
  public:
     PolishMod(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));

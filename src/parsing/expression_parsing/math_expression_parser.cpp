@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <map>
+#include "common/lexer_deque.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 
 /**
@@ -43,7 +44,7 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a SymObject.
  */
-std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& input,
+std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<MathLexerElement>& input,
                                     std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const Datatype type,
                                     const uint32_t powerseries_expansion_size,
@@ -92,7 +93,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
 
     auto p = shunting_yard_algorithm(formula);
 
-    std::deque<MathLexerElement> polish;
+    LexerDeque<MathLexerElement> polish;
 
     for (MathLexerElement x : p) {
         polish.push_back(x);
