@@ -117,7 +117,7 @@ class PolishSymbolicMethodOperator: public PolishFunction {
  public:
     PolishSymbolicMethodOperator(uint32_t position,
         uint32_t num_args,
-        const SymbolicMethodOperator op): PolishFunction(position, num_args, 1, 1), op(op) {}
+        const SymbolicMethodOperator op): PolishFunction(position, num_args, 1, 2), op(op) {}
     std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
@@ -125,10 +125,20 @@ class PolishSymbolicMethodOperator: public PolishFunction {
         if (!result) {
             throw ParsingTypeException("Type error: Expected mathematical object as argument in symbolic method operator");
         }
-        auto subset = Subset("", fp_size);
+
+        std::string subset_str = "";
+        if (num_args == 2) {
+            if (op == SymbolicMethodOperator::INV_MSET) {
+                throw InvalidFunctionArgException("Explicit subset arg for inv mset not allowed", this->get_position());
+            }
+            auto arg = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, variables, fp_size));
+            if (!arg) {
+                throw ParsingTypeException("Type error: Expected string object as second argument in symbolic method operator");
+            }
+            subset_str = arg->to_string();
+        }
+        auto subset = Subset(subset_str, fp_size);
         return result->symbolic_method(op, fp_size, subset);
-
-
     }
 };
 
