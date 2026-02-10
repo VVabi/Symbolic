@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <map>
+#include <sstream>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
@@ -32,7 +33,19 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
     while (it != input.end()) {
         char current = *it;
         auto distance = std::distance(input.begin(), it)+position_offset;
-        if (isdigit(current)) {
+        if (current == '"') {
+            it++;
+            std::stringstream strm;
+            while (it != input.end() && *it != '\"') {
+                strm << *it;
+                it++;
+            }
+
+            if (it == input.end()) {
+                throw ParsingException("Unterminated string literal", distance);
+            }
+            formula.push_back(MathLexerElement(STRING, strm.str(), distance));
+        } else if (isdigit(current)) {
             std::string num = "";
 
             while (isdigit(*it) || *it == '.' || *it =='e' || (*it == '-' && previous == 'e') || (*it == '+' && previous == 'e')) {

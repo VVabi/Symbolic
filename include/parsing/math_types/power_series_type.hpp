@@ -9,6 +9,7 @@
 #include <utility>
 #include <string>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 
 /**
  * @class PowerSeriesType
@@ -36,7 +37,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return RingCompanionHelper<RationalFunction<T>>::get_zero(Polynomial<T>(value.copy_coefficients()));
     }
 
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) const {
         if (num_coeffs > value.num_coefficients()) {
             return value;
         }
@@ -66,7 +67,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return std::make_shared<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         auto unit = RingCompanionHelper<T>::get_unit(value[0]);
         auto ps = evaluate_power_series_function<T>(value, type, unit, fp_size);
         return std::make_shared<PowerSeriesType<T>>(ps);
@@ -113,12 +114,78 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return std::make_shared<PowerSeriesType<T>>(ret);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
-        return input->insert_into_power_series(value);
+    std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
+        auto ptr = std::dynamic_pointer_cast<ParsingWrapperType<T>>(input);
+
+        if (!ptr) {
+            throw EvalException("Cannot evaluate power series at this input", -1);
+        }
+        return ptr->insert_into_power_series(value);
     }
 
     Datatype get_type() const override;
+
+    T get_coefficient(const uint32_t index) const override {
+        if (index < value.num_coefficients()) {
+            return value[index];
+        }
+        throw ParsingTypeException("Coefficient index out of bounds");
+    }
+
+    std::shared_ptr<SymMathObject> as_double() const override {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
+
+    std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const override {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to ModLong");
+    }
 };
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::as_double() const {
+    auto new_coefficients = std::vector<double>();
+
+    for (uint32_t ind = 0; ind < value.num_coefficients(); ind++) {
+        if (value[ind].get_denominator() == BigInt(0)) {
+            throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+        }
+        new_coefficients.push_back(value[ind].get_numerator().as_double()/value[ind].get_denominator().as_double());
+    }
+
+    PowerSeries<double> new_ps = FormalPowerSeries<double>(std::move(new_coefficients));
+    return std::make_shared<PowerSeriesType<double>>(new_ps);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
+    auto new_coefficients = std::vector<ModLong>();
+
+    for (uint32_t ind = 0; ind < value.num_coefficients(); ind++) {
+        if (value[ind].get_denominator() == BigInt(0)) {
+            throw EvalException("Cannot convert rational function with zero denominator to ModLong", -1);
+        }
+        auto num = value[ind].get_numerator();
+        auto den = value[ind].get_denominator();
+        auto mod_num = ModLong((num % modulus).as_int64(), modulus);
+        auto mod_den = ModLong((den % modulus).as_int64(), modulus);
+        new_coefficients.push_back(mod_num/mod_den);
+    }
+
+    PowerSeries<ModLong> new_ps = FormalPowerSeries<ModLong>(std::move(new_coefficients));
+    return std::make_shared<PowerSeriesType<ModLong>>(new_ps);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<ModLong>::as_modlong(const int64_t& modulus) const {
+    UNUSED(modulus);
+    return std::make_shared<PowerSeriesType<ModLong>>(value);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<double>::as_double() const {
+    return std::make_shared<PowerSeriesType<double>>(value);
+}
 
 template <>
 inline Datatype PowerSeriesType<double>::get_type() const {

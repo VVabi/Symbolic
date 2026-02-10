@@ -91,6 +91,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                 break;
             case NUMBER:
             case VARIABLE:
+            case STRING:
                 ret.push_back(*it);
                 break;
             case FUNCTION:

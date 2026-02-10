@@ -22,7 +22,8 @@ enum expression_type {
     VARIABLE,               ///< Variable
     LEFT_PARENTHESIS,       ///< Left parenthesis
     RIGHT_PARENTHESIS,      ///< Right parenthesis
-    SEPARATOR               ///< Separator
+    SEPARATOR,              ///< Separator
+    STRING                  ///< String literal
 };
 
 inline std::string expression_type_to_string(expression_type type) {
@@ -43,6 +44,8 @@ inline std::string expression_type_to_string(expression_type type) {
             return "RIGHT_PARENTHESIS";
         case SEPARATOR:
             return "SEPARATOR";
+        case STRING:
+            return "STRING";
     }
 
     return "";  // unreachable

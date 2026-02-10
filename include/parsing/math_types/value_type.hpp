@@ -9,6 +9,8 @@
 #include <string>
 #include <utility>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "parsing/math_types/rational_function_type.hpp"
+#include "parsing/math_types/power_series_type.hpp"
 
 /**
  * @class ValueType
@@ -35,7 +37,7 @@ class ValueType: public ParsingWrapperType<T> {
         return RationalFunction<T>(Polynomial<T>(std::vector<T>{value}));
     }
 
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) const {
         auto zero = RingCompanionHelper<T>::get_zero(value);
         auto coeffs = std::vector<T>(num_coeffs, zero);
         coeffs[0] = value;
@@ -81,7 +83,7 @@ class ValueType: public ParsingWrapperType<T> {
         return std::make_shared<ValueType<T>>(other->as_value()/value);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         UNUSED(type);
         UNUSED(fp_size);
         throw DatatypeInternalException("Cannot apply power series function to a constant for non-double types");
@@ -98,7 +100,7 @@ class ValueType: public ParsingWrapperType<T> {
         throw DatatypeInternalException("Cannot evaluate power series at a constant");
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
+    std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
         UNUSED(input);
         return std::make_shared<ValueType<T>>(value);
     }
@@ -108,10 +110,56 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     Datatype get_type() const override;
+
+    std::shared_ptr<SymMathObject> as_double() const override {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
+
+    T get_coefficient(const uint32_t index) const override {
+        if (index == 0) {
+            return value;
+        }
+        auto zero = RingCompanionHelper<T>::get_zero(value);
+        return zero;
+    }
+
+    std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
+    }
 };
 
 template<>
-inline std::shared_ptr<ParsingWrapperType<double>> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
+    if (value.get_denominator() == BigInt(0)) {
+        throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+    }
+    auto num = (value.get_numerator() % modulus).as_int64();
+    auto denom = (value.get_denominator() % modulus).as_int64();
+    return std::make_shared<ValueType<ModLong>>(ModLong(num, modulus)/ModLong(denom, modulus));
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<ModLong>::as_modlong(const int64_t& modulus) const {
+    UNUSED(modulus);
+    return std::make_shared<ValueType<ModLong>>(value);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_double() const {
+    if (value.get_denominator() == BigInt(0)) {
+        throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+    }
+    return std::make_shared<ValueType<double>>(value.get_numerator().as_double()/value.get_denominator().as_double());
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<double>::as_double() const {
+    return std::make_shared<ValueType<double>>(value);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<double>::power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
     UNUSED(fp_size);
     return std::make_shared<ValueType<double>>(evaluate_power_series_function_double(value, type));
 }
@@ -164,4 +212,9 @@ inline Datatype ValueType<RationalNumber<BigInt>>::get_type() const {
 template <>
 inline Datatype ValueType<ModLong>::get_type() const {
     return Datatype::MOD;
+}
+
+template<typename T>
+std::shared_ptr<SymMathObject> create_value_type(const T value) {
+    return std::make_shared<ValueType<T>>(value);
 }

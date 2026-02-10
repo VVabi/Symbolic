@@ -7,7 +7,10 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include <utility>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "parsing/math_types/power_series_type.hpp"
+#include "types/polynomial.hpp"
 
 /**
  * @class RationalFunctionType
@@ -34,7 +37,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return value;
     }
 
-    PowerSeries<T> as_power_series(uint32_t num_coeffs) {
+    PowerSeries<T> as_power_series(uint32_t num_coeffs) const {
         auto num = value.get_numerator();
         auto den = value.get_denominator();
 
@@ -66,7 +69,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return std::make_shared<RationalFunctionType<T>>(other->as_rational_function()/value);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
+    std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) {
         auto unit = RingCompanionHelper<T>::get_unit(value.get_numerator()[0]);
         auto ps = evaluate_power_series_function<T>(this->as_power_series(fp_size), type, unit, fp_size);
         return std::make_shared<PowerSeriesType<T>>(ps);
@@ -129,12 +132,101 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return std::make_shared<PowerSeriesType<T>>(ret);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
-        return input->insert_into_rational_function(value);
+    std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
+        auto cast = std::dynamic_pointer_cast<ParsingWrapperType<T>>(input);
+
+        if (cast) {
+            return cast->insert_into_rational_function(value);
+        }
+
+        throw EvalException("Cannot evaluate rational function at this input", -1);
     }
 
     Datatype get_type() const override;
+
+    T get_coefficient(const uint32_t index) const override {
+        return this->as_power_series(index+1)[index];
+    }
+
+    std::shared_ptr<SymMathObject> as_double() const override {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
+
+    std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
+    }
 };
+
+
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt>>::as_double() const {
+    auto new_numerator = std::vector<double>();
+    auto new_denominator = std::vector<double>();
+
+    for (uint32_t ind = 0; ind < value.get_numerator().num_coefficients(); ind++) {
+        auto current_num = value.get_numerator()[ind];
+        auto num_num = current_num.get_numerator();
+        auto den_num = current_num.get_denominator();
+        auto double_num = num_num.as_double()/den_num.as_double();
+
+        new_numerator.push_back(double_num);
+    }
+
+    for (uint32_t ind = 0; ind < value.get_denominator().num_coefficients(); ind++) {
+        auto current_num = value.get_denominator()[ind];
+        auto num_den = current_num.get_numerator();
+        auto den_den = current_num.get_denominator();
+        auto double_den = num_den.as_double()/den_den.as_double();
+
+        new_denominator.push_back(double_den);
+    }
+
+
+    RationalFunction<double> new_rat_function = RationalFunction<double>(Polynomial<double>(std::move(new_numerator)), Polynomial<double>(std::move(new_denominator)));
+    return std::make_shared<RationalFunctionType<double>>(new_rat_function);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<ModLong>::as_modlong(const int64_t& modulus) const {
+    UNUSED(modulus);
+    return std::make_shared<RationalFunctionType<ModLong>>(value);
+}
+
+
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
+    auto new_numerator = std::vector<ModLong>();
+    auto new_denominator = std::vector<ModLong>();
+
+    for (uint32_t ind = 0; ind < value.get_numerator().num_coefficients(); ind++) {
+        auto current_num = value.get_numerator()[ind];
+        auto num_num = current_num.get_numerator();
+        auto den_num = current_num.get_denominator();
+        auto mod_num = ModLong((num_num % modulus).as_int64(), modulus);
+        auto mod_den = ModLong((den_num % modulus).as_int64(), modulus);
+
+        new_numerator.push_back(mod_num / mod_den);
+    }
+
+    for (uint32_t ind = 0; ind < value.get_denominator().num_coefficients(); ind++) {
+        auto current_num = value.get_denominator()[ind];
+        auto num_den = current_num.get_numerator();
+        auto den_den = current_num.get_denominator();
+        auto mod_num = ModLong((num_den % modulus).as_int64(), modulus);
+        auto mod_den = ModLong((den_den % modulus).as_int64(), modulus);
+
+        new_denominator.push_back(mod_num / mod_den);
+    }
+
+    RationalFunction<ModLong> new_rat_function = RationalFunction<ModLong>(Polynomial<ModLong>(std::move(new_numerator)), Polynomial<ModLong>(std::move(new_denominator)));
+    return std::make_shared<RationalFunctionType<ModLong>>(new_rat_function);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<double>::as_double() const {
+    return std::make_shared<RationalFunctionType<double>>(value);
+}
 
 template <>
 inline Datatype RationalFunctionType<double>::get_type() const {

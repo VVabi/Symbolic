@@ -17,7 +17,10 @@
 #include "types/polynomial.hpp"
 #include "functions/power_series_functions.hpp"
 #include "cpp_utils/unused.hpp"
-#include "parsing/sym_object.hpp"
+#include "types/sym_types/sym_math_object.hpp"
+#include "symbolic_method/symbolic_method_core.hpp"
+#include "symbolic_method/unlabelled_symbolic.hpp"
+#include "symbolic_method/labelled_symbolic.hpp"
 
 /**
  * @brief Alias for RationalFunction type.
@@ -25,6 +28,9 @@
  */
 template<typename T>
 using RationalFunction = RationalNumber<Polynomial<T>>;
+
+template<typename T>
+std::shared_ptr<SymMathObject> create_value_type(const T value);
 
 template<typename T>
 PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, const uint32_t num_coefficients) {
@@ -38,6 +44,9 @@ PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, 
     den_ps.resize(num_coefficients);
     return num_ps/den_ps;
 }
+
+template<typename T>
+class PowerSeriesType;
 
 /**
  * @class ParsingWrapperType
@@ -64,7 +73,7 @@ class ParsingWrapperType : public SymMathObject {
      * @param num_coeffs The number of coefficients in the power series.
      * @return The power series.
      */
-    virtual PowerSeries<T> as_power_series(uint32_t num_coeffs) = 0;
+    virtual PowerSeries<T> as_power_series(uint32_t num_coeffs) const = 0;
 
     /**
      * @brief Get the priority of the parsing wrapper.
@@ -106,7 +115,7 @@ class ParsingWrapperType : public SymMathObject {
      * @param fp_size The size of the fixed point representation.
      * @return The result of the power series function.
      */
-    virtual std::shared_ptr<ParsingWrapperType<T>> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) = 0;
+    virtual std::shared_ptr<SymMathObject> power_series_function(PowerSeriesBuiltinFunctionType type, const uint32_t fp_size) = 0;
 
     /**
      * @brief Apply unary minus to this parsing wrapper.
@@ -124,7 +133,60 @@ class ParsingWrapperType : public SymMathObject {
     virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) = 0;
     virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) = 0;
 
-    virtual std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) = 0;
+
+
+    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
+    }
+
+    virtual std::shared_ptr<SymMathObject> as_double() const {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
+
+    virtual T get_coefficient(const uint32_t index) const = 0;
+
+    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index, const bool as_egf) const {
+        auto coeff = get_coefficient(index);
+
+        if (as_egf) {
+            auto factorial = RingCompanionHelper<T>::get_unit(coeff);
+            for (uint32_t ind = 1; ind <= index; ind++) {
+                factorial = factorial*ind;
+            }
+            coeff = coeff*factorial;
+        }
+        return create_value_type(coeff);
+    }
+
+    std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) {
+        return symbolic_method_internal(op, fp_size, subset);
+    }
+
+    std::shared_ptr<SymObject> symbolic_method_internal(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) {
+        auto power_series = this->as_power_series(fp_size);
+
+        switch (op) {
+            case SEQ:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_sequence(power_series, subset));
+            case MSET:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_mset(power_series, subset));
+            case PSET:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_pset(power_series, subset));
+            case CYC:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_cyc(power_series, subset));
+            case LSET:
+                return std::make_shared<PowerSeriesType<T>>(labelled_set(power_series, subset));
+            case LCYC:
+                return std::make_shared<PowerSeriesType<T>>(labelled_cyc(power_series, subset));
+            case INV_MSET:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_inv_mset(power_series));
+            default:
+                throw DatatypeInternalException("Unsupported symbolic method operator");
+        }
+
+        return nullptr;
+    }
 };
 
 
