@@ -163,13 +163,12 @@ std::shared_ptr<SymObject> iterate_wrapped(std::deque<MathLexerElement>& cmd_lis
         throw EvalException(e.what(), element->get_position());
     } catch (DatatypeInternalException&e ) {
         throw EvalException(e.what(), element->get_position());
-    }
-    /*catch (SubsetArgumentException& e) {
+    } catch (SubsetArgumentException& e) {
         auto pos = element->get_position();
         auto underscore_occurence = current.data.find("_");
         if (underscore_occurence != std::string::npos) {
             pos += underscore_occurence;
         }
         throw EvalException(e.what(), pos);
-    }*/
+    }
 }

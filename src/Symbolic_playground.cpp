@@ -18,10 +18,7 @@
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
 
-bool test_derangements();
-
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
-    test_derangements();
 }

@@ -34,30 +34,6 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
 }
 
 /**
- * @brief Infers the mod unit from the input lexer elements.
- *
- * This function iterates through the input lexer elements, looks for calls of mods and returns the inferred mod modulus via unit.
- *
- * @param input The deque of MathLexerElement objects representing the input lexer elements.
- * @return The inferred mod unit.
- * @throws EvalException if no "Mod" function is found.
- */
-/*bool infer_mod_unit(ModLong& unit, std::map<std::string, std::shared_ptr<SymObject>>& variables, std::deque<MathLexerElement> input) {
-    while (input.size() > 0) {
-        auto x = input.front();
-
-        if (x.type == FUNCTION && x.data == "Mod") {
-            auto num = iterate_wrapped<ModLong>(input, variables, ModLong(0, 1), 1)->as_value();
-            unit = RingCompanionHelper<ModLong>::get_unit(num);
-            return true;
-        }
-        input.pop_front();
-    }
-
-    return false;
-}*/
-
-/**
  * @brief Parses a formula based on the given datatype.
  *
  * This function parses the formula represented by the input lexer elements based on the given datatype.
@@ -75,24 +51,6 @@ std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& 
     UNUSED(default_modulus);
     UNUSED(type);
     return iterate_wrapped(input, variables, powerseries_expansion_size);
-    /*switch (type) {
-        case Datatype::DYNAMIC:
-             // needs to be resolved on a higher level
-             // TODO(vabi): would be nicer to split this enum into two enums: "Dynamic" and "fixed" and "double"/"rational"/"mod"
-            throw std::runtime_error("Dynamic type not allowed here");
-        case Datatype::DOUBLE:
-            return iterate_wrapped<double>(input, variables, 1.0, powerseries_expansion_size);
-        case Datatype::RATIONAL:
-            return iterate_wrapped<RationalNumber<BigInt>>(input, variables, powerseries_expansion_size);
-        case Datatype::MOD:
-            ModLong unit = ModLong(0, 1);
-            if (!infer_mod_unit(unit, variables, input)) {
-                unit = ModLong(1, default_modulus);
-            }
-            return iterate_wrapped<ModLong>(input, variables, unit, powerseries_expansion_size);
-    }*/
-
-    return nullptr;  // Unreachable
 }
 
 

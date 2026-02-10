@@ -7,6 +7,7 @@
 #include "parsing/polish_notation/polish.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
+#include "exceptions/parsing_exceptions.hpp"
 
 class PolishFunction: public PolishNotationElement {
  public:
@@ -37,11 +38,12 @@ class PolishPowerSeriesFunction: public PolishFunction {
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
         auto result = iterate_wrapped(cmd_list, variables, fp_size);
-        try {
-            return std::dynamic_pointer_cast<SymMathObject>(result)->power_series_function(type, fp_size);
-        } catch (std::runtime_error& e) {
-            throw EvalException(e.what(), this->get_position());
+        auto math_obj = std::dynamic_pointer_cast<SymMathObject>(result);
+        if (!math_obj) {
+            throw ParsingTypeException("Type error: Expected mathematical object for power series function");
         }
+
+        return math_obj->power_series_function(type, fp_size);
     }
 };
 
@@ -92,7 +94,7 @@ class PolishLandau: public PolishFunction {
             if (deg > fp_size) {
                 deg = fp_size;
             }
-            return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
+            return std::make_shared<PowerSeriesType<ModLong>>(PowerSeries<ModLong>::get_zero(mod_result->get_coefficient(0), deg));
         }
 
         throw ParsingTypeException("Type error: Expected rational function in Landau symbol");
@@ -205,6 +207,10 @@ class PolishMod: public PolishFunction {
                                     const size_t fp_size) {
         auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
         auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        if (!argument || !mod) {
+            throw ParsingTypeException("Type error: Expected natural numbers as arguments in mod function");
+        }
+
         auto value = argument->as_value();
         if (value.get_denominator() != BigInt(1)) {
             throw EvalException("Expected natural number as modulus", this->get_position());

@@ -5,6 +5,7 @@
 #include "functions/power_series_functions.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "symbolic_method/symbolic_method_core.hpp"
+#include "cpp_utils/unused.hpp"
 
 class SymMathObject: public SymObject {
  public:
