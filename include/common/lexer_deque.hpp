@@ -7,6 +7,7 @@ template<typename T>
 class LexerDeque {
     std::vector<T> data;
     uint32_t index;
+
  public:
     LexerDeque(): data(std::vector<T>()), index(0) {}
 
