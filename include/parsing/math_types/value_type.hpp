@@ -110,7 +110,7 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     Datatype get_type() const override;
-    std::shared_ptr<SymMathObject> as_double() const override {
+    virtual std::shared_ptr<SymMathObject> as_double() const override {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
     }
 
@@ -123,13 +123,17 @@ class ValueType: public ParsingWrapperType<T> {
     }
 };
 
-
 template<>
 inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_double() const {
     if (value.get_denominator() == BigInt(0)) {
         throw EvalException("Cannot convert rational function with zero denominator to double", -1);
     }
     return std::make_shared<ValueType<double>>(value.get_numerator().as_double()/value.get_denominator().as_double());
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<double>::as_double() const {
+    return std::make_shared<ValueType<double>>(value);
 }
 
 template<>

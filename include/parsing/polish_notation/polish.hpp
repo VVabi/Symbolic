@@ -12,7 +12,7 @@ class PolishNotationElement {
     PolishNotationElement(uint32_t position): position(position) { }
     virtual ~PolishNotationElement() { }
 
-    virtual std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    virtual inline std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                     std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) = 0;
     uint32_t get_position() {

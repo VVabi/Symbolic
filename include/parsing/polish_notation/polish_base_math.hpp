@@ -114,6 +114,7 @@ class PolishPow: public PolishNotationElement {
                 return std::make_shared<ValueType<double>>(value);
             }
 
+
             throw ParsingTypeException("Type error: Expected mathematical object as base in pow");
         }
 

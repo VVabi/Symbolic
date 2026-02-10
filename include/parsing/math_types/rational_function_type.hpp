@@ -9,6 +9,7 @@
 #include <string>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
 #include "parsing/math_types/power_series_type.hpp"
+#include "types/polynomial.hpp"
 
 /**
  * @class RationalFunctionType
@@ -140,10 +141,43 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return this->as_power_series(index+1)[index];
     }
 
-    //std::shared_ptr<SymMathObject> as_double() const override;
+    std::shared_ptr<SymMathObject> as_double() const override {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
 };
 
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt>>::as_double() const {
+    auto new_numerator = std::vector<double>();
+    auto new_denominator = std::vector<double>();
 
+    for (uint32_t ind = 0; ind < value.get_numerator().num_coefficients(); ind++) {
+        auto current_num = value.get_numerator()[ind];
+        auto num_num = current_num.get_numerator();
+        auto den_num = current_num.get_denominator();
+        auto double_num = num_num.as_double()/den_num.as_double();
+
+        new_numerator.push_back(double_num);
+    }
+
+    for (uint32_t ind = 0; ind < value.get_denominator().num_coefficients(); ind++) {
+        auto current_num = value.get_denominator()[ind];
+        auto num_den = current_num.get_numerator();
+        auto den_den = current_num.get_denominator();
+        auto double_den = num_den.as_double()/den_den.as_double();
+
+        new_denominator.push_back(double_den);
+    }
+
+
+    RationalFunction<double> new_rat_function = RationalFunction<double>(Polynomial<double>(std::move(new_numerator)), Polynomial<double>(std::move(new_denominator)));
+    return std::make_shared<RationalFunctionType<double>>(new_rat_function);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<double>::as_double() const {
+    return std::make_shared<RationalFunctionType<double>>(value);
+}
 
 template <>
 inline Datatype RationalFunctionType<double>::get_type() const {

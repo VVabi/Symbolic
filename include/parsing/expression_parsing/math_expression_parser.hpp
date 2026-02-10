@@ -66,8 +66,6 @@ inline std::shared_ptr<ParsingWrapperType<double>> parse_power_series_from_strin
     return std::dynamic_pointer_cast<ParsingWrapperType<double>>(res);
 }
 
-
-
 std::string parse_formula(const std::string& input,
                         const Datatype type,
                         std::map<std::string,

@@ -126,7 +126,31 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         }
         throw ParsingTypeException("Coefficient index out of bounds");
     }
+
+    std::shared_ptr<SymMathObject> as_double() const override {
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
+    }
 };
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::as_double() const {
+    auto new_coefficients = std::vector<double>();
+
+    for (uint32_t ind = 0; ind < value.num_coefficients(); ind++) {
+        if (value[ind].get_denominator() == BigInt(0)) {
+            throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+        }
+        new_coefficients.push_back(value[ind].get_numerator().as_double()/value[ind].get_denominator().as_double());
+    }
+
+    PowerSeries<double> new_ps = FormalPowerSeries<double>(std::move(new_coefficients));
+    return std::make_shared<PowerSeriesType<double>>(new_ps);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<double>::as_double() const {
+    return std::make_shared<PowerSeriesType<double>>(value);
+}
 
 template <>
 inline Datatype PowerSeriesType<double>::get_type() const {
