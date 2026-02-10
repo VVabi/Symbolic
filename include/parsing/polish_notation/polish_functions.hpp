@@ -108,12 +108,13 @@ class PolishCoefficient: public PolishFunction {
             throw EvalException("Coefficient index negative", this->get_position());
         }
 
-        return result->get_coefficient_as_sym_object(int_idx);
+        return result->get_coefficient_as_sym_object(int_idx, as_egf);
     }
 };
 
 class PolishSymbolicMethodOperator: public PolishFunction {
     SymbolicMethodOperator op;
+
  public:
     PolishSymbolicMethodOperator(uint32_t position,
         uint32_t num_args,
@@ -162,5 +163,32 @@ class PolishEval: public PolishFunction {
         }
 
         return to_evaluate->evaluate_at(arg);
+    }
+};
+
+class PolishMod: public PolishFunction {
+ public:
+    PolishMod(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto value = argument->as_value();
+        if (value.get_denominator() != BigInt(1)) {
+            throw EvalException("Expected natural number as modulus", this->get_position());
+        }
+
+        auto modulus_num = mod->as_value().get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+        if (modulus_num <= 0) {
+            throw EvalException("Expected natural number as modulus", this->get_position());
+        }
+
+        auto a = value.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+        auto b = value.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+
+        auto result = ModLong(a, modulus_num)/ModLong(b, modulus_num);
+        return std::make_shared<ValueType<ModLong>>(result);
     }
 };

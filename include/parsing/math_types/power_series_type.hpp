@@ -130,6 +130,11 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     std::shared_ptr<SymMathObject> as_double() const override {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
     }
+
+    std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const override {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to ModLong");
+    }
 };
 
 template<>
@@ -145,6 +150,25 @@ inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::a
 
     PowerSeries<double> new_ps = FormalPowerSeries<double>(std::move(new_coefficients));
     return std::make_shared<PowerSeriesType<double>>(new_ps);
+}
+
+template<>
+inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
+    auto new_coefficients = std::vector<ModLong>();
+
+    for (uint32_t ind = 0; ind < value.num_coefficients(); ind++) {
+        if (value[ind].get_denominator() == BigInt(0)) {
+            throw EvalException("Cannot convert rational function with zero denominator to ModLong", -1);
+        }
+        auto num = value[ind].get_numerator();
+        auto den = value[ind].get_denominator();
+        auto mod_num = ModLong((num % modulus).as_int64(), modulus);
+        auto mod_den = ModLong((den % modulus).as_int64(), modulus);
+        new_coefficients.push_back(mod_num/mod_den);
+    }
+
+    PowerSeries<ModLong> new_ps = FormalPowerSeries<ModLong>(std::move(new_coefficients));
+    return std::make_shared<PowerSeriesType<ModLong>>(new_ps);
 }
 
 template<>

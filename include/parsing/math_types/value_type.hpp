@@ -110,7 +110,8 @@ class ValueType: public ParsingWrapperType<T> {
     }
 
     Datatype get_type() const override;
-    virtual std::shared_ptr<SymMathObject> as_double() const override {
+
+    std::shared_ptr<SymMathObject> as_double() const override {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
     }
 
@@ -121,7 +122,22 @@ class ValueType: public ParsingWrapperType<T> {
         auto zero = RingCompanionHelper<T>::get_zero(value);
         return zero;
     }
+
+    std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
+    }
 };
+
+template<>
+inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
+    if (value.get_denominator() == BigInt(0)) {
+        throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+    }
+    auto num = (value.get_numerator() % modulus).as_int64();
+    auto denom = (value.get_denominator() % modulus).as_int64();
+    return std::make_shared<ValueType<ModLong>>(ModLong(num, modulus)/ModLong(denom, modulus));
+}
 
 template<>
 inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_double() const {

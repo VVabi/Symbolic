@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 #include "types/sym_types/sym_object.hpp"
 
 

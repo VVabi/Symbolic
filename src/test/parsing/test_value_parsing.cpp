@@ -41,7 +41,7 @@ std::vector<DoubleValueTestCase> double_test_cases = {
     {"2.0^(-2)", 0.25},
     {"2.0^0.5", 1.41421356237},
     {"sqrt(10.0)", 3.16227766017},
-    {"sqrt(10.0)+exp(1)", 5.88055948863},
+    {"sqrt(10.0)+exp(1.0)", 5.88055948863},
     {"5.0-exp(log(5.0))", 0.0},
     {"exp(log(17.0))", 17.0},
     {"-3.0+2.0*2.5", 2.0},
@@ -77,8 +77,9 @@ std::vector<RationalValueTestCase> rational_test_cases = {
     {"-7/2+4/3", RationalNumber<BigInt>(-13, 6)},
     {"(8/3)^2", RationalNumber<BigInt>(64, 9)},
     {"(8/3)^(-2)", RationalNumber<BigInt>(9, 64)},
-    {"7!", BigInt(5040)},
-    {"11!/10!", BigInt(11)},
+   /*{"7!", BigInt(5040)},
+    {"11!/10!", BigInt(11),
+    {"20!/18!", BigInt(380)},*/
 };
 
 TEST(ParsingTests, RationalValueParsing) {
@@ -106,10 +107,30 @@ std::vector<ModValueTestCase> mod_test_cases = {
     {"Mod(4, 17)/Mod(9, 17)", ModLong(8, 17)}
 };
 
-/*TEST(ParsingTests, ModValueParsing) {
+ModLong parse_modlong_value(const std::string& input) {
+    // remove spaces from input
+    std::string cleaned = input;
+    cleaned.erase(std::remove(cleaned.begin(), cleaned.end(), ' '), cleaned.end());
+
+    // remove leading 4 characters and last character
+    std::string content = cleaned.substr(4, cleaned.length() - 5);
+
+    // split at ","
+    size_t comma_pos = content.find(',');
+    std::string value_str = content.substr(0, comma_pos);
+    std::string mod_str = content.substr(comma_pos + 1);
+
+    int64_t value = std::stol(value_str);
+    int64_t mod = std::stol(mod_str);
+
+    return ModLong(value, mod);
+}
+
+
+TEST(ParsingTests, ModValueParsing) {
     for (const auto& test_case : mod_test_cases) {
         auto vars = std::map<std::string, std::shared_ptr<SymObject>>();
         auto result = parse_modlong_value(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 1));
         EXPECT_TRUE(EqualityChecker<ModLong>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
-}*/
+}

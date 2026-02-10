@@ -7,6 +7,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include <utility>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
 #include "parsing/math_types/power_series_type.hpp"
 #include "types/polynomial.hpp"
@@ -150,6 +151,11 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     std::shared_ptr<SymMathObject> as_double() const override {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
     }
+
+    std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
+        UNUSED(modulus);
+        throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
+    }
 };
 
 
@@ -179,6 +185,36 @@ inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt
 
     RationalFunction<double> new_rat_function = RationalFunction<double>(Polynomial<double>(std::move(new_numerator)), Polynomial<double>(std::move(new_denominator)));
     return std::make_shared<RationalFunctionType<double>>(new_rat_function);
+}
+
+
+template<>
+inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
+    auto new_numerator = std::vector<ModLong>();
+    auto new_denominator = std::vector<ModLong>();
+
+    for (uint32_t ind = 0; ind < value.get_numerator().num_coefficients(); ind++) {
+        auto current_num = value.get_numerator()[ind];
+        auto num_num = current_num.get_numerator();
+        auto den_num = current_num.get_denominator();
+        auto mod_num = ModLong((num_num % modulus).as_int64(), modulus);
+        auto mod_den = ModLong((den_num % modulus).as_int64(), modulus);
+
+        new_numerator.push_back(mod_num / mod_den);
+    }
+
+    for (uint32_t ind = 0; ind < value.get_denominator().num_coefficients(); ind++) {
+        auto current_num = value.get_denominator()[ind];
+        auto num_den = current_num.get_numerator();
+        auto den_den = current_num.get_denominator();
+        auto mod_num = ModLong((num_den % modulus).as_int64(), modulus);
+        auto mod_den = ModLong((den_den % modulus).as_int64(), modulus);
+
+        new_denominator.push_back(mod_num / mod_den);
+    }
+
+    RationalFunction<ModLong> new_rat_function = RationalFunction<ModLong>(Polynomial<ModLong>(std::move(new_numerator)), Polynomial<ModLong>(std::move(new_denominator)));
+    return std::make_shared<RationalFunctionType<ModLong>>(new_rat_function);
 }
 
 template<>

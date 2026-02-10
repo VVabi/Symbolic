@@ -12,7 +12,7 @@ class SymMathObject: public SymObject {
     virtual std::shared_ptr<SymObject> clone() const = 0;
     virtual Datatype get_type() const = 0;
 
-    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) {
+    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
         UNUSED(modulus);
         throw DatatypeInternalException("Cannot convert to Mod");
     }
@@ -29,7 +29,7 @@ class SymMathObject: public SymObject {
 
     virtual void pow(const double& exponent) = 0;
 
-    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const = 0;
+    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index, const bool as_egf) const = 0;
 
     virtual std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) = 0;
 

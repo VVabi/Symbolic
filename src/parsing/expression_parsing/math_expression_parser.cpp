@@ -213,20 +213,3 @@ std::string parse_formula(const std::string& input,
     }
     return ret_str;
 }
-
-// currently needed for tests
-// to remove this, fix the from_string implementation of ModLong so that it can actually parse something like Mod(6,17)
-/*ModLong parse_modlong_value(const std::string& input) {
-    auto formula = parse_math_expression_string(input, 0);
-    auto p = shunting_yard_algorithm(formula);
-
-    std::deque<MathLexerElement> polish;
-
-    for (MathLexerElement x : p) {
-        polish.push_back(x);
-    }
-    ModLong unit = ModLong(0, 1);
-    std::map<std::string, std::shared_ptr<SymObject>> variables;
-    infer_mod_unit(unit, variables, polish);
-    return iterate_wrapped<ModLong>(polish, variables, unit, 20)->as_value();
-}*/

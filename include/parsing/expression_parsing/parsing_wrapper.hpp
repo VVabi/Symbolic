@@ -135,7 +135,7 @@ class ParsingWrapperType : public SymMathObject {
 
 
 
-    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) {
+    virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) const {
         UNUSED(modulus);
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
     }
@@ -146,8 +146,17 @@ class ParsingWrapperType : public SymMathObject {
 
     virtual T get_coefficient(const uint32_t index) const = 0;
 
-    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const {
-        return create_value_type(get_coefficient(index));
+    virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index, const bool as_egf) const {
+        auto coeff = get_coefficient(index);
+
+        if (as_egf) {
+            auto factorial = RingCompanionHelper<T>::get_unit(coeff);
+            for (uint32_t ind = 1; ind <= index; ind++) {
+                factorial = factorial*ind;
+            }
+            coeff = coeff*factorial;
+        }
+        return create_value_type(coeff);
     }
 
 

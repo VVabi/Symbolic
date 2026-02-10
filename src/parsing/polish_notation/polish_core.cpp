@@ -89,9 +89,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             } else if (element.data == "^") {
                 return std::make_shared<PolishPow>(element.position);
             }
-            /*else if (element.data == "!") {
-                return std::make_shared<PolishFactorial>(element.position);
-            }*/
 
             throw EvalException("Unknown infix operator: " + element.data, element.position);
             break;
@@ -121,11 +118,9 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishLandau>(element.position, element.num_args);
             } else if (element.data == "coeff") {
                 return std::make_shared<PolishCoefficient>(element.position, false, element.num_args);
-            }
-            /*else if (element.data == "egfcoeff") {
+            } else if (element.data == "egfcoeff") {
                 return std::make_shared<PolishCoefficient>(element.position, true, element.num_args);
-            }*/
-            else if (element.data == "PSET") {
+            } else if (element.data == "PSET") {
                 return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::PSET);
             } else if (element.data == "MSET") {
                 return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::MSET);
@@ -141,6 +136,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::INV_MSET);
             } else if (element.data == "eval") {
                 return std::make_shared<PolishEval>(element.position, element.num_args);
+            } else if (element.data == "Mod") {
+                return std::make_shared<PolishMod>(element.position, element.num_args);
             }
         }
         default:
