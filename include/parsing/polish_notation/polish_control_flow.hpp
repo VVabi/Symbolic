@@ -1,0 +1,162 @@
+#pragma once
+#include <functional>
+#include <memory>
+#include <string>
+#include <map>
+#include "common/lexer_deque.hpp"
+#include "parsing/polish_notation/polish.hpp"
+#include "parsing/polish_notation/polish_functions.hpp"
+#include "parsing/polish_notation/polish_base_math.hpp"
+#include "parsing/subset_parsing/subset_parser.hpp"
+#include "exceptions/invalid_function_arg_exception.hpp"
+#include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/eval_exception.hpp"
+#include "types/sym_types/sym_void.hpp"
+#include "types/sym_types/sym_boolean.hpp"
+class PolishFor: public PolishFunction {
+ public:
+    PolishFor(uint32_t position, uint32_t num_args) :
+        PolishFunction(position, num_args, 4, UINT32_MAX) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto variable = cmd_list.pop_front();
+        if (variable.type != VARIABLE) {
+            throw EvalException("Expected variable name as first argument in for loop", variable.position);
+        }
+
+        auto loop_index_var_name = variable.data;
+
+        auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+
+        if (!start || !end) {
+            throw EvalException("Expected integer start and end values in for loop", variable.position);
+        }
+
+        if (start->as_value().get_denominator() != BigInt(1) || end->as_value().get_denominator() != BigInt(1)) {
+            throw EvalException("Expected integer start and end values in for loop", variable.position);
+        }
+
+        auto start_v = start->as_value().get_numerator();
+        auto end_v = end->as_value().get_numerator();
+
+        uint32_t start_cmd = cmd_list.get_index();
+        //std::cout << "iterating from " << start_v << " to " << end_v << std::endl;
+        for (int64_t i = start_v.as_int64(); i <= end_v.as_int64(); i++) {
+           cmd_list.set_index(start_cmd);
+           for (uint32_t arg = 0; arg < num_args - 3; arg++) {
+                //std::cout << "loop index " << loop_index_var_name << " = " << i << std::endl;
+                variables[loop_index_var_name] = std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1)));
+                iterate_wrapped(cmd_list, variables, fp_size);
+            }
+        }
+
+        if (start_v.as_int64() > end_v.as_int64()) {
+            // If the loop doesn't execute at all, we still need to move the index forward
+            auto dummy_variables = std::map<std::string, std::shared_ptr<SymObject>>();
+
+            for (auto &var: variables) {
+                dummy_variables[var.first] = var.second->clone();
+            }
+            dummy_variables["suppress_print"] = std::make_shared<SymBooleanObject>(true);
+            dummy_variables[loop_index_var_name] = std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(start_v, BigInt(1)));
+            for (uint32_t arg = 0; arg < num_args - 3; arg++) {
+                iterate_wrapped(cmd_list, dummy_variables, fp_size);
+            }
+
+        }
+
+        return std::make_shared<SymVoidObject>();
+    }
+};
+
+class PolishIf: public PolishFunction {
+ public:
+    PolishIf(uint32_t position, uint32_t num_args) :
+        PolishFunction(position, num_args, 2, UINT32_MAX) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        if (!condition) {
+            throw EvalException("Expected boolean condition in if statement", this->get_position());
+        }
+
+        if (condition->as_boolean()) {
+            for (uint32_t arg = 0; arg < num_args - 1; arg++) {
+                iterate_wrapped(cmd_list, variables, fp_size);
+            }
+        } else {
+            auto dummy_variables = std::map<std::string, std::shared_ptr<SymObject>>();
+            for (auto &var: variables) {
+                dummy_variables[var.first] = var.second->clone();
+            }
+
+            dummy_variables["suppress_print"] = std::make_shared<SymBooleanObject>(true);  // Used to suppress printing in the else branch, this is a bit hacky but it works for now
+            // TODO how do we solve this? We need to iterate through the commands to move the index forward, but we don't want to execute them. For now we just clone the variables and execute them with that, but this is not ideal.
+            for (uint32_t arg = 0; arg < num_args - 1; arg++) {
+                iterate_wrapped(cmd_list, dummy_variables, fp_size);
+            }
+        }
+        return std::make_shared<SymVoidObject>();
+    }
+};
+
+class PolishEq: public PolishFunction {
+ public:
+    PolishEq(uint32_t position, uint32_t num_args) :
+        PolishFunction(position, num_args, 2, 2) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto first = iterate_wrapped(cmd_list, variables, fp_size);
+        auto second = iterate_wrapped(cmd_list, variables, fp_size);
+
+        if (first->to_string() == second->to_string()) {
+            return std::make_shared<SymBooleanObject>(true);
+        } else {
+            return std::make_shared<SymBooleanObject>(false);
+        }
+    }
+};
+
+class PolishNeq: public PolishFunction {
+ public:
+    PolishNeq(uint32_t position, uint32_t num_args) :
+        PolishFunction(position, num_args, 2, 2) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto first = iterate_wrapped(cmd_list, variables, fp_size);
+        auto second = iterate_wrapped(cmd_list, variables, fp_size);
+
+        if (first->to_string() != second->to_string()) {
+            return std::make_shared<SymBooleanObject>(true);
+        } else {
+            return std::make_shared<SymBooleanObject>(false);
+        }
+    }
+};
+
+class PolishPrint: public PolishFunction {
+ public:
+    PolishPrint(uint32_t position, uint32_t num_args) :
+        PolishFunction(position, num_args, 1, 1) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto first = iterate_wrapped(cmd_list, variables, fp_size);
+        auto res = variables.find("suppress_print");
+        if (res == variables.end()) {
+            std::cout << first->to_string() << std::endl;
+        }
+        return std::make_shared<SymVoidObject>();
+    }
+};
+//for(p,2,1000,prime=eq(1,1),for(i,2,p-1,if(eq(Mod(p,i),Mod(0,i)),prime=neq(1,1))), if(prime, print("PRIME"), print(p)))exit^C

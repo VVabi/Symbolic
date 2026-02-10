@@ -4,6 +4,7 @@
 #include "parsing/polish_notation/polish.hpp"
 #include "parsing/polish_notation/polish_base_math.hpp"
 #include "parsing/polish_notation/polish_functions.hpp"
+#include "parsing/polish_notation/polish_control_flow.hpp"
 #include "parsing/math_types/value_type.hpp"
 #include "parsing/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -47,6 +48,7 @@ class PolishVariable: public PolishNotationElement {
         UNUSED(fp_size);
         auto existing_var = variables.find(name);
         if (existing_var == variables.end()) {
+            std::cout << "Poly from " << name << std::endl;
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
@@ -141,6 +143,16 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishEval>(element.position, element.num_args);
             } else if (element.data == "Mod") {
                 return std::make_shared<PolishMod>(element.position, element.num_args);
+            } else if (element.data == "for") {
+                return std::make_shared<PolishFor>(element.position, element.num_args);
+            } else if (element.data == "if") {
+                return std::make_shared<PolishIf>(element.position, element.num_args);
+            } else if (element.data == "eq") {
+                return std::make_shared<PolishEq>(element.position, element.num_args);
+            } else if (element.data == "neq") {
+                return std::make_shared<PolishNeq>(element.position, element.num_args);
+            } else if (element.data == "print") {
+                return std::make_shared<PolishPrint>(element.position, element.num_args);
             }
         }
         default:

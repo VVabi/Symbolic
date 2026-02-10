@@ -205,9 +205,12 @@ class PolishMod: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
-        auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
-        auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto arg_raw    = iterate_wrapped(cmd_list, variables, fp_size);
+        auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(arg_raw);
+        auto mod_raw    = iterate_wrapped(cmd_list, variables, fp_size);
+        auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(mod_raw);
         if (!argument || !mod) {
+            std::cout << arg_raw->to_string() << " " << mod_raw->to_string() << std::endl;
             throw ParsingTypeException("Type error: Expected natural numbers as arguments in mod function");
         }
 

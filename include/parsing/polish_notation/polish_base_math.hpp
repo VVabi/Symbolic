@@ -180,6 +180,7 @@ class PolishAssign: public PolishNotationElement {
         }
         auto var_value = iterate_wrapped(cmd_list, variables, fp_size);
 
+        //std::cout << "Assigning " << var_value->to_string() << " to variable " << next.data << std::endl;
         variables[next.data] = var_value;
         return var_value;
     }
