@@ -115,7 +115,12 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
-        return std::dynamic_pointer_cast<ParsingWrapperType<T>>(input)->insert_into_power_series(value);
+        auto ptr = std::dynamic_pointer_cast<ParsingWrapperType<T>>(input);
+
+        if (!ptr) {
+            throw EvalException("Cannot evaluate power series at this input", -1);
+        }
+        return ptr->insert_into_power_series(value);
     }
 
     Datatype get_type() const override;

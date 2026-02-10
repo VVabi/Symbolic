@@ -94,7 +94,7 @@ class PolishLandau: public PolishFunction {
             if (deg > fp_size) {
                 deg = fp_size;
             }
-            return std::make_shared<PowerSeriesType<ModLong>>(PowerSeries<ModLong>::get_zero(mod_result->get_coefficient(0), deg));
+            return std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg));
         }
 
         throw ParsingTypeException("Type error: Expected rational function in Landau symbol");
@@ -218,6 +218,11 @@ class PolishMod: public PolishFunction {
 
         auto modulus_num = mod->as_value().get_numerator().as_int64();  // TODO(vabi) potential overflow issues
         if (modulus_num <= 0) {
+            throw EvalException("Expected natural number as modulus", this->get_position());
+        }
+
+        auto modulus_den = mod->as_value().get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+        if (modulus_den != 1) {
             throw EvalException("Expected natural number as modulus", this->get_position());
         }
 

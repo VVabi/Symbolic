@@ -14,6 +14,7 @@
 #include <utility>
 #include <map>
 #include <cmath>
+#include <algorithm>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
