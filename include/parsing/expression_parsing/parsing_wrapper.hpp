@@ -133,7 +133,7 @@ class ParsingWrapperType : public SymMathObject {
     virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) = 0;
     virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) = 0;
 
-    virtual std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) = 0;
+
 
     virtual std::shared_ptr<SymMathObject> as_modlong(const int64_t& modulus) {
         UNUSED(modulus);

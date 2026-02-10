@@ -122,6 +122,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::LCYC);
             } else if (element.data == "INVMSET") {
                 return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::INV_MSET);
+            } else if (element.data == "eval") {
+                return std::make_shared<PolishEval>(element.position, element.num_args);
             }
         }
         default:

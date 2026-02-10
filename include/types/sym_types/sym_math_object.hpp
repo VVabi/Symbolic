@@ -32,4 +32,6 @@ class SymMathObject: public SymObject {
     virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const = 0;
 
     virtual std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) = 0;
+
+    virtual std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) = 0;
 };

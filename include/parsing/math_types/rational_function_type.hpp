@@ -131,8 +131,14 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return std::make_shared<PowerSeriesType<T>>(ret);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
-        return input->insert_into_rational_function(value);
+    std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
+        auto cast = std::dynamic_pointer_cast<ParsingWrapperType<T>>(input);
+
+        if (cast) {
+            return cast->insert_into_rational_function(value);
+        }
+
+        throw EvalException("Cannot evaluate rational function at this input", -1);
     }
 
     Datatype get_type() const override;
@@ -145,6 +151,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Double");
     }
 };
+
 
 template<>
 inline std::shared_ptr<SymMathObject> RationalFunctionType<RationalNumber<BigInt>>::as_double() const {

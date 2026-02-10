@@ -100,7 +100,7 @@ class ValueType: public ParsingWrapperType<T> {
         throw DatatypeInternalException("Cannot evaluate power series at a constant");
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> evaluate_at(std::shared_ptr<ParsingWrapperType<T>> input) {
+    std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
         UNUSED(input);
         return std::make_shared<ValueType<T>>(value);
     }

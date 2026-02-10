@@ -131,3 +131,26 @@ class PolishSymbolicMethodOperator: public PolishFunction {
 
     }
 };
+
+class PolishEval: public PolishFunction {
+ public:
+    PolishEval(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {
+    }
+
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto to_evaluate   = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+
+        if (!to_evaluate) {
+            throw ParsingTypeException("Type error: Expected mathematical object as first argument in eval function");
+        }
+        auto arg        = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+
+        if (!arg) {
+            throw ParsingTypeException("Type error: Expected mathematical object as second argument in eval function");
+        }
+
+        return to_evaluate->evaluate_at(arg);
+    }
+};
