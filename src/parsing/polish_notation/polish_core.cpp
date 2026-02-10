@@ -88,6 +88,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishDiv>(element.position);
             } else if (element.data == "^") {
                 return std::make_shared<PolishPow>(element.position);
+            } else if (element.data == "=") {
+                return std::make_shared<PolishAssign>(element.position);
             }
 
             throw EvalException("Unknown infix operator: " + element.data, element.position);

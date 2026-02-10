@@ -23,6 +23,8 @@
  */
 int32_t get_operator_precedence(char op) {
     switch (op) {
+        case '=':
+            return -1;
         case '+':
         case '-':
             return 0;
@@ -52,6 +54,7 @@ bool is_right_associative(char op) {
         case '-':
         case '/':
         case '!':
+        case '=':
             return false;
         case '^':
             return true;
