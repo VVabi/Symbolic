@@ -18,6 +18,9 @@
 #include "functions/power_series_functions.hpp"
 #include "cpp_utils/unused.hpp"
 #include "types/sym_types/sym_math_object.hpp"
+#include "symbolic_method/symbolic_method_core.hpp"
+#include "symbolic_method/unlabelled_symbolic.hpp"
+#include "symbolic_method/labelled_symbolic.hpp"
 
 /**
  * @brief Alias for RationalFunction type.
@@ -41,6 +44,9 @@ PowerSeries<T> rational_function_to_power_series(const RationalFunction<T>& in, 
     den_ps.resize(num_coefficients);
     return num_ps/den_ps;
 }
+
+template<typename T>
+class PowerSeriesType;
 
 /**
  * @class ParsingWrapperType
@@ -142,6 +148,36 @@ class ParsingWrapperType : public SymMathObject {
 
     virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const {
         return create_value_type(get_coefficient(index));
+    }
+
+
+    std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) {
+        return symbolic_method_internal(op, fp_size, subset);
+    }
+
+    std::shared_ptr<SymObject> symbolic_method_internal(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) {
+        auto power_series = this->as_power_series(fp_size);
+
+        switch (op) {
+            case SEQ:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_sequence(power_series, subset));
+            case MSET:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_mset(power_series, subset));
+            case PSET:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_pset(power_series, subset));
+            case CYC:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_cyc(power_series, subset));
+            case LSET:
+                return std::make_shared<PowerSeriesType<T>>(labelled_set(power_series, subset));
+            case LCYC:
+                return std::make_shared<PowerSeriesType<T>>(labelled_cyc(power_series, subset));
+            case INV_MSET:
+                return std::make_shared<PowerSeriesType<T>>(unlabelled_inv_mset(power_series));
+            default:
+                throw DatatypeInternalException("Unsupported symbolic method operator");
+        }
+
+        return nullptr;
     }
 };
 

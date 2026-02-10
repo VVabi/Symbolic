@@ -23,6 +23,16 @@
 #include "exceptions/parsing_exceptions.hpp"
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
 
+
+std::shared_ptr<SymObject> parse_formula_as_sym_object(
+                    const std::string& input_string,
+                    const uint32_t offset,
+                    const Datatype type,
+                    std::map<std::string,
+                    std::shared_ptr<SymObject>>& variables,
+                    const uint32_t powerseries_expansion_size,
+                    const int64_t default_modulus);
+
  /**
  * @brief Parses a mathematical expression string into a formal power series.
  *
@@ -40,22 +50,23 @@
 template<typename T> std::shared_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
-    auto formula = parse_math_expression_string(input, 0);
-    auto p = shunting_yard_algorithm(formula);
-
-    std::deque<MathLexerElement> polish;
-
-    for (MathLexerElement x : p) {
-        polish.push_back(x);
-    }
+    UNUSED(unit);
     auto variables = std::map<std::string, std::shared_ptr<SymObject>>();
-    auto res = iterate_wrapped<T>(polish, variables, unit, size);
-
-    if (polish.size() != 0) {
-        throw ParsingException("Parsing error: Unconsumed tokens", polish.front().position);
-    }
+    auto res = std::dynamic_pointer_cast<ParsingWrapperType<T>>(parse_formula_as_sym_object(input, 0, Datatype::DYNAMIC, variables, size, 1));
     return res;
 }
+
+template<>
+inline std::shared_ptr<ParsingWrapperType<double>> parse_power_series_from_string(const std::string& input,
+        const uint32_t size,
+        const double unit) {
+    UNUSED(unit);
+    auto variables = std::map<std::string, std::shared_ptr<SymObject>>();
+    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, 0, Datatype::DYNAMIC, variables, size, 1))->as_double();
+    return std::dynamic_pointer_cast<ParsingWrapperType<double>>(res);
+}
+
+
 
 std::string parse_formula(const std::string& input,
                         const Datatype type,

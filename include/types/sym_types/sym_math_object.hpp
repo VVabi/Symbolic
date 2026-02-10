@@ -3,6 +3,8 @@
 #include "types/sym_types/sym_object.hpp"
 #include "types/modLong.hpp"
 #include "functions/power_series_functions.hpp"
+#include "parsing/subset_parsing/subset_parser.hpp"
+#include "symbolic_method/symbolic_method_core.hpp"
 
 class SymMathObject: public SymObject {
  public:
@@ -28,4 +30,6 @@ class SymMathObject: public SymObject {
     virtual void pow(const double& exponent) = 0;
 
     virtual std::shared_ptr<SymObject> get_coefficient_as_sym_object(const uint32_t index) const = 0;
+
+    virtual std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) = 0;
 };

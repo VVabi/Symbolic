@@ -108,6 +108,21 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             /*else if (element.data == "egfcoeff") {
                 return std::make_shared<PolishCoefficient>(element.position, true, element.num_args);
             }*/
+            else if (element.data == "PSET") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::PSET);
+            } else if (element.data == "MSET") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::MSET);
+            } else if (element.data == "CYC") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::CYC);
+            } else if (element.data == "SEQ") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::SEQ);
+            } else if (element.data == "LSET") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::LSET);
+            } else if (element.data == "LCYC") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::LCYC);
+            } else if (element.data == "INVMSET") {
+                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::INV_MSET);
+            }
         }
         default:
             break;

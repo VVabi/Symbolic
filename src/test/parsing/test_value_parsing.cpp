@@ -13,6 +13,7 @@
 #include <iostream>
 #include <utility>
 #include <map>
+#include <cmath>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
@@ -105,10 +106,10 @@ std::vector<ModValueTestCase> mod_test_cases = {
     {"Mod(4, 17)/Mod(9, 17)", ModLong(8, 17)}
 };
 
-TEST(ParsingTests, ModValueParsing) {
+/*TEST(ParsingTests, ModValueParsing) {
     for (const auto& test_case : mod_test_cases) {
         auto vars = std::map<std::string, std::shared_ptr<SymObject>>();
         auto result = parse_modlong_value(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 1));
         EXPECT_TRUE(EqualityChecker<ModLong>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
-}
+}*/

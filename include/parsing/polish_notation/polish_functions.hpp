@@ -5,6 +5,7 @@
 #include <deque>
 #include <map>
 #include "parsing/polish_notation/polish.hpp"
+#include "parsing/subset_parsing/subset_parser.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
 
 class PolishFunction: public PolishNotationElement {
@@ -108,5 +109,25 @@ class PolishCoefficient: public PolishFunction {
         }
 
         return result->get_coefficient_as_sym_object(int_idx);
+    }
+};
+
+class PolishSymbolicMethodOperator: public PolishFunction {
+    SymbolicMethodOperator op;
+ public:
+    PolishSymbolicMethodOperator(uint32_t position,
+        uint32_t num_args,
+        const SymbolicMethodOperator op): PolishFunction(position, num_args, 1, 1), op(op) {}
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        if (!result) {
+            throw ParsingTypeException("Type error: Expected mathematical object as argument in symbolic method operator");
+        }
+        auto subset = Subset("", fp_size);
+        return result->symbolic_method(op, fp_size, subset);
+
+
     }
 };

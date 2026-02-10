@@ -139,7 +139,11 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     T get_coefficient(const uint32_t index) const override {
         return this->as_power_series(index+1)[index];
     }
+
+    //std::shared_ptr<SymMathObject> as_double() const override;
 };
+
+
 
 template <>
 inline Datatype RationalFunctionType<double>::get_type() const {

@@ -122,6 +122,33 @@ bool verify_variable_name(const std::string& name) {
     return true;
 }
 
+std::shared_ptr<SymObject> parse_formula_as_sym_object(
+                    const std::string& input_string,
+                    const uint32_t offset,
+                    const Datatype type,
+                    std::map<std::string,
+                    std::shared_ptr<SymObject>>& variables,
+                    const uint32_t powerseries_expansion_size,
+                    const int64_t default_modulus) {
+    auto formula = parse_math_expression_string(input_string, offset);
+
+    auto p = shunting_yard_algorithm(formula);
+
+    std::deque<MathLexerElement> polish;
+
+    for (MathLexerElement x : p) {
+        polish.push_back(x);
+    }
+
+    std::shared_ptr<SymObject> ret;
+    if (type == Datatype::DYNAMIC) {
+        auto actual_type = infer_datatype_from_lexer(p);
+        ret = parse_formula_internal(polish, variables, actual_type, powerseries_expansion_size, default_modulus);
+    } else {
+        ret = parse_formula_internal(polish, variables, type, powerseries_expansion_size, default_modulus);
+    }
+    return ret;
+}
 
 /**
  * @brief Parses the math expression formula based on the given datatype.
@@ -177,23 +204,7 @@ std::string parse_formula(const std::string& input,
         input_string = parts[0];
     }
 
-    auto formula = parse_math_expression_string(input_string, offset);
-
-    auto p = shunting_yard_algorithm(formula);
-
-    std::deque<MathLexerElement> polish;
-
-    for (MathLexerElement x : p) {
-        polish.push_back(x);
-    }
-
-    std::shared_ptr<SymObject> ret;
-    if (type == Datatype::DYNAMIC) {
-        auto actual_type = infer_datatype_from_lexer(p);
-        ret = parse_formula_internal(polish, variables, actual_type, powerseries_expansion_size, default_modulus);
-    } else {
-        ret = parse_formula_internal(polish, variables, type, powerseries_expansion_size, default_modulus);
-    }
+    auto ret = parse_formula_as_sym_object(input_string, offset, type, variables, powerseries_expansion_size, default_modulus);
 
     auto ret_str = ret->to_string();
     variables["ANS"] = ret;
