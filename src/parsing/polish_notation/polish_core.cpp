@@ -7,6 +7,7 @@
 #include "parsing/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/sym_types/sym_math.hpp"
+#include "types/sym_types/sym_string_object.hpp"
 
 class PolishNumber: public PolishNotationElement {
  private:
@@ -53,6 +54,20 @@ class PolishVariable: public PolishNotationElement {
     }
 };
 
+class PolishString: public PolishNotationElement {
+    std::string value;
+
+ public:
+    PolishString(std::string value, uint32_t position) : PolishNotationElement(position), value(value) { }
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        const size_t fp_size) {
+        UNUSED(cmd_list);
+        UNUSED(fp_size);
+        UNUSED(variables);
+        return std::make_shared<SymStringObject>(value);
+    }
+};
 
 std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const MathLexerElement element) {
     switch (element.type) {
@@ -60,6 +75,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             return std::make_shared<PolishNumber>(element.data, element.position);
         case VARIABLE:
             return std::make_shared<PolishVariable>(element.data, element.position);
+        case STRING:
+            return std::make_shared<PolishString>(element.data, element.position);
         case INFIX:
             if (element.data == "+") {
                 return std::make_shared<PolishPlus>(element.position);

@@ -13,6 +13,8 @@
 #include "parsing/math_types/value_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/sym_types/sym_math.hpp"
+#include "types/sym_types/sym_string_object.hpp"
+
 
 
 inline std::shared_ptr<SymObject> binary_operation(std::deque<MathLexerElement>& cmd_list,
@@ -36,7 +38,24 @@ class PolishPlus : public PolishNotationElement {
     std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                         const size_t fp_size) {
-        return binary_operation(cmd_list, variables, fp_size, sym_add);
+        auto left = iterate_wrapped(cmd_list, variables, fp_size);
+        auto right = iterate_wrapped(cmd_list, variables, fp_size);
+
+        auto left_math = std::dynamic_pointer_cast<SymMathObject>(left);
+        auto right_math = std::dynamic_pointer_cast<SymMathObject>(right);
+
+        if (left_math && right_math) {
+            return sym_add(left_math, right_math);
+        }
+
+        auto left_string = std::dynamic_pointer_cast<SymStringObject>(left);
+        auto right_string = std::dynamic_pointer_cast<SymStringObject>(right);
+
+        if (left_string && right_string) {
+            return std::make_shared<SymStringObject>(left_string->to_string() + right_string->to_string());
+        }
+
+        throw ParsingTypeException("Type error: Expected mathematical objects or strings as argument for addition");
     }
 };
 
