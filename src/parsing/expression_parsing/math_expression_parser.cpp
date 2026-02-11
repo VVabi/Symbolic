@@ -53,33 +53,6 @@ std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& 
     return iterate_wrapped(input, variables, powerseries_expansion_size);
 }
 
-
-/**
- * @brief Verifies if a given string is a valid variable name.
- *
- * This function checks if the provided string is a valid variable name by ensuring that:
- * - The string is not empty.
- * - The first character is not a digit.
- * - All characters are either digits, lowercase letters, or uppercase letters.
- *
- * @param name The string to be verified as a variable name.
- * @return True if the string is a valid variable name, false otherwise.
- */
-bool verify_variable_name(const std::string& name) {
-    if (name.size() == 0) {
-        return false;
-    }
-    if (name[0] >= '0' && name[0] <= '9') {
-        return false;
-    }
-    for (char c : name) {
-        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
                     const uint32_t offset,

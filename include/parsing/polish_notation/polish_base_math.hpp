@@ -170,7 +170,7 @@ class PolishAssign: public PolishNotationElement {
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                         const size_t fp_size) {
         if (cmd_list.size() == 0) {
-            throw EvalException("Expected variable name to assign to", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+            throw EvalException("Expected variable name to assign to", this->get_position());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
         }
         auto next = cmd_list.front();
         cmd_list.pop_front();
