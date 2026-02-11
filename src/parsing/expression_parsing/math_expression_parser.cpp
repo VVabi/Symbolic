@@ -39,7 +39,7 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  *
  * This function parses the formula represented by the input lexer elements based on the given datatype.
  *
- * @param input The deque of MathLexerElement objects representing the input lexer elements.
+ * @param input The LexerDeque of MathLexerElement objects representing the input lexer elements.
  * @param type The datatype to parse the formula as.
  * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a SymObject.
