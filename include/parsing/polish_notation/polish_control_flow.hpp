@@ -14,13 +14,16 @@
 #include "types/sym_types/sym_void.hpp"
 #include "types/sym_types/sym_boolean.hpp"
 class PolishFor: public PolishFunction {
+    uint32_t num_expressions_inside;
+
  public:
-    PolishFor(uint32_t position, uint32_t num_args) :
-        PolishFunction(position, num_args, 4, UINT32_MAX) { }
+    PolishFor(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
+        PolishFunction(position, num_args, 4, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
+        uint32_t original_index  = cmd_list.get_index();
         auto variable = cmd_list.pop_front();
         if (variable.type != VARIABLE) {
             throw EvalException("Expected variable name as first argument in for loop", variable.position);
@@ -40,7 +43,7 @@ class PolishFor: public PolishFunction {
         }
 
         auto start_v = start->as_value().get_numerator();
-        auto end_v = end->as_value().get_numerator();
+        auto end_v   = end->as_value().get_numerator();
 
         uint32_t start_cmd = cmd_list.get_index();
         //std::cout << "iterating from " << start_v << " to " << end_v << std::endl;
@@ -52,8 +55,7 @@ class PolishFor: public PolishFunction {
                 iterate_wrapped(cmd_list, variables, fp_size);
             }
         }
-
-        if (start_v.as_int64() > end_v.as_int64()) {
+        /*if (start_v.as_int64() > end_v.as_int64()) {
             // If the loop doesn't execute at all, we still need to move the index forward
             auto dummy_variables = std::map<std::string, std::shared_ptr<SymObject>>();
 
@@ -65,21 +67,30 @@ class PolishFor: public PolishFunction {
             for (uint32_t arg = 0; arg < num_args - 3; arg++) {
                 iterate_wrapped(cmd_list, dummy_variables, fp_size);
             }
+        }*/
 
-        }
+        // set execution index to after the loop body
+        cmd_list.set_index(original_index + num_expressions_inside);
+
+        /*std::cout << "END FOR" << std::endl;
+        std::cout << original_index + num_expressions_inside << std::endl;
+        std::cout << cmd_list.get_index() << std::endl;*/
 
         return std::make_shared<SymVoidObject>();
     }
 };
 
 class PolishIf: public PolishFunction {
+    uint32_t num_expressions_inside;
+
  public:
-    PolishIf(uint32_t position, uint32_t num_args) :
-        PolishFunction(position, num_args, 2, UINT32_MAX) { }
+    PolishIf(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
+        PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                     std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) {
+        uint32_t original_index  = cmd_list.get_index();
         auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, variables, fp_size));
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
@@ -89,18 +100,9 @@ class PolishIf: public PolishFunction {
             for (uint32_t arg = 0; arg < num_args - 1; arg++) {
                 iterate_wrapped(cmd_list, variables, fp_size);
             }
-        } else {
-            auto dummy_variables = std::map<std::string, std::shared_ptr<SymObject>>();
-            for (auto &var: variables) {
-                dummy_variables[var.first] = var.second->clone();
-            }
-
-            dummy_variables["suppress_print"] = std::make_shared<SymBooleanObject>(true);  // Used to suppress printing in the else branch, this is a bit hacky but it works for now
-            // TODO how do we solve this? We need to iterate through the commands to move the index forward, but we don't want to execute them. For now we just clone the variables and execute them with that, but this is not ideal.
-            for (uint32_t arg = 0; arg < num_args - 1; arg++) {
-                iterate_wrapped(cmd_list, dummy_variables, fp_size);
-            }
         }
+
+        cmd_list.set_index(original_index + num_expressions_inside);
         return std::make_shared<SymVoidObject>();
     }
 };

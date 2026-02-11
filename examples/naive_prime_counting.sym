@@ -1,0 +1,1 @@
+for(p,2,1000,prime=eq(1,1),for(i,2,p-1,if(eq(Mod(p,i),Mod(0,i)),prime=neq(1,1))), if(prime, print("PRIME"), print(p), count = count+1))

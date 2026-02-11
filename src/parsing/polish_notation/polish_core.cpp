@@ -144,9 +144,9 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             } else if (element.data == "Mod") {
                 return std::make_shared<PolishMod>(element.position, element.num_args);
             } else if (element.data == "for") {
-                return std::make_shared<PolishFor>(element.position, element.num_args);
+                return std::make_shared<PolishFor>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "if") {
-                return std::make_shared<PolishIf>(element.position, element.num_args);
+                return std::make_shared<PolishIf>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "eq") {
                 return std::make_shared<PolishEq>(element.position, element.num_args);
             } else if (element.data == "neq") {

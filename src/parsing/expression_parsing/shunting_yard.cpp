@@ -64,6 +64,13 @@ bool is_right_associative(char op) {
     }
 }
 
+
+struct arg_expression_counts {
+    arg_expression_counts(int num_args, int num_expressions): arg_count(num_args), num_expressions(num_expressions) { }
+    int arg_count;
+    int num_expressions;
+};
+
 /**
  * @brief Apply the shunting yard algorithm to a list of math lexer elements.
  * @param input The input list of math lexer elements.
@@ -72,10 +79,12 @@ bool is_right_associative(char op) {
 std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input) {
     auto ret                = std::vector<MathLexerElement>();
     auto operators          = std::stack<MathLexerElement>();
-    auto arg_counts         = std::stack<int>();
+    auto arg_count          = std::stack<int>();
+    auto expression_count   = std::stack<int>();
 
     int current_args_count = 0;
     int last_closed_bracket_args_count = 0;
+    int last_expression_count = 0;
 
     for (auto it = input.rbegin(); it != input.rend(); ++it) {
         switch (it->type) {
@@ -85,6 +94,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     if (next_op.type == FUNCTION) {
                         operators.pop();
                         next_op.set_num_args(last_closed_bracket_args_count);
+                        next_op.set_num_expressions(ret.size() - last_expression_count);
                         ret.push_back(next_op);
                     } else {
                         break;
@@ -101,7 +111,8 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                 operators.push(*it);
                 break;
             case RIGHT_PARENTHESIS:
-                arg_counts.push(current_args_count);
+                arg_count.push(current_args_count);
+                expression_count.push(ret.size());
                 current_args_count = 1;
                 operators.push(*it);
                 break;
@@ -116,6 +127,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 
                     if (op.type == FUNCTION) {
                         op.set_num_args(last_closed_bracket_args_count);
+                        op.set_num_expressions(ret.size() - last_expression_count);
                     }
                     ret.push_back(op);
                     operators.pop();
@@ -130,6 +142,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     MathLexerElement op = operators.top();
                     if (op.type == FUNCTION) {
                         op.set_num_args(last_closed_bracket_args_count);
+                        op.set_num_expressions(ret.size() - last_expression_count);
                     }
                     ret.push_back(op);
                     operators.pop();
@@ -143,13 +156,16 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     throw ParsingException("Mismatched or missing parentheses", it->position);
                 }
 
-                if (arg_counts.size() == 0) {
+                if (arg_count.size() == 0) {
                     throw ParsingException("Mismatched or missing parentheses", it->position);
                 }
 
                 last_closed_bracket_args_count = current_args_count;
-                current_args_count             = arg_counts.top();
-                arg_counts.pop();
+
+                current_args_count             = arg_count.top();
+                arg_count.pop();
+                last_expression_count          = expression_count.top();
+                expression_count.pop();
                 operators.pop();
 
                 if (operators.size() > 0) {
@@ -157,6 +173,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
                     if (next_op.type == FUNCTION) {
                         operators.pop();
                         next_op.set_num_args(last_closed_bracket_args_count);
+                        next_op.set_num_expressions(ret.size()-last_expression_count);
                         ret.push_back(next_op);
                     }
                 }
@@ -173,6 +190,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 
                     if (candidate.type == FUNCTION) {
                         candidate.set_num_args(last_closed_bracket_args_count);
+                        candidate.set_num_expressions(ret.size() - last_expression_count);
                         ret.push_back(candidate);
                         operators.pop();
                         continue;
@@ -194,6 +212,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
         auto op = operators.top();
         if (op.type == FUNCTION) {
             op.set_num_args(last_closed_bracket_args_count);
+            op.set_num_expressions(ret.size() - last_expression_count);
         }
         if (operators.top().type == RIGHT_PARENTHESIS) {
             throw ParsingException("Mismatched parentheses", operators.top().position);
