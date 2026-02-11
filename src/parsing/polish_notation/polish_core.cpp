@@ -143,8 +143,12 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishEval>(element.position, element.num_args);
             } else if (element.data == "Mod") {
                 return std::make_shared<PolishMod>(element.position, element.num_args);
+            } else if (element.data == "ModValue") {
+                return std::make_shared<PolishModValue>(element.position, element.num_args);
             } else if (element.data == "for") {
                 return std::make_shared<PolishFor>(element.position, element.num_args, element.num_expressions);
+            } else if (element.data == "while") {
+                return std::make_shared<PolishWhile>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "if") {
                 return std::make_shared<PolishIf>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "eq") {
@@ -153,6 +157,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishNeq>(element.position, element.num_args);
             } else if (element.data == "print") {
                 return std::make_shared<PolishPrint>(element.position, element.num_args);
+            } else if (element.data == "lte") {
+                return std::make_shared<PolishLTE>(element.position, element.num_args);
             }
         }
         default:

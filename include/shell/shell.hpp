@@ -95,11 +95,13 @@ class FileShellInput : public ShellInput {
     }
 
     std::string get_next_input() override {
-        std::string input;
-        if (std::getline(file_stream, input)) {
-            return input;
+        std::stringstream buffer;
+        buffer << file_stream.rdbuf();
+        auto ret =  buffer.str();
+        if (ret.empty()) {
+            return "exit";
         }
-        return "exit";
+        return ret;
     }
 };
 

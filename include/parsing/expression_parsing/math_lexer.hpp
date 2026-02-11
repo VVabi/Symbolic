@@ -67,19 +67,13 @@ struct MathLexerElement {
      * @param position The position of the element in the input string.
      */
     MathLexerElement(expression_type type, std::string data, int position, int num_args = -1, int num_expressions = -1)
-        : type(type), data(data), position(position), num_args(num_args), num_expressions(num_expressions) {
-            if (num_expressions != -1 || type == FUNCTION) {
-                std::cout << "data: " << data << ", num_expressions: " << num_expressions << std::endl;
-            }
-
-        }
+        : type(type), data(data), position(position), num_args(num_args), num_expressions(num_expressions) {}
 
     void set_num_args(int num) {
         num_args = num;
     }
 
     void set_num_expressions(int num) {
-        std::cout << "Setting num_expressions for " << data << " to " << num << std::endl;
         num_expressions = num;
     }
 };

@@ -51,7 +51,11 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<MathLexerElement>& 
                                     const int64_t default_modulus) {
     UNUSED(default_modulus);
     UNUSED(type);
-    return iterate_wrapped(input, variables, powerseries_expansion_size);
+    auto ret = std::shared_ptr<SymObject>();
+    while (!input.is_empty()) {
+        ret = iterate_wrapped(input, variables, powerseries_expansion_size);
+    }
+    return ret;
 }
 
 

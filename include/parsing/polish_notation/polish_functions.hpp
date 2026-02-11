@@ -232,7 +232,28 @@ class PolishMod: public PolishFunction {
         auto a = value.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
         auto b = value.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
 
+        if (modulus_num == 1 && b == 1) {
+            return std::make_shared<ValueType<ModLong>>(ModLong(0, 1));
+        }
         auto result = ModLong(a, modulus_num)/ModLong(b, modulus_num);
         return std::make_shared<ValueType<ModLong>>(result);
+    }
+};
+
+class PolishModValue: public PolishFunction {
+ public:
+    PolishModValue(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto arg_raw    = iterate_wrapped(cmd_list, variables, fp_size);
+        auto argument   = std::dynamic_pointer_cast<ValueType<ModLong>>(arg_raw);
+        if (!argument) {
+            throw ParsingTypeException("Type error: Expected ModLong as argument in mod_value function");
+        }
+
+        auto value = argument->as_value();
+        return std::make_shared<ValueType<RationalNumber<BigInt>>>(BigInt(value.to_num()));
     }
 };

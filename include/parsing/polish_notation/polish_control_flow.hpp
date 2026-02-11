@@ -55,30 +55,47 @@ class PolishFor: public PolishFunction {
                 iterate_wrapped(cmd_list, variables, fp_size);
             }
         }
-        /*if (start_v.as_int64() > end_v.as_int64()) {
-            // If the loop doesn't execute at all, we still need to move the index forward
-            auto dummy_variables = std::map<std::string, std::shared_ptr<SymObject>>();
-
-            for (auto &var: variables) {
-                dummy_variables[var.first] = var.second->clone();
-            }
-            dummy_variables["suppress_print"] = std::make_shared<SymBooleanObject>(true);
-            dummy_variables[loop_index_var_name] = std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(start_v, BigInt(1)));
-            for (uint32_t arg = 0; arg < num_args - 3; arg++) {
-                iterate_wrapped(cmd_list, dummy_variables, fp_size);
-            }
-        }*/
 
         // set execution index to after the loop body
         cmd_list.set_index(original_index + num_expressions_inside);
-
-        /*std::cout << "END FOR" << std::endl;
-        std::cout << original_index + num_expressions_inside << std::endl;
-        std::cout << cmd_list.get_index() << std::endl;*/
-
         return std::make_shared<SymVoidObject>();
     }
 };
+
+class PolishWhile: public PolishFunction {
+    uint32_t num_expressions_inside;
+
+ public:
+    PolishWhile(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
+        PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        uint32_t original_index  = cmd_list.get_index();
+
+        while (true) {
+            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, variables, fp_size));
+            if (!condition) {
+                throw EvalException("Expected boolean condition in while statement", this->get_position());
+            }
+
+            if (!condition->as_boolean()) {
+                break;
+            }
+
+            for (uint32_t arg = 0; arg < num_args - 1; arg++) {
+                iterate_wrapped(cmd_list, variables, fp_size);
+            }
+            cmd_list.set_index(original_index);
+        }
+
+        // set execution index to after the loop body
+        cmd_list.set_index(original_index + num_expressions_inside);
+        return std::make_shared<SymVoidObject>();
+    }
+};
+
 
 class PolishIf: public PolishFunction {
     uint32_t num_expressions_inside;
@@ -144,6 +161,35 @@ class PolishNeq: public PolishFunction {
         }
     }
 };
+
+class PolishLTE: public PolishFunction {
+ public:
+    PolishLTE(uint32_t position, uint32_t num_args) :
+        PolishFunction(position, num_args, 2, 2) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    const size_t fp_size) {
+        auto first = iterate_wrapped(cmd_list, variables, fp_size);
+        auto second = iterate_wrapped(cmd_list, variables, fp_size);
+
+        auto first_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
+        auto second_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);
+        if (!first_num || !second_num) {
+            throw EvalException("Expected numeric arguments for LTE operation", this->get_position());
+        }
+
+        auto first_val = first_num->as_value();
+        auto second_val = second_num->as_value();
+
+        if (first_val.get_numerator()*second_val.get_denominator() <= second_val.get_numerator()*first_val.get_denominator()) {
+            return std::make_shared<SymBooleanObject>(true);
+        } else {
+            return std::make_shared<SymBooleanObject>(false);
+        }
+    }
+};
+
 
 class PolishPrint: public PolishFunction {
  public:
