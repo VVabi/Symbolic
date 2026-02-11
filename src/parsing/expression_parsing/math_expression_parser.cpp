@@ -53,33 +53,6 @@ std::shared_ptr<SymObject> parse_formula_internal(std::deque<MathLexerElement>& 
     return iterate_wrapped(input, variables, powerseries_expansion_size);
 }
 
-
-/**
- * @brief Verifies if a given string is a valid variable name.
- *
- * This function checks if the provided string is a valid variable name by ensuring that:
- * - The string is not empty.
- * - The first character is not a digit.
- * - All characters are either digits, lowercase letters, or uppercase letters.
- *
- * @param name The string to be verified as a variable name.
- * @return True if the string is a valid variable name, false otherwise.
- */
-bool verify_variable_name(const std::string& name) {
-    if (name.size() == 0) {
-        return false;
-    }
-    if (name[0] >= '0' && name[0] <= '9') {
-        return false;
-    }
-    for (char c : name) {
-        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
                     const uint32_t offset,
@@ -125,49 +98,9 @@ std::string parse_formula(const std::string& input,
                     std::shared_ptr<SymObject>>& variables,
                     const uint32_t powerseries_expansion_size,
                     const int64_t default_modulus) {
-    auto pos = input.find("=");
-    std::vector<std::string> parts;
-
-    // TODO(vabi) this is an abomination unto nuggan
-    // Currently necessary to distinguish between a '=' assignment like in f = 1/(1-z), or an = appearing in a set descriptor
-    // like MSET_>=2(1/(1-z))
-    if (pos != std::string::npos) {
-        if (pos == 0) {
-            throw ParsingException("No variable name provided", -1);
-        }
-
-        if (input[pos-1] != '<' && input[pos-1] != '>' && input[pos-1] != '=' && input[pos-1] != '!' && input[pos-1] != '_') {
-            parts.push_back(input.substr(0, pos));
-            parts.push_back(input.substr(pos+1));
-        } else {
-            parts.push_back(input);
-        }
-    } else {
-        parts.push_back(input);
-    }
-
-    std::string input_string = "";
-    std::string variable = "";
-    uint32_t offset = 0;
-    if (parts.size() == 2) {
-        offset += parts[0].size()+1;
-        std::string::iterator end_pos = std::remove(parts[0].begin(), parts[0].end(), ' ');
-        parts[0].erase(end_pos, parts[0].end());
-        variable = parts[0];
-        if (!verify_variable_name(variable)) {
-            throw ParsingException("Invalid variable name: "+variable, 0);
-        }
-        input_string = parts[1];
-    } else {
-        input_string = parts[0];
-    }
-
-    auto ret = parse_formula_as_sym_object(input_string, offset, type, variables, powerseries_expansion_size, default_modulus);
+    auto ret = parse_formula_as_sym_object(input, 0, type, variables, powerseries_expansion_size, default_modulus);
 
     auto ret_str = ret->to_string();
     variables["ANS"] = ret;
-    if (variable.size() > 0) {
-        variables[variable] = ret;
-    }
     return ret_str;
 }

@@ -80,7 +80,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
             switch (*it) {
                 case '+':
                 case '-':
-                    if (previous == '(' || previous == ',') {
+                    if (previous == '(' || previous == ',' || previous == '=') {
                         formula.push_back(MathLexerElement(NUMBER, "0", distance));
                         formula.push_back(MathLexerElement(INFIX, std::string(1, *it), distance));
                     } else {
@@ -91,6 +91,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 case '/':
                 case '^':
                 case '!':
+                case '=':
                     if (previous == '(' || previous == ',') {
                         char c = *it;
                         throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", distance);

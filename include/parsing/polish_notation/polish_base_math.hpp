@@ -14,7 +14,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/sym_types/sym_math.hpp"
 #include "types/sym_types/sym_string_object.hpp"
-
+#include "types/sym_types/sym_void.hpp"
 
 
 inline std::shared_ptr<SymObject> binary_operation(std::deque<MathLexerElement>& cmd_list,
@@ -159,5 +159,28 @@ class PolishUnaryMinus: public PolishNotationElement {
         throw ParsingTypeException("Type error: Expected mathematical object as argument");
 
         return nullptr;
+    }
+};
+
+class PolishAssign: public PolishNotationElement {
+ public:
+    PolishAssign(uint32_t position) : PolishNotationElement(position) { }
+
+    std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        const size_t fp_size) {
+        if (cmd_list.size() == 0) {
+            throw EvalException("Expected variable name to assign to", this->get_position());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+        }
+        auto next = cmd_list.front();
+        cmd_list.pop_front();
+
+        if (next.type != expression_type::VARIABLE) {
+            throw ParsingTypeException("Type error: Expected variable name as first argument in assignment");
+        }
+        auto var_value = iterate_wrapped(cmd_list, variables, fp_size);
+
+        variables[next.data] = var_value;
+        return var_value;
     }
 };
