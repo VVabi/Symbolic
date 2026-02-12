@@ -192,7 +192,6 @@ class PolishMod: public PolishFunction {
         auto mod_raw    = iterate_wrapped(cmd_list, variables, fp_size);
         auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(mod_raw);
         if (!argument || !mod) {
-            std::cout << arg_raw->to_string() << " " << mod_raw->to_string() << std::endl;
             throw ParsingTypeException("Type error: Expected natural numbers as arguments in mod function");
         }
 

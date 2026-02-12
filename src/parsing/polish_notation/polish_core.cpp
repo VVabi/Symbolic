@@ -147,10 +147,19 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             } else if (element.data == "ModValue") {
                 return std::make_shared<PolishModValue>(element.position, element.num_args);
             } else if (element.data == "for") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside for loop not set", element.position);
+                }
                 return std::make_shared<PolishFor>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "while") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside while loop not set", element.position);
+                }
                 return std::make_shared<PolishWhile>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "if") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside if statement not set", element.position);
+                }
                 return std::make_shared<PolishIf>(element.position, element.num_args, element.num_expressions);
             } else if (element.data == "eq") {
                 return std::make_shared<PolishEq>(element.position, element.num_args);

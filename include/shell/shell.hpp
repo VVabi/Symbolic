@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"

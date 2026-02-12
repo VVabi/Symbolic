@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <iostream>
 #include "parsing/polish_notation/polish.hpp"
 #include "parsing/polish_notation/polish_function_core.hpp"
 #include "exceptions/parsing_exceptions.hpp"

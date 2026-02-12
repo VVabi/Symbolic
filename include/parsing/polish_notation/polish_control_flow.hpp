@@ -46,9 +46,17 @@ class PolishFor: public PolishFunction {
 
         auto start_v = start->as_value().get_numerator();
         auto end_v   = end->as_value().get_numerator();
+        int64_t start_idx, end_idx;
+
+        try {  // TODO(vabi): allow bigints as for loop bounds
+            start_idx = start_v.as_int64();
+            end_idx = end_v.as_int64();
+        } catch (const std::runtime_error& e) {
+            throw EvalException("Start and end values in for loop must be within int64 range", variable.position);
+        }
 
         uint32_t start_cmd = cmd_list.get_index();
-        for (int64_t i = start_v.as_int64(); i <= end_v.as_int64(); i++) {
+        for (int64_t i = start_idx; i <= end_idx; i++) {
            cmd_list.set_index(start_cmd);
            for (uint32_t arg = 0; arg < num_args - 3; arg++) {
                 variables[loop_index_var_name] = std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1)));

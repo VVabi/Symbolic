@@ -84,7 +84,7 @@ std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerEleme
 
     int current_args_count = 0;
     int last_closed_bracket_args_count = 0;
-    int last_expression_count = 0;
+    ptrdiff_t last_expression_count = 0;
 
     for (auto it = input.rbegin(); it != input.rend(); ++it) {
         switch (it->type) {
