@@ -6,7 +6,7 @@
 template<typename T>
 class LexerDeque {
     std::vector<T> data;
-    uint32_t index;
+    size_t index;
 
  public:
     LexerDeque(): data(std::vector<T>()), index(0) {}
@@ -15,30 +15,28 @@ class LexerDeque {
         data.push_back(element);
     }
 
-    T pop_front() {
+    void pop_front() {
         if (index >= data.size()) {
-            throw std::out_of_range("Cannot pop from an empty vector");
+            throw std::out_of_range("Cannot pop from an empty deque");
         }
-        T front_element = data[index];
         index++;
-        return front_element;
     }
 
     T& front() {
         if (index >= data.size()) {
-            throw std::out_of_range("Cannot access front of an empty vector");
+            throw std::out_of_range("Cannot access front of an empty deque");
         }
         return data[index];
     }
 
-    void set_index(uint32_t new_index) {
+    void set_index(size_t new_index) {
         if (new_index > data.size()) {
             throw std::out_of_range("Index out of range");
         }
         index = new_index;
     }
 
-    uint32_t get_index() const {
+    size_t get_index() const {
         return index;
     }
 
