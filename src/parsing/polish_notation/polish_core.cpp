@@ -5,6 +5,8 @@
 #include "parsing/polish_notation/polish_base_math.hpp"
 #include "parsing/polish_notation/polish_functions.hpp"
 #include "parsing/polish_notation/polish_control_flow.hpp"
+#include "parsing/polish_notation/polish_comparison_operators.hpp"
+#include "parsing/polish_notation/polish_utils.hpp"
 #include "parsing/math_types/value_type.hpp"
 #include "parsing/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -48,7 +50,6 @@ class PolishVariable: public PolishNotationElement {
         UNUSED(fp_size);
         auto existing_var = variables.find(name);
         if (existing_var == variables.end()) {
-            std::cout << "Poly from " << name << std::endl;
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
@@ -157,8 +158,14 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishNeq>(element.position, element.num_args);
             } else if (element.data == "print") {
                 return std::make_shared<PolishPrint>(element.position, element.num_args);
+            } else if (element.data == "lt") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, LT);
             } else if (element.data == "lte") {
-                return std::make_shared<PolishLTE>(element.position, element.num_args);
+                return std::make_shared<PolishComparison>(element.position, element.num_args, LTE);
+            } else if (element.data == "gt") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, GT);
+            } else if (element.data == "gte") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, GTE);
             }
         }
         default:
