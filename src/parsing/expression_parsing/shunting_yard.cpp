@@ -24,17 +24,17 @@
 int32_t get_operator_precedence(char op) {
     switch (op) {
         case '=':
-            return -1;
+            return 0;
         case '+':
         case '-':
-            return 0;
+            return 1;
         case '*':
         case '/':
-            return 1;
-        case '^':
             return 2;
-        case '!':
+        case '^':
             return 3;
+        case '!':
+            return 4;
         default:
             throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
             return -1;
@@ -50,11 +50,11 @@ bool is_right_associative(char op) {
     switch (op) {
         case '+':
         case '*':
+        case '=':
             return true;
         case '-':
         case '/':
         case '!':
-        case '=':
             return false;
         case '^':
             return true;

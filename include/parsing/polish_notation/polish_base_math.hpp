@@ -170,7 +170,7 @@ class PolishAssign: public PolishNotationElement {
                                         std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                         const size_t fp_size) {
         if (cmd_list.is_empty()) {
-            throw EvalException("Expected variable name to assign to", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+            throw EvalException("Expected variable name to assign to", this->get_position());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
         }
         auto next = cmd_list.front();
         cmd_list.pop_front();
@@ -180,7 +180,6 @@ class PolishAssign: public PolishNotationElement {
         }
         auto var_value = iterate_wrapped(cmd_list, variables, fp_size);
 
-        //std::cout << "Assigning " << var_value->to_string() << " to variable " << next.data << std::endl;
         variables[next.data] = var_value;
         return var_value;
     }
