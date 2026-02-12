@@ -105,6 +105,25 @@ class FileShellInput : public ShellInput {
     }
 };
 
+class FileShellLineInput : public ShellInput {
+ public:
+    std::ifstream file_stream;
+    FileShellLineInput(const std::string& filename): file_stream(filename) {
+        if (!file_stream.is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+    }
+
+    std::string get_next_input() override {
+        std::string input;
+        if (!std::getline(file_stream, input)) {
+            return "exit";
+        }
+        return input;
+    }
+};
+
+
 class FileShellOutput: public ShellOutput {
  public:
     std::ofstream file_stream;

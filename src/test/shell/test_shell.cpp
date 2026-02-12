@@ -112,7 +112,7 @@ void test_shell_explicit_tests() {
         initialize_shell_parameters();
         initialize_command_handler();
 
-        auto shell_input = std::make_shared<FileShellInput>(test_folder+"/input.txt");
+        auto shell_input = std::make_shared<FileShellLineInput>(test_folder+"/input.txt");
         auto shell_output = std::make_shared<TestShellOutput>();
         SymbolicShellEvaluator evaluator(shell_input, shell_output);
         evaluator.run();
@@ -174,5 +174,3 @@ void regenerate_outputs() {
     error_file.flush();
     error_file.close();
 }
-
-
