@@ -278,6 +278,10 @@ class BigInt {
     double as_double() const {
         return mpz_get_d(value);
     }
+
+    bool operator<=(const BigInt& other) const {
+        return mpz_cmp(value, other.value) <= 0;
+    }
 };
 
 #endif  // INCLUDE_TYPES_BIGINT_HPP_

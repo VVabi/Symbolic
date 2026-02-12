@@ -25,37 +25,7 @@ class TestShellInput: public ShellInput {
     }
 };
 
-class TestShellOutput: public ShellOutput {
- public:
-    std::stringstream out;
-    std::stringstream err;
 
-    std::vector<std::string> outputs;
-    std::vector<std::string> errs;
-
-    TestShellOutput() {
-        out = std::stringstream();
-        err = std::stringstream();
-    }
-
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) {
-        UNUSED(print_result);
-        result->print_result(out, err, print_result);
-        outputs.push_back(out.str());
-
-        auto error_string = err.str();
-
-        for (auto str : string_split(error_string, '\n')) {
-            errs.push_back(str);
-        }
-
-        if (error_string.size() == 0) {
-            errs.push_back(error_string);
-        }
-        out.str("");
-        err.str("");
-    }
-};
 
 void test_shell_power_series_parsing() {
     initialize_shell_parameters();
@@ -112,7 +82,7 @@ void test_shell_explicit_tests() {
         initialize_shell_parameters();
         initialize_command_handler();
 
-        auto shell_input = std::make_shared<FileShellInput>(test_folder+"/input.txt");
+        auto shell_input = std::make_shared<FileShellLineInput>(test_folder+"/input.txt");
         auto shell_output = std::make_shared<TestShellOutput>();
         SymbolicShellEvaluator evaluator(shell_input, shell_output);
         evaluator.run();
@@ -174,5 +144,3 @@ void regenerate_outputs() {
     error_file.flush();
     error_file.close();
 }
-
-

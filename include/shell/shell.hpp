@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -95,13 +96,34 @@ class FileShellInput : public ShellInput {
     }
 
     std::string get_next_input() override {
-        std::string input;
-        if (std::getline(file_stream, input)) {
-            return input;
+        std::stringstream buffer;
+        buffer << file_stream.rdbuf();
+        auto ret =  buffer.str();
+        if (ret.empty()) {
+            return "exit";
         }
-        return "exit";
+        return ret;
     }
 };
+
+class FileShellLineInput : public ShellInput {
+ public:
+    std::ifstream file_stream;
+    FileShellLineInput(const std::string& filename): file_stream(filename) {
+        if (!file_stream.is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+    }
+
+    std::string get_next_input() override {
+        std::string input;
+        if (!std::getline(file_stream, input)) {
+            return "exit";
+        }
+        return input;
+    }
+};
+
 
 class FileShellOutput: public ShellOutput {
  public:
@@ -115,6 +137,37 @@ class FileShellOutput: public ShellOutput {
     void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(file_stream, std::cerr, print_result);
         file_stream << std::endl;
+    }
+};
+
+class TestShellOutput: public ShellOutput {
+ public:
+    std::stringstream out;
+    std::stringstream err;
+
+    std::vector<std::string> outputs;
+    std::vector<std::string> errs;
+
+    TestShellOutput() {
+        out = std::stringstream();
+        err = std::stringstream();
+    }
+
+    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+        result->print_result(out, err, print_result);
+        outputs.push_back(out.str());
+
+        auto error_string = err.str();
+
+        for (auto str : string_split(error_string, '\n')) {
+            errs.push_back(str);
+        }
+
+        if (error_string.size() == 0) {
+            errs.push_back(error_string);
+        }
+        out.str("");
+        err.str("");
     }
 };
 

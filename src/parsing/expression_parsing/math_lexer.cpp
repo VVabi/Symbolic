@@ -109,11 +109,13 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                     break;
                 case ' ':
                     break;
+                case '\n':
+                    break;
                 default:
                     throw ParsingException("Unknown symbol "+std::string(&(*it), 1), distance);
             }
         }
-        if (*it != ' ') {
+        if (*it != ' ' && *it != '\n') {
             previous = *it;
         }
         it++;

@@ -4,6 +4,9 @@
 #include "parsing/polish_notation/polish.hpp"
 #include "parsing/polish_notation/polish_base_math.hpp"
 #include "parsing/polish_notation/polish_functions.hpp"
+#include "parsing/polish_notation/polish_control_flow.hpp"
+#include "parsing/polish_notation/polish_comparison_operators.hpp"
+#include "parsing/polish_notation/polish_utils.hpp"
 #include "parsing/math_types/value_type.hpp"
 #include "parsing/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -141,6 +144,37 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishEval>(element.position, element.num_args);
             } else if (element.data == "Mod") {
                 return std::make_shared<PolishMod>(element.position, element.num_args);
+            } else if (element.data == "ModValue") {
+                return std::make_shared<PolishModValue>(element.position, element.num_args);
+            } else if (element.data == "for") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside for loop not set", element.position);
+                }
+                return std::make_shared<PolishFor>(element.position, element.num_args, element.num_expressions);
+            } else if (element.data == "while") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside while loop not set", element.position);
+                }
+                return std::make_shared<PolishWhile>(element.position, element.num_args, element.num_expressions);
+            } else if (element.data == "if") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside if statement not set", element.position);
+                }
+                return std::make_shared<PolishIf>(element.position, element.num_args, element.num_expressions);
+            } else if (element.data == "eq") {
+                return std::make_shared<PolishEq>(element.position, element.num_args);
+            } else if (element.data == "neq") {
+                return std::make_shared<PolishNeq>(element.position, element.num_args);
+            } else if (element.data == "print") {
+                return std::make_shared<PolishPrint>(element.position, element.num_args);
+            } else if (element.data == "lt") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, LT);
+            } else if (element.data == "lte") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, LTE);
+            } else if (element.data == "gt") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, GT);
+            } else if (element.data == "gte") {
+                return std::make_shared<PolishComparison>(element.position, element.num_args, GTE);
             }
         }
         default:

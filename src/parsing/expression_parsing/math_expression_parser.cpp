@@ -8,6 +8,7 @@
 #include <map>
 #include "common/lexer_deque.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
+#include "types/sym_types/sym_void.hpp"
 
 /**
  * @brief Infers the datatype from the lexer elements.
@@ -51,7 +52,11 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<MathLexerElement>& 
                                     const int64_t default_modulus) {
     UNUSED(default_modulus);
     UNUSED(type);
-    return iterate_wrapped(input, variables, powerseries_expansion_size);
+    std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
+    while (!input.is_empty()) {
+        ret = iterate_wrapped(input, variables, powerseries_expansion_size);
+    }
+    return ret;
 }
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
