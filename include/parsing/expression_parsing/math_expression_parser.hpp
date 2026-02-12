@@ -8,7 +8,6 @@
 #ifndef INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
 #define INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
 
-#include <deque>
 #include <utility>
 #include <memory>
 #include <string>

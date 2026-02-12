@@ -1,8 +1,8 @@
 #pragma once
-#include <deque>
 #include <map>
 #include <memory>
 #include <string>
+#include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 
@@ -12,7 +12,7 @@ class PolishNotationElement {
     PolishNotationElement(uint32_t position): position(position) { }
     virtual ~PolishNotationElement() { }
 
-    virtual inline std::shared_ptr<SymObject> handle_wrapper(std::deque<MathLexerElement>& cmd_list,
+    virtual inline std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
                                     std::map<std::string, std::shared_ptr<SymObject>>& variables,
                                     const size_t fp_size) = 0;
     uint32_t get_position() {
@@ -20,6 +20,6 @@ class PolishNotationElement {
     }
 };
 
-std::shared_ptr<SymObject> iterate_wrapped(std::deque<MathLexerElement>& cmd_list,
+std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<MathLexerElement>& cmd_list,
         std::map<std::string, std::shared_ptr<SymObject>>& variables,
         const size_t fp_size);
