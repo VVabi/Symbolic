@@ -6,14 +6,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_executable(Symbolic
         src/Symbolic.cpp
         src/string_utils/string_utils.cpp
-        src/polya/partitions.cpp
-        src/number_theory/moebius.cpp
-        src/number_theory/euler_phi.cpp
+        src/math/combinatorics/polya/partitions.cpp
+        src/math/number_theory/moebius.cpp
+        src/math/number_theory/euler_phi.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/interpreter/polish_notation/polish_core.cpp
-        src/functions/power_series_functions.cpp
+        src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
         src/shell/command_handling.cpp
@@ -25,14 +25,14 @@ add_executable(Symbolic
 add_executable(Symbolic_tests
         src/Symbolic_tests.cpp
         src/string_utils/string_utils.cpp
-        src/polya/partitions.cpp
-        src/number_theory/moebius.cpp
-        src/number_theory/euler_phi.cpp
+        src/math/combinatorics/polya/partitions.cpp
+        src/math/number_theory/moebius.cpp
+        src/math/number_theory/euler_phi.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/interpreter/polish_notation/polish_core.cpp
-        src/functions/power_series_functions.cpp
+        src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
         src/shell/command_handling.cpp
@@ -55,14 +55,14 @@ add_executable(Symbolic_tests
 add_executable(Symbolic_playground
         src/Symbolic_playground.cpp
         src/string_utils/string_utils.cpp
-        src/polya/partitions.cpp
-        src/number_theory/moebius.cpp
-        src/number_theory/euler_phi.cpp
+        src/math/combinatorics/polya/partitions.cpp
+        src/math/number_theory/moebius.cpp
+        src/math/number_theory/euler_phi.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/interpreter/polish_notation/polish_core.cpp
-        src/functions/power_series_functions.cpp
+        src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
         src/shell/command_handling.cpp
