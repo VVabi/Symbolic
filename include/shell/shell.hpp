@@ -31,7 +31,8 @@ class ShellInput {
 
 class ShellOutput {
  public:
-    virtual void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
+    virtual void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
+    virtual void handle_print(const std::string& output) = 0;
 };
 
 class CmdLineShellInput : public ShellInput {
@@ -75,13 +76,20 @@ class ReadlineShellInput : public ShellInput {
 };
 
 class CmdLineShellOutput : public ShellOutput {
+    bool repl_mode;
+
  public:
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
-        result->print_result(std::cout, std::cerr, print_result);
+    CmdLineShellOutput(bool repl_mode) : repl_mode(repl_mode) {  }
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+        result->print_result(std::cout, std::cerr, print_result && repl_mode);
         // TODO(vabi): this is architecturally questionable...
-        if (print_result) {
+        if (print_result && repl_mode) {
             std::cout << std::endl;
         }
+    }
+
+    void handle_print(const std::string& output) override {
+        std::cout << output << std::endl;
     }
 };
 
@@ -134,9 +142,13 @@ class FileShellOutput: public ShellOutput {
         }
     }
 
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(file_stream, std::cerr, print_result);
         file_stream << std::endl;
+    }
+
+    void handle_print(const std::string& output) override {
+        file_stream << output << std::endl;
     }
 };
 
@@ -153,7 +165,7 @@ class TestShellOutput: public ShellOutput {
         err = std::stringstream();
     }
 
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(out, err, print_result);
         outputs.push_back(out.str());
 
@@ -168,6 +180,10 @@ class TestShellOutput: public ShellOutput {
         }
         out.str("");
         err.str("");
+    }
+
+    void handle_print(const std::string& output) override {
+        outputs.push_back(output);
     }
 };
 
