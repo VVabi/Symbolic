@@ -20,7 +20,7 @@
 #include "interpreter/polish_notation/polish.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
 #include "exceptions/parsing_exceptions.hpp"
-#include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "types/sym_types/math_types/parsing_wrapper.hpp"
 #include "types/sym_types/math_types/rational_function_type.hpp"
 #include "interpreter/context.hpp"
 

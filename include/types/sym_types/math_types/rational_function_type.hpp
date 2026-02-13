@@ -8,9 +8,8 @@
 #include <algorithm>
 #include <string>
 #include <utility>
-#include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "types/sym_types/math_types/parsing_wrapper.hpp"
 #include "types/sym_types/math_types/power_series_type.hpp"
-#include "types/polynomial.hpp"
 
 /**
  * @class RationalFunctionType
