@@ -22,6 +22,7 @@ std::shared_ptr<SymMathObject> sym_binary_base(std::shared_ptr<MathWrapperType<T
         case ADD:
              return a->get_priority() > b->get_priority() ? a->add(b) : b->add(a);
         case SUBTRACT:
+            b = std::dynamic_pointer_cast<MathWrapperType<T>>(b->clone());
             b->unary_minus();
             return a->get_priority() > b->get_priority() ? a->add(b) : b->add(a);
         case MULTIPLY:

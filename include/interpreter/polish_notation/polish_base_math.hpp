@@ -113,7 +113,7 @@ class PolishPow: public PolishNotationElement {
             if (value.get_denominator() != BigInt(1)) {
                 throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
             }
-
+            math_object = std::dynamic_pointer_cast<SymMathObject>(math_object->clone());
             math_object->pow(value.get_numerator());
             return math_object;
         }
@@ -122,6 +122,7 @@ class PolishPow: public PolishNotationElement {
         if (exponent_double) {
             auto math_double_object = std::dynamic_pointer_cast<ValueType<double>>(math_object);
             if (math_double_object) {
+                math_double_object = std::dynamic_pointer_cast<ValueType<double>>(math_double_object->clone());
                 math_double_object->pow(exponent_double->as_value());
                 return math_double_object;
             }
@@ -153,6 +154,7 @@ class PolishUnaryMinus: public PolishNotationElement {
         auto result = iterate_wrapped(cmd_list, context, fp_size);
         auto math_type = std::dynamic_pointer_cast<SymMathObject>(result);
         if (math_type) {
+            math_type = std::dynamic_pointer_cast<SymMathObject>(math_type->clone());
             math_type->unary_minus();
             return math_type;
         }
