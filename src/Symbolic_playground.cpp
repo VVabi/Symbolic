@@ -18,6 +18,7 @@
 #include "types/polynomial.hpp"
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
+#include "cpp_utils/unused.hpp"
 
 void test_script_interpretation();
 
