@@ -34,7 +34,7 @@ class SymListObject: public SymObject {
 
     void set(size_t index, std::shared_ptr<SymObject> value) {
         if (index >= data.size()) {
-            throw std::out_of_range("Index out of bounds in SymListObject::set");
+            throw ParsingTypeException("Index out of bounds in SymListObject::set");
         }
         data[index] = value;
     }
@@ -43,7 +43,7 @@ class SymListObject: public SymObject {
         return true;
     }
 
-    void append(std::shared_ptr<SymObject>& value) {
+    void append(const std::shared_ptr<SymObject>& value) {
         data.push_back(value);
     }
 

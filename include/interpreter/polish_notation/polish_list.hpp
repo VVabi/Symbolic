@@ -10,6 +10,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "interpreter/polish_notation/polish_function_core.hpp"
 #include "types/sym_types/sym_list.hpp"
+#include "types/sym_types/sym_void.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 
 class PolishList: public PolishFunction {
