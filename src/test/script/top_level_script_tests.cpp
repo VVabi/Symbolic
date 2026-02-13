@@ -2,14 +2,13 @@
 #include <string>
 #include <memory>
 #include <filesystem>
+#include <fstream>
+#include <vector>
 #include "shell/shell.hpp"
 #include "test/test_data/power_series_parsing_testdata.hpp"
 #include "shell/parameters/parameters.hpp"
 
-void test_single_script(std::string filename, std::vector<std::string> expected_outputs) {
-    initialize_shell_parameters();
-    initialize_command_handler();
-
+void test_single_script(const std::string& filename, const std::vector<std::string>& expected_outputs) {
     auto shell_input = std::make_shared<FileShellInput>(filename);
     auto shell_output = std::make_shared<TestShellOutput>();
     SymbolicShellEvaluator evaluator(shell_input, shell_output);
@@ -21,11 +20,14 @@ void test_single_script(std::string filename, std::vector<std::string> expected_
     }
 }
 
-void test_single_script_wrapper(std::string filename, std::string expected_results) {
+void test_single_script_wrapper(const std::string& filename, const std::string& expected_results) {
     std::vector<std::string> expected_outputs;
 
     // Read expected outputs from file
     std::ifstream strm(expected_results);
+    if (!strm.is_open()) {
+        throw std::runtime_error("Failed to open expected results file: " + expected_results);
+    }
     std::string line;
     while (std::getline(strm, line)) {
         expected_outputs.push_back(line);
@@ -33,8 +35,9 @@ void test_single_script_wrapper(std::string filename, std::string expected_resul
     test_single_script(filename, expected_outputs);
 }
 
-
 void test_script_interpretation() {
+    initialize_shell_parameters();
+    initialize_command_handler();
     auto base_folder = "../src/test/script/test_scripts/single_tests";
 
     for (const auto& entry : std::filesystem::directory_iterator(base_folder)) {

@@ -19,10 +19,7 @@
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
 
-void test_script_interpretation();
-
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
-    test_script_interpretation();
 }
