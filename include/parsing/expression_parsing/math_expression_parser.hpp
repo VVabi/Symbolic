@@ -46,17 +46,17 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  * @param unit The multiplicative identity of type `T`.
  * @return The parsed power series.
  */
-template<typename T> std::shared_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
+template<typename T> std::shared_ptr<MathWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
     UNUSED(unit);
     auto context = std::make_shared<InterpreterContext>(nullptr);
-    auto res = std::dynamic_pointer_cast<ParsingWrapperType<T>>(parse_formula_as_sym_object(input, 0, Datatype::DYNAMIC, context, size, 1));
+    auto res = std::dynamic_pointer_cast<MathWrapperType<T>>(parse_formula_as_sym_object(input, 0, Datatype::DYNAMIC, context, size, 1));
     return res;
 }
 
 template<>
-inline std::shared_ptr<ParsingWrapperType<double>> parse_power_series_from_string(const std::string& input,
+inline std::shared_ptr<MathWrapperType<double>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const double unit) {
     UNUSED(unit);
@@ -65,11 +65,11 @@ inline std::shared_ptr<ParsingWrapperType<double>> parse_power_series_from_strin
     // workaround: force the parser to infer the type as double, so that we can parse things like exp(z) as power series in z, instead of trying to parse it as a rational function in z and then converting to a power series, which doesn't work since the rational function is not actually a rational function but a power series in disguise
     context->set_variable("z", std::make_shared<RationalFunctionType<double>>(RationalFunction<double>(Polynomial<double>({0, 1}), Polynomial<double>({1}))));
     auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, 0, Datatype::DYNAMIC, context, size, 1))->as_double();
-    return std::dynamic_pointer_cast<ParsingWrapperType<double>>(res);
+    return std::dynamic_pointer_cast<MathWrapperType<double>>(res);
 }
 
 template<>
-inline std::shared_ptr<ParsingWrapperType<ModLong>> parse_power_series_from_string(const std::string& input,
+inline std::shared_ptr<MathWrapperType<ModLong>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const ModLong unit) {
     auto context = std::make_shared<InterpreterContext>(nullptr);
@@ -77,7 +77,7 @@ inline std::shared_ptr<ParsingWrapperType<ModLong>> parse_power_series_from_stri
     // workaround: force the parser to infer the type as modlong, so that we can parse things like exp(z) as power series in z, instead of trying to parse it as a rational function in z and then converting to a power series, which doesn't work since the rational function is not actually a rational function but a power series in disguise
     context->set_variable("z", std::make_shared<RationalFunctionType<ModLong>>(RationalFunction<ModLong>(Polynomial<ModLong>({ModLong(0, unit.get_modulus()), unit}), Polynomial<ModLong>({unit}))));
     auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, 0, Datatype::DYNAMIC, context, size, 1))->as_modlong(unit.get_modulus());
-    return std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(res);
+    return std::dynamic_pointer_cast<MathWrapperType<ModLong>>(res);
 }
 
 std::string parse_formula(const std::string& input,

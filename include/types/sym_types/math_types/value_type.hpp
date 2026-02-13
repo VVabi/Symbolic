@@ -18,7 +18,7 @@
  * @tparam T The underlying type of the parsing wrapper.
  */
 template<typename T>
-class ValueType: public ParsingWrapperType<T> {
+class ValueType: public MathWrapperType<T> {
  private:
     T value;
 
@@ -48,11 +48,11 @@ class ValueType: public ParsingWrapperType<T> {
         return 0;
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> add(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<ValueType<T>>(value + other->as_value());
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> mult(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<ValueType<T>>(value*other->as_value());
     }
 
@@ -76,10 +76,10 @@ class ValueType: public ParsingWrapperType<T> {
         throw EvalException("Cannot raise type to a non-integer power", -1);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> div(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<ValueType<T>>(value/other->as_value());
     }
-    std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> reverse_div(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<ValueType<T>>(other->as_value()/value);
     }
 
@@ -89,13 +89,13 @@ class ValueType: public ParsingWrapperType<T> {
         throw DatatypeInternalException("Cannot apply power series function to a constant for non-double types");
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
+    std::shared_ptr<MathWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
         auto numerator_ev = rat_function.get_numerator().evaluate(value);
         auto denominator_ev = rat_function.get_denominator().evaluate(value);
         return std::make_shared<ValueType<T>>(numerator_ev/denominator_ev);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
+    std::shared_ptr<MathWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
         UNUSED(power_series);
         throw DatatypeInternalException("Cannot evaluate power series at a constant");
     }

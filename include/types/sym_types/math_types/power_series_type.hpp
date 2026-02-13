@@ -17,7 +17,7 @@
  * @tparam T The underlying type of the parsing wrapper.
  */
 template<typename T>
-class PowerSeriesType: public ParsingWrapperType<T> {
+class PowerSeriesType: public MathWrapperType<T> {
  private:
     FormalPowerSeries<T> value;
 
@@ -51,19 +51,19 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return 2;
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> add(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<PowerSeriesType<T>>(value + other->as_power_series(value.num_coefficients()));
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> mult(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<PowerSeriesType<T>>(value*other->as_power_series(value.num_coefficients()));
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> div(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<PowerSeriesType<T>>(value/other->as_power_series(value.num_coefficients()));
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> reverse_div(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<PowerSeriesType<T>>(other->as_power_series(value.num_coefficients())/value);
     }
 
@@ -92,12 +92,12 @@ class PowerSeriesType: public ParsingWrapperType<T> {
         return ss.str();
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
+    std::shared_ptr<MathWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
         auto ps = rational_function_to_power_series(rat_function, value.num_coefficients());
         return this->insert_into_power_series(ps);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
+    std::shared_ptr<MathWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
         auto zero = RingCompanionHelper<T>::get_zero(value[0]);
 
         if (value[0] != zero) {
@@ -115,7 +115,7 @@ class PowerSeriesType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
-        auto ptr = std::dynamic_pointer_cast<ParsingWrapperType<T>>(input);
+        auto ptr = std::dynamic_pointer_cast<MathWrapperType<T>>(input);
 
         if (!ptr) {
             throw EvalException("Cannot evaluate power series at this input", -1);

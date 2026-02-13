@@ -1,6 +1,6 @@
 /**
  * @file parsing_wrapper.hpp
- * @brief This file contains the declaration of the ParsingWrapperType class and its derived classes.
+ * @brief This file contains the declaration of the MathWrapperType class and its derived classes.
  */
 
 #ifndef INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
@@ -49,12 +49,12 @@ template<typename T>
 class PowerSeriesType;
 
 /**
- * @class ParsingWrapperType
+ * @class MathWrapperType
  * @brief Abstract base class for parsing wrapper types.
  * @tparam T The underlying type of the parsing wrapper.
  */
 template<typename T>
-class ParsingWrapperType : public SymMathObject {
+class MathWrapperType : public SymMathObject {
  public:
     /**
      * @brief Convert the parsing wrapper to a value of type T.
@@ -86,28 +86,28 @@ class ParsingWrapperType : public SymMathObject {
      * @param other The other parsing wrapper.
      * @return The result of the addition.
      */
-    virtual std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) = 0;
+    virtual std::shared_ptr<MathWrapperType<T>> add(std::shared_ptr<MathWrapperType<T>> other) = 0;
 
     /**
      * @brief Multiply another parsing wrapper with this parsing wrapper.
      * @param other The other parsing wrapper.
      * @return The result of the multiplication.
      */
-    virtual std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) = 0;
+    virtual std::shared_ptr<MathWrapperType<T>> mult(std::shared_ptr<MathWrapperType<T>> other) = 0;
 
     /**
      * @brief Divide this parsing wrapper by another parsing wrapper.
      * @param other The other parsing wrapper.
      * @return The result of the division.
      */
-    virtual std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) = 0;
+    virtual std::shared_ptr<MathWrapperType<T>> div(std::shared_ptr<MathWrapperType<T>> other) = 0;
 
     /**
      * @brief Divide another parsing wrapper by this parsing wrapper.
      * @param other The other parsing wrapper.
      * @return The result of the reverse division.
      */
-    virtual std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) = 0;
+    virtual std::shared_ptr<MathWrapperType<T>> reverse_div(std::shared_ptr<MathWrapperType<T>> other) = 0;
 
     /**
      * @brief Apply a power series function to this parsing wrapper.
@@ -130,8 +130,8 @@ class ParsingWrapperType : public SymMathObject {
 
     virtual void pow(const double& exponent) = 0;
 
-    virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) = 0;
-    virtual std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) = 0;
+    virtual std::shared_ptr<MathWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) = 0;
+    virtual std::shared_ptr<MathWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) = 0;
 
 
 

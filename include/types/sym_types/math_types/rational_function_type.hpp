@@ -17,7 +17,7 @@
  * @tparam T The underlying type of the parsing wrapper.
  */
 template<typename T>
-class RationalFunctionType: public ParsingWrapperType<T> {
+class RationalFunctionType: public MathWrapperType<T> {
  private:
     RationalFunction<T> value;
 
@@ -52,19 +52,19 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return 1;
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> add(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> add(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<RationalFunctionType<T>>(value + other->as_rational_function());
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> mult(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> mult(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<RationalFunctionType<T>>(value*other->as_rational_function());
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> div(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> div(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<RationalFunctionType<T>>(value/other->as_rational_function());
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> reverse_div(std::shared_ptr<ParsingWrapperType<T>> other) {
+    std::shared_ptr<MathWrapperType<T>> reverse_div(std::shared_ptr<MathWrapperType<T>> other) {
         return std::make_shared<RationalFunctionType<T>>(other->as_rational_function()/value);
     }
 
@@ -93,7 +93,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return ss.str();
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
+    std::shared_ptr<MathWrapperType<T>> insert_into_rational_function(const RationalFunction<T>& rat_function) {
         auto numerator = rat_function.get_numerator();
         auto numerator_ev = RationalFunction<T>(Polynomial<T>::get_zero(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
         auto pw = RationalFunction<T>(Polynomial<T>::get_unit(numerator[0]), Polynomial<T>::get_unit(numerator[0]));
@@ -115,7 +115,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
         return std::make_shared<RationalFunctionType<T>>(numerator_ev/denominator_ev);
     }
 
-    std::shared_ptr<ParsingWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
+    std::shared_ptr<MathWrapperType<T>> insert_into_power_series(const PowerSeries<T>& power_series) {
         auto zero = RingCompanionHelper<T>::get_zero(power_series[0]);
         auto value_as_power_series = this->as_power_series(power_series.num_coefficients());
         if (value_as_power_series[0] != zero) {
@@ -132,7 +132,7 @@ class RationalFunctionType: public ParsingWrapperType<T> {
     }
 
     std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) {
-        auto cast = std::dynamic_pointer_cast<ParsingWrapperType<T>>(input);
+        auto cast = std::dynamic_pointer_cast<MathWrapperType<T>>(input);
 
         if (cast) {
             return cast->insert_into_rational_function(value);
