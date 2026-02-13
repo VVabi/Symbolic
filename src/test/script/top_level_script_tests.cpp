@@ -1,7 +1,7 @@
+#include <gtest/gtest.h>
 #include <string>
 #include <memory>
 #include <filesystem>
-#include <gtest/gtest.h>
 #include "shell/shell.hpp"
 #include "test/test_data/power_series_parsing_testdata.hpp"
 #include "shell/parameters/parameters.hpp"
