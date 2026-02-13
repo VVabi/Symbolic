@@ -55,7 +55,11 @@ class PolishVariable: public PolishNotationElement {
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
-        return existing_var; // TODO(vabi): Do we need to clone here?
+
+        if (existing_var->modifiable_in_place()) {
+            return existing_var;
+        }
+        return existing_var->clone();
     }
 };
 
@@ -182,6 +186,14 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListSet>(element.position, element.num_args);
             } else if (element.data == "list") {
                 return std::make_shared<PolishList>(element.position, element.num_args);
+            } else if (element.data == "len") {
+                return std::make_shared<PolishLength>(element.position, element.num_args);
+            } else if (element.data == "append") {
+                return std::make_shared<PolishListAppend>(element.position, element.num_args);
+            } else if (element.data == "pop") {
+                return std::make_shared<PolishListPop>(element.position, element.num_args);
+            } else if (element.data == "slice") {
+                return std::make_shared<PolishListSlice>(element.position, element.num_args);
             }
         }
         default:

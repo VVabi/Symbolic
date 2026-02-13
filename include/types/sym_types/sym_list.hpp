@@ -7,6 +7,7 @@
 
 class SymListObject: public SymObject {
     std::vector<std::shared_ptr<SymObject>> data;
+
  public:
     SymListObject(const std::vector<std::shared_ptr<SymObject>>& data): data(data) { }
 
@@ -27,7 +28,7 @@ class SymListObject: public SymObject {
         return std::make_shared<SymListObject>(data);
     }
 
-    std::vector<std::shared_ptr<SymObject>> as_list() const {
+    std::vector<std::shared_ptr<SymObject>>& as_list() {
         return data;
     }
 
@@ -36,5 +37,22 @@ class SymListObject: public SymObject {
             throw std::out_of_range("Index out of bounds in SymListObject::set");
         }
         data[index] = value;
+    }
+
+    bool modifiable_in_place() const override {
+        return true;
+    }
+
+    void append(std::shared_ptr<SymObject>& value) {
+        data.push_back(value);
+    }
+
+    std::shared_ptr<SymObject> pop() {
+        if (data.empty()) {
+            return nullptr;
+        }
+        auto value = data.back();
+        data.pop_back();
+        return value;
     }
 };
