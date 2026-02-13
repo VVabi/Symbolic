@@ -12,6 +12,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/sym_types/sym_math.hpp"
 #include "types/sym_types/sym_string_object.hpp"
+#include "interpreter/context.hpp"
 
 class PolishNumber: public PolishNotationElement {
  private:
@@ -21,11 +22,11 @@ class PolishNumber: public PolishNotationElement {
     PolishNumber(std::string num_repr, uint32_t position): PolishNotationElement(position), num_repr(num_repr) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    std::shared_ptr<InterpreterContext> &context,
                                     const size_t fp_size) {
                                         UNUSED(fp_size);
                                         UNUSED(cmd_list);
-                                        UNUSED(variables);
+                                        UNUSED(context);
                                         try {
                                             return std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(num_repr, RationalNumber<BigInt>(1)));
                                         } catch (std::exception& e) {}
@@ -44,17 +45,16 @@ class PolishVariable: public PolishNotationElement {
  public:
     PolishVariable(std::string name, uint32_t position) : PolishNotationElement(position), name(name) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
         UNUSED(fp_size);
-        auto existing_var = variables.find(name);
-        if (existing_var == variables.end()) {
+        auto existing_var = context->get_variable(name);
+        if (!existing_var) {
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
-        auto var = existing_var->second;
-        return var->clone();
+        return existing_var->clone();
     }
 };
 
@@ -64,11 +64,11 @@ class PolishString: public PolishNotationElement {
  public:
     PolishString(std::string value, uint32_t position) : PolishNotationElement(position), value(value) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
         UNUSED(fp_size);
-        UNUSED(variables);
+        UNUSED(context);
         return std::make_shared<SymStringObject>(value);
     }
 };
@@ -186,7 +186,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
 }
 
 std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<MathLexerElement>& cmd_list,
-        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+        std::shared_ptr<InterpreterContext> &context,
         const size_t fp_size) {
     if (cmd_list.is_empty()) {
         throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
@@ -195,7 +195,7 @@ std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<MathLexerElement>& cmd_lis
     cmd_list.pop_front();
     auto element = polish_notation_element_from_lexer(current);
     try {
-        return element->handle_wrapper(cmd_list, variables, fp_size);
+        return element->handle_wrapper(cmd_list, context, fp_size);
     } catch (ParsingTypeException& e) {
         throw EvalException(e.what(), element->get_position());
     } catch (DatatypeInternalException&e ) {

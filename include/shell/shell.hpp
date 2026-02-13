@@ -277,13 +277,16 @@ class FormulaParsingTypeExceptionResult : public FormulaParsingResult {
 
 class FormulaParser {
  private:
-    std::map<std::string, std::shared_ptr<SymObject>> variables = std::map<std::string, std::shared_ptr<SymObject>>();
+    std::shared_ptr<InterpreterContext> context;
+
  public:
-    FormulaParser() {  }
+    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler) {
+        context = std::make_shared<InterpreterContext>(print_handler);
+    }
 
     std::unique_ptr<FormulaParsingResult> parse(const std::string& input, Datatype parsing_type, uint32_t powerseries_expansion_size, uint32_t default_modulus) {
         try {
-             auto res = parse_formula(input, parsing_type, variables, powerseries_expansion_size, default_modulus);
+             auto res = parse_formula(input, parsing_type, context, powerseries_expansion_size, default_modulus);
              return std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             return std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
@@ -292,6 +295,18 @@ class FormulaParser {
         } catch (ParsingTypeException &e) {
             return std::make_unique<FormulaParsingTypeExceptionResult>(e);
         }
+    }
+};
+
+
+class ShellPrintHandler: public InterpreterPrintHandler {
+ private:
+    std::shared_ptr<ShellOutput> shell_output;
+ public:
+    ShellPrintHandler(std::shared_ptr<ShellOutput> output) : shell_output(output) {  }
+
+    void handle_print(const std::string& output) override {
+        shell_output->handle_print(output);
     }
 };
 
@@ -306,9 +321,10 @@ class SymbolicShellEvaluator {
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:
-    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) : shell_input(input), shell_output(output) {
-        parser = FormulaParser();
-    }
+    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) :
+        shell_input(input),
+        shell_output(output),
+        parser(std::make_shared<ShellPrintHandler>(output)) {}
     void run();
     bool run_single_input();
 };

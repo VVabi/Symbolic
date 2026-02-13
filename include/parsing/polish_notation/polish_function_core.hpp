@@ -20,8 +20,4 @@ class PolishFunction: public PolishNotationElement {
                         }
                     }
     virtual ~PolishFunction() { }
-
-    virtual std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
-                                    const size_t fp_size) = 0;
 };

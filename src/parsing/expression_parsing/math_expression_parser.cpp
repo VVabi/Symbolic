@@ -9,6 +9,7 @@
 #include "common/lexer_deque.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/sym_types/sym_void.hpp"
+#include "interpreter/context.hpp"
 
 /**
  * @brief Infers the datatype from the lexer elements.
@@ -46,7 +47,7 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  * @return The parsed formula as a SymObject.
  */
 std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<MathLexerElement>& input,
-                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    std::shared_ptr<InterpreterContext>& context,
                                     const Datatype type,
                                     const uint32_t powerseries_expansion_size,
                                     const int64_t default_modulus) {
@@ -54,7 +55,7 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<MathLexerElement>& 
     UNUSED(type);
     std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
     while (!input.is_empty()) {
-        ret = iterate_wrapped(input, variables, powerseries_expansion_size);
+        ret = iterate_wrapped(input, context, powerseries_expansion_size);
     }
     return ret;
 }
@@ -63,8 +64,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
                     const uint32_t offset,
                     const Datatype type,
-                    std::map<std::string,
-                    std::shared_ptr<SymObject>>& variables,
+                    std::shared_ptr<InterpreterContext>& context,
                     const uint32_t powerseries_expansion_size,
                     const int64_t default_modulus) {
     auto formula = parse_math_expression_string(input_string, offset);
@@ -80,9 +80,9 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     std::shared_ptr<SymObject> ret;
     if (type == Datatype::DYNAMIC) {
         auto actual_type = infer_datatype_from_lexer(p);
-        ret = parse_formula_internal(polish, variables, actual_type, powerseries_expansion_size, default_modulus);
+        ret = parse_formula_internal(polish, context, actual_type, powerseries_expansion_size, default_modulus);
     } else {
-        ret = parse_formula_internal(polish, variables, type, powerseries_expansion_size, default_modulus);
+        ret = parse_formula_internal(polish, context, type, powerseries_expansion_size, default_modulus);
     }
     return ret;
 }
@@ -100,13 +100,12 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  */
 std::string parse_formula(const std::string& input,
                     const Datatype type,
-                    std::map<std::string,
-                    std::shared_ptr<SymObject>>& variables,
+                    std::shared_ptr<InterpreterContext>& context,
                     const uint32_t powerseries_expansion_size,
                     const int64_t default_modulus) {
-    auto ret = parse_formula_as_sym_object(input, 0, type, variables, powerseries_expansion_size, default_modulus);
+    auto ret = parse_formula_as_sym_object(input, 0, type, context, powerseries_expansion_size, default_modulus);
 
     auto ret_str = ret->to_string();
-    variables["ANS"] = ret;
+    context->set_variable("ANS", ret);
     return ret_str;
 }
