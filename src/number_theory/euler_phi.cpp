@@ -4,14 +4,14 @@
  * @date Feb 6, 2024
  * @brief Euler totient function calculation.
  */
-#include "number_theory/euler_phi.hpp"
+#include "math/number_theory/euler_phi.hpp"
 #include <stdint.h>
 #include <vector>
 
 
 /**
  * @brief Calculates Euler's totient function (phi) for all numbers up to a given limit.
- * 
+ *
  * Uses sum(d | n) phi(d) = n and hence phi(n) = n - sum(d | n, d < n) phi(d) to efficiently tabulate phi values.
  *
  * @param limit The upper limit for the calculation.
@@ -32,4 +32,3 @@ std::vector<int32_t> calculate_euler_phi(uint32_t limit) {
     }
     return ret;
 }
-

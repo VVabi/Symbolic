@@ -2,9 +2,9 @@
 #include <memory>
 #include "types/sym_types/sym_object.hpp"
 #include "types/modLong.hpp"
-#include "functions/power_series_functions.hpp"
+#include "math/power_series/power_series_functions.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
-#include "symbolic_method/symbolic_method_core.hpp"
+#include "math/combinatorics/symbolic_method/symbolic_method_core.hpp"
 #include "cpp_utils/unused.hpp"
 
 class SymMathObject: public SymObject {

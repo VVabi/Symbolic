@@ -1,6 +1,6 @@
 #include <getopt.h>
 #include <iostream>
-#include "options/cmd_line_options.hpp"
+#include "shell/options/cmd_line_options.hpp"
 
 CmdLineOptions parse_cmd_line_args(int argc, char **argv) {
     CmdLineOptions options;

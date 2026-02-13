@@ -3,7 +3,7 @@
  * @brief Implementation of power series functions for double inputs.
  */
 
-#include "functions/power_series_functions.hpp"
+#include "math/power_series/power_series_functions.hpp"
 #include <cmath>
 
 /**

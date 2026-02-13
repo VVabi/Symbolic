@@ -9,13 +9,13 @@
 #include <stdint.h>
 #include <functional>
 #include <iostream>
-#include "polya/partitions.hpp"
+#include "math/combinatorics/polya/partitions.hpp"
 
 
 /**
  * @brief Iterates over all partitions of a given size and applies a callback function to each.
- * 
- * This function uses recursion to generate all partitions of a given size. It applies a callback 
+ *
+ * This function uses recursion to generate all partitions of a given size. It applies a callback
  * function to each partition. The partitions are represented as vectors of PartitionCount objects.
  *
  * @param size The remaining number to partition
@@ -50,7 +50,7 @@ void iterate_partitions_internal(const uint32_t size,
 
 /**
  * @brief Calculates the sign of a partition.
- * 
+ *
  * Calculates the sign of any permutation with the given cycle decomposition.
  *
  * @param partition The partition to calculate the sign for.
@@ -68,12 +68,12 @@ int32_t get_partition_sign(const std::vector<PartitionCount>& partition) {
 
 /**
  * @brief Iterates over all partitions of a given size and applies a callback function to each.
- * 
- * This function is a wrapper for the `iterate_partitions_internal` function. It initializes a 
- * storage vector and then calls `iterate_partitions_internal` with the given size and callback 
+ *
+ * This function is a wrapper for the `iterate_partitions_internal` function. It initializes a
+ * storage vector and then calls `iterate_partitions_internal` with the given size and callback
  * function, and the initialized storage vector.
  *
- * The partitions are represented as vectors of `PartitionCount` objects. The callback function 
+ * The partitions are represented as vectors of `PartitionCount` objects. The callback function
  * is applied to each partition.
  *
  * @param size The size of the partitions we want to generate.
@@ -84,5 +84,3 @@ void iterate_partitions(const uint32_t size, std::function<void(std::vector<Part
     storage.reserve(size);
     iterate_partitions_internal(size, size, storage, callback);
 }
-
-

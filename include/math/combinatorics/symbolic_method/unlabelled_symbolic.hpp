@@ -11,10 +11,10 @@
 #include <stdint.h>
 #include <set>
 #include "types/power_series.hpp"
-#include "polya/cycle_index.hpp"
+#include "math/combinatorics/polya/cycle_index.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
-#include "number_theory/euler_phi.hpp"
-#include "number_theory/moebius.hpp"
+#include "math/number_theory/euler_phi.hpp"
+#include "math/number_theory/moebius.hpp"
 
 template <typename T> FormalPowerSeries<T> unlabelled_sequence(FormalPowerSeries<T> a, const Subset& indices) {
     auto unit = RingCompanionHelper<T>::get_unit(a[0]);

@@ -1,7 +1,7 @@
 /**
  * @file cycle_index.hpp
  * @brief This file contains the declarations and definitions of functions related to cycle index calculations.
- * 
+ *
  * @date Feb 3, 2024
  * @author vabi
  */
@@ -11,11 +11,11 @@
 
 #include <map>
 #include <vector>
-#include "polya/cycle_index.hpp"
+#include "math/combinatorics/polya/partitions.hpp"
 #include "types/power_series.hpp"
 #include "math_utils/factorial_generator.hpp"
-#include "polya/partitions.hpp"
-#include "number_theory/euler_phi.hpp"
+#include "math/combinatorics/polya/partitions.hpp"
+#include "math/number_theory/euler_phi.hpp"
 
 template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uint32_t n, std::vector<FormalPowerSeries<T>>& args, const T unit, const uint32_t num_coeffs) {
     if (args.size() < n) {

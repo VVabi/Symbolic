@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <vector>
-#include "options/cmd_line_options.hpp"
+#include "shell/options/cmd_line_options.hpp"
 
 void test_option_parsing() {
     {
@@ -48,6 +48,3 @@ void test_option_parsing() {
 TEST(ShellTest, OptionParsing) {
     test_option_parsing();
 }
-
-
-

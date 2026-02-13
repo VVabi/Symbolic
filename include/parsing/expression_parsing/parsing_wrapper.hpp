@@ -15,12 +15,12 @@
 #include <algorithm>
 #include "types/power_series.hpp"
 #include "types/polynomial.hpp"
-#include "functions/power_series_functions.hpp"
+#include "math/power_series/power_series_functions.hpp"
 #include "cpp_utils/unused.hpp"
 #include "types/sym_types/sym_math_object.hpp"
-#include "symbolic_method/symbolic_method_core.hpp"
-#include "symbolic_method/unlabelled_symbolic.hpp"
-#include "symbolic_method/labelled_symbolic.hpp"
+#include "math/combinatorics/symbolic_method/symbolic_method_core.hpp"
+#include "math/combinatorics/symbolic_method/unlabelled_symbolic.hpp"
+#include "math/combinatorics/symbolic_method/labelled_symbolic.hpp"
 
 /**
  * @brief Alias for RationalFunction type.
