@@ -8,6 +8,7 @@
 #include <random>
 #include <map>
 #include <fstream>
+#include <vector>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/power_series.hpp"
 #include "types/rationals.hpp"
@@ -18,7 +19,10 @@
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
 
+void test_script_interpretation();
+
 int main(int argc, char **argv) {
     UNUSED(argc);
     UNUSED(argv);
+    test_script_interpretation();
 }

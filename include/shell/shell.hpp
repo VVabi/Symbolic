@@ -159,6 +159,7 @@ class TestShellOutput: public ShellOutput {
 
     std::vector<std::string> outputs;
     std::vector<std::string> errs;
+    std::vector<std::string> printed_outputs;
 
     TestShellOutput() {
         out = std::stringstream();
@@ -183,7 +184,7 @@ class TestShellOutput: public ShellOutput {
     }
 
     void handle_print(const std::string& output) override {
-        outputs.push_back(output);
+        printed_outputs.push_back(output);
     }
 };
 
