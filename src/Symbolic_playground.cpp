@@ -18,6 +18,7 @@
 #include "types/polynomial.hpp"
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
+#include "cpp_utils/unused.hpp"
 
 int main(int argc, char **argv) {
     UNUSED(argc);
