@@ -10,7 +10,7 @@
 #include "cpp_utils/unused.hpp"
 #include "types/bigint.hpp"
 #include "types/rationals.hpp"
-#include "parsing/math_types/value_type.hpp"
+#include "types/sym_types/math_types/value_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "types/sym_types/sym_math.hpp"
 #include "types/sym_types/sym_string_object.hpp"

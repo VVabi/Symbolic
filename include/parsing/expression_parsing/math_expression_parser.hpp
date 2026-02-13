@@ -21,7 +21,7 @@
 #include "parsing/expression_parsing/shunting_yard.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
-#include "parsing/math_types/rational_function_type.hpp"
+#include "types/sym_types/math_types/rational_function_type.hpp"
 #include "interpreter/context.hpp"
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(

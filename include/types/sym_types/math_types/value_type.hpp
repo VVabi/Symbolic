@@ -9,8 +9,8 @@
 #include <string>
 #include <utility>
 #include "parsing/expression_parsing/parsing_wrapper.hpp"
-#include "parsing/math_types/rational_function_type.hpp"
-#include "parsing/math_types/power_series_type.hpp"
+#include "types/sym_types/math_types/rational_function_type.hpp"
+#include "types/sym_types/math_types/power_series_type.hpp"
 
 /**
  * @class ValueType
