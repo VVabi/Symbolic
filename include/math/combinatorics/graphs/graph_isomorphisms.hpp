@@ -2,11 +2,7 @@
  * @file graph_isomorphisms.hpp
  * @brief This file contains the definition of the function calc_num_iso_classes_of_graphs.
  */
-
-
-#ifndef INCLUDE_EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
-#define INCLUDE_EXAMPLES_GRAPH_ISOMORPHISMS_HPP_
-
+#pragma once
 #include <stdint.h>
 #include <vector>
 #include <utility>
@@ -298,5 +294,3 @@ FormalPowerSeries<T> get_trees_gf(const uint32_t size, const T zero, const T uni
     auto ret = rooted-(rooted*rooted-rooted.substitute_exponent(2))/2;
     return ret;
 }
-
-#endif  // INCLUDE_EXAMPLES_GRAPH_ISOMORPHISMS_HPP_

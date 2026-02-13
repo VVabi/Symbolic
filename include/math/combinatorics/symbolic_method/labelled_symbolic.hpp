@@ -4,10 +4,7 @@
  *  Created on: Jan 31, 2024
  *      Author: vabi
  */
-
-#ifndef INCLUDE_SYMBOLIC_METHOD_LABELLED_SYMBOLIC_HPP_
-#define INCLUDE_SYMBOLIC_METHOD_LABELLED_SYMBOLIC_HPP_
-
+#pragma once
 #include <stdint.h>
 #include <set>
 #include "types/power_series.hpp"
@@ -90,5 +87,3 @@ template <typename T> FormalPowerSeries<T> labelled_cyc(FormalPowerSeries<T> a, 
 
     return ret;
 }
-
-#endif /* INCLUDE_SYMBOLIC_METHOD_LABELLED_SYMBOLIC_HPP_ */

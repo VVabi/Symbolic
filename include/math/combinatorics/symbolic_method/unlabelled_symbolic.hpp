@@ -5,9 +5,7 @@
  *      Author: vabi
  */
 
-#ifndef INCLUDE_SYMBOLIC_METHOD_UNLABELLED_SYMBOLIC_HPP_
-#define INCLUDE_SYMBOLIC_METHOD_UNLABELLED_SYMBOLIC_HPP_
-
+#pragma once
 #include <stdint.h>
 #include <set>
 #include "types/power_series.hpp"
@@ -187,6 +185,3 @@ template <typename T> FormalPowerSeries<T> unlabelled_cyc(FormalPowerSeries<T> a
 
     return ret;
 }
-
-
-#endif  // INCLUDE_SYMBOLIC_METHOD_UNLABELLED_SYMBOLIC_HPP_

@@ -2,10 +2,7 @@
  * @file parsing_wrapper.hpp
  * @brief This file contains the declaration of the MathWrapperType class and its derived classes.
  */
-
-#ifndef INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
-#define INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_
-
+#pragma once
 #include <memory>
 #include <string>
 #include <utility>
@@ -188,6 +185,3 @@ class MathWrapperType : public SymMathObject {
         return nullptr;
     }
 };
-
-
-#endif  // INCLUDE_PARSING_EXPRESSION_PARSING_PARSING_WRAPPER_HPP_

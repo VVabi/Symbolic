@@ -1,6 +1,4 @@
-#ifndef INCLUDE_OPTIONS_CMD_LINE_OPTIONS_HPP_
-#define INCLUDE_OPTIONS_CMD_LINE_OPTIONS_HPP_
-
+#pragma once
 #include <optional>
 #include <string>
 
@@ -11,6 +9,3 @@ struct CmdLineOptions {
 };
 
 CmdLineOptions parse_cmd_line_args(int argc, char **argv);
-
-
-#endif  // INCLUDE_OPTIONS_CMD_LINE_OPTIONS_HPP_

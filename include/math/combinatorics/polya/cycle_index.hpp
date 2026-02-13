@@ -5,16 +5,12 @@
  * @date Feb 3, 2024
  * @author vabi
  */
-
-#ifndef INCLUDE_POLYA_CYCLE_INDEX_HPP_
-#define INCLUDE_POLYA_CYCLE_INDEX_HPP_
-
+#pragma once
 #include <map>
 #include <vector>
 #include "math/combinatorics/polya/partitions.hpp"
 #include "types/power_series.hpp"
 #include "math_utils/factorial_generator.hpp"
-#include "math/combinatorics/polya/partitions.hpp"
 #include "math/number_theory/euler_phi.hpp"
 
 template <typename T> FormalPowerSeries<T> symmetric_group_cycle_index(const uint32_t n, std::vector<FormalPowerSeries<T>>& args, const T unit, const uint32_t num_coeffs) {
@@ -103,6 +99,3 @@ template <typename T> FormalPowerSeries<T> cyclic_group_cycle_index(const uint32
 
     return cyclic_group_cycle_index(n, args, unit, arg.num_coefficients());
 }
-
-
-#endif  // INCLUDE_POLYA_CYCLE_INDEX_HPP_

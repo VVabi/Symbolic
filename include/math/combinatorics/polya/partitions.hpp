@@ -4,10 +4,7 @@
  *
  * This file provides functions to calculate the size of a conjugacy class in the symmetric group, iterate over partitions, and get the sign of a partition.
  */
-
-#ifndef INCLUDE_POLYA_PARTITIONS_HPP_
-#define INCLUDE_POLYA_PARTITIONS_HPP_
-
+#pragma once
 #include <stdint.h>
 #include <vector>
 #include <functional>
@@ -16,7 +13,7 @@
 /**
  * @struct PartitionCount
  * @brief A structure to hold a partition count.
- * 
+ *
  * Represents num appearing count times in a partition.
  */
 struct PartitionCount {
@@ -36,17 +33,17 @@ struct PartitionCount {
 
 /**
  * @brief Calculates the size of a conjugacy class in the symmetric group.
- * 
- * This function calculates the size of a conjugacy class in the symmetric group using the 
- * cycle type of the conjugacy class, represented as a partition. The size is calculated 
- * using the formula: 
- * 
+ *
+ * This function calculates the size of a conjugacy class in the symmetric group using the
+ * cycle type of the conjugacy class, represented as a partition. The size is calculated
+ * using the formula:
+ *
  * size = n! / (product of (count_i! * num_i^count_i) for (num_i, count_i) in partition)
- * 
+ *
  * where n = sum num_i*count_i is the size of the partition and the value num_i appears count_i times in the partition, assuming num_i
  * are all different.
  *
- * @tparam T The type of the return value. 
+ * @tparam T The type of the return value.
  * @param partition The cycle type of the conjugacy class, represented as a partition.
  * @param unit The multiplicative identity of type `T`.
  * @param factorial_generator A `FactorialGenerator` object initialized with type `T`.
@@ -79,7 +76,7 @@ template<typename T> T sym_group_conjugacy_class_size(const std::vector<Partitio
 
 /**
  * @brief Iterates over partitions of a given size and calls a callback function for each partition.
- * 
+ *
  * This function generates all partitions of a given size and calls the provided callback function for each partition.
  * The partitions are represented as vectors of `PartitionCount` structures.
  *
@@ -90,12 +87,10 @@ void iterate_partitions(const uint32_t size, std::function<void(std::vector<Part
 
 /**
  * @brief Calculates the sign of a partition.
- * 
+ *
  * This function calculates the sign of a conjugacy class in the symmetric group.
  *
  * @param partition The partition for which the sign is to be calculated.
  * @return The sign of the partition (-1 or 1).
  */
 int32_t get_partition_sign(const std::vector<PartitionCount>& partition);
-
-#endif  // INCLUDE_POLYA_PARTITIONS_HPP_
