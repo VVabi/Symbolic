@@ -31,7 +31,8 @@ class ShellInput {
 
 class ShellOutput {
  public:
-    virtual void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
+    virtual void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
+    virtual void handle_print(const std::string& output) = 0;
 };
 
 class CmdLineShellInput : public ShellInput {
@@ -75,13 +76,20 @@ class ReadlineShellInput : public ShellInput {
 };
 
 class CmdLineShellOutput : public ShellOutput {
+    bool repl_mode;
+
  public:
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
-        result->print_result(std::cout, std::cerr, print_result);
+    CmdLineShellOutput(bool repl_mode) : repl_mode(repl_mode) {  }
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+        result->print_result(std::cout, std::cerr, print_result && repl_mode);
         // TODO(vabi): this is architecturally questionable...
-        if (print_result) {
+        if (print_result && repl_mode) {
             std::cout << std::endl;
         }
+    }
+
+    void handle_print(const std::string& output) override {
+        std::cout << output << std::endl;
     }
 };
 
@@ -134,9 +142,13 @@ class FileShellOutput: public ShellOutput {
         }
     }
 
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(file_stream, std::cerr, print_result);
         file_stream << std::endl;
+    }
+
+    void handle_print(const std::string& output) override {
+        file_stream << output << std::endl;
     }
 };
 
@@ -147,13 +159,14 @@ class TestShellOutput: public ShellOutput {
 
     std::vector<std::string> outputs;
     std::vector<std::string> errs;
+    std::vector<std::string> printed_outputs;
 
     TestShellOutput() {
         out = std::stringstream();
         err = std::stringstream();
     }
 
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(out, err, print_result);
         outputs.push_back(out.str());
 
@@ -168,6 +181,10 @@ class TestShellOutput: public ShellOutput {
         }
         out.str("");
         err.str("");
+    }
+
+    void handle_print(const std::string& output) override {
+        printed_outputs.push_back(output);
     }
 };
 
@@ -261,13 +278,16 @@ class FormulaParsingTypeExceptionResult : public FormulaParsingResult {
 
 class FormulaParser {
  private:
-    std::map<std::string, std::shared_ptr<SymObject>> variables = std::map<std::string, std::shared_ptr<SymObject>>();
+    std::shared_ptr<InterpreterContext> context;
+
  public:
-    FormulaParser() {  }
+    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler) {
+        context = std::make_shared<InterpreterContext>(print_handler);
+    }
 
     std::unique_ptr<FormulaParsingResult> parse(const std::string& input, Datatype parsing_type, uint32_t powerseries_expansion_size, uint32_t default_modulus) {
         try {
-             auto res = parse_formula(input, parsing_type, variables, powerseries_expansion_size, default_modulus);
+             auto res = parse_formula(input, parsing_type, context, powerseries_expansion_size, default_modulus);
              return std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             return std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
@@ -276,6 +296,18 @@ class FormulaParser {
         } catch (ParsingTypeException &e) {
             return std::make_unique<FormulaParsingTypeExceptionResult>(e);
         }
+    }
+};
+
+
+class ShellPrintHandler: public InterpreterPrintHandler {
+ private:
+    std::shared_ptr<ShellOutput> shell_output;
+ public:
+    ShellPrintHandler(std::shared_ptr<ShellOutput> output) : shell_output(output) {  }
+
+    void handle_print(const std::string& output) override {
+        shell_output->handle_print(output);
     }
 };
 
@@ -290,9 +322,10 @@ class SymbolicShellEvaluator {
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:
-    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) : shell_input(input), shell_output(output) {
-        parser = FormulaParser();
-    }
+    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) :
+        shell_input(input),
+        shell_output(output),
+        parser(std::make_shared<ShellPrintHandler>(output)) {}
     void run();
     bool run_single_input();
 };

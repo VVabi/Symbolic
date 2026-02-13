@@ -6,13 +6,14 @@ CmdLineOptions parse_cmd_line_args(int argc, char **argv) {
     CmdLineOptions options;
     options.input_file      = std::nullopt;
     options.output_file     = std::nullopt;
-
+    options.repl_mode       = true;
     int opt;
     optind = 0;  // necessary to reset getopt for non-global use (eg in tests)
     while ((opt = getopt(argc, argv, "i:o:h")) != -1) {
         switch (opt) {
             case 'i':
                 options.input_file = optarg;
+                options.repl_mode  = false;
                 break;
             case 'o':
                 options.output_file = optarg;
@@ -26,6 +27,7 @@ CmdLineOptions parse_cmd_line_args(int argc, char **argv) {
                 exit(EXIT_FAILURE);
         }
     }
+
 
     return options;
 }

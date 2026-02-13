@@ -18,12 +18,12 @@
 
 
 inline std::shared_ptr<SymObject> binary_operation(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size,
                                         std::function<std::shared_ptr<SymMathObject>(std::shared_ptr<SymMathObject>, std::shared_ptr<SymMathObject>)> op
 ) {
-    std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
-    std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+    std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
+    std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
     if (left == nullptr || right == nullptr) {
         throw ParsingTypeException("Type error: Expected mathematical object as argument");
     }
@@ -36,10 +36,10 @@ class PolishPlus : public PolishNotationElement {
     PolishPlus(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
-        auto left = iterate_wrapped(cmd_list, variables, fp_size);
-        auto right = iterate_wrapped(cmd_list, variables, fp_size);
+        auto left = iterate_wrapped(cmd_list, context, fp_size);
+        auto right = iterate_wrapped(cmd_list, context, fp_size);
 
         auto left_math = std::dynamic_pointer_cast<SymMathObject>(left);
         auto right_math = std::dynamic_pointer_cast<SymMathObject>(right);
@@ -64,9 +64,9 @@ class PolishMinus : public PolishNotationElement {
     PolishMinus(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
-        return binary_operation(cmd_list, variables, fp_size, sym_subtract);
+        return binary_operation(cmd_list, context, fp_size, sym_subtract);
     }
 };
 
@@ -75,9 +75,9 @@ class PolishTimes : public PolishNotationElement {
     PolishTimes(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
-        return binary_operation(cmd_list, variables, fp_size, sym_multiply);
+        return binary_operation(cmd_list, context, fp_size, sym_multiply);
     }
 };
 
@@ -86,9 +86,9 @@ class PolishDiv : public PolishNotationElement {
     PolishDiv(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
-        return binary_operation(cmd_list, variables, fp_size, sym_divide);
+        return binary_operation(cmd_list, context, fp_size, sym_divide);
     }
 };
 
@@ -97,15 +97,15 @@ class PolishPow: public PolishNotationElement {
     PolishPow(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
-                                    const size_t fp_size) {
-        auto left  = iterate_wrapped(cmd_list, variables, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context,
+                                        const size_t fp_size) {
+        auto left  = iterate_wrapped(cmd_list, context, fp_size);
         auto math_object = std::dynamic_pointer_cast<SymMathObject>(left);
         if (!math_object) {
             throw ParsingTypeException("Type error: Expected mathematical object as argument in pow");
         }
         // TODO(vabi) check for emptyness
-        auto exponent_raw = iterate_wrapped(cmd_list, variables, fp_size);
+        auto exponent_raw = iterate_wrapped(cmd_list, context, fp_size);
 
         auto exponent = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(exponent_raw);
         if (exponent) {
@@ -148,9 +148,9 @@ class PolishUnaryMinus: public PolishNotationElement {
     PolishUnaryMinus(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
-        auto result = iterate_wrapped(cmd_list, variables, fp_size);
+        auto result = iterate_wrapped(cmd_list, context, fp_size);
         auto math_type = std::dynamic_pointer_cast<SymMathObject>(result);
         if (math_type) {
             math_type->unary_minus();
@@ -167,7 +167,7 @@ class PolishAssign: public PolishNotationElement {
     PolishAssign(uint32_t position) : PolishNotationElement(position) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         if (cmd_list.is_empty()) {
             throw EvalException("Expected variable name to assign to", this->get_position());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
@@ -178,9 +178,9 @@ class PolishAssign: public PolishNotationElement {
         if (next.type != expression_type::VARIABLE) {
             throw ParsingTypeException("Type error: Expected variable name as first argument in assignment");
         }
-        auto var_value = iterate_wrapped(cmd_list, variables, fp_size);
+        auto var_value = iterate_wrapped(cmd_list, context, fp_size);
 
-        variables[next.data] = var_value;
+        context->set_variable(next.data, var_value);
         return var_value;
     }
 };

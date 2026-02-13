@@ -22,7 +22,7 @@ std::shared_ptr<ShellOutput> get_shell_output(const CmdLineOptions& opts) {
     if (opts.output_file.has_value()) {
         return std::make_shared<FileShellOutput>(opts.output_file.value());
     } else {
-        return std::make_shared<CmdLineShellOutput>();
+        return std::make_shared<CmdLineShellOutput>(opts.repl_mode);
     }
 }
 

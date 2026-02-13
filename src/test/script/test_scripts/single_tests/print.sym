@@ -1,0 +1,5 @@
+print("Hello World"),
+print(173),
+f = 1+z+z^2,
+print(f),
+print(Mod(3,7)),

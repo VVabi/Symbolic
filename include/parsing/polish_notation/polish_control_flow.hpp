@@ -22,7 +22,7 @@ class PolishFor: public PolishFunction {
         PolishFunction(position, num_args, 4, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
         auto variable = cmd_list.front();
@@ -33,8 +33,8 @@ class PolishFor: public PolishFunction {
 
         auto loop_index_var_name = variable.data;
 
-        auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
-        auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
+        auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
 
         if (!start || !end) {
             throw EvalException("Expected integer start and end values in for loop", variable.position);
@@ -59,8 +59,8 @@ class PolishFor: public PolishFunction {
         for (int64_t i = start_idx; i <= end_idx; i++) {
            cmd_list.set_index(start_cmd);
            for (uint32_t arg = 0; arg < num_args - 3; arg++) {
-                variables[loop_index_var_name] = std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1)));
-                iterate_wrapped(cmd_list, variables, fp_size);
+                context->set_variable(loop_index_var_name, std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1))));
+                iterate_wrapped(cmd_list, context, fp_size);
             }
         }
 
@@ -78,12 +78,12 @@ class PolishWhile: public PolishFunction {
         PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
 
         while (true) {
-            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, variables, fp_size));
+            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
             if (!condition) {
                 throw EvalException("Expected boolean condition in while statement", this->get_position());
             }
@@ -93,7 +93,7 @@ class PolishWhile: public PolishFunction {
             }
 
             for (uint32_t arg = 0; arg < num_args - 1; arg++) {
-                iterate_wrapped(cmd_list, variables, fp_size);
+                iterate_wrapped(cmd_list, context, fp_size);
             }
             cmd_list.set_index(original_index);
         }
@@ -113,17 +113,17 @@ class PolishIf: public PolishFunction {
         PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
-        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
 
         if (condition->as_boolean()) {
             for (uint32_t arg = 0; arg < num_args - 1; arg++) {
-                iterate_wrapped(cmd_list, variables, fp_size);
+                iterate_wrapped(cmd_list, context, fp_size);
             }
         }
 

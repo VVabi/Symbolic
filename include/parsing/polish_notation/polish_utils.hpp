@@ -10,6 +10,7 @@
 #include "exceptions/eval_exception.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "types/sym_types/sym_boolean.hpp"
+#include "interpreter/context.hpp"
 
 class PolishPrint: public PolishFunction {
  public:
@@ -17,12 +18,12 @@ class PolishPrint: public PolishFunction {
         PolishFunction(position, num_args, 1, 1) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    std::shared_ptr<InterpreterContext> &context,
                                     const size_t fp_size) {
-        auto first = iterate_wrapped(cmd_list, variables, fp_size);
-        auto res = variables.find("suppress_print");
-        if (res == variables.end()) {
-            std::cout << first->to_string() << std::endl;
+        auto first = iterate_wrapped(cmd_list, context, fp_size);
+        auto res = context->get_variable("suppress_print");
+        if (!res) {
+            context->handle_print(first->to_string());
         }
         return std::make_shared<SymVoidObject>();
     }

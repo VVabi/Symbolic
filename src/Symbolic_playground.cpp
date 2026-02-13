@@ -8,6 +8,7 @@
 #include <random>
 #include <map>
 #include <fstream>
+#include <vector>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/power_series.hpp"
 #include "types/rationals.hpp"
@@ -17,6 +18,7 @@
 #include "types/polynomial.hpp"
 #include "shell/shell.hpp"
 #include "shell/parameters/parameters.hpp"
+#include "cpp_utils/unused.hpp"
 
 int main(int argc, char **argv) {
     UNUSED(argc);

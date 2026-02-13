@@ -17,9 +17,9 @@ class PolishPowerSeriesFunction: public PolishFunction {
     PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position, uint32_t num_args) : PolishFunction(position, num_args, 1, 1), type(type) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto result = iterate_wrapped(cmd_list, variables, fp_size);
+        auto result = iterate_wrapped(cmd_list, context, fp_size);
         auto math_obj = std::dynamic_pointer_cast<SymMathObject>(result);
         if (!math_obj) {
             throw ParsingTypeException("Type error: Expected mathematical object for power series function");
@@ -35,9 +35,9 @@ class PolishLandau: public PolishFunction {
     PolishLandau(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto result = iterate_wrapped(cmd_list, variables, fp_size);
+        auto result = iterate_wrapped(cmd_list, context, fp_size);
         auto bigint_result = std::dynamic_pointer_cast<RationalFunctionType<RationalNumber<BigInt>>>(result);
         if (bigint_result) {
             uint32_t deg = bigint_result->as_rational_function().get_numerator().degree();
@@ -89,15 +89,15 @@ class PolishCoefficient: public PolishFunction {
  public:
     PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction(position, num_args, 2, 2), as_egf(as_egf) {}
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                    std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                    std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
 
         if (!result) {
             throw ParsingTypeException("Type error: Expected mathematical object as argument in coefficient function");
         }
 
-        auto number = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto number = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
         if (!number) {
             throw EvalException("Expected natural number as coefficient index", this->get_position());
         }
@@ -134,9 +134,9 @@ class PolishSymbolicMethodOperator: public PolishFunction {
         uint32_t num_args,
         const SymbolicMethodOperator op): PolishFunction(position, num_args, 1, 2), op(op) {}
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
         if (!result) {
             throw ParsingTypeException("Type error: Expected mathematical object as argument in symbolic method operator");
         }
@@ -146,7 +146,7 @@ class PolishSymbolicMethodOperator: public PolishFunction {
             if (op == SymbolicMethodOperator::INV_MSET) {
                 throw InvalidFunctionArgException("Explicit subset arg for inv mset not allowed", this->get_position());
             }
-            auto arg = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, variables, fp_size));
+            auto arg = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context, fp_size));
             if (!arg) {
                 throw ParsingTypeException("Type error: Expected string object as second argument in symbolic method operator");
             }
@@ -163,14 +163,14 @@ class PolishEval: public PolishFunction {
     }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto to_evaluate   = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto to_evaluate   = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
 
         if (!to_evaluate) {
             throw ParsingTypeException("Type error: Expected mathematical object as first argument in eval function");
         }
-        auto arg        = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, variables, fp_size));
+        auto arg        = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
 
         if (!arg) {
             throw ParsingTypeException("Type error: Expected mathematical object as second argument in eval function");
@@ -185,11 +185,11 @@ class PolishMod: public PolishFunction {
     PolishMod(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto arg_raw    = iterate_wrapped(cmd_list, variables, fp_size);
+        auto arg_raw    = iterate_wrapped(cmd_list, context, fp_size);
         auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(arg_raw);
-        auto mod_raw    = iterate_wrapped(cmd_list, variables, fp_size);
+        auto mod_raw    = iterate_wrapped(cmd_list, context, fp_size);
         auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(mod_raw);
         if (!argument || !mod) {
             throw ParsingTypeException("Type error: Expected natural numbers as arguments in mod function");
@@ -226,9 +226,9 @@ class PolishModValue: public PolishFunction {
     PolishModValue(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
-                                        std::map<std::string, std::shared_ptr<SymObject>>& variables,
+                                        std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        auto arg_raw    = iterate_wrapped(cmd_list, variables, fp_size);
+        auto arg_raw    = iterate_wrapped(cmd_list, context, fp_size);
         auto argument   = std::dynamic_pointer_cast<ValueType<ModLong>>(arg_raw);
         if (!argument) {
             throw ParsingTypeException("Type error: Expected ModLong as argument in mod_value function");

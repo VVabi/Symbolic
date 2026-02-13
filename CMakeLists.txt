@@ -48,6 +48,7 @@ add_executable(Symbolic_tests
         src/test/types/polynomial_tests.cpp
         src/test/shell/parameters/parameter_tests.cpp
         src/test/shell/test_shell.cpp
+        src/test/script/top_level_script_tests.cpp
         src/test/options/test_options.cpp)
 
 add_executable(Symbolic_playground
@@ -69,6 +70,7 @@ add_executable(Symbolic_playground
         src/options/cmd_line_options.cpp
         src/test/test_data/power_series_parsing_testdata.cpp #TODO remove
         src/test/shell/test_shell.cpp
+        src/test/script/top_level_script_tests.cpp
         src/test/options/test_options.cpp #TODO remove
 )
 
