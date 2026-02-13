@@ -6,6 +6,7 @@
 
 class InterpreterPrintHandler {
  public:
+    virtual ~InterpreterPrintHandler() = default;
     virtual void handle_print(const std::string& output) = 0;
 };
 
