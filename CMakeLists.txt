@@ -6,39 +6,39 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_executable(Symbolic
         src/Symbolic.cpp
         src/string_utils/string_utils.cpp
-        src/polya/partitions.cpp
-        src/number_theory/moebius.cpp
-        src/number_theory/euler_phi.cpp
+        src/math/combinatorics/polya/partitions.cpp
+        src/math/number_theory/moebius.cpp
+        src/math/number_theory/euler_phi.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
-        src/parsing/polish_notation/polish_core.cpp
-        src/functions/power_series_functions.cpp
+        src/interpreter/polish_notation/polish_core.cpp
+        src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
         src/shell/command_handling.cpp
+        src/shell/options/cmd_line_options.cpp
         src/types/sym_types/sym_math.cpp
         src/common/common_datatypes.cpp
-        src/options/cmd_line_options.cpp
 )
 
 add_executable(Symbolic_tests
         src/Symbolic_tests.cpp
         src/string_utils/string_utils.cpp
-        src/polya/partitions.cpp
-        src/number_theory/moebius.cpp
-        src/number_theory/euler_phi.cpp
+        src/math/combinatorics/polya/partitions.cpp
+        src/math/number_theory/moebius.cpp
+        src/math/number_theory/euler_phi.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
-        src/parsing/polish_notation/polish_core.cpp
-        src/functions/power_series_functions.cpp
+        src/interpreter/polish_notation/polish_core.cpp
+        src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
         src/shell/command_handling.cpp
+        src/shell/options/cmd_line_options.cpp
         src/common/common_datatypes.cpp
         src/types/sym_types/sym_math.cpp
-        src/options/cmd_line_options.cpp
         src/test/test_data/power_series_parsing_testdata.cpp
         src/test/parsing/test_power_series_parsing.cpp
         src/test/parsing/test_value_parsing.cpp
@@ -49,29 +49,30 @@ add_executable(Symbolic_tests
         src/test/shell/parameters/parameter_tests.cpp
         src/test/shell/test_shell.cpp
         src/test/script/top_level_script_tests.cpp
-        src/test/options/test_options.cpp)
+        src/test/shell/options/test_options.cpp
+)
 
 add_executable(Symbolic_playground
         src/Symbolic_playground.cpp
         src/string_utils/string_utils.cpp
-        src/polya/partitions.cpp
-        src/number_theory/moebius.cpp
-        src/number_theory/euler_phi.cpp
+        src/math/combinatorics/polya/partitions.cpp
+        src/math/number_theory/moebius.cpp
+        src/math/number_theory/euler_phi.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
-        src/parsing/polish_notation/polish_core.cpp
-        src/functions/power_series_functions.cpp
+        src/interpreter/polish_notation/polish_core.cpp
+        src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
         src/shell/command_handling.cpp
+        src/shell/options/cmd_line_options.cpp
         src/common/common_datatypes.cpp
         src/types/sym_types/sym_math.cpp
-        src/options/cmd_line_options.cpp
-        src/test/test_data/power_series_parsing_testdata.cpp #TODO remove
+        src/test/test_data/power_series_parsing_testdata.cpp
         src/test/shell/test_shell.cpp
         src/test/script/top_level_script_tests.cpp
-        src/test/options/test_options.cpp #TODO remove
+        src/test/shell/options/test_options.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

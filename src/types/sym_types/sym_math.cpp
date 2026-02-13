@@ -4,7 +4,7 @@
 #include "cpp_utils/unused.hpp"
 #include "types/bigint.hpp"
 #include "types/rationals.hpp"
-#include "parsing/math_types/value_type.hpp"
+#include "types/sym_types/math_types/value_type.hpp"
 
 enum OperationType {
     ADD,
@@ -14,7 +14,7 @@ enum OperationType {
 };
 
 template<typename T>
-std::shared_ptr<SymMathObject> sym_binary_base(std::shared_ptr<ParsingWrapperType<T>> a, std::shared_ptr<ParsingWrapperType<T>> b, const OperationType& op_type) {
+std::shared_ptr<SymMathObject> sym_binary_base(std::shared_ptr<MathWrapperType<T>> a, std::shared_ptr<MathWrapperType<T>> b, const OperationType& op_type) {
     if (!a || !b) {
         throw ParsingTypeException("Type error: Cannot apply binary operation due to type error");
     }
@@ -35,32 +35,32 @@ std::shared_ptr<SymMathObject> sym_binary_base(std::shared_ptr<ParsingWrapperTyp
 
 std::shared_ptr<SymMathObject> sym_binary(std::shared_ptr<SymMathObject> a, std::shared_ptr<SymMathObject> b, const OperationType& op_type) {
     if (a->get_type() == Datatype::DOUBLE && b->get_type() == Datatype::DOUBLE) {
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(a);
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(b);
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<double>>(a);
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<double>>(b);
         return sym_binary_base<double>(a_casted, b_casted, op_type);
     } else if (a->get_type() == Datatype::RATIONAL && b->get_type() == Datatype::RATIONAL) {
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<RationalNumber<BigInt>>>(a);
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<RationalNumber<BigInt>>>(b);
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<RationalNumber<BigInt>>>(a);
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<RationalNumber<BigInt>>>(b);
         return sym_binary_base<RationalNumber<BigInt>>(a_casted, b_casted, op_type);
     } else if (a->get_type() == Datatype::MOD && b->get_type() == Datatype::MOD) {
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(a);
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(b);
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<ModLong>>(a);
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<ModLong>>(b);
         return sym_binary_base<ModLong>(a_casted, b_casted, op_type);
     } else if (a->get_type() == Datatype::DOUBLE) {
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(a);
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(b->as_double());
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<double>>(a);
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<double>>(b->as_double());
         return sym_binary_base<double>(a_casted, b_casted, op_type);
     } else if (b->get_type() == Datatype::DOUBLE) {
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(a->as_double());
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<double>>(b);
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<double>>(a->as_double());
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<double>>(b);
         return sym_binary_base<double>(a_casted, b_casted, op_type);
     } else if (a->get_type() == Datatype::MOD) {
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(a);
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(b->as_modlong(a_casted->get_coefficient(0).get_modulus()));
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<ModLong>>(a);
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<ModLong>>(b->as_modlong(a_casted->get_coefficient(0).get_modulus()));
         return sym_binary_base<ModLong>(a_casted, b_casted, op_type);
     } else if (b->get_type() == Datatype::MOD) {
-        auto b_casted = std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(b);
-        auto a_casted = std::dynamic_pointer_cast<ParsingWrapperType<ModLong>>(a->as_modlong(b_casted->get_coefficient(0).get_modulus()));
+        auto b_casted = std::dynamic_pointer_cast<MathWrapperType<ModLong>>(b);
+        auto a_casted = std::dynamic_pointer_cast<MathWrapperType<ModLong>>(a->as_modlong(b_casted->get_coefficient(0).get_modulus()));
         return sym_binary_base<ModLong>(a_casted, b_casted, op_type);
     }
 

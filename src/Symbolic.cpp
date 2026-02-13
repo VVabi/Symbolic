@@ -8,7 +8,7 @@
 #include <memory>
 #include "shell/parameters/parameters.hpp"
 #include "shell/shell.hpp"
-#include "options/cmd_line_options.hpp"
+#include "shell/options/cmd_line_options.hpp"
 
 std::shared_ptr<ShellInput> get_shell_input(const CmdLineOptions& opts) {
     if (opts.input_file.has_value()) {
