@@ -4,11 +4,11 @@
 #include <string>
 #include <map>
 #include "common/lexer_deque.hpp"
-#include "parsing/polish_notation/polish.hpp"
+#include "interpreter/polish_notation/polish.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_exceptions.hpp"
-#include "parsing/polish_notation/polish_function_core.hpp"
+#include "interpreter/polish_notation/polish_function_core.hpp"
 
 class PolishPowerSeriesFunction: public PolishFunction {
     PowerSeriesBuiltinFunctionType type;

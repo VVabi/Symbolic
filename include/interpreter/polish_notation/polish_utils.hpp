@@ -4,8 +4,8 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include "parsing/polish_notation/polish.hpp"
-#include "parsing/polish_notation/polish_function_core.hpp"
+#include "interpreter/polish_notation/polish.hpp"
+#include "interpreter/polish_notation/polish_function_core.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/eval_exception.hpp"
 #include "types/sym_types/sym_void.hpp"

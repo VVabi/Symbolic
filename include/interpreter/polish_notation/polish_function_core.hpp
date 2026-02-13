@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include "common/lexer_deque.hpp"
-#include "parsing/polish_notation/polish.hpp"
+#include "interpreter/polish_notation/polish.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
 
 class PolishFunction: public PolishNotationElement {

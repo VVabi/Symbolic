@@ -4,9 +4,9 @@
 #include <string>
 #include <map>
 #include "common/lexer_deque.hpp"
-#include "parsing/polish_notation/polish.hpp"
-#include "parsing/polish_notation/polish_functions.hpp"
-#include "parsing/polish_notation/polish_base_math.hpp"
+#include "interpreter/polish_notation/polish.hpp"
+#include "interpreter/polish_notation/polish_functions.hpp"
+#include "interpreter/polish_notation/polish_base_math.hpp"
 #include "parsing/subset_parsing/subset_parser.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_exceptions.hpp"

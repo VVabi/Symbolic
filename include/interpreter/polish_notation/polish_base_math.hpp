@@ -6,7 +6,7 @@
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "exceptions/parsing_exceptions.hpp"
-#include "parsing/polish_notation/polish.hpp"
+#include "interpreter/polish_notation/polish.hpp"
 #include "cpp_utils/unused.hpp"
 #include "types/bigint.hpp"
 #include "types/rationals.hpp"
