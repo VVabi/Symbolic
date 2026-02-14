@@ -207,3 +207,24 @@ class PolishListSlice: public PolishFunction {
         return std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObject>>());
     }
 };
+
+class PolishListCopy: public PolishFunction {
+ public:
+    PolishListCopy(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) {
+        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+        auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
+        if (!list) {
+            throw ParsingTypeException("Type error: Expected list as argument in copy function");
+        }
+
+        std::vector<std::shared_ptr<SymObject>> copied_elements;
+        for (const auto& element : list->as_list()) {
+            copied_elements.push_back(element->clone());
+        }
+        return std::make_shared<SymListObject>(copied_elements);
+    }
+};

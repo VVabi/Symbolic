@@ -194,6 +194,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListPop>(element.position, element.num_args);
             } else if (element.data == "slice") {
                 return std::make_shared<PolishListSlice>(element.position, element.num_args);
+            } else if (element.data == "copy") {
+                return std::make_shared<PolishListCopy>(element.position, element.num_args);
             }
         }
         default:
