@@ -13,4 +13,8 @@ print(sliced),
 cp = copy(a),
 list_set(cp, 3, 15),
 print(list_get(cp, 3)),
-print(list_get(a, 3))
+print(list_get(a, 3)),
+r = pop(a),
+print(r),
+x = pop(a),
+print(x)
