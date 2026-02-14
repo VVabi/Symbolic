@@ -196,12 +196,14 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListSlice>(element.position, element.num_args);
             } else if (element.data == "copy") {
                 return std::make_shared<PolishListCopy>(element.position, element.num_args);
+            } else if (element.data == "as_list") {
+                return std::make_shared<PolishStringToList>(element.position, element.num_args);
             }
         }
         default:
             break;
     }
-
+    std::cout << "Element type: " << element.type << " " << element.data <<std::endl;
     throw EvalException("Unknown element type", element.position);
     return std::shared_ptr<PolishNotationElement>(nullptr);
 }
