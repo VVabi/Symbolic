@@ -113,7 +113,6 @@ class PolishPow: public PolishNotationElement {
             if (value.get_denominator() != BigInt(1)) {
                 throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
             }
-
             math_object->pow(value.get_numerator());
             return math_object;
         }
