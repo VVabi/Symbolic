@@ -239,11 +239,12 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
         strm << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
 
         auto istrm = std::istringstream(input);
-        auto count = -1;
+
+        std::ptrdiff_t count = 0;
         std::string line;
         bool found_position = true;
         uint32_t line_number = 0;
-        while (count < e.get_position()) {
+        while (count <= e.get_position()) {
             line_number++;
             if (!std::getline(istrm, line)) {
                 found_position = false;
@@ -254,10 +255,10 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
 
         if (found_position) {
             strm << "Error occurred at line " << line_number << ":" << std::endl;
-             strm << line << std::endl;
-             for (size_t i = 0; i < e.get_position() - 1 -(count - line.size() - 1); i++) {
-                strm << " ";
-             }
+            strm << line << std::endl;
+            for (std::ptrdiff_t i = 0; i < e.get_position() - (count - (std::ptrdiff_t) line.size() - 1); i++) {
+            strm << " ";
+            }
             strm << "^ here";
         } else {
             strm << "Could not determine error position in input (position " << e.get_position() << " is out of bounds for input of length " << input.size() << ")";
