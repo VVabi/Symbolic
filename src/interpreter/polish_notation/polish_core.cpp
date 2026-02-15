@@ -206,7 +206,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             break;
     }
     throw EvalException("Unknown element type " + element.data, element.position);
-    return std::shared_ptr<PolishNotationElement>(nullptr);
 }
 
 std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<MathLexerElement>& cmd_list,
