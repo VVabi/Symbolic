@@ -14,7 +14,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 
 
-char as_ascii(std::shared_ptr<SymObject>& obj) {
+inline char as_ascii(std::shared_ptr<SymObject>& obj) {
     auto rational = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(obj);
     auto mod      = std::dynamic_pointer_cast<ValueType<ModLong>>(obj);
 
@@ -61,15 +61,17 @@ class PolishPrint: public PolishFunction {
             mode_str = mode->to_string();
         }
 
+        auto res = context->get_variable("suppress_print");
         if (mode_str == "raw") {
-            auto res = context->get_variable("suppress_print");
             if (!res) {
                 context->handle_print(first->to_string(), line_break);
             }
             return std::make_shared<SymVoidObject>();
         } else if (mode_str == "ascii") {
-            auto char_obj = as_ascii(first);
-            context->handle_print(std::string(1, char_obj), line_break);
+            if (!res) {
+                auto char_obj = as_ascii(first);
+                context->handle_print(std::string(1, char_obj), line_break);
+            }
             return std::make_shared<SymVoidObject>();
         } else {
             throw ParsingTypeException("Type error: Unknown print mode: " + mode_str);
