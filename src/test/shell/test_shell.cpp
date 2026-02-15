@@ -104,6 +104,17 @@ void test_shell_explicit_tests() {
 
         EXPECT_EQ(expected_outputs.size(), shell_output->outputs.size()) << "Found different output sizes for " << test_folder;
 
+        if (expected_errors.size() != shell_output->errs.size()) {
+            std::cout << "Expected errors:" << std::endl;
+            for (const auto& error : expected_errors) {
+                std::cout << error << std::endl;
+            }
+            std::cout << "Actual errors:" << std::endl;
+            for (const auto& error : shell_output->errs) {
+                std::cout << error << std::endl;
+            }
+        }
+
         for (size_t i = 0; i < std::min(expected_outputs.size(), shell_output->outputs.size()); i++) {
             EXPECT_EQ(expected_outputs[i], shell_output->outputs[i]) << "Expected " << expected_outputs[i] << " Got " << shell_output->outputs[i] << " for " << test_folder << " in step " << i;
         }
