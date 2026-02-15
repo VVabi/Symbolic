@@ -32,7 +32,7 @@ class ShellInput {
 class ShellOutput {
  public:
     virtual void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
-    virtual void handle_print(const std::string& output) = 0;
+    virtual void handle_print(const std::string& output, bool line_break = true) = 0;
 };
 
 class CmdLineShellInput : public ShellInput {
@@ -88,8 +88,11 @@ class CmdLineShellOutput : public ShellOutput {
         }
     }
 
-    void handle_print(const std::string& output) override {
-        std::cout << output << std::endl;
+    void handle_print(const std::string& output, bool line_break = true) override {
+        std::cout << output;
+        if (line_break) {
+             std::cout << std::endl;
+        }
     }
 };
 
@@ -147,8 +150,11 @@ class FileShellOutput: public ShellOutput {
         file_stream << std::endl;
     }
 
-    void handle_print(const std::string& output) override {
-        file_stream << output << std::endl;
+    void handle_print(const std::string& output, bool line_break = true) override {
+        file_stream << output;
+        if (line_break) {
+            file_stream << std::endl;
+        }
     }
 };
 
@@ -183,7 +189,8 @@ class TestShellOutput: public ShellOutput {
         err.str("");
     }
 
-    void handle_print(const std::string& output) override {
+    void handle_print(const std::string& output, bool line_break = true) override {
+        UNUSED(line_break);
         printed_outputs.push_back(output);
     }
 };
@@ -306,8 +313,8 @@ class ShellPrintHandler: public InterpreterPrintHandler {
  public:
     ShellPrintHandler(std::shared_ptr<ShellOutput> output) : shell_output(output) {  }
 
-    void handle_print(const std::string& output) override {
-        shell_output->handle_print(output);
+    void handle_print(const std::string& output, bool line_break = true) override {
+        shell_output->handle_print(output, line_break);
     }
 };
 

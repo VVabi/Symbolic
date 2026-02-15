@@ -49,6 +49,7 @@ void test_script_interpretation() {
 
 
     test_single_script("../examples/less_naive_prime_counting.sym", std::vector<std::string>({"168"}));
+    test_single_script("../examples/bf_interpreter.sym", std::vector<std::string>({"H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", "!", "\n"}));
 }
 
 TEST(ScriptTests, ScriptInterpretation) {

@@ -7,7 +7,7 @@
 class InterpreterPrintHandler {
  public:
     virtual ~InterpreterPrintHandler() = default;
-    virtual void handle_print(const std::string& output) = 0;
+    virtual void handle_print(const std::string& output, bool line_break = true) = 0;
 };
 
 /**
@@ -49,9 +49,9 @@ class InterpreterContext {
      *
      * @note If no output handler is registered, this call has no effect.
      */
-    void handle_print(const std::string& output) {
+    void handle_print(const std::string& output, bool line_break = true) {
         if (output_handler) {
-            output_handler->handle_print(output);
+            output_handler->handle_print(output, line_break);
         }
     }
 

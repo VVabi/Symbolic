@@ -171,7 +171,9 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             } else if (element.data == "neq") {
                 return std::make_shared<PolishNeq>(element.position, element.num_args);
             } else if (element.data == "print") {
-                return std::make_shared<PolishPrint>(element.position, element.num_args);
+                return std::make_shared<PolishPrint>(element.position, element.num_args, false);
+            } else if (element.data == "println") {
+                return std::make_shared<PolishPrint>(element.position, element.num_args, true);
             } else if (element.data == "lt") {
                 return std::make_shared<PolishComparison>(element.position, element.num_args, LT);
             } else if (element.data == "lte") {
