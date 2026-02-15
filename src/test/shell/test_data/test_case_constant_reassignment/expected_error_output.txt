@@ -1,0 +1,10 @@
+Parsing error at position 5: Cannot modify constant: true
+Error occurred at line 1:
+true = false
+     ^ here
+Parsing error at position 6: Cannot modify constant: false
+Error occurred at line 1:
+false = true
+      ^ here
+
+
