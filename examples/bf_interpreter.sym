@@ -1,11 +1,11 @@
 code = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.",
 source = as_list(code),
 ram = list(),
-for(p, 0, 1023,
+for(p, 0, 2^15-1,
     append(ram, Mod(0, 256))
 ),
 programpointer = 0,
-memorypointer = 511,
+memorypointer = 0,
 while(lt(programpointer,len(source)),
     current = list_get(source, programpointer),
     if(eq(current, "+"),
