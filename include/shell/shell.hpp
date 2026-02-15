@@ -236,11 +236,32 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
     FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& input) {
         std::stringstream strm;
         strm << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
-        strm << input << std::endl;
-        for (int32_t i = 0; i < e.get_position(); i++) {
-            strm << " ";
+
+        auto istrm = std::istringstream(input);
+        auto count = 0;
+        std::string line;
+        bool found_position = true;
+        uint32_t line_number = 0;
+        while (count < e.get_position()) {
+            line_number++;
+            if (!std::getline(istrm, line)) {
+                found_position = false;
+                break;
+            }
+            count += line.size() + 1; // +1 for the newline character
         }
-        strm << "^ here";
+
+        if (found_position) {
+            strm << "Error occurred at line " << line_number << ": " << std::endl;
+             strm << line << std::endl;
+             for (size_t i = 0; i < e.get_position() - (count - line.size() - 1); i++) {
+                strm << " ";
+             }
+            strm << "^ here";
+        } else {
+            strm << "Could not determine error position in input (position " << e.get_position() << " is out of bounds for input of length " << input.size() << ")";
+        }
+
         error_message = strm.str();
     }
 
