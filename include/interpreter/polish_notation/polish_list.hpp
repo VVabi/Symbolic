@@ -11,6 +11,7 @@
 #include "interpreter/polish_notation/polish_function_core.hpp"
 #include "types/sym_types/sym_list.hpp"
 #include "types/sym_types/sym_void.hpp"
+#include "types/sym_types/sym_string_object.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 
 class PolishList: public PolishFunction {
@@ -239,7 +240,7 @@ class PolishStringToList: public PolishFunction {
         auto string_raw   = iterate_wrapped(cmd_list, context, fp_size);
         auto string       = std::dynamic_pointer_cast<SymStringObject>(string_raw);
         if (!string) {
-            throw ParsingTypeException("Type error: Expected string as argument in string_to_list function");
+            throw ParsingTypeException("Type error: Expected string as argument in as_list function");
         }
 
         const auto& str = string->to_string();

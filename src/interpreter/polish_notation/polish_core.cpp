@@ -203,8 +203,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
         default:
             break;
     }
-    std::cout << "Element type: " << element.type << " " << element.data <<std::endl;
-    throw EvalException("Unknown element type", element.position);
+    throw EvalException("Unknown element type " + element.data, element.position);
     return std::shared_ptr<PolishNotationElement>(nullptr);
 }
 

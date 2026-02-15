@@ -92,7 +92,6 @@ class PolishWhile: public PolishFunction {
             }
 
             for (uint32_t arg = 0; arg < num_args - 1; arg++) {
-                auto current = cmd_list.front();
                 iterate_wrapped(cmd_list, context, fp_size);
             }
             cmd_list.set_index(original_index);

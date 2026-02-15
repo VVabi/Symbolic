@@ -1,7 +1,7 @@
 code = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.",
 source = as_list(code),
 ram = list(),
-for(p, 0, 1024,
+for(p, 0, 1023,
     append(ram, Mod(0, 256))
 ),
 programpointer = 0,
@@ -38,7 +38,7 @@ while(lt(programpointer,len(source)),
             if(eq(sourcecurrent, "["),
                 count = count+1
             ),
-            programpointer = programpointer+1,
+            programpointer = programpointer+1
         )
     ),
     if(eq(current, "]"),
@@ -59,7 +59,7 @@ while(lt(programpointer,len(source)),
             programpointer = programpointer+1
         ),
         if(eq(value, Mod(0, 256)),
-            programpointer=programpointer+1,
+            programpointer=programpointer+1
         )
     ),
     if(eq(current, "<"),
