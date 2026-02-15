@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 #include "types/sym_types/sym_object.hpp"
+#include "types/sym_types/sym_boolean.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 
 class InterpreterPrintHandler {
  public:
@@ -22,6 +24,7 @@ class InterpreterPrintHandler {
  */
 class InterpreterContext {
     std::map<std::string, std::shared_ptr<SymObject>> variables;
+    std::map<std::string, std::shared_ptr<SymObject>> constants;
     std::shared_ptr<InterpreterPrintHandler> output_handler;
 
  public:
@@ -33,14 +36,22 @@ class InterpreterContext {
     virtual ~InterpreterContext() = default;
 
 
+    void initialize_constants() {
+        std::shared_ptr<SymBooleanObject> true_const = std::make_shared<SymBooleanObject>(true);
+        constants["true"] = true_const;
+        std::shared_ptr<SymBooleanObject> false_const = std::make_shared<SymBooleanObject>(false);
+        constants["false"] = false_const;
+    }
+
     /**
      * @brief Constructs an InterpreterContext with a print handler.
      *
      * @param handler A shared pointer to an InterpreterPrintHandler used for output operations.
      *                If nullptr, print operations will be silently ignored.
      */
-    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler) : output_handler(handler) {}
-
+    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler) : output_handler(handler) {
+        initialize_constants();
+    }
 
     /**
      * @brief Handles output by delegating to the registered print handler.
@@ -68,6 +79,10 @@ class InterpreterContext {
         if (it != variables.end()) {
             return it->second;
         }
+        auto const_it = constants.find(name);
+        if (const_it != constants.end()) {
+            return const_it->second;
+        }
         return nullptr;
     }
 
@@ -80,6 +95,9 @@ class InterpreterContext {
      * @note If a variable with the given name already exists, it will be overwritten.
      */
     void set_variable(const std::string& name, std::shared_ptr<SymObject> value) {
+        if (constants.find(name) != constants.end()) {
+            throw ParsingTypeException("Cannot modify constant: " + name);
+        }
         variables[name] = value;
     }
 };

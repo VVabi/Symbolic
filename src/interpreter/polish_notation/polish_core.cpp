@@ -8,6 +8,7 @@
 #include "interpreter/polish_notation/polish_comparison_operators.hpp"
 #include "interpreter/polish_notation/polish_utils.hpp"
 #include "interpreter/polish_notation/polish_list.hpp"
+#include "interpreter/polish_notation/polish_boolean_operators.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 #include "types/sym_types/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -200,6 +201,18 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListCopy>(element.position, element.num_args);
             } else if (element.data == "as_list") {
                 return std::make_shared<PolishStringToList>(element.position, element.num_args);
+            } else if (element.data == "and") {
+                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, AND);
+            } else if (element.data == "or") {
+                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, OR);
+            } else if (element.data == "xor") {
+                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, XOR);
+            } else if (element.data == "nand") {
+                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, NAND);
+            } else if (element.data == "nor") {
+                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, NOR);
+            } else if (element.data == "not") {
+                return std::make_shared<PolishNotOperator>(element.position, element.num_args);
             }
         }
         default:
