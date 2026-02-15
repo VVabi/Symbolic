@@ -232,6 +232,7 @@ class SuccessfulFormulaParsingResult : public FormulaParsingResult {
 
 class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
     std::string error_message;
+
  public:
     FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& input) {
         std::stringstream strm;
@@ -248,7 +249,7 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
                 found_position = false;
                 break;
             }
-            count += line.size() + 1; // +1 for the newline character
+            count += line.size() + 1;  // +1 for the newline character
         }
 
         if (found_position) {
