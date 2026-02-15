@@ -81,7 +81,6 @@ class PolishWhile: public PolishFunction {
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
-
         while (true) {
             auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
             if (!condition) {
@@ -120,7 +119,6 @@ class PolishIf: public PolishFunction {
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
-
         if (condition->as_boolean()) {
             for (uint32_t arg = 0; arg < num_args - 1; arg++) {
                 iterate_wrapped(cmd_list, context, fp_size);

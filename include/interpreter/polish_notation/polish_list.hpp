@@ -11,6 +11,7 @@
 #include "interpreter/polish_notation/polish_function_core.hpp"
 #include "types/sym_types/sym_list.hpp"
 #include "types/sym_types/sym_void.hpp"
+#include "types/sym_types/sym_string_object.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 
 class PolishList: public PolishFunction {
@@ -226,5 +227,27 @@ class PolishListCopy: public PolishFunction {
             copied_elements.push_back(element->clone());
         }
         return std::make_shared<SymListObject>(copied_elements);
+    }
+};
+
+class PolishStringToList: public PolishFunction {
+ public:
+    PolishStringToList(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) {
+        auto string_raw   = iterate_wrapped(cmd_list, context, fp_size);
+        auto string       = std::dynamic_pointer_cast<SymStringObject>(string_raw);
+        if (!string) {
+            throw ParsingTypeException("Type error: Expected string as argument in as_list function");
+        }
+
+        const auto& str = string->to_string();
+        std::vector<std::shared_ptr<SymObject>> char_elements;
+        for (const auto& ch : str) {
+            char_elements.push_back(std::make_shared<SymStringObject>(std::string(1, ch)));
+        }
+        return std::make_shared<SymListObject>(char_elements);
     }
 };
