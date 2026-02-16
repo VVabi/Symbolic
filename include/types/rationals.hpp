@@ -173,6 +173,34 @@ class RationalNumber {
 
         return ret;
     }
+
+    bool operator<(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator < denominator*other.numerator;
+    }
+
+    bool operator<=(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator <= denominator*other.numerator;
+    }
+
+    bool operator>(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator > denominator*other.numerator;
+    }
+
+    bool operator>=(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator >= denominator*other.numerator;
+    }
 };
 
 template <typename T>
