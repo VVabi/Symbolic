@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 #include "common/lexer_deque.hpp"
 #include "interpreter/polish_notation/polish.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
@@ -26,6 +27,7 @@ class PolishList: public PolishFunction {
             auto element = iterate_wrapped(cmd_list, context, fp_size);
             elements.push_back(element);
         }
+
         return std::make_shared<SymListObject>(elements);
     }
 };

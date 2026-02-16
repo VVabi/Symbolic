@@ -69,8 +69,15 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const int64_t default_modulus) {
     auto formula = parse_math_expression_string(input_string, offset);
 
+    std::reverse(formula.begin(), formula.end());
 
-    auto p = shunting_yard_algorithm(formula);
+    LexerDeque<MathLexerElement> formula_deque;
+
+    for (const auto& x : formula) {
+        formula_deque.push_back(x);
+    }
+
+    auto p = shunting_yard_algorithm(formula_deque);
 
     LexerDeque<ParsedCodeElement> polish;
 
