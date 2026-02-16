@@ -21,7 +21,7 @@ class PolishFor: public PolishFunction {
     PolishFor(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
         PolishFunction(position, num_args, 4, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
@@ -77,7 +77,7 @@ class PolishWhile: public PolishFunction {
     PolishWhile(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
         PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
@@ -111,7 +111,7 @@ class PolishIf: public PolishFunction {
     PolishIf(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
         PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();

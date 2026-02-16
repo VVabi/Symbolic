@@ -28,7 +28,7 @@ class PolishBooleanOperator: public PolishFunction {
     PolishBooleanOperator(uint32_t position, uint32_t num_args, BooleanOperatorType type) :
         PolishFunction(position, num_args, 2, 2), operator_type(type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first  = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
@@ -68,7 +68,7 @@ class PolishNotOperator: public PolishFunction {
  public:
     PolishNotOperator(uint32_t position, uint32_t num_args) : PolishFunction(position, num_args, 1, 1) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto operand = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));

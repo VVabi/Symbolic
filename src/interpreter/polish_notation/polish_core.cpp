@@ -23,7 +23,7 @@ class PolishNumber: public PolishNotationElement {
  public:
     PolishNumber(std::string num_repr, uint32_t position): PolishNotationElement(position), num_repr(num_repr) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context,
                                     const size_t fp_size) {
                                         UNUSED(fp_size);
@@ -46,7 +46,7 @@ class PolishVariable: public PolishNotationElement {
 
  public:
     PolishVariable(std::string name, uint32_t position) : PolishNotationElement(position), name(name) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
@@ -69,7 +69,7 @@ class PolishString: public PolishNotationElement {
 
  public:
     PolishString(std::string value, uint32_t position) : PolishNotationElement(position), value(value) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
@@ -79,7 +79,7 @@ class PolishString: public PolishNotationElement {
     }
 };
 
-std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const MathLexerElement element) {
+std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const ParsedCodeElement element) {
     switch (element.type) {
         case NUMBER:
             return std::make_shared<PolishNumber>(element.data, element.position);
@@ -221,7 +221,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
     throw EvalException("Unknown element type " + element.data, element.position);
 }
 
-std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<MathLexerElement>& cmd_list,
+std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<ParsedCodeElement>& cmd_list,
         std::shared_ptr<InterpreterContext> &context,
         const size_t fp_size) {
     if (cmd_list.is_empty()) {

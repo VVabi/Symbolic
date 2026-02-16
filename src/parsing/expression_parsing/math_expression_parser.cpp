@@ -46,7 +46,7 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a SymObject.
  */
-std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<MathLexerElement>& input,
+std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>& input,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const Datatype type,
                                     const uint32_t powerseries_expansion_size,
@@ -69,22 +69,16 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const int64_t default_modulus) {
     auto formula = parse_math_expression_string(input_string, offset);
 
+
     auto p = shunting_yard_algorithm(formula);
 
-    LexerDeque<MathLexerElement> polish;
+    LexerDeque<ParsedCodeElement> polish;
 
-    for (MathLexerElement x : p) {
+    for (ParsedCodeElement x : p) {
         polish.push_back(x);
     }
 
-    std::shared_ptr<SymObject> ret;
-    if (type == Datatype::DYNAMIC) {
-        auto actual_type = infer_datatype_from_lexer(p);
-        ret = parse_formula_internal(polish, context, actual_type, powerseries_expansion_size, default_modulus);
-    } else {
-        ret = parse_formula_internal(polish, context, type, powerseries_expansion_size, default_modulus);
-    }
-    return ret;
+    return parse_formula_internal(polish, context, type, powerseries_expansion_size, default_modulus);
 }
 
 /**

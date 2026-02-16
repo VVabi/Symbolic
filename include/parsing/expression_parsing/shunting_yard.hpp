@@ -9,8 +9,9 @@
 #define INCLUDE_PARSING_EXPRESSION_PARSING_SHUNTING_YARD_HPP_
 #include <vector>
 #include "parsing/expression_parsing/math_lexer.hpp"
+#include "parsing/expression_parsing/parsed_code_element.hpp"
 
-std::vector<MathLexerElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input);
+std::vector<ParsedCodeElement> shunting_yard_algorithm(std::vector<MathLexerElement>& input);
 
 
 

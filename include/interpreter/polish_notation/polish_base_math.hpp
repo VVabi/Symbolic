@@ -17,7 +17,7 @@
 #include "types/sym_types/sym_void.hpp"
 
 
-inline std::shared_ptr<SymObject> binary_operation(LexerDeque<MathLexerElement>& cmd_list,
+inline std::shared_ptr<SymObject> binary_operation(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size,
                                         std::function<std::shared_ptr<SymMathObject>(std::shared_ptr<SymMathObject>, std::shared_ptr<SymMathObject>)> op
@@ -35,7 +35,7 @@ class PolishPlus : public PolishNotationElement {
  public:
     PolishPlus(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         auto left = iterate_wrapped(cmd_list, context, fp_size);
@@ -63,7 +63,7 @@ class PolishMinus : public PolishNotationElement {
  public:
     PolishMinus(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         return binary_operation(cmd_list, context, fp_size, sym_subtract);
@@ -74,7 +74,7 @@ class PolishTimes : public PolishNotationElement {
  public:
     PolishTimes(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         return binary_operation(cmd_list, context, fp_size, sym_multiply);
@@ -85,7 +85,7 @@ class PolishDiv : public PolishNotationElement {
  public:
     PolishDiv(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         return binary_operation(cmd_list, context, fp_size, sym_divide);
@@ -96,7 +96,7 @@ class PolishPow: public PolishNotationElement {
  public:
     PolishPow(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         auto left  = iterate_wrapped(cmd_list, context, fp_size);
@@ -146,7 +146,7 @@ class PolishUnaryMinus: public PolishNotationElement {
  public:
     PolishUnaryMinus(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         auto result = iterate_wrapped(cmd_list, context, fp_size);
@@ -165,7 +165,7 @@ class PolishAssign: public PolishNotationElement {
  public:
     PolishAssign(uint32_t position) : PolishNotationElement(position) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                         const size_t fp_size) {
         if (cmd_list.is_empty()) {

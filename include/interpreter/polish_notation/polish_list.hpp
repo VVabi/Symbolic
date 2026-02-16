@@ -18,7 +18,7 @@ class PolishList: public PolishFunction {
  public:
     PolishList(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 0, UINT32_MAX) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         std::vector<std::shared_ptr<SymObject>> elements;
@@ -34,7 +34,7 @@ class PolishListGet: public PolishFunction {
  public:
     PolishListGet(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -67,7 +67,7 @@ class PolishListSet: public PolishFunction {
  public:
     PolishListSet(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 3, 3) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -102,7 +102,7 @@ class PolishLength: public PolishFunction {
  public:
     PolishLength(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -121,7 +121,7 @@ class PolishListAppend: public PolishFunction {
  public:
     PolishListAppend(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -140,7 +140,7 @@ class PolishListPop: public PolishFunction {
  public:
     PolishListPop(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -161,7 +161,7 @@ class PolishListSlice: public PolishFunction {
  public:
     PolishListSlice(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 3, 3) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -213,7 +213,7 @@ class PolishListCopy: public PolishFunction {
  public:
     PolishListCopy(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
@@ -234,7 +234,7 @@ class PolishStringToList: public PolishFunction {
  public:
     PolishStringToList(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto string_raw   = iterate_wrapped(cmd_list, context, fp_size);
