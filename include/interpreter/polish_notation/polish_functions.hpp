@@ -14,7 +14,7 @@ class PolishPowerSeriesFunction: public PolishFunction {
     PowerSeriesBuiltinFunctionType type;
 
  public:
-    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, ParsedCodeElement element) : PolishFunction(element, 1, 1), type(type) { }
+    PolishPowerSeriesFunction(ParsedCodeElement element, PowerSeriesBuiltinFunctionType type) : PolishFunction(element, 1, 1), type(type) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,

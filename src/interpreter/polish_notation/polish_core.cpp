@@ -112,17 +112,17 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
             }
             if (element.data == "exp") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::EXP, element);
+                return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::EXP);
             } else if (element.data == "sqrt") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SQRT, element);
+                return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::SQRT);
             } else if (element.data == "log") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::LOG, element);
+                return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::LOG);
             } else if (element.data == "sin") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SIN, element);
+                return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::SIN);
             } else if (element.data == "cos") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::COS, element);
+                return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::COS);
             } else if (element.data == "tan") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::TAN, element);
+                return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::TAN);
             } else if (element.data == "O") {
                 return std::make_shared<PolishLandau>(element);
             } else if (element.data == "coeff") {
