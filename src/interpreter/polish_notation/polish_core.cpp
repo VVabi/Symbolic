@@ -17,8 +17,6 @@
 #include "interpreter/context.hpp"
 
 class PolishNumber: public PolishNotationElement {
- private:
-
  public:
     PolishNumber(ParsedCodeElement element): PolishNotationElement(element) { }
 
@@ -41,7 +39,6 @@ class PolishNumber: public PolishNotationElement {
 };
 
 class PolishVariable: public PolishNotationElement {
-
  public:
     PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
@@ -63,7 +60,6 @@ class PolishVariable: public PolishNotationElement {
 };
 
 class PolishString: public PolishNotationElement {
-
  public:
     PolishString(ParsedCodeElement element): PolishNotationElement(element) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,

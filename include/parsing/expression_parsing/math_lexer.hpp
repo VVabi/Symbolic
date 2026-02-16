@@ -31,7 +31,6 @@ struct MathLexerElement {
      */
     MathLexerElement(expression_type type, std::string data, int position)
         : type(type), data(data), position(position) {}
-
 };
 
 /**

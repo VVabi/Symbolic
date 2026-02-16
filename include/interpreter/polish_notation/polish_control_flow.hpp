@@ -15,7 +15,6 @@
 #include "types/sym_types/sym_boolean.hpp"
 
 class PolishFor: public PolishFunction {
-
  public:
     PolishFor(ParsedCodeElement element) :
         PolishFunction(element, 4, UINT32_MAX) { }
@@ -104,7 +103,6 @@ class PolishWhile: public PolishFunction {
 
 
 class PolishIf: public PolishFunction {
-
  public:
     PolishIf(ParsedCodeElement element) :
         PolishFunction(element, 2, UINT32_MAX) { }
