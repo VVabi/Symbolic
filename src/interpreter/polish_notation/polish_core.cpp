@@ -18,10 +18,9 @@
 
 class PolishNumber: public PolishNotationElement {
  private:
-    std::string num_repr;
 
  public:
-    PolishNumber(std::string num_repr, uint32_t position): PolishNotationElement(position), num_repr(num_repr) { }
+    PolishNumber(ParsedCodeElement element): PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context,
@@ -30,28 +29,27 @@ class PolishNumber: public PolishNotationElement {
                                         UNUSED(cmd_list);
                                         UNUSED(context);
                                         try {
-                                            return std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(num_repr, RationalNumber<BigInt>(1)));
+                                            return std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(get_data(), RationalNumber<BigInt>(1)));
                                         } catch (std::exception& e) {}
 
                                         try {
-                                            return std::make_shared<ValueType<double>>(RingCompanionHelper<double>::from_string(num_repr, 1.0));
+                                            return std::make_shared<ValueType<double>>(RingCompanionHelper<double>::from_string(get_data(), 1.0));
                                         } catch (std::exception& e) {
-                                            throw EvalException("Cannot parse number: " + num_repr, this->get_position());
+                                            throw EvalException("Cannot parse number: " + get_data(), this->get_position());
                                         }
                                     }
 };
 
 class PolishVariable: public PolishNotationElement {
-    std::string name;
 
  public:
-    PolishVariable(std::string name, uint32_t position) : PolishNotationElement(position), name(name) { }
+    PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
         UNUSED(fp_size);
-        auto existing_var = context->get_variable(name);
+        auto existing_var = context->get_variable(get_data());
         if (!existing_var) {
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
@@ -65,48 +63,47 @@ class PolishVariable: public PolishNotationElement {
 };
 
 class PolishString: public PolishNotationElement {
-    std::string value;
 
  public:
-    PolishString(std::string value, uint32_t position) : PolishNotationElement(position), value(value) { }
+    PolishString(ParsedCodeElement element): PolishNotationElement(element) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
         UNUSED(fp_size);
         UNUSED(context);
-        return std::make_shared<SymStringObject>(value);
+        return std::make_shared<SymStringObject>(get_data());
     }
 };
 
 std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const ParsedCodeElement element) {
     switch (element.type) {
         case NUMBER:
-            return std::make_shared<PolishNumber>(element.data, element.position);
+            return std::make_shared<PolishNumber>(element);
         case VARIABLE:
-            return std::make_shared<PolishVariable>(element.data, element.position);
+            return std::make_shared<PolishVariable>(element);
         case STRING:
-            return std::make_shared<PolishString>(element.data, element.position);
+            return std::make_shared<PolishString>(element);
         case INFIX:
             if (element.data == "+") {
-                return std::make_shared<PolishPlus>(element.position);
+                return std::make_shared<PolishPlus>(element);
             } else if (element.data == "-") {
-                return std::make_shared<PolishMinus>(element.position);
+                return std::make_shared<PolishMinus>(element);
             } else if (element.data == "*") {
-                return std::make_shared<PolishTimes>(element.position);
+                return std::make_shared<PolishTimes>(element);
             } else if (element.data == "/") {
-                return std::make_shared<PolishDiv>(element.position);
+                return std::make_shared<PolishDiv>(element);
             } else if (element.data == "^") {
-                return std::make_shared<PolishPow>(element.position);
+                return std::make_shared<PolishPow>(element);
             } else if (element.data == "=") {
-                return std::make_shared<PolishAssign>(element.position);
+                return std::make_shared<PolishAssign>(element);
             }
 
             throw EvalException("Unknown infix operator: " + element.data, element.position);
             break;
         case UNARY:
             if (element.data == "-") {
-                return std::make_shared<PolishUnaryMinus>(element.position);
+                return std::make_shared<PolishUnaryMinus>(element);
             }
             throw EvalException("Unknown unary operator: " + element.data, element.position);
             break;
@@ -115,104 +112,104 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
             }
             if (element.data == "exp") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::EXP, element.position, element.num_args);
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::EXP, element);
             } else if (element.data == "sqrt") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SQRT, element.position, element.num_args);
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SQRT, element);
             } else if (element.data == "log") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::LOG, element.position, element.num_args);
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::LOG, element);
             } else if (element.data == "sin") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SIN, element.position, element.num_args);
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::SIN, element);
             } else if (element.data == "cos") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::COS, element.position, element.num_args);
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::COS, element);
             } else if (element.data == "tan") {
-                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::TAN, element.position, element.num_args);
+                return std::make_shared<PolishPowerSeriesFunction>(PowerSeriesBuiltinFunctionType::TAN, element);
             } else if (element.data == "O") {
-                return std::make_shared<PolishLandau>(element.position, element.num_args);
+                return std::make_shared<PolishLandau>(element);
             } else if (element.data == "coeff") {
-                return std::make_shared<PolishCoefficient>(element.position, false, element.num_args);
+                return std::make_shared<PolishCoefficient>(element, false);
             } else if (element.data == "egfcoeff") {
-                return std::make_shared<PolishCoefficient>(element.position, true, element.num_args);
+                return std::make_shared<PolishCoefficient>(element, true);
             } else if (element.data == "PSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::PSET);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::PSET);
             } else if (element.data == "MSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::MSET);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::MSET);
             } else if (element.data == "CYC") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::CYC);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::CYC);
             } else if (element.data == "SEQ") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::SEQ);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::SEQ);
             } else if (element.data == "LSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::LSET);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::LSET);
             } else if (element.data == "LCYC") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::LCYC);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::LCYC);
             } else if (element.data == "INVMSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element.position, element.num_args, SymbolicMethodOperator::INV_MSET);
+                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::INV_MSET);
             } else if (element.data == "eval") {
-                return std::make_shared<PolishEval>(element.position, element.num_args);
+                return std::make_shared<PolishEval>(element);
             } else if (element.data == "Mod") {
-                return std::make_shared<PolishMod>(element.position, element.num_args);
+                return std::make_shared<PolishMod>(element);
             } else if (element.data == "ModValue") {
-                return std::make_shared<PolishModValue>(element.position, element.num_args);
+                return std::make_shared<PolishModValue>(element);
             } else if (element.data == "for") {
                 if (element.num_expressions == -1) {
                     throw EvalException("Number of expressions inside for loop not set", element.position);
                 }
-                return std::make_shared<PolishFor>(element.position, element.num_args, element.num_expressions);
+                return std::make_shared<PolishFor>(element);
             } else if (element.data == "while") {
                 if (element.num_expressions == -1) {
                     throw EvalException("Number of expressions inside while loop not set", element.position);
                 }
-                return std::make_shared<PolishWhile>(element.position, element.num_args, element.num_expressions);
+                return std::make_shared<PolishWhile>(element);
             } else if (element.data == "if") {
                 if (element.num_expressions == -1) {
                     throw EvalException("Number of expressions inside if statement not set", element.position);
                 }
-                return std::make_shared<PolishIf>(element.position, element.num_args, element.num_expressions);
+                return std::make_shared<PolishIf>(element);
             } else if (element.data == "eq") {
-                return std::make_shared<PolishEq>(element.position, element.num_args);
+                return std::make_shared<PolishEq>(element);
             } else if (element.data == "neq") {
-                return std::make_shared<PolishNeq>(element.position, element.num_args);
+                return std::make_shared<PolishNeq>(element);
             } else if (element.data == "print") {
-                return std::make_shared<PolishPrint>(element.position, element.num_args, false);
+                return std::make_shared<PolishPrint>(element, false);
             } else if (element.data == "println") {
-                return std::make_shared<PolishPrint>(element.position, element.num_args, true);
+                return std::make_shared<PolishPrint>(element, true);
             } else if (element.data == "lt") {
-                return std::make_shared<PolishComparison>(element.position, element.num_args, LT);
+                return std::make_shared<PolishComparison>(element, LT);
             } else if (element.data == "lte") {
-                return std::make_shared<PolishComparison>(element.position, element.num_args, LTE);
+                return std::make_shared<PolishComparison>(element, LTE);
             } else if (element.data == "gt") {
-                return std::make_shared<PolishComparison>(element.position, element.num_args, GT);
+                return std::make_shared<PolishComparison>(element, GT);
             } else if (element.data == "gte") {
-                return std::make_shared<PolishComparison>(element.position, element.num_args, GTE);
+                return std::make_shared<PolishComparison>(element, GTE);
             } else if (element.data == "list_get") {
-                return std::make_shared<PolishListGet>(element.position, element.num_args);
+                return std::make_shared<PolishListGet>(element);
             } else if (element.data == "list_set") {
-                return std::make_shared<PolishListSet>(element.position, element.num_args);
+                return std::make_shared<PolishListSet>(element);
             } else if (element.data == "list") {
-                return std::make_shared<PolishList>(element.position, element.num_args);
+                return std::make_shared<PolishList>(element);
             } else if (element.data == "len") {
-                return std::make_shared<PolishLength>(element.position, element.num_args);
+                return std::make_shared<PolishLength>(element);
             } else if (element.data == "append") {
-                return std::make_shared<PolishListAppend>(element.position, element.num_args);
+                return std::make_shared<PolishListAppend>(element);
             } else if (element.data == "pop") {
-                return std::make_shared<PolishListPop>(element.position, element.num_args);
+                return std::make_shared<PolishListPop>(element);
             } else if (element.data == "slice") {
-                return std::make_shared<PolishListSlice>(element.position, element.num_args);
+                return std::make_shared<PolishListSlice>(element);
             } else if (element.data == "copy") {
-                return std::make_shared<PolishListCopy>(element.position, element.num_args);
+                return std::make_shared<PolishListCopy>(element);
             } else if (element.data == "as_list") {
-                return std::make_shared<PolishStringToList>(element.position, element.num_args);
+                return std::make_shared<PolishStringToList>(element);
             } else if (element.data == "and") {
-                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, AND);
+                return std::make_shared<PolishBooleanOperator>(element, AND);
             } else if (element.data == "or") {
-                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, OR);
+                return std::make_shared<PolishBooleanOperator>(element, OR);
             } else if (element.data == "xor") {
-                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, XOR);
+                return std::make_shared<PolishBooleanOperator>(element, XOR);
             } else if (element.data == "nand") {
-                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, NAND);
+                return std::make_shared<PolishBooleanOperator>(element, NAND);
             } else if (element.data == "nor") {
-                return std::make_shared<PolishBooleanOperator>(element.position, element.num_args, NOR);
+                return std::make_shared<PolishBooleanOperator>(element, NOR);
             } else if (element.data == "not") {
-                return std::make_shared<PolishNotOperator>(element.position, element.num_args);
+                return std::make_shared<PolishNotOperator>(element);
             }
         }
         default:

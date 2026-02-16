@@ -15,11 +15,10 @@
 #include "types/sym_types/sym_boolean.hpp"
 
 class PolishFor: public PolishFunction {
-    uint32_t num_expressions_inside;
 
  public:
-    PolishFor(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
-        PolishFunction(position, num_args, 4, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
+    PolishFor(ParsedCodeElement element) :
+        PolishFunction(element, 4, UINT32_MAX) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -58,14 +57,14 @@ class PolishFor: public PolishFunction {
         uint32_t start_cmd = cmd_list.get_index();
         for (int64_t i = start_idx; i <= end_idx; i++) {
            cmd_list.set_index(start_cmd);
-           for (uint32_t arg = 0; arg < num_args - 3; arg++) {
+           for (uint32_t arg = 0; arg < get_num_args() - 3; arg++) {
                 context->set_variable(loop_index_var_name, std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1))));
                 iterate_wrapped(cmd_list, context, fp_size);
             }
         }
 
         // set execution index to after the loop body
-        cmd_list.set_index(original_index + num_expressions_inside);
+        cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };
@@ -74,8 +73,8 @@ class PolishWhile: public PolishFunction {
     uint32_t num_expressions_inside;
 
  public:
-    PolishWhile(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
-        PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
+    PolishWhile(ParsedCodeElement element) :
+        PolishFunction(element, 2, UINT32_MAX) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -91,25 +90,24 @@ class PolishWhile: public PolishFunction {
                 break;
             }
 
-            for (uint32_t arg = 0; arg < num_args - 1; arg++) {
+            for (uint32_t arg = 0; arg < get_num_args() - 1; arg++) {
                 iterate_wrapped(cmd_list, context, fp_size);
             }
             cmd_list.set_index(original_index);
         }
 
         // set execution index to after the loop body
-        cmd_list.set_index(original_index + num_expressions_inside);
+        cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };
 
 
 class PolishIf: public PolishFunction {
-    uint32_t num_expressions_inside;
 
  public:
-    PolishIf(uint32_t position, uint32_t num_args, uint32_t num_expressions_inside) :
-        PolishFunction(position, num_args, 2, UINT32_MAX), num_expressions_inside(num_expressions_inside) { }
+    PolishIf(ParsedCodeElement element) :
+        PolishFunction(element, 2, UINT32_MAX) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
@@ -120,12 +118,12 @@ class PolishIf: public PolishFunction {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
         if (condition->as_boolean()) {
-            for (uint32_t arg = 0; arg < num_args - 1; arg++) {
+            for (uint32_t arg = 0; arg < get_num_args() - 1; arg++) {
                 iterate_wrapped(cmd_list, context, fp_size);
             }
         }
 
-        cmd_list.set_index(original_index + num_expressions_inside);
+        cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };

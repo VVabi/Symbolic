@@ -9,14 +9,16 @@
 
 class PolishFunction: public PolishNotationElement {
  public:
-    uint32_t num_args;
-    PolishFunction(uint32_t position,
-                    uint32_t num_args,
+    PolishFunction(ParsedCodeElement element,
                     uint32_t min_num_args,
-                    uint32_t max_num_args): PolishNotationElement(position), num_args(num_args) {
-                        if (num_args < min_num_args || num_args > max_num_args) {
-                            throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(num_args)+
-                                ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), position);
+                    uint32_t max_num_args): PolishNotationElement(element) {
+                        if (element.num_args < (int64_t) min_num_args || element.num_args > (int64_t) max_num_args) {
+                            throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(element.num_args)+
+                                ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), element.position);
+                        }
+
+                        if (element.num_expressions == -1) {
+                            throw InvalidFunctionArgException("Internal error: Function element missing num_expressions data", element.position);
                         }
                     }
     virtual ~PolishFunction() { }

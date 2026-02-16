@@ -33,7 +33,7 @@ inline std::shared_ptr<SymObject> binary_operation(LexerDeque<ParsedCodeElement>
 
 class PolishPlus : public PolishNotationElement {
  public:
-    PolishPlus(uint32_t position) : PolishNotationElement(position) { }
+    PolishPlus(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -61,7 +61,7 @@ class PolishPlus : public PolishNotationElement {
 
 class PolishMinus : public PolishNotationElement {
  public:
-    PolishMinus(uint32_t position) : PolishNotationElement(position) { }
+    PolishMinus(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -72,7 +72,7 @@ class PolishMinus : public PolishNotationElement {
 
 class PolishTimes : public PolishNotationElement {
  public:
-    PolishTimes(uint32_t position) : PolishNotationElement(position) { }
+    PolishTimes(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -83,7 +83,7 @@ class PolishTimes : public PolishNotationElement {
 
 class PolishDiv : public PolishNotationElement {
  public:
-    PolishDiv(uint32_t position) : PolishNotationElement(position) { }
+    PolishDiv(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -94,7 +94,7 @@ class PolishDiv : public PolishNotationElement {
 
 class PolishPow: public PolishNotationElement {
  public:
-    PolishPow(uint32_t position) : PolishNotationElement(position) { }
+    PolishPow(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -144,7 +144,7 @@ class PolishPow: public PolishNotationElement {
 
 class PolishUnaryMinus: public PolishNotationElement {
  public:
-    PolishUnaryMinus(uint32_t position) : PolishNotationElement(position) { }
+    PolishUnaryMinus(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -163,7 +163,7 @@ class PolishUnaryMinus: public PolishNotationElement {
 
 class PolishAssign: public PolishNotationElement {
  public:
-    PolishAssign(uint32_t position) : PolishNotationElement(position) { }
+    PolishAssign(ParsedCodeElement element) : PolishNotationElement(element) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,

@@ -14,7 +14,7 @@ class PolishPowerSeriesFunction: public PolishFunction {
     PowerSeriesBuiltinFunctionType type;
 
  public:
-    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, uint32_t position, uint32_t num_args) : PolishFunction(position, num_args, 1, 1), type(type) { }
+    PolishPowerSeriesFunction(PowerSeriesBuiltinFunctionType type, ParsedCodeElement element) : PolishFunction(element, 1, 1), type(type) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -32,7 +32,7 @@ class PolishPowerSeriesFunction: public PolishFunction {
 
 class PolishLandau: public PolishFunction {
  public:
-    PolishLandau(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
+    PolishLandau(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -87,7 +87,7 @@ class PolishCoefficient: public PolishFunction {
     bool as_egf;
 
  public:
-    PolishCoefficient(uint32_t position, bool as_egf, uint32_t num_args): PolishFunction(position, num_args, 2, 2), as_egf(as_egf) {}
+    PolishCoefficient(ParsedCodeElement element, bool as_egf): PolishFunction(element, 2, 2), as_egf(as_egf) {}
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
@@ -130,9 +130,8 @@ class PolishSymbolicMethodOperator: public PolishFunction {
     SymbolicMethodOperator op;
 
  public:
-    PolishSymbolicMethodOperator(uint32_t position,
-        uint32_t num_args,
-        const SymbolicMethodOperator op): PolishFunction(position, num_args, 1, 2), op(op) {}
+    PolishSymbolicMethodOperator(ParsedCodeElement element,
+        const SymbolicMethodOperator op): PolishFunction(element, 1, 2), op(op) {}
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
@@ -142,7 +141,7 @@ class PolishSymbolicMethodOperator: public PolishFunction {
         }
 
         std::string subset_str = "";
-        if (num_args == 2) {
+        if (get_num_args() == 2) {
             if (op == SymbolicMethodOperator::INV_MSET) {
                 throw InvalidFunctionArgException("Explicit subset arg for inv mset not allowed", this->get_position());
             }
@@ -159,7 +158,7 @@ class PolishSymbolicMethodOperator: public PolishFunction {
 
 class PolishEval: public PolishFunction {
  public:
-    PolishEval(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {
+    PolishEval(ParsedCodeElement element): PolishFunction(element, 2, 2) {
     }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
@@ -182,7 +181,7 @@ class PolishEval: public PolishFunction {
 
 class PolishMod: public PolishFunction {
  public:
-    PolishMod(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 2, 2) {}
+    PolishMod(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
@@ -223,7 +222,7 @@ class PolishMod: public PolishFunction {
 
 class PolishModValue: public PolishFunction {
  public:
-    PolishModValue(uint32_t position, uint32_t num_args): PolishFunction(position, num_args, 1, 1) {}
+    PolishModValue(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
