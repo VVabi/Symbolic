@@ -59,6 +59,40 @@ class PolishNeq: public PolishFunction {
     }
 };
 
+template<typename T>
+std::shared_ptr<SymObject> handle_comparison(std::shared_ptr<ValueType<T>> first_num,
+                                            std::shared_ptr<ValueType<T>> second_num,
+                                            ComparisonOperatorType operator_type,
+                                            uint32_t position) {
+    if (!first_num || !second_num) {
+        throw EvalException("Expected numeric arguments for comparison operation", position);
+    }
+
+    auto first_val  = first_num->as_value();
+    auto second_val = second_num->as_value();
+
+    bool result = false;
+    switch (operator_type) {
+        case LT:
+            result = first_val < second_val;
+            break;
+        case LTE:
+            result = first_val <= second_val;
+            break;
+        case GT:
+            result = first_val > second_val;
+            break;
+        case GTE:
+            result = first_val >= second_val;
+            break;
+        default:
+            throw ParsingException("Unknown comparison operator type", position);
+    }
+
+    return std::make_shared<SymBooleanObject>(result);
+}
+
+
 class PolishComparison: public PolishFunction {
     ComparisonOperatorType operator_type;
 
@@ -72,35 +106,28 @@ class PolishComparison: public PolishFunction {
         auto first  = iterate_wrapped(cmd_list, context, fp_size);
         auto second = iterate_wrapped(cmd_list, context, fp_size);
 
-        auto first_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
-        auto second_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);
-        if (!first_num || !second_num) {
-            throw EvalException("Expected numeric arguments for comparison operation", this->get_position());
+        auto first_num      = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
+        auto second_num     = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);
+
+        if (first_num && second_num) {
+            return handle_comparison<RationalNumber<BigInt>>(first_num, second_num, operator_type, get_position());
         }
 
-        auto first_val = first_num->as_value();
-        auto second_val = second_num->as_value();
-
-        if (first_val.get_denominator() < BigInt(0)|| second_val.get_denominator() < BigInt(0)) {
-            throw EvalException("Expected positive denominators for comparison operation", this->get_position());
+        auto first_double   = std::dynamic_pointer_cast<ValueType<double>>(first);
+        auto second_double  = std::dynamic_pointer_cast<ValueType<double>>(second);
+        if (first_double && second_double) {
+            return handle_comparison<double>(first_double, second_double, operator_type, get_position());
         }
 
-        bool result = false;
-        switch (operator_type) {
-            case LT:
-                result = first_val.get_numerator() * second_val.get_denominator() < second_val.get_numerator() * first_val.get_denominator();
-                break;
-            case LTE:
-                result = first_val.get_numerator() * second_val.get_denominator() <= second_val.get_numerator() * first_val.get_denominator();
-                break;
-            case GT:
-                result = first_val.get_numerator() * second_val.get_denominator() > second_val.get_numerator() * first_val.get_denominator();
-                break;
-            case GTE:
-                result = first_val.get_numerator() * second_val.get_denominator() >= second_val.get_numerator() * first_val.get_denominator();
-                break;
+        if (first_double && second_num) {
+            auto second_as_double =  std::dynamic_pointer_cast<ValueType<double>>(second_num->as_double());
+            return handle_comparison<double>(first_double, second_as_double, operator_type, get_position());
         }
 
-        return std::make_shared<SymBooleanObject>(result);
+        if (first_num && second_double) {
+            auto first_as_double = std::dynamic_pointer_cast<ValueType<double>>(first_num->as_double());
+            return handle_comparison<double>(first_as_double, second_double, operator_type, get_position());
+        }
+        throw EvalException("Expected numeric arguments for comparison operation", get_position());
     }
 };
