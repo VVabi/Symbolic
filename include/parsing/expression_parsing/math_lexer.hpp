@@ -20,8 +20,7 @@ struct MathLexerElement {
     expression_type type;   ///< Type of the element
     std::string data;       ///< Data of the element
     int position;           ///< Position of the element in the input string
-    int num_args;           ///< Number of args between current brackets (used for function argument separation)
-    ptrdiff_t num_expressions;    ///< Number of expressions between current brackets (used for control flow constructs)
+
     /**
      * @brief Constructor for MathLexerElement.
      * @param type The type of the element.
@@ -30,16 +29,9 @@ struct MathLexerElement {
      * @param num_args The number of args between current brackets (used for function argument separation).
      * @param num_expressions The number of expressions between current brackets (used for control flow
      */
-    MathLexerElement(expression_type type, std::string data, int position, int num_args = -1, ptrdiff_t num_expressions = -1)
-        : type(type), data(data), position(position), num_args(num_args), num_expressions(num_expressions) {}
+    MathLexerElement(expression_type type, std::string data, int position)
+        : type(type), data(data), position(position) {}
 
-    void set_num_args(int num) {
-        num_args = num;
-    }
-
-    void set_num_expressions(ptrdiff_t num) {
-        num_expressions = num;
-    }
 };
 
 /**
