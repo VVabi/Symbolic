@@ -1,8 +1,5 @@
 #pragma once
 #include <string>
-#include <vector>
-#include <cstdint>
-#include <map>
 #include "parsing/expression_parsing/lexer_types.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 struct ParsedCodeElement {

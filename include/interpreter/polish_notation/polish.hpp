@@ -21,11 +21,11 @@ class PolishNotationElement {
         return base_element.position;
     }
 
-    uint32_t get_num_args() const {
+    int get_num_args() const {
         return base_element.num_args;
     }
 
-    uint32_t get_num_expressions() const {
+     ptrdiff_t get_num_expressions() const {
         return base_element.num_expressions;
     }
 

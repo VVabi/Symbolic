@@ -56,7 +56,7 @@ class PolishFor: public PolishFunction {
         uint32_t start_cmd = cmd_list.get_index();
         for (int64_t i = start_idx; i <= end_idx; i++) {
            cmd_list.set_index(start_cmd);
-           for (uint32_t arg = 0; arg < get_num_args() - 3; arg++) {
+           for (int64_t arg = 0; arg < get_num_args() - 3; arg++) {
                 context->set_variable(loop_index_var_name, std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1))));
                 iterate_wrapped(cmd_list, context, fp_size);
             }
@@ -69,8 +69,6 @@ class PolishFor: public PolishFunction {
 };
 
 class PolishWhile: public PolishFunction {
-    uint32_t num_expressions_inside;
-
  public:
     PolishWhile(ParsedCodeElement element) :
         PolishFunction(element, 2, UINT32_MAX) { }
@@ -89,7 +87,7 @@ class PolishWhile: public PolishFunction {
                 break;
             }
 
-            for (uint32_t arg = 0; arg < get_num_args() - 1; arg++) {
+            for (int64_t arg = 0; arg < get_num_args() - 1; arg++) {
                 iterate_wrapped(cmd_list, context, fp_size);
             }
             cmd_list.set_index(original_index);
@@ -116,7 +114,7 @@ class PolishIf: public PolishFunction {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
         if (condition->as_boolean()) {
-            for (uint32_t arg = 0; arg < get_num_args() - 1; arg++) {
+            for (int64_t arg = 0; arg < get_num_args() - 1; arg++) {
                 iterate_wrapped(cmd_list, context, fp_size);
             }
         }

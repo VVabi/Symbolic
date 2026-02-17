@@ -81,7 +81,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
 
     LexerDeque<ParsedCodeElement> polish;
 
-    for (ParsedCodeElement x : p) {
+    for (const auto& x : p) {
         polish.push_back(x);
     }
 

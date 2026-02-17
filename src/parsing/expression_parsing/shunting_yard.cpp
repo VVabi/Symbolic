@@ -141,7 +141,7 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                 break;
             case LEFT_PARENTHESIS:
             {
-                // TODO(vabi) this is an equisitely shitty hack to detect empty parentheses, need to rewrite the shunting yard algorithm in a way that doesnt require this
+                // TODO(vabi) this is an exquisitely shitty hack to detect empty parentheses, need to rewrite the shunting yard algorithm in a way that doesnt require this
                 auto peek = input.peek(-2);
                 if (peek && peek->type == RIGHT_PARENTHESIS) {
                     current_args_count = 0;

@@ -26,8 +26,6 @@ struct MathLexerElement {
      * @param type The type of the element.
      * @param data The data of the element.
      * @param position The position of the element in the input string.
-     * @param num_args The number of args between current brackets (used for function argument separation).
-     * @param num_expressions The number of expressions between current brackets (used for control flow
      */
     MathLexerElement(expression_type type, std::string data, int position)
         : type(type), data(data), position(position) {}
