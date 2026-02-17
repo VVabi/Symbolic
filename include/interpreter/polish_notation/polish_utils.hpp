@@ -44,15 +44,15 @@ class PolishPrint: public PolishFunction {
     bool line_break;
 
  public:
-    PolishPrint(uint32_t position, uint32_t num_args, bool line_break) :
-        PolishFunction(position, num_args, 1, 2), line_break(line_break) { }
+    PolishPrint(ParsedCodeElement element, bool line_break) :
+        PolishFunction(element, 1, 2), line_break(line_break) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context,
                                     const size_t fp_size) {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
         std::string mode_str = "raw";
-        if (num_args == 2) {
+        if (get_num_args() == 2) {
             auto mode = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context, fp_size));
             if (!mode) {
                 throw ParsingTypeException("Type error: Expected string as second argument in print function");

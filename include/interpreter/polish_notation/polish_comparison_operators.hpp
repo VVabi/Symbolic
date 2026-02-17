@@ -23,10 +23,10 @@ enum ComparisonOperatorType {
 
 class PolishEq: public PolishFunction {
  public:
-    PolishEq(uint32_t position, uint32_t num_args) :
-        PolishFunction(position, num_args, 2, 2) { }
+    PolishEq(ParsedCodeElement element) :
+        PolishFunction(element, 2, 2) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
@@ -42,10 +42,10 @@ class PolishEq: public PolishFunction {
 
 class PolishNeq: public PolishFunction {
  public:
-    PolishNeq(uint32_t position, uint32_t num_args) :
-        PolishFunction(position, num_args, 2, 2) { }
+    PolishNeq(ParsedCodeElement element) :
+        PolishFunction(element, 2, 2) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
@@ -97,10 +97,10 @@ class PolishComparison: public PolishFunction {
     ComparisonOperatorType operator_type;
 
  public:
-    PolishComparison(uint32_t position, uint32_t num_args, ComparisonOperatorType operator_type) :
-        PolishFunction(position, num_args, 2, 2), operator_type(operator_type) { }
+    PolishComparison(ParsedCodeElement element, ComparisonOperatorType operator_type) :
+        PolishFunction(element, 2, 2), operator_type(operator_type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<MathLexerElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first  = iterate_wrapped(cmd_list, context, fp_size);

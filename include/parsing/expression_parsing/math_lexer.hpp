@@ -10,46 +10,8 @@
 #include <vector>
 #include <cstdint>
 #include <map>
+#include "parsing/expression_parsing/lexer_types.hpp"
 
-/**
- * @brief Enum representing the type of an expression element.
- */
-enum expression_type {
-    INFIX,                  ///< Infix operator
-    UNARY,                  ///< Unary operator
-    FUNCTION,               ///< Function
-    NUMBER,                 ///< Number
-    VARIABLE,               ///< Variable
-    LEFT_PARENTHESIS,       ///< Left parenthesis
-    RIGHT_PARENTHESIS,      ///< Right parenthesis
-    SEPARATOR,              ///< Separator
-    STRING                  ///< String literal
-};
-
-inline std::string expression_type_to_string(expression_type type) {
-    switch (type) {
-        case INFIX:
-            return "INFIX";
-        case UNARY:
-            return "UNARY";
-        case FUNCTION:
-            return "FUNCTION";
-        case NUMBER:
-            return "NUMBER";
-        case VARIABLE:
-            return "VARIABLE";
-        case LEFT_PARENTHESIS:
-            return "LEFT_PARENTHESIS";
-        case RIGHT_PARENTHESIS:
-            return "RIGHT_PARENTHESIS";
-        case SEPARATOR:
-            return "SEPARATOR";
-        case STRING:
-            return "STRING";
-    }
-
-    return "";  // unreachable
-}
 
 /**
  * @brief Struct representing an element in a mathematical expression.
@@ -58,26 +20,15 @@ struct MathLexerElement {
     expression_type type;   ///< Type of the element
     std::string data;       ///< Data of the element
     int position;           ///< Position of the element in the input string
-    int num_args;           ///< Number of args between current brackets (used for function argument separation)
-    ptrdiff_t num_expressions;    ///< Number of expressions between current brackets (used for control flow constructs)
+
     /**
      * @brief Constructor for MathLexerElement.
      * @param type The type of the element.
      * @param data The data of the element.
      * @param position The position of the element in the input string.
-     * @param num_args The number of args between current brackets (used for function argument separation).
-     * @param num_expressions The number of expressions between current brackets (used for control flow
      */
-    MathLexerElement(expression_type type, std::string data, int position, int num_args = -1, ptrdiff_t num_expressions = -1)
-        : type(type), data(data), position(position), num_args(num_args), num_expressions(num_expressions) {}
-
-    void set_num_args(int num) {
-        num_args = num;
-    }
-
-    void set_num_expressions(ptrdiff_t num) {
-        num_expressions = num;
-    }
+    MathLexerElement(expression_type type, std::string data, int position)
+        : type(type), data(data), position(position) {}
 };
 
 /**

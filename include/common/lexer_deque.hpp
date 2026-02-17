@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <stdexcept>
+#include <optional>
 
 template<typename T>
 class LexerDeque {
@@ -42,5 +43,12 @@ class LexerDeque {
 
     bool is_empty() const {
         return index >= data.size();
+    }
+
+    std::optional<T> peek(ptrdiff_t offset = 0) const {
+        if (index + offset >= data.size() || (ptrdiff_t) index + offset < 0) {
+            return std::nullopt;
+        }
+        return data[index + offset];
     }
 };
