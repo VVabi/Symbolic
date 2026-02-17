@@ -115,7 +115,7 @@ class PolishIf: public PolishFunction {
         }
 
         auto subexpressions = get_sub_expressions();
-        std::cout << "IF statement with " << subexpressions.size() << " subexpressions and " << get_num_args() << " args" << std::endl;
+        //std::cout << "IF statement with " << subexpressions.size() << " subexpressions and " << get_num_args() << " args" << std::endl;
         /*for (size_t ind = 0; ind < subexpressions.size(); ind++) {
             std::cout << "Expression of type " << expression_type_to_string(subexpressions.peek(ind)->type) << " with data " << subexpressions.peek(ind)->data << std::endl;
         }*/

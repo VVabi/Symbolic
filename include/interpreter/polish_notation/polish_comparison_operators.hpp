@@ -29,7 +29,6 @@ class PolishEq: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        std::cout << "EQ: " << get_sub_expressions().size() << " subexpressions, " << get_num_args() << " args" << std::endl;
         auto first = iterate_wrapped(cmd_list, context, fp_size);
         auto second = iterate_wrapped(cmd_list, context, fp_size);
 
