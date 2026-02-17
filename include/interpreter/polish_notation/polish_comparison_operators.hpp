@@ -37,7 +37,6 @@ class PolishEq: public PolishFunction {
         } else {
             return std::make_shared<SymBooleanObject>(false);
         }
-
     }
 };
 

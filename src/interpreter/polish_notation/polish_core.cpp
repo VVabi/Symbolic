@@ -222,7 +222,6 @@ std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<ParsedCodeElement>& cmd_li
     }
     auto current = cmd_list.front();
     cmd_list.pop_front();
-    //std::cout << "Executing element of type " << expression_type_to_string(current.type) << " with data " << current.data << std::endl;
     auto element = polish_notation_element_from_lexer(current);
     try {
         return element->handle_wrapper(cmd_list, context, fp_size);

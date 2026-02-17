@@ -22,7 +22,6 @@ class PolishFor: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        //uint32_t original_index  = cmd_list.get_index();
         auto variable = cmd_list.front();
         cmd_list.pop_front();
         if (variable.type != VARIABLE) {
@@ -53,15 +52,6 @@ class PolishFor: public PolishFunction {
             throw EvalException("Start and end values in for loop must be within int64 range", variable.position);
         }
 
-        /*uint32_t start_cmd = cmd_list.get_index();
-        for (int64_t i = start_idx; i <= end_idx; i++) {
-           cmd_list.set_index(start_cmd);
-           for (int64_t arg = 0; arg < get_num_args() - 3; arg++) {
-                context->set_variable(loop_index_var_name, std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1))));
-                iterate_wrapped(cmd_list, context, fp_size);
-            }
-        }*/
-
         auto subexpressions = get_sub_expressions();
         for (int64_t i = start_idx; i <= end_idx; i++) {
             context->set_variable(loop_index_var_name, std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1))));
@@ -71,8 +61,6 @@ class PolishFor: public PolishFunction {
             subexpressions.set_index(0);
         }
 
-        // set execution index to after the loop body
-        //cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };
@@ -119,28 +107,19 @@ class PolishIf: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        //uint32_t original_index  = cmd_list.get_index();
         auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
 
         auto subexpressions = get_sub_expressions();
-        //std::cout << "IF statement with " << subexpressions.size() << " subexpressions and " << get_num_args() << " args" << std::endl;
-        /*for (size_t ind = 0; ind < subexpressions.size(); ind++) {
-            std::cout << "Expression of type " << expression_type_to_string(subexpressions.peek(ind)->type) << " with data " << subexpressions.peek(ind)->data << std::endl;
-        }*/
 
         if (condition->as_boolean()) {
             while (!subexpressions.is_empty()) {
                 iterate_wrapped(subexpressions, context, fp_size);
             }
-            /*for (int64_t arg = 0; arg < get_num_args() - 1; arg++) {
-                iterate_wrapped(cmd_list, context, fp_size);
-            }*/
         }
 
-        //cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };
