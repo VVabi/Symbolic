@@ -83,6 +83,7 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
     auto operators          = std::stack<MathLexerElement>();
     auto arg_count          = std::stack<int>();
     auto expression_count   = std::stack<int>();
+    std::vector<ParsedCodeElement> sub_expressions;
 
     int current_args_count = 0;
     int last_closed_bracket_args_count = 0;
@@ -92,6 +93,30 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
         auto it = input.front();
         input.pop_front();
         switch (it.type) {
+            case SCOPE_START:
+                while (operators.size() > 0) {
+                    auto op = operators.top();
+                    auto element = ParsedCodeElement(op);
+                    if (element.type == FUNCTION) {
+                        element.set_num_args(last_closed_bracket_args_count);
+                        element.set_num_expressions(ret.size() - last_expression_count);
+                        if (element.data == "if") {
+                            element.set_sub_expressions(sub_expressions);
+                            sub_expressions.clear();
+                        }
+                    }
+                    if (operators.top().type == RIGHT_PARENTHESIS) {
+                        throw ParsingException("Mismatched parentheses", operators.top().position);
+                    }
+                    ret.push_back(element);
+                    operators.pop();
+                }
+                std::reverse(ret.begin(), ret.end());
+                return ret;
+            case SCOPE_END:
+                sub_expressions = shunting_yard_algorithm(input);
+                std::cout << "Finished parsing subexpression with " << sub_expressions.size() << " elements" << std::endl;
+                break;
             case UNARY:
                 while (operators.size() > 0) {
                     MathLexerElement next_op = operators.top();
@@ -100,6 +125,10 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                         auto element = ParsedCodeElement(next_op);
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size() - last_expression_count);
+                        if (element.data == "if") {
+                            element.set_sub_expressions(sub_expressions);
+                            sub_expressions.clear();
+                        }
                         ret.push_back(element);
                     } else {
                         break;
@@ -134,6 +163,10 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                     if (element.type == FUNCTION) {
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size() - last_expression_count);
+                        if (element.data == "if") {
+                            element.set_sub_expressions(sub_expressions);
+                            sub_expressions.clear();
+                        }
                     }
                     ret.push_back(element);
                     operators.pop();
@@ -152,6 +185,10 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                     if (element.type == FUNCTION) {
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size() - last_expression_count);
+                        if (element.data == "if") {
+                            element.set_sub_expressions(sub_expressions);
+                            sub_expressions.clear();
+                        }
                     }
                     ret.push_back(element);
                     operators.pop();
@@ -184,6 +221,10 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                         ParsedCodeElement element = ParsedCodeElement(next_op);
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size()-last_expression_count);
+                        if (element.data == "if") {
+                            element.set_sub_expressions(sub_expressions);
+                            sub_expressions.clear();
+                        }
                         ret.push_back(element);
                     }
                 }
@@ -202,6 +243,10 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                         ParsedCodeElement element = ParsedCodeElement(candidate);
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size() - last_expression_count);
+                        if (element.data == "if") {
+                            element.set_sub_expressions(sub_expressions);
+                            sub_expressions.clear();
+                        }
                         ret.push_back(element);
                         operators.pop();
                         continue;
@@ -225,6 +270,10 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
         if (element.type == FUNCTION) {
             element.set_num_args(last_closed_bracket_args_count);
             element.set_num_expressions(ret.size() - last_expression_count);
+            if (element.data == "if") {
+                element.set_sub_expressions(sub_expressions);
+                sub_expressions.clear();
+            }
         }
         if (operators.top().type == RIGHT_PARENTHESIS) {
             throw ParsingException("Mismatched parentheses", operators.top().position);

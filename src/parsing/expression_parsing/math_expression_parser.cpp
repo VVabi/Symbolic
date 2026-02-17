@@ -79,11 +79,12 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
 
     auto p = shunting_yard_algorithm(formula_deque);
 
-    LexerDeque<ParsedCodeElement> polish;
-
     for (const auto& x : p) {
-        polish.push_back(x);
+        std::cout << "Parsed element of type " << expression_type_to_string(x.type) << " with data " << x.data << std::endl;
     }
+
+    LexerDeque<ParsedCodeElement> polish(p);
+
 
     return parse_formula_internal(polish, context, type, powerseries_expansion_size, default_modulus);
 }

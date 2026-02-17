@@ -32,6 +32,10 @@ class PolishNotationElement {
     std::string get_data() const {
         return base_element.data;
     }
+
+    LexerDeque<ParsedCodeElement> get_sub_expressions() const {
+        return base_element.sub_expressions;
+    }
 };
 
 std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<ParsedCodeElement>& cmd_list,

@@ -103,23 +103,33 @@ class PolishWhile: public PolishFunction {
 class PolishIf: public PolishFunction {
  public:
     PolishIf(ParsedCodeElement element) :
-        PolishFunction(element, 2, UINT32_MAX) { }
+        PolishFunction(element, 1, UINT32_MAX) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        uint32_t original_index  = cmd_list.get_index();
+        //uint32_t original_index  = cmd_list.get_index();
         auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
+
+        auto subexpressions = get_sub_expressions();
+        std::cout << "IF statement with " << subexpressions.size() << " subexpressions and " << get_num_args() << " args" << std::endl;
+        /*for (size_t ind = 0; ind < subexpressions.size(); ind++) {
+            std::cout << "Expression of type " << expression_type_to_string(subexpressions.peek(ind)->type) << " with data " << subexpressions.peek(ind)->data << std::endl;
+        }*/
+
         if (condition->as_boolean()) {
-            for (int64_t arg = 0; arg < get_num_args() - 1; arg++) {
-                iterate_wrapped(cmd_list, context, fp_size);
+            while (!subexpressions.is_empty()) {
+                iterate_wrapped(subexpressions, context, fp_size);
             }
+            /*for (int64_t arg = 0; arg < get_num_args() - 1; arg++) {
+                iterate_wrapped(cmd_list, context, fp_size);
+            }*/
         }
 
-        cmd_list.set_index(original_index + get_num_expressions());
+        //cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };
