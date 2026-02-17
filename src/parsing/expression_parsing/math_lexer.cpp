@@ -45,6 +45,10 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 throw ParsingException("Unterminated string literal", distance);
             }
             formula.push_back(MathLexerElement(STRING, strm.str(), distance));
+        } else if (current == '{') {
+            formula.push_back(MathLexerElement(SCOPE_START, "", distance));
+        } else if (current == '}') {
+            formula.push_back(MathLexerElement(SCOPE_END, "", distance));
         } else if (isdigit(current)) {
             std::string num = "";
 

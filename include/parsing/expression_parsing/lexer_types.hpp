@@ -12,7 +12,9 @@ enum expression_type {
     LEFT_PARENTHESIS,       ///< Left parenthesis
     RIGHT_PARENTHESIS,      ///< Right parenthesis
     SEPARATOR,              ///< Separator
-    STRING                  ///< String literal
+    STRING,                 ///< String literal
+    SCOPE_START,            ///< Scope start (used for function definitions and control flow constructs)
+    SCOPE_END               ///< Scope end (used for function definitions and control flow constructs)
 };
 
 inline std::string expression_type_to_string(expression_type type) {
@@ -35,6 +37,10 @@ inline std::string expression_type_to_string(expression_type type) {
             return "SEPARATOR";
         case STRING:
             return "STRING";
+        case SCOPE_START:
+            return "SCOPE_START";
+        case SCOPE_END:
+            return "SCOPE_END";
     }
 
     return "";  // unreachable

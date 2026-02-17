@@ -12,6 +12,8 @@ class LexerDeque {
  public:
     LexerDeque(): data(std::vector<T>()), index(0) {}
 
+    LexerDeque(const std::vector<T>&& initial_data): data(initial_data), index(0) {}
+
     void push_back(const T& element) {
         data.push_back(element);
     }
@@ -50,5 +52,14 @@ class LexerDeque {
             return std::nullopt;
         }
         return data[index + offset];
+    }
+
+    void clear() {
+        data.clear();
+        index = 0;
+    }
+
+    size_t size() const {
+        return data.size() - index;
     }
 };
