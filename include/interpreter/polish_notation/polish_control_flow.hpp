@@ -92,8 +92,6 @@ class PolishWhile: public PolishFunction {
             subexpressions.set_index(0);
         }
 
-        // set execution index to after the loop body
-        cmd_list.set_index(original_index + get_num_expressions());
         return std::make_shared<SymVoidObject>();
     }
 };

@@ -38,10 +38,10 @@ struct ParsedCodeElement {
     ptrdiff_t num_expressions;    ///< Number of expressions between current brackets (used for control flow constructs)
     LexerDeque<ParsedCodeElement> sub_expressions;  ///< Sub expressions (used for control flow constructs)
 
-    explicit ParsedCodeElement(const MathLexerElement& element, ShuntingYardStackData& stack_data)
+    /*explicit ParsedCodeElement(const MathLexerElement& element, ShuntingYardStackData& stack_data)
         : type(element.type), data(element.data), position(element.position),
           num_args(stack_data.get_num_args()), num_expressions(stack_data.get_num_expressions()),
-          sub_expressions(stack_data.get_sub_expressions()) {}
+          sub_expressions(stack_data.get_sub_expressions()) {}*/
 
     explicit ParsedCodeElement(const MathLexerElement& element)
         : type(element.type), data(element.data), position(element.position), num_args(-1), num_expressions(-1) {}
@@ -54,7 +54,7 @@ struct ParsedCodeElement {
         num_expressions = num;
     }
 
-    void set_sub_expressions(const LexerDeque<ParsedCodeElement>& sub_exprs) {
-        sub_expressions = LexerDeque<ParsedCodeElement>(sub_exprs);
+    void set_sub_expressions(std::vector<ParsedCodeElement>&& sub_exprs) {
+        sub_expressions = LexerDeque<ParsedCodeElement>(std::move(sub_exprs));
     }
 };
