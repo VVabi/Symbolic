@@ -161,6 +161,11 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                     throw EvalException("Number of expressions inside if statement not set", element.position);
                 }
                 return std::make_shared<PolishIf>(element);
+            } else if (element.data == "elif") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside if statement not set", element.position);
+                }
+                return std::make_shared<PolishIf>(element);
             } else if (element.data == "eq") {
                 return std::make_shared<PolishEq>(element);
             } else if (element.data == "neq") {

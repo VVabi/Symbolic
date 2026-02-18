@@ -98,9 +98,10 @@ class PolishWhile: public PolishFunction {
 
 
 class PolishIf: public PolishFunction {
+bool condition_already_fulfilled;
  public:
     PolishIf(ParsedCodeElement element) :
-        PolishFunction(element, 1, UINT32_MAX) { }
+        PolishFunction(element, 1, UINT32_MAX), condition_already_fulfilled(false) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
@@ -111,13 +112,28 @@ class PolishIf: public PolishFunction {
         }
 
         auto subexpressions = get_sub_expressions();
-
-        if (condition->as_boolean()) {
+        bool entered_branch = false;
+        if (condition->as_boolean() && !condition_already_fulfilled) {
+            entered_branch = true;
             while (!subexpressions.is_empty()) {
                 iterate_wrapped(subexpressions, context, fp_size);
             }
         }
 
+        auto next = cmd_list.peek();
+        if (next && next.value()->get_data() == "elif") {
+            auto elif_branch = std::dynamic_pointer_cast<PolishIf>(next.value());
+            if (!elif_branch) {
+                throw EvalException("Invalid elif branch after if statement", next.value()->get_position());
+            }
+            elif_branch->set_condition_already_fulfilled(entered_branch || condition_already_fulfilled);
+            iterate_wrapped(cmd_list, context, fp_size);
+        }
+
         return std::make_shared<SymVoidObject>();
+    }
+
+    void set_condition_already_fulfilled(bool fulfilled) {
+        condition_already_fulfilled = fulfilled;
     }
 };
