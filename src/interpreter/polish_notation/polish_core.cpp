@@ -225,6 +225,7 @@ std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNota
     #if DEBUG_EXECUTION
     element->debug_print();
     #endif
+    context->increment_steps();
     try {
         return element->handle_wrapper(cmd_list, context, fp_size);
     } catch (ParsingTypeException& e) {

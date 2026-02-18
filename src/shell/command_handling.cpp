@@ -20,5 +20,3 @@ CommandResult handle_command(const std::string& command) {
     CommandResult result = command_handler.handle_command(parts);
     return result;
 }
-
-

@@ -48,14 +48,9 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
  */
 std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>& input,
                                     std::shared_ptr<InterpreterContext>& context,
-                                    const Datatype type,
-                                    const uint32_t powerseries_expansion_size,
-                                    const int64_t default_modulus) {
-    UNUSED(default_modulus);
-    UNUSED(type);
+                                    const uint32_t powerseries_expansion_size) {
+
     std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
-
-
     LexerDeque<std::shared_ptr<PolishNotationElement>> polish_input;
     while (!input.is_empty()) {
         auto element = input.front();
@@ -71,10 +66,8 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
                     const uint32_t offset,
-                    const Datatype type,
                     std::shared_ptr<InterpreterContext>& context,
-                    const uint32_t powerseries_expansion_size,
-                    const int64_t default_modulus) {
+                    const uint32_t powerseries_expansion_size) {
     auto formula = parse_math_expression_string(input_string, offset);
 
     #if DEBUG_MATH_LEXER_OUTPUT
@@ -102,7 +95,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     #endif
 
     LexerDeque<ParsedCodeElement> polish(std::move(p));
-    return parse_formula_internal(polish, context, type, powerseries_expansion_size, default_modulus);
+    return parse_formula_internal(polish, context, powerseries_expansion_size);
 }
 
 /**
@@ -117,11 +110,9 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  * @return The parsed formula as a string.
  */
 std::string parse_formula(const std::string& input,
-                    const Datatype type,
                     std::shared_ptr<InterpreterContext>& context,
-                    const uint32_t powerseries_expansion_size,
-                    const int64_t default_modulus) {
-    auto ret = parse_formula_as_sym_object(input, 0, type, context, powerseries_expansion_size, default_modulus);
+                    const uint32_t powerseries_expansion_size) {
+    auto ret = parse_formula_as_sym_object(input, 0, context, powerseries_expansion_size);
 
     auto ret_str = ret->to_string();
     context->set_variable("ANS", ret);

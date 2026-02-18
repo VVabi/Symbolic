@@ -12,6 +12,8 @@
 #include "shell/command_handling.hpp"
 #include "common/common_datatypes.hpp"
 
+struct CommandResult;
+
 /**
  * @brief Structure representing the parameters for the shell.
  */
