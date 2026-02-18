@@ -1,8 +1,8 @@
 a = 13*555457888,
 b = 13*75657999,
-while(neq(b,0),
+while(neq(b,0)) {
     t = b,
     b = ModValue(Mod(a,b)),
     a = t
-),
-print(a)
+},
+println(a)

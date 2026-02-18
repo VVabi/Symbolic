@@ -47,7 +47,8 @@ void test_script_interpretation() {
         }
     }
 
-
+    std::vector<std::string> fizzbuzz_expected({"1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz", "11", "Fizz", "13", "14", "Fizz Buzz", "16", "17", "Fizz", "19", "Buzz"});
+    test_single_script("../examples/fizzbuzz.sym", fizzbuzz_expected);
     test_single_script("../examples/less_naive_prime_counting.sym", std::vector<std::string>({"168"}));
     test_single_script("../examples/bf_interpreter.sym", std::vector<std::string>({"H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", "!", "\n"}));
 }
