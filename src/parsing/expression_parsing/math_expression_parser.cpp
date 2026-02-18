@@ -49,7 +49,6 @@ Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
 std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>& input,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const uint32_t powerseries_expansion_size) {
-
     std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
     LexerDeque<std::shared_ptr<PolishNotationElement>> polish_input;
     while (!input.is_empty()) {

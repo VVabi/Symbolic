@@ -338,8 +338,8 @@ class FormulaParser {
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
         std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
-        std::cout << "Average time per step: " << (context->get_steps() > 0 ? (double) duration / context->get_steps() : 0) << " ms" << std::endl;
-        std::cout << "Average steps per s: " << (duration > 0 ? (double) context->get_steps()*1000.0 / duration : 0) << " steps/s" << std::endl;
+        std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
+        std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
         #endif
         return ret;
     }
