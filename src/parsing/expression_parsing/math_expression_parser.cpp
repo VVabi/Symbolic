@@ -69,6 +69,13 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const int64_t default_modulus) {
     auto formula = parse_math_expression_string(input_string, offset);
 
+    #if DEBUG_MATH_LEXER_OUTPUT
+    std::cout << "Lexer output:\n";
+    for (const auto& element : formula) {
+        std::cout << "MathLexerElement(type=" << element.type << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
+    }
+    #endif
+
     std::reverse(formula.begin(), formula.end());
 
     LexerDeque<MathLexerElement> formula_deque;
@@ -78,6 +85,14 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     }
 
     auto p = shunting_yard_algorithm(formula_deque);
+
+    #if DEBUG_SHUNTING_YARD_OUTPUT
+    std::cout << "Shunting Yard output:\n";
+    for (const auto & element : p) {
+        element.debug_print(0);
+    }
+    #endif
+
     LexerDeque<ParsedCodeElement> polish(std::move(p));
     return parse_formula_internal(polish, context, type, powerseries_expansion_size, default_modulus);
 }

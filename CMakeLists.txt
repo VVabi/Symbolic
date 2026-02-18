@@ -3,6 +3,9 @@ project(Symbolic VERSION 0.1.0 LANGUAGES C CXX)
 include_directories(include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+add_compile_definitions(DEBUG_SHUNTING_YARD_OUTPUT=false)
+add_compile_definitions(DEBUG_MATH_LEXER_OUTPUT=false)
+
 add_executable(Symbolic
         src/Symbolic.cpp
         src/string_utils/string_utils.cpp
