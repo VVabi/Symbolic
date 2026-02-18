@@ -16,7 +16,7 @@ class PolishPowerSeriesFunction: public PolishFunction {
  public:
     PolishPowerSeriesFunction(ParsedCodeElement element, PowerSeriesBuiltinFunctionType type) : PolishFunction(element, 1, 1), type(type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto result = iterate_wrapped(cmd_list, context, fp_size);
@@ -34,7 +34,7 @@ class PolishLandau: public PolishFunction {
  public:
     PolishLandau(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto result = iterate_wrapped(cmd_list, context, fp_size);
@@ -88,7 +88,7 @@ class PolishCoefficient: public PolishFunction {
 
  public:
     PolishCoefficient(ParsedCodeElement element, bool as_egf): PolishFunction(element, 2, 2), as_egf(as_egf) {}
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
@@ -132,7 +132,7 @@ class PolishSymbolicMethodOperator: public PolishFunction {
  public:
     PolishSymbolicMethodOperator(ParsedCodeElement element,
         const SymbolicMethodOperator op): PolishFunction(element, 1, 2), op(op) {}
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
@@ -161,7 +161,7 @@ class PolishEval: public PolishFunction {
     PolishEval(ParsedCodeElement element): PolishFunction(element, 2, 2) {
     }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto to_evaluate   = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context, fp_size));
@@ -183,7 +183,7 @@ class PolishMod: public PolishFunction {
  public:
     PolishMod(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto arg_raw    = iterate_wrapped(cmd_list, context, fp_size);
@@ -224,7 +224,7 @@ class PolishModValue: public PolishFunction {
  public:
     PolishModValue(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto arg_raw    = iterate_wrapped(cmd_list, context, fp_size);

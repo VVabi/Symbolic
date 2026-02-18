@@ -20,7 +20,7 @@ class PolishNumber: public PolishNotationElement {
  public:
     PolishNumber(ParsedCodeElement element): PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context,
                                     const size_t fp_size) {
                                         UNUSED(fp_size);
@@ -41,7 +41,7 @@ class PolishNumber: public PolishNotationElement {
 class PolishVariable: public PolishNotationElement {
  public:
     PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
@@ -62,7 +62,7 @@ class PolishVariable: public PolishNotationElement {
 class PolishString: public PolishNotationElement {
  public:
     PolishString(ParsedCodeElement element): PolishNotationElement(element) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context,
                                         const size_t fp_size) {
         UNUSED(cmd_list);
@@ -214,15 +214,14 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
     throw EvalException("Unknown element type " + element.data, element.position);
 }
 
-std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<ParsedCodeElement>& cmd_list,
+std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
         std::shared_ptr<InterpreterContext> &context,
         const size_t fp_size) {
     if (cmd_list.is_empty()) {
         throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
     }
-    auto current = cmd_list.front();
+    auto element = cmd_list.front();
     cmd_list.pop_front();
-    auto element = polish_notation_element_from_lexer(current);
     try {
         return element->handle_wrapper(cmd_list, context, fp_size);
     } catch (ParsingTypeException& e) {
@@ -231,7 +230,7 @@ std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<ParsedCodeElement>& cmd_li
         throw EvalException(e.what(), element->get_position());
     } catch (SubsetArgumentException& e) {
         auto pos = element->get_position();
-        auto underscore_occurence = current.data.find("_");
+        auto underscore_occurence = element->get_data().find("_");
         if (underscore_occurence != std::string::npos) {
             pos += underscore_occurence;
         }

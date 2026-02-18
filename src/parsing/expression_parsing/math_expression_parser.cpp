@@ -54,8 +54,16 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
     UNUSED(default_modulus);
     UNUSED(type);
     std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
+
+
+    LexerDeque<std::shared_ptr<PolishNotationElement>> polish_input;
     while (!input.is_empty()) {
-        ret = iterate_wrapped(input, context, powerseries_expansion_size);
+        auto element = input.front();
+        input.pop_front();
+        polish_input.push_back(polish_notation_element_from_lexer(element));
+    }
+    while (!polish_input.is_empty()) {
+        ret = iterate_wrapped(polish_input, context, powerseries_expansion_size);
     }
     return ret;
 }

@@ -26,7 +26,7 @@ class PolishEq: public PolishFunction {
     PolishEq(ParsedCodeElement element) :
         PolishFunction(element, 2, 2) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
@@ -45,7 +45,7 @@ class PolishNeq: public PolishFunction {
     PolishNeq(ParsedCodeElement element) :
         PolishFunction(element, 2, 2) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
@@ -100,7 +100,7 @@ class PolishComparison: public PolishFunction {
     PolishComparison(ParsedCodeElement element, ComparisonOperatorType operator_type) :
         PolishFunction(element, 2, 2), operator_type(operator_type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto first  = iterate_wrapped(cmd_list, context, fp_size);
