@@ -98,7 +98,8 @@ class PolishWhile: public PolishFunction {
 
 
 class PolishIf: public PolishFunction {
-bool condition_already_fulfilled;
+    bool condition_already_fulfilled;
+
  public:
     PolishIf(ParsedCodeElement element) :
         PolishFunction(element, 1, UINT32_MAX), condition_already_fulfilled(false) { }
