@@ -11,8 +11,6 @@ static ShellParameters parameters;
 
 void initialize_shell_parameters() {
     parameters.powerseries_expansion_size = DEFAULT_POWERSERIES_PRECISION;
-    parameters.parsing_type               = Datatype::DYNAMIC;
-    parameters.default_modulus            = 2;
 }
 
 const ShellParameters* get_shell_parameters() {
@@ -41,45 +39,6 @@ static std::map<std::string, ParameterDescription> parameter_descriptions = {
                         return CommandResult{"Power series precision must be positive", false};
                     }
                     parameters.powerseries_expansion_size = new_value;
-                    return CommandResult{"Parameter updated", true};
-                } catch (const std::exception& e) {
-                    return CommandResult{"Invalid value for integer", false};
-                }
-            }
-        }
-    },
-    {   "parsingtype",
-        {
-            "enum(dynamic, double, rational, mod)",
-            "The type of number to parse",
-            []() -> std::string {
-                return datatypeToString(parameters.parsing_type);
-            },
-            [](const std::string& value) -> CommandResult {
-                Datatype new_type;
-                if (!stringToDatatype(value, new_type)) {
-                    return CommandResult{"Invalid parsing type", false};
-                }
-                parameters.parsing_type = new_type;
-                return CommandResult{"Parameter updated", true};
-            }
-        }
-    },
-    {
-        "defaultmod",
-        {
-            "int64",
-            "Positive integer; the default modulus for modular arithmetic",
-            []() -> std::string {
-                return std::to_string(parameters.default_modulus);
-            },
-            [](const std::string& value) -> CommandResult {
-                try {
-                    auto new_value = std::stoi(value);
-                    if (new_value <= 0) {
-                        return CommandResult{"Default modulus must be positive", false};
-                    }
-                    parameters.default_modulus = new_value;
                     return CommandResult{"Parameter updated", true};
                 } catch (const std::exception& e) {
                     return CommandResult{"Invalid value for integer", false};

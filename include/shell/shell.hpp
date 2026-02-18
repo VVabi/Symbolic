@@ -4,6 +4,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <memory>
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <map>
@@ -315,17 +316,32 @@ class FormulaParser {
         context = std::make_shared<InterpreterContext>(print_handler);
     }
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, Datatype parsing_type, uint32_t powerseries_expansion_size, uint32_t default_modulus) {
+    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, const uint32_t powerseries_expansion_size) {
+        #if SHELL_DEBUG_OUTPUT
+        auto now = std::chrono::high_resolution_clock::now();
+        #endif
+        context->reset_steps();
+        std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, parsing_type, context, powerseries_expansion_size, default_modulus);
-             return std::make_unique<SuccessfulFormulaParsingResult>(res);
+             auto res = parse_formula(input, context, powerseries_expansion_size);
+             ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
-            return std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
+            ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
         } catch (ReachedUnreachableException &e) {
-            return std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
+            ret = std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
         } catch (ParsingTypeException &e) {
-            return std::make_unique<FormulaParsingTypeExceptionResult>(e);
+            ret = std::make_unique<FormulaParsingTypeExceptionResult>(e);
         }
+
+
+        #if SHELL_DEBUG_OUTPUT
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
+        std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
+        std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
+        std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
+        #endif
+        return ret;
     }
 };
 

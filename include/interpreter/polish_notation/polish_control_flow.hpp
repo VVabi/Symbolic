@@ -19,26 +19,26 @@ class PolishFor: public PolishFunction {
     PolishFor(ParsedCodeElement element) :
         PolishFunction(element, 3, UINT32_MAX) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto variable = cmd_list.front();
         cmd_list.pop_front();
-        if (variable.type != VARIABLE) {
-            throw EvalException("Expected variable name as first argument in for loop", variable.position);
+        if (variable->get_type() != VARIABLE) {
+            throw EvalException("Expected variable name as first argument in for loop", variable->get_position());
         }
 
-        auto loop_index_var_name = variable.data;
+        auto loop_index_var_name = variable->get_data();
 
         auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
         auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
 
         if (!start || !end) {
-            throw EvalException("Expected integer start and end values in for loop", variable.position);
+            throw EvalException("Expected integer start and end values in for loop", variable->get_position());
         }
 
         if (start->as_value().get_denominator() != BigInt(1) || end->as_value().get_denominator() != BigInt(1)) {
-            throw EvalException("Expected integer start and end values in for loop", variable.position);
+            throw EvalException("Expected integer start and end values in for loop", variable->get_position());
         }
 
         auto start_v = start->as_value().get_numerator();
@@ -49,7 +49,7 @@ class PolishFor: public PolishFunction {
             start_idx = start_v.as_int64();
             end_idx = end_v.as_int64();
         } catch (const std::runtime_error& e) {
-            throw EvalException("Start and end values in for loop must be within int64 range", variable.position);
+            throw EvalException("Start and end values in for loop must be within int64 range", variable->get_position());
         }
 
         auto subexpressions = get_sub_expressions();
@@ -70,7 +70,7 @@ class PolishWhile: public PolishFunction {
     PolishWhile(ParsedCodeElement element) :
         PolishFunction(element, 1, UINT32_MAX) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         uint32_t original_index  = cmd_list.get_index();
@@ -102,7 +102,7 @@ class PolishIf: public PolishFunction {
     PolishIf(ParsedCodeElement element) :
         PolishFunction(element, 1, UINT32_MAX) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
         auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));

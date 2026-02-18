@@ -59,7 +59,7 @@ bool SymbolicShellEvaluator::run_single_input() {
             break;
         case NO_PREFIX:
             auto par = get_shell_parameters();
-            auto x = parser.parse(result.processed_input, par->parsing_type, par->powerseries_expansion_size, par->default_modulus);
+            auto x = parser.parse(result.processed_input, par->powerseries_expansion_size);
             shell_output->handle_result(std::move(x), result.print_result());
             break;
     }

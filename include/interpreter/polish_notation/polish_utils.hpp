@@ -47,7 +47,7 @@ class PolishPrint: public PolishFunction {
     PolishPrint(ParsedCodeElement element, bool line_break) :
         PolishFunction(element, 1, 2), line_break(line_break) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context,
                                     const size_t fp_size) {
         auto first = iterate_wrapped(cmd_list, context, fp_size);

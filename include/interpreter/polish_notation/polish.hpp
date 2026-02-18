@@ -2,19 +2,31 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <ostream>
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/parsed_code_element.hpp"
+#include "exceptions/parsing_exceptions.hpp"
 #include "interpreter/context.hpp"
+
+class PolishNotationElement;
+
+std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const ParsedCodeElement element);
 
 class PolishNotationElement {
     ParsedCodeElement base_element;
+    LexerDeque<std::shared_ptr<PolishNotationElement>> sub_expressions;
 
  public:
-    PolishNotationElement(ParsedCodeElement element): base_element(element) { }
+    PolishNotationElement(ParsedCodeElement element): base_element(element) {
+        for (uint32_t i = 0; i < element.sub_expressions.size(); i++) {
+            sub_expressions.push_back(polish_notation_element_from_lexer(element.sub_expressions.peek(i).value()));
+        }
+    }
+
     virtual ~PolishNotationElement() { }
 
-    virtual inline std::shared_ptr<SymObject> handle_wrapper(LexerDeque<ParsedCodeElement>& cmd_list,
+    virtual inline std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) = 0;
     uint32_t get_position() const {
@@ -33,11 +45,25 @@ class PolishNotationElement {
         return base_element.data;
     }
 
-    LexerDeque<ParsedCodeElement> get_sub_expressions() const {
-        return base_element.sub_expressions;
+    LexerDeque<std::shared_ptr<PolishNotationElement>>& get_sub_expressions() {
+        if (sub_expressions.get_index() != 0) {
+            throw ParsingException("Sub expressions have already been accessed and not reset", get_position());
+        }
+        return sub_expressions;
+    }
+
+    expression_type get_type() const {
+        return base_element.type;
+    }
+
+    virtual void debug_print(std::ostream& os) const {
+        os << "Executing PolishNotationElement(type=" << base_element.type << ", data=\"" << base_element.data
+           << "\", position=" << base_element.position << ", num_args=" << base_element.num_args
+           << ", num_expressions=" << base_element.num_expressions << ")\n";
     }
 };
 
-std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<ParsedCodeElement>& cmd_list,
+
+std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
         std::shared_ptr<InterpreterContext>& context,
         const size_t fp_size);

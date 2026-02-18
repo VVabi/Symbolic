@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <cstdint>
 #include "types/sym_types/sym_object.hpp"
 #include "types/sym_types/sym_boolean.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -26,6 +27,7 @@ class InterpreterContext {
     std::map<std::string, std::shared_ptr<SymObject>> variables;
     std::map<std::string, std::shared_ptr<SymObject>> constants;
     std::shared_ptr<InterpreterPrintHandler> output_handler;
+    uint64_t steps = 0;
 
  public:
     /**
@@ -99,5 +101,17 @@ class InterpreterContext {
             throw ParsingTypeException("Cannot modify constant: " + name);
         }
         variables[name] = value;
+    }
+
+    inline void increment_steps() {
+        steps++;
+    }
+
+    uint64_t get_steps() const {
+        return steps;
+    }
+
+    void reset_steps() {
+        steps = 0;
     }
 };
