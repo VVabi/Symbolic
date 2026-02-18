@@ -1,3 +1,4 @@
+#include <iostream>
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "exceptions/parsing_exceptions.hpp"
@@ -223,7 +224,7 @@ std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNota
     auto element = cmd_list.front();
     cmd_list.pop_front();
     #if DEBUG_EXECUTION
-    element->debug_print();
+    element->debug_print(std::cout);
     #endif
     context->increment_steps();
     try {

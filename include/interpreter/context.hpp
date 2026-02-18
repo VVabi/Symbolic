@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <cstdint>
 #include "types/sym_types/sym_object.hpp"
 #include "types/sym_types/sym_boolean.hpp"
 #include "exceptions/parsing_type_exception.hpp"

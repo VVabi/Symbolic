@@ -19,8 +19,6 @@ struct CommandResult;
  */
 struct ShellParameters {
     uint32_t powerseries_expansion_size; /**< Size of the power series expansion. */
-    Datatype parsing_type; /**< Type of parsing used. */
-    int64_t default_modulus; /**< Default modulus value. */
 };
 
 /**

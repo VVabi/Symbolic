@@ -2,9 +2,11 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <ostream>
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/parsed_code_element.hpp"
+#include "exceptions/parsing_exceptions.hpp"
 #include "interpreter/context.hpp"
 
 class PolishNotationElement;
@@ -54,7 +56,7 @@ class PolishNotationElement {
         return base_element.type;
     }
 
-    virtual void debug_print(std::ostream& os = std::cout) const {
+    virtual void debug_print(std::ostream& os) const {
         os << "Executing PolishNotationElement(type=" << base_element.type << ", data=\"" << base_element.data
            << "\", position=" << base_element.position << ", num_args=" << base_element.num_args
            << ", num_expressions=" << base_element.num_expressions << ")\n";
