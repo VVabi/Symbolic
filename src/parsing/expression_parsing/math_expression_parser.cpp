@@ -97,7 +97,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     #if DEBUG_SHUNTING_YARD_OUTPUT
     std::cout << "Shunting Yard output:\n";
     for (const auto & element : p) {
-        element.debug_print(0);
+        element.debug_print(std::cout, 0);
     }
     #endif
 

@@ -5,6 +5,7 @@ include_directories(include)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_compile_definitions(DEBUG_SHUNTING_YARD_OUTPUT=false)
 add_compile_definitions(DEBUG_MATH_LEXER_OUTPUT=false)
+add_compile_definitions(DEBUG_EXECUTION=false)
 
 add_executable(Symbolic
         src/Symbolic.cpp

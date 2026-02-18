@@ -53,6 +53,12 @@ class PolishNotationElement {
     expression_type get_type() const {
         return base_element.type;
     }
+
+    virtual void debug_print(std::ostream& os = std::cout) const {
+        os << "Executing PolishNotationElement(type=" << base_element.type << ", data=\"" << base_element.data
+           << "\", position=" << base_element.position << ", num_args=" << base_element.num_args
+           << ", num_expressions=" << base_element.num_expressions << ")\n";
+    }
 };
 
 
