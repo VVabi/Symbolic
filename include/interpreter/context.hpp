@@ -47,9 +47,10 @@ class InterpreterContext {
     }
 
     void pop_variables() {
-        if (!variables.empty()) {
-            variables.pop();
+        if (variables.empty()) {
+            throw ParsingTypeException("Attempted to pop variable scope when no scopes are available");
         }
+        variables.pop();
     }
 
     std::shared_ptr<PolishCustomFunction> get_custom_function(const std::string& name) {

@@ -76,13 +76,17 @@ class PolishCustomFunction: public PolishFunction {
 
             context->push_variables();
 
-            for (uint32_t i = 0; i < existing_func->arg_names.size(); i++) {
-                context->set_variable(existing_func->arg_names[i], arg_values[i]);
+            for (uint32_t ind = 0; ind < existing_func->arg_names.size(); ind++) {
+                context->set_variable(existing_func->arg_names[ind], arg_values[ind]);
             }
+
+            // This is a bit subtle for recursive calls.
+            // The way we store the data (as a shared_ptr) in the lexer deque,
+            // the data is always the *SAME*, but the index is *COPIED* in the line below,
+            // so each call stack has its own index.
+            // This avoids unnecessary copying of the data while still allowing recursive calls.
             auto subexpressions = existing_func->get_sub_expressions();
-            if (subexpressions.get_index() != 0) {
-                throw EvalException("Sub expressions have already been accessed and not reset for function: " + get_data(), this->get_position());
-            }
+
             std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
             while (!subexpressions.is_empty()) {
                 ret = iterate_wrapped(subexpressions, context, fp_size);

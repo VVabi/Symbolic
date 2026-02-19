@@ -45,7 +45,7 @@ class PolishNotationElement {
         return base_element.data;
     }
 
-    LexerDeque<std::shared_ptr<PolishNotationElement>>& get_sub_expressions() {
+    LexerDeque<std::shared_ptr<PolishNotationElement>> get_sub_expressions() {
         if (sub_expressions.get_index() != 0) {
             throw ParsingException("Sub expressions have already been accessed and not reset", get_position());
         }
