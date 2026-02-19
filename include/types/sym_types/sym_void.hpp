@@ -10,7 +10,7 @@ class SymVoidObject: public SymObject {
     SymVoidObject() { }
 
     std::string to_string() const override {
-        return "(void)";
+        return "null";
     }
 
     std::shared_ptr<SymObject> clone() const override {

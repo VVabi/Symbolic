@@ -6,6 +6,7 @@
 #include <stack>
 #include "types/sym_types/sym_object.hpp"
 #include "types/sym_types/sym_boolean.hpp"
+#include "types/sym_types/sym_void.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 
 class PolishCustomFunction;
@@ -68,6 +69,7 @@ class InterpreterContext {
         constants["true"] = true_const;
         std::shared_ptr<SymBooleanObject> false_const = std::make_shared<SymBooleanObject>(false);
         constants["false"] = false_const;
+        constants["null"] = std::make_shared<SymVoidObject>();
     }
 
     /**

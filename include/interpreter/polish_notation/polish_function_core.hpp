@@ -28,14 +28,14 @@ class PolishFunction: public PolishNotationElement {
 class PolishCustomFunction: public PolishFunction {
  public:
     std::vector<std::string> arg_names;
-    PolishCustomFunction(ParsedCodeElement element) : PolishFunction(element, 0, UINT32_MAX) { }
+    PolishCustomFunction(ParsedCodeElement element) : PolishFunction(element, 0, UINT32_MAX) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) override {
         auto subexpressions = get_sub_expressions();
 
-        if (subexpressions.size() >0) {
+        if (!subexpressions.is_empty()) {
             if (get_num_expressions() != get_num_args()) {
                 throw InvalidFunctionArgException("Function defined with incorrect number of expressions: "+std::to_string(get_num_expressions())+
                     ", expected " + std::to_string(get_num_args()), this->get_position());
@@ -60,7 +60,7 @@ class PolishCustomFunction: public PolishFunction {
         } else {
             auto existing_func = context->get_custom_function(get_data());
             if (!existing_func) {
-                throw EvalException("Undefined function: " + get_data(), this->get_position());
+                throw EvalException("Undefined or empty function: " + get_data(), this->get_position());
             }
 
             if (get_num_args() != existing_func->get_num_args()) {
