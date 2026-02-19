@@ -105,12 +105,9 @@ Every `.cpp` and `.hpp` file begins with a Doxygen file-doc comment:
 ```
 
 ### Include guards
-All headers use `#ifndef` include guards following the pattern derived from the path:
+All new headers should use `#pragma once` (preferred over legacy `#ifndef` guards):
 ```cpp
-#ifndef INCLUDE_SUBSYSTEM_FILENAME_HPP_
-#define INCLUDE_SUBSYSTEM_FILENAME_HPP_
-// ...
-#endif  // INCLUDE_SUBSYSTEM_FILENAME_HPP_
+#pragma once
 ```
 
 ### Class documentation
@@ -126,7 +123,7 @@ Core types (`PowerSeries<T>`, `Polynomial<T>`) are fully generic over the coeffi
 
 ## Adding a New Feature — Typical Workflow
 
-1. **Header first**: add the declaration to the appropriate file under `include/`. Follow the existing Doxygen doc style and include-guard convention.
+1. **Header first**: add the declaration to the appropriate file under `include/`. Follow the existing Doxygen doc style and use `#pragma once` for header protection.
 2. **Implementation**: add the `.cpp` file under `src/` (same subdirectory as the header). Register it in **all relevant targets** in `CMakeLists.txt` (`Symbolic`, `Symbolic_tests`, `Symbolic_playground` as needed).
 3. **Tests**: add a GoogleTest `.cpp` file under `src/test/<subsystem>/`. Register it in the `Symbolic_tests` target in `CMakeLists.txt`. Include `<gtest/gtest.h>` and use `TEST(SuiteName, CaseName)` macros with `EXPECT_*` / `ASSERT_*` assertions.
 4. **Build & test**: `cmake --build build --target Symbolic_tests && ./build/Symbolic_tests`
@@ -147,6 +144,7 @@ Core types (`PowerSeries<T>`, `Polynomial<T>`) are fully generic over the coeffi
 | `CycleIndex` | `include/polya/cycle_index.hpp` | Pólya cycle index polynomial |
 | `SymbolicShellEvaluator` | `include/shell/shell.hpp` | Top-level REPL evaluator |
 | `MathExpressionParser` | `include/parsing/expression_parsing/math_expression_parser.hpp` | Parse and evaluate expressions |
+| Polish notation interpreter | `include/parsing/polish_notation/polish_notation.hpp`, `src/parsing/polish_notation/polish_core.cpp` | Core expression interpretation/evaluation engine (RPN evaluator) |
 
 ## Known Issues and Workarounds
 
