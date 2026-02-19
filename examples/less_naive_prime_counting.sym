@@ -1,5 +1,4 @@
-count = 0,
-for(p,2,1000) {
+check_prime(p) {
     prime=true,
     i=2,
     while(lte(i*i,p)) {
@@ -8,7 +7,11 @@ for(p,2,1000) {
         },
         i=i+1
     },
-    if(prime){
+    prime
+},
+count = 0,
+for(p,2,1000) {
+    if(check_prime(p)) {
         count = count+1
     }
 },
