@@ -212,6 +212,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishBooleanOperator>(element, NOR);
             } else if (element.data == "not") {
                 return std::make_shared<PolishNotOperator>(element);
+            } else {
+                return std::make_shared<PolishCustomFunction>(element);
             }
         }
         default:

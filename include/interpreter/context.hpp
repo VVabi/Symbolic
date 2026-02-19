@@ -3,9 +3,13 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include <stack>
 #include "types/sym_types/sym_object.hpp"
 #include "types/sym_types/sym_boolean.hpp"
+#include "types/sym_types/sym_void.hpp"
 #include "exceptions/parsing_type_exception.hpp"
+
+class PolishCustomFunction;
 
 class InterpreterPrintHandler {
  public:
@@ -24,9 +28,10 @@ class InterpreterPrintHandler {
  * @note This class uses virtual destruction to support potential inheritance.
  */
 class InterpreterContext {
-    std::map<std::string, std::shared_ptr<SymObject>> variables;
+    std::stack<std::map<std::string, std::shared_ptr<SymObject>>> variables;
     std::map<std::string, std::shared_ptr<SymObject>> constants;
     std::shared_ptr<InterpreterPrintHandler> output_handler;
+    std::map<std::string, std::shared_ptr<PolishCustomFunction>> custom_functions;
     uint64_t steps = 0;
 
  public:
@@ -37,12 +42,35 @@ class InterpreterContext {
      */
     virtual ~InterpreterContext() = default;
 
+    void push_variables() {
+        variables.push({});
+    }
+
+    void pop_variables() {
+        if (variables.empty()) {
+            throw ParsingTypeException("Attempted to pop variable scope when no scopes are available");
+        }
+        variables.pop();
+    }
+
+    std::shared_ptr<PolishCustomFunction> get_custom_function(const std::string& name) {
+        auto it = custom_functions.find(name);
+        if (it != custom_functions.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void set_custom_function(const std::string& name, std::shared_ptr<PolishCustomFunction> func) {
+        custom_functions[name] = func;
+    }
 
     void initialize_constants() {
         std::shared_ptr<SymBooleanObject> true_const = std::make_shared<SymBooleanObject>(true);
         constants["true"] = true_const;
         std::shared_ptr<SymBooleanObject> false_const = std::make_shared<SymBooleanObject>(false);
         constants["false"] = false_const;
+        constants["null"] = std::make_shared<SymVoidObject>();
     }
 
     /**
@@ -53,6 +81,7 @@ class InterpreterContext {
      */
     InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler) : output_handler(handler) {
         initialize_constants();
+        push_variables();  // Start with an initial variable scope
     }
 
     /**
@@ -77,8 +106,13 @@ class InterpreterContext {
      *         or nullptr if the variable does not exist.
      */
     std::shared_ptr<SymObject> get_variable(const std::string& name) {
-        auto it = variables.find(name);
-        if (it != variables.end()) {
+        auto current_vars = variables.empty() ? nullptr : &variables.top();
+
+        if (!current_vars) {
+            throw ParsingTypeException("No variable scope available when trying to access variable: " + name);
+        }
+        auto it = current_vars->find(name);
+        if (it != current_vars->end()) {
             return it->second;
         }
         auto const_it = constants.find(name);
@@ -100,7 +134,10 @@ class InterpreterContext {
         if (constants.find(name) != constants.end()) {
             throw ParsingTypeException("Cannot modify constant: " + name);
         }
-        variables[name] = value;
+        if (variables.empty()) {
+            throw ParsingTypeException("No variable scope available when trying to set variable: " + name);
+        }
+        variables.top()[name] = value;
     }
 
     inline void increment_steps() {

@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <vector>
 #include "common/lexer_deque.hpp"
 #include "interpreter/polish_notation/polish.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
@@ -22,4 +23,77 @@ class PolishFunction: public PolishNotationElement {
                         }
                     }
     virtual ~PolishFunction() { }
+};
+
+class PolishCustomFunction: public PolishFunction {
+ public:
+    std::vector<std::string> arg_names;
+    PolishCustomFunction(ParsedCodeElement element) : PolishFunction(element, 0, UINT32_MAX) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                    std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) override {
+        auto subexpressions = get_sub_expressions();
+
+        if (!subexpressions.is_empty()) {
+            if (get_num_expressions() != get_num_args()) {
+                throw InvalidFunctionArgException("Function defined with incorrect number of expressions: "+std::to_string(get_num_expressions())+
+                    ", expected " + std::to_string(get_num_args()), this->get_position());
+            }
+
+            for (int ind = 0; ind < get_num_args(); ind++) {
+                auto expr = cmd_list.front();
+                cmd_list.pop_front();
+                if (expr->get_type() != VARIABLE) {
+                    throw InvalidFunctionArgException("Expected variable name as argument "+std::to_string(ind)+" in function definition", expr->get_position());
+                }
+                arg_names.push_back(expr->get_data());
+            }
+
+            if (context->get_custom_function(get_data())) {
+                throw EvalException("Custom function with name " + get_data() + " already exists", this->get_position());
+            }
+
+            context->set_custom_function(get_data(), std::make_shared<PolishCustomFunction>(*this));
+
+            return std::make_shared<SymVoidObject>();
+        } else {
+            auto existing_func = context->get_custom_function(get_data());
+            if (!existing_func) {
+                throw EvalException("Undefined or empty function: " + get_data(), this->get_position());
+            }
+
+            if (get_num_args() != existing_func->get_num_args()) {
+                throw EvalException("Function " + get_data() + " called with incorrect number of arguments: "+std::to_string(get_num_args())+
+                    ", expected " + std::to_string(existing_func->get_num_args()), this->get_position());
+            }
+
+            auto arg_values = std::vector<std::shared_ptr<SymObject>>();
+            for (int i = 0; i < get_num_args(); i++) {
+                auto arg_value = iterate_wrapped(cmd_list, context, fp_size);
+                arg_values.push_back(arg_value);
+            }
+
+            context->push_variables();
+
+            for (uint32_t ind = 0; ind < existing_func->arg_names.size(); ind++) {
+                context->set_variable(existing_func->arg_names[ind], arg_values[ind]);
+            }
+
+            // This is a bit subtle for recursive calls.
+            // The way we store the data (as a shared_ptr) in the lexer deque,
+            // the data is always the *SAME*, but the index is *COPIED* in the line below,
+            // so each call stack has its own index.
+            // This avoids unnecessary copying of the data while still allowing recursive calls.
+            auto subexpressions = existing_func->get_sub_expressions();
+
+            std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
+            while (!subexpressions.is_empty()) {
+                ret = iterate_wrapped(subexpressions, context, fp_size);
+            }
+            context->pop_variables();
+            subexpressions.set_index(0);
+            return ret;
+        }
+    }
 };

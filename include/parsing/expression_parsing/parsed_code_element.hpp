@@ -60,7 +60,7 @@ struct ParsedCodeElement {
 
     void debug_print(std::ostream& os, uint32_t offset) const {
         std::string indent(offset, ' ');
-        os << indent << "ParsedCodeElement(type=" << type << ", data=\"" << data << "\", position=" << position
+        os << indent << "ParsedCodeElement(type=" << expression_type_to_string(type) << ", data=\"" << data << "\", position=" << position
            << ", num_args=" << num_args << ", num_expressions=" << num_expressions << ")\n";
         if (!sub_expressions.is_empty()) {
             os << indent << "Sub expressions:\n";
