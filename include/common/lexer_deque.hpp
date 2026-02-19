@@ -4,15 +4,16 @@
 #include <cstdint>
 #include <stdexcept>
 #include <optional>
+#include <utility>
 
 template<typename T>
 class LexerDeque {
-     public:
      // Storing the data behind another shared_ptr automatically implements the correct copying behaviour:
      // We want to always operate on the same underlying data, but with different indices (eg for recursive function calls)
     std::shared_ptr<std::vector<T>> data;
     size_t index;
 
+ public:
     LexerDeque(): data(std::make_shared<std::vector<T>>()), index(0) {}
     LexerDeque(const std::vector<T>&& initial_data): data(std::make_shared<std::vector<T>>(std::move(initial_data))), index(0) {}
 
