@@ -26,17 +26,6 @@ class PolishDict: public PolishFunction {
         UNUSED(fp_size);
         UNUSED(cmd_list);
         std::map<std::string, std::shared_ptr<SymObject>> dict;
-        /*for (int64_t i = 0; i < get_num_args(); i += 2) {
-            auto key_raw = iterate_wrapped(cmd_list, context, fp_size);
-            auto key = std::dynamic_pointer_cast<SymStringObject>(key_raw);
-            if (!key) {
-                throw ParsingTypeException("Type error: Expected string as key in dict function");
-            }
-
-            auto value = iterate_wrapped(cmd_list, context, fp_size);
-            dict[key->as_string()] = value;
-        }*/
-
         return std::make_shared<SymDictObject>(dict);
     }
 };
@@ -48,8 +37,6 @@ class PolishDictGet: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        UNUSED(context);
-        UNUSED(fp_size);
         auto dict_raw = iterate_wrapped(cmd_list, context, fp_size);
         auto dict = std::dynamic_pointer_cast<SymDictObject>(dict_raw);
         if (!dict) {
@@ -69,8 +56,6 @@ class PolishDictSet: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        UNUSED(context);
-        UNUSED(fp_size);
         auto dict_raw = iterate_wrapped(cmd_list, context, fp_size);
         auto dict = std::dynamic_pointer_cast<SymDictObject>(dict_raw);
         if (!dict) {
@@ -90,8 +75,6 @@ class PolishDictHasKey: public PolishFunction {
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context,
                                     const size_t fp_size) {
-        UNUSED(context);
-        UNUSED(fp_size);
         auto dict_raw = iterate_wrapped(cmd_list, context, fp_size);
         auto dict = std::dynamic_pointer_cast<SymDictObject>(dict_raw);
         if (!dict) {
