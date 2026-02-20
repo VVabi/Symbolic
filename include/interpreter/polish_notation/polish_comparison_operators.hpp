@@ -32,7 +32,7 @@ class PolishEq: public PolishFunction {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
         auto second = iterate_wrapped(cmd_list, context, fp_size);
 
-        if (first->to_string() == second->to_string()) {
+        if (first->equals(second)) {
             return std::make_shared<SymBooleanObject>(true);
         } else {
             return std::make_shared<SymBooleanObject>(false);
@@ -51,7 +51,7 @@ class PolishNeq: public PolishFunction {
         auto first = iterate_wrapped(cmd_list, context, fp_size);
         auto second = iterate_wrapped(cmd_list, context, fp_size);
 
-        if (first->to_string() != second->to_string()) {
+        if (!first->equals(second)) {
             return std::make_shared<SymBooleanObject>(true);
         } else {
             return std::make_shared<SymBooleanObject>(false);

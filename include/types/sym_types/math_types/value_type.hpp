@@ -29,6 +29,14 @@ class ValueType: public MathWrapperType<T> {
      */
     ValueType(T value): value(value) {}
 
+    bool equals(const std::shared_ptr<SymObject>& other) const override {
+        auto other_value = std::dynamic_pointer_cast<ValueType<T>>(other);
+        if (!other_value) {
+            return false;
+        }
+        return value == other_value->value;
+    }
+
     T as_value() {
         return value;
     }
