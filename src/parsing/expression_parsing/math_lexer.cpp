@@ -28,7 +28,7 @@ bool is_separator(char c) {
  * @return A vector of `MathLexerElement` objects representing the parsed expression.
  */
 std::vector<MathLexerElement> parse_math_expression_string(const std::string& input,
-                                                           const uint32_t position_offset) {;
+                                                           const uint32_t position_offset) {
     std::vector<MathLexerElement> formula;
 
     char previous = '(';
@@ -66,7 +66,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
         } else if (isalpha(*it)) {
             std::string var = "";
 
-            while ((isalpha(*it) || (*it == '_')) && it != input.end()) {
+            while (it != input.end() && (isalpha(*it) || (*it == '_'))) {
                 var = var + *it;
                 it++;
             }
@@ -74,16 +74,16 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
             // TODO(vabi) this sucks balls, we need to look ahead to determine if this is a function or variable,
             // but we also need to be able to report the correct position in case of an error,
             // and we also need to be able to handle whitespace between the function name and the parenthesis, so we need to look back as well. This is just a mess.
-            while (*it == ' ') {
+            while (it != input.end() && *it == ' ') {
                 it++;
             }
-            if (*it == '(') {
+            if (it != input.end() && *it == '(') {
                 formula.push_back(MathLexerElement(FUNCTION, var, distance));
             } else {
                 formula.push_back(MathLexerElement(VARIABLE, var, distance));
             }
             it--;
-            while (*it == ' ') {
+            while (it != input.begin() && *it == ' ') {
                 it--;
             }
         } else {

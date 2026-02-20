@@ -39,7 +39,7 @@ class PolishFor: public PolishFunction {
         }
 
         if (start->as_value().get_denominator() != BigInt(1) || end->as_value().get_denominator() != BigInt(1)) {
-            throw EvalException("Expected integer start and end values in for loop, not rationals", variable->get_position());
+            throw EvalException("Expected integer start and end values in for loop, found a non-integer rational", variable->get_position());
         }
 
         auto start_v = start->as_value().get_numerator();
