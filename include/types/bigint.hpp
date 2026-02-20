@@ -59,7 +59,7 @@ class BigInt {
 
     static void add_int64_to_mpz(mpz_t out, int64_t rhs) {
         if (rhs >= 0) {
-            mpz_add_ui(out, out, static_cast<unsigned long>(rhs));
+            mpz_add_ui(out, out, static_cast<uint64_t>(rhs));
             return;
         }
 
@@ -72,12 +72,12 @@ class BigInt {
             return;
         }
 
-        mpz_sub_ui(out, out, static_cast<unsigned long>(-rhs));
+        mpz_sub_ui(out, out, static_cast<uint64_t>(-rhs));
     }
 
     static void sub_int64_from_mpz(mpz_t out, int64_t rhs) {
         if (rhs >= 0) {
-            mpz_sub_ui(out, out, static_cast<unsigned long>(rhs));
+            mpz_sub_ui(out, out, static_cast<uint64_t>(rhs));
             return;
         }
 
@@ -90,7 +90,7 @@ class BigInt {
             return;
         }
 
-        mpz_add_ui(out, out, static_cast<unsigned long>(-rhs));
+        mpz_add_ui(out, out, static_cast<uint64_t>(-rhs));
     }
 
     void export_to_mpz(mpz_t out) const {
