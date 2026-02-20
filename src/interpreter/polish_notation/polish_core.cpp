@@ -18,7 +18,6 @@
 #include "types/sym_types/sym_string_object.hpp"
 #include "interpreter/context.hpp"
 
-
 class PolishNumber: public PolishNotationElement {
     std::shared_ptr<SymObject> symobject_value;
  public:
