@@ -1,8 +1,8 @@
 check_prime(p) {
     prime=true
     i=2
-    while(lte(i*i,p)) {
-        if(eq(Mod(p,i),Mod(0,i))){
+    while (lte(i*i,p)) {
+        if (eq(Mod(p,i),Mod(0,i))){
             prime=false
         },
         i=i+1
@@ -10,8 +10,8 @@ check_prime(p) {
     prime
 }
 count = 0
-for(p,2,1000) {
-    if(check_prime(p)) {
+for (p,2,1000) {
+    if (check_prime(p)) {
         count = count+1
     }
 }

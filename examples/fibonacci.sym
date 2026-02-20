@@ -6,11 +6,9 @@ fib(n) {
         ret = 1
     },
     elif(true) {
-        ret = fib(n-1)+fib(n-2),
+        ret = fib(n-1)+fib(n-2)
     }
     ret
 },
-println(fib(10)),
+println(fib(10))
 println(fib(20))
-
-

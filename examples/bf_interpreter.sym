@@ -6,24 +6,24 @@ for(p, 0, 2^15-1) {
 }
 programpointer = 0
 memorypointer = 0
-while(lt(programpointer,len(source))) {
+while (lt(programpointer,len(source))) {
     current = list_get(source, programpointer)
-    if(eq(current, "+")) {
+    if (eq(current, "+")) {
         value = list_get(ram, memorypointer)+1
         list_set(ram, memorypointer, value)
         programpointer = programpointer+1
     },
-    elif(eq(current, "-")) {
+    elif (eq(current, "-")) {
         value = list_get(ram, memorypointer)-1
         list_set(ram, memorypointer, value)
         programpointer = programpointer+1
     },
-    elif(eq(current, ".")) {
+    elif (eq(current, ".")) {
         value = list_get(ram, memorypointer)
         print(value, "ascii")
         programpointer = programpointer+1
     },
-    elif(eq(current, "[")) {
+    elif (eq(current, "[")) {
         value = list_get(ram, memorypointer)
         programpointer = programpointer+1
         count = 0
@@ -41,7 +41,7 @@ while(lt(programpointer,len(source))) {
             programpointer = programpointer+1
         }
     }
-    elif(eq(current, "]")) {
+    elif (eq(current, "]")) {
         value = list_get(ram, memorypointer),
         if(neq(value, Mod(0,256))) {
             programpointer = programpointer-1
@@ -62,11 +62,11 @@ while(lt(programpointer,len(source))) {
             programpointer=programpointer+1
         }
     }
-    elif(eq(current, "<")) {
+    elif (eq(current, "<")) {
         memorypointer = memorypointer-1,
         programpointer = programpointer+1
     }
-    elif(eq(current, ">")) {
+    elif (eq(current, ">")) {
         memorypointer = memorypointer+1,
         programpointer = programpointer+1
     }
