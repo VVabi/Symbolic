@@ -1,15 +1,2 @@
-fib(n) {
-    if(eq(n,0)) {
-        ret = 0
-    },
-    elif(eq(n,1)){
-        ret = 1
-    },
-    elif(true) {
-        ret = fib(n-1)+fib(n-2),
-    }
-    ret
-},
-println(fib(10))
-
-
+println(7)
+println(3)

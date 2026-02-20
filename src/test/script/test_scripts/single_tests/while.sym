@@ -1,7 +1,7 @@
-k = 1,
-sum = 0,
+k = 1
+sum = 0
 while(lte(k,1000)) {
-    sum = sum+k,
+    sum = sum+k
     k = k+1
-},
+}
 println(sum)

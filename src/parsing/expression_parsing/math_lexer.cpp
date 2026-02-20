@@ -84,7 +84,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
             switch (*it) {
                 case '+':
                 case '-':
-                    if (previous == '(' || previous == ',' || previous == '=') {
+                    if (previous == '(' || previous == ',' || previous == '=' || previous == ' ' || previous == '\n') {
                         formula.push_back(MathLexerElement(NUMBER, "0", distance));
                         formula.push_back(MathLexerElement(INFIX, std::string(1, *it), distance));
                     } else {
@@ -96,7 +96,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 case '^':
                 case '!':
                 case '=':
-                    if (previous == '(' || previous == ',') {
+                    if (previous == '(' || previous == ',' || previous == ';' || previous == '\n') {
                         char c = *it;
                         throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", distance);
                     }
@@ -109,17 +109,17 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                     formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, "", distance));
                     break;
                 case ',':
+                case ';':
+                case '\n':
                     formula.push_back(MathLexerElement(SEPARATOR, "", distance));
                     break;
                 case ' ':
-                    break;
-                case '\n':
                     break;
                 default:
                     throw ParsingException("Unknown symbol "+std::string(&(*it), 1), distance);
             }
         }
-        if (*it != ' ' && *it != '\n') {
+        if (*it != ' ') {
             previous = *it;
         }
         it++;
