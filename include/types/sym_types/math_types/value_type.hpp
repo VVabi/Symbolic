@@ -29,6 +29,14 @@ class ValueType: public MathWrapperType<T> {
      */
     ValueType(T value): value(value) {}
 
+    bool equals(const std::shared_ptr<SymObject>& other) const override {
+        auto other_value = std::dynamic_pointer_cast<ValueType<T>>(other);
+        if (!other_value) {
+            return false;
+        }
+        return value == other_value->value;
+    }
+
     T as_value() {
         return value;
     }
@@ -163,6 +171,38 @@ inline std::shared_ptr<SymMathObject> ValueType<double>::power_series_function(P
     UNUSED(fp_size);
     return std::make_shared<ValueType<double>>(evaluate_power_series_function_double(value, type));
 }
+
+template<>
+inline bool ValueType<double>::equals(const std::shared_ptr<SymObject>& other) const {
+    auto other_value = std::dynamic_pointer_cast<ValueType<double>>(other);
+    if (!other_value) {
+        auto rational_value = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(other);
+        if (rational_value) {
+            auto rat_value = rational_value->as_value();
+            double d = rat_value.get_numerator().as_double()/rat_value.get_denominator().as_double();
+            return value == d;
+        }
+        return false;
+    }
+    return value == other_value->value;
+}
+
+template<>
+inline bool ValueType<RationalNumber<BigInt>>::equals(const std::shared_ptr<SymObject>& other) const {
+    auto other_value = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(other);
+    if (!other_value) {
+        auto double_value = std::dynamic_pointer_cast<ValueType<double>>(other);
+        if (double_value) {
+            auto d = double_value->as_value();
+            double this_d = value.get_numerator().as_double()/value.get_denominator().as_double();
+            return this_d == d;
+        }
+
+        return false;
+    }
+    return value == other_value->value;
+}
+
 
 template<>
 inline void ValueType<double>::pow(const double& exponent) {

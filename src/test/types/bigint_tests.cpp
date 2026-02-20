@@ -4,6 +4,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <limits>
 #include <types/bigint.hpp>
 
 TEST(TypeTests, BigInt) {
@@ -52,3 +53,19 @@ TEST(TypeTests, BigInt) {
     }
 }
 
+TEST(TypeTests, BigIntOverflowPromotion) {
+    const int64_t max = std::numeric_limits<int64_t>::max();
+    const int64_t min = std::numeric_limits<int64_t>::min();
+
+    auto add_over = BigInt(max) + BigInt(1);
+    EXPECT_EQ(add_over, BigInt("9223372036854775808"));
+
+    auto add_under = BigInt(min) + BigInt(-1);
+    EXPECT_EQ(add_under, BigInt("-9223372036854775809"));
+
+    auto mul_over = BigInt(max) * BigInt(2);
+    EXPECT_EQ(mul_over, BigInt("18446744073709551614"));
+
+    auto mul_under = BigInt(min) * BigInt(-1);
+    EXPECT_EQ(mul_under, BigInt("9223372036854775808"));
+}

@@ -1,5 +1,5 @@
-println("Hello World"),
-println(173),
-f = 1+z+z^2,
-println(f),
-println(Mod(3,7)),
+println("Hello World");
+println(173);
+f = 1+z+z^2
+println(f);
+println(Mod(3,7));

@@ -11,4 +11,8 @@ class SymObject {
     virtual bool modifiable_in_place() const {
         return false;
     }
+
+    virtual bool equals(const std::shared_ptr<SymObject>& other) const {
+        return to_string() == other->to_string();
+    }
 };

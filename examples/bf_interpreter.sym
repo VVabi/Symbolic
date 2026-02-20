@@ -1,37 +1,37 @@
-code = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.",
-source = as_list(code),
-ram = list(),
+code = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
+source = as_list(code)
+ram = list()
 for(p, 0, 2^15-1) {
     append(ram, Mod(0, 256))
-},
-programpointer = 0,
-memorypointer = 0,
-while(lt(programpointer,len(source))) {
-    current = list_get(source, programpointer),
-    if(eq(current, "+")) {
-        value = list_get(ram, memorypointer)+1,
-        list_set(ram, memorypointer, value),
+}
+programpointer = 0
+memorypointer = 0
+while (lt(programpointer,len(source))) {
+    current = list_get(source, programpointer)
+    if (eq(current, "+")) {
+        value = list_get(ram, memorypointer)+1
+        list_set(ram, memorypointer, value)
         programpointer = programpointer+1
     },
-    elif(eq(current, "-")) {
-        value = list_get(ram, memorypointer)-1,
-        list_set(ram, memorypointer, value),
+    elif (eq(current, "-")) {
+        value = list_get(ram, memorypointer)-1
+        list_set(ram, memorypointer, value)
         programpointer = programpointer+1
     },
-    elif(eq(current, ".")) {
-        value = list_get(ram, memorypointer),
-        print(value, "ascii"),
+    elif (eq(current, ".")) {
+        value = list_get(ram, memorypointer)
+        print(value, "ascii")
         programpointer = programpointer+1
     },
-    elif(eq(current, "[")) {
-        value = list_get(ram, memorypointer),
-        programpointer = programpointer+1,
-        count = 0,
+    elif (eq(current, "[")) {
+        value = list_get(ram, memorypointer)
+        programpointer = programpointer+1
+        count = 0
         if(eq(value, Mod(0,256))) {
             count = 1
         },
         while(gt(count, 0)) {
-            sourcecurrent = list_get(source, programpointer),
+            sourcecurrent = list_get(source, programpointer)
             if(eq(sourcecurrent, "]")) {
                 count = count-1
             },
@@ -40,33 +40,33 @@ while(lt(programpointer,len(source))) {
             },
             programpointer = programpointer+1
         }
-    },
-    elif(eq(current, "]")) {
+    }
+    elif (eq(current, "]")) {
         value = list_get(ram, memorypointer),
         if(neq(value, Mod(0,256))) {
-            programpointer = programpointer-1,
-            count = 1,
+            programpointer = programpointer-1
+            count = 1
             while(gt(count, 0)) {
-                sourcecurrent = list_get(source, programpointer),
+                sourcecurrent = list_get(source, programpointer)
                 if(eq(sourcecurrent, "[")) {
                     count = count-1
                 },
                 if(eq(sourcecurrent, "]")) {
                     count = count+1
-                },
+                }
                 programpointer = programpointer-1
-            },
+            }
             programpointer = programpointer+1
-        },
+        }
         if(eq(value, Mod(0, 256))) {
             programpointer=programpointer+1
         }
-    },
-    elif(eq(current, "<")) {
+    }
+    elif (eq(current, "<")) {
         memorypointer = memorypointer-1,
         programpointer = programpointer+1
-    },
-    elif(eq(current, ">")) {
+    }
+    elif (eq(current, ">")) {
         memorypointer = memorypointer+1,
         programpointer = programpointer+1
     }

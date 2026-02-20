@@ -1,24 +1,24 @@
-a = list(1,2,3,4,5,6,7,8),
-println(a),
-b = list_get(a, 4),
-println(b),
-list_set(a, 3, 11),
-println(list_get(a, 3)),
-sliced = slice(a, 2, 5),
-println(sliced),
-sliced = slice(a,4,4),
-println(sliced),
-sliced = slice(a,4,2),
-println(sliced),
-cp = copy(a),
-list_set(cp, 3, 15),
-println(list_get(cp, 3)),
-println(list_get(a, 3)),
-r = pop(a),
-println(r),
-x = pop(a),
-println(x),
+a = list(1,2,3,4,5,6,7,8);
+println(a);
+b = list_get(a, 4);
+println(b);
+list_set(a, 3, 11);
+println(list_get(a, 3));
+sliced = slice(a, 2, 5);
+println(sliced);
+sliced = slice(a,4,4);
+println(sliced);
+sliced = slice(a,4,2);
+println(sliced);
+cp = copy(a);
+list_set(cp, 3, 15);
+println(list_get(cp, 3));
+println(list_get(a, 3));
+r = pop(a);
+println(r);
+x = pop(a);
+println(x);
 a = "helloworld",
-parts = as_list(a),
-println(len(parts)),
-println(list_get(parts, 4)),
+parts = as_list(a);
+println(len(parts));
+println(list_get(parts, 4));

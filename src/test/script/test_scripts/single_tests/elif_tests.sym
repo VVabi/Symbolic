@@ -1,16 +1,16 @@
 for(a,1, 10) {
     if(eq(a, 2)) {
         println(4)
-    },
+    }
     elif(eq(a, 3)) {
         println(6)
-    },
+    }
     elif(eq(a, 4)) {
         println(8)
-    },
+    }
     elif(eq(a, 9)) {
         println(18)
-    },
+    }
     elif(true) {
         println(a)
     }

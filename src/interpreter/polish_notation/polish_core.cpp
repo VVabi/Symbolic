@@ -20,8 +20,19 @@
 
 
 class PolishNumber: public PolishNotationElement {
+    std::shared_ptr<SymObject> symobject_value;
  public:
-    PolishNumber(ParsedCodeElement element): PolishNotationElement(element) { }
+    PolishNumber(ParsedCodeElement element): PolishNotationElement(element) {
+        try {
+            symobject_value = std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(get_data(), RationalNumber<BigInt>(1)));
+        } catch (std::exception& e) {
+            try {
+                symobject_value = std::make_shared<ValueType<double>>(RingCompanionHelper<double>::from_string(get_data(), 1.0));
+            } catch (std::exception& e) {
+                throw EvalException("Cannot parse number: " + get_data(), this->get_position());
+            }
+        }
+    }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context,
@@ -29,15 +40,7 @@ class PolishNumber: public PolishNotationElement {
                                         UNUSED(fp_size);
                                         UNUSED(cmd_list);
                                         UNUSED(context);
-                                        try {
-                                            return std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(get_data(), RationalNumber<BigInt>(1)));
-                                        } catch (std::exception& e) {}
-
-                                        try {
-                                            return std::make_shared<ValueType<double>>(RingCompanionHelper<double>::from_string(get_data(), 1.0));
-                                        } catch (std::exception& e) {
-                                            throw EvalException("Cannot parse number: " + get_data(), this->get_position());
-                                        }
+                                        return symobject_value->clone();
                                     }
 };
 
