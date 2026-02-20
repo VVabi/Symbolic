@@ -10,6 +10,7 @@
 
 #include <gmp.h>
 #include <stdint.h>
+#include <limits>
 #include <string>
 #include <iostream>
 #include "exceptions/parsing_type_exception.hpp"
@@ -19,7 +20,86 @@
  */
 class BigInt {
  private:
-    mpz_t value; /**< The underlying GMP integer value. */
+    int64_t small_value;
+    bool is_small;
+    mpz_t value;
+
+    void set_small(int64_t in) {
+        small_value = in;
+        is_small = true;
+    }
+
+    void promote_to_big() {
+        if (!is_small) {
+            return;
+        }
+        mpz_set_si(value, small_value);
+        is_small = false;
+    }
+
+    void maybe_demote_to_small() {
+        if (mpz_fits_slong_p(value)) {
+            set_small(static_cast<int64_t>(mpz_get_si(value)));
+        } else {
+            is_small = false;
+        }
+    }
+
+    static bool add_overflowed(int64_t lhs, int64_t rhs, int64_t* out) {
+        return __builtin_add_overflow(lhs, rhs, out);
+    }
+
+    static bool mul_overflowed(int64_t lhs, int64_t rhs, int64_t* out) {
+        return __builtin_mul_overflow(lhs, rhs, out);
+    }
+
+    static void set_mpz_from_int64(mpz_t out, int64_t in) {
+        mpz_set_si(out, in);
+    }
+
+    static void add_int64_to_mpz(mpz_t out, int64_t rhs) {
+        if (rhs >= 0) {
+            mpz_add_ui(out, out, static_cast<uint64_t>(rhs));
+            return;
+        }
+
+        if (rhs == std::numeric_limits<int64_t>::min()) {
+            mpz_t tmp;
+            mpz_init(tmp);
+            set_mpz_from_int64(tmp, rhs);
+            mpz_add(out, out, tmp);
+            mpz_clear(tmp);
+            return;
+        }
+
+        mpz_sub_ui(out, out, static_cast<uint64_t>(-rhs));
+    }
+
+    static void sub_int64_from_mpz(mpz_t out, int64_t rhs) {
+        if (rhs >= 0) {
+            mpz_sub_ui(out, out, static_cast<uint64_t>(rhs));
+            return;
+        }
+
+        if (rhs == std::numeric_limits<int64_t>::min()) {
+            mpz_t tmp;
+            mpz_init(tmp);
+            set_mpz_from_int64(tmp, rhs);
+            mpz_sub(out, out, tmp);
+            mpz_clear(tmp);
+            return;
+        }
+
+        mpz_add_ui(out, out, static_cast<uint64_t>(-rhs));
+    }
+
+    void export_to_mpz(mpz_t out) const {
+        if (is_small) {
+            set_mpz_from_int64(out, small_value);
+        } else {
+            mpz_set(out, value);
+        }
+    }
 
  public:
     /**
@@ -29,9 +109,12 @@ class BigInt {
      */
     BigInt(std::string in, uint32_t base = 10) {
         mpz_init(value);
+        is_small = false;
+        small_value = 0;
         if (mpz_set_str(value, in.c_str(), base) != 0) {
             throw ParsingTypeException("Error parsing BigInt from string");
         }
+        maybe_demote_to_small();
     }
 
     /**
@@ -40,7 +123,7 @@ class BigInt {
      */
     BigInt(int64_t in) {
         mpz_init(value);
-        mpz_set_si(value, in);
+        set_small(in);
     }
 
     /**
@@ -48,7 +131,7 @@ class BigInt {
      */
     BigInt() {
         mpz_init(value);
-        mpz_set_ui(value, 0);
+        set_small(0);
     }
 
     /**
@@ -57,7 +140,11 @@ class BigInt {
      */
     BigInt(BigInt const & other) {
         mpz_init(value);
-        mpz_set(value, other.value);
+        small_value = other.small_value;
+        is_small = other.is_small;
+        if (!is_small) {
+            mpz_set(value, other.value);
+        }
     }
 
     /**
@@ -67,8 +154,11 @@ class BigInt {
      */
     BigInt& operator=(const BigInt& other) {
         if (this != &other) {
-            mpz_init(value);
-            mpz_set(value, other.value);
+            small_value = other.small_value;
+            is_small = other.is_small;
+            if (!is_small) {
+                mpz_set(value, other.value);
+            }
         }
         return *this;
     }
@@ -79,10 +169,12 @@ class BigInt {
      */
     BigInt(BigInt&& other) {
         mpz_init(value);
-        mpz_set(value, other.value);
-        mpz_clear(other.value);
-        mpz_init(other.value);
-        mpz_set_ui(other.value, 0);
+        small_value = other.small_value;
+        is_small = other.is_small;
+        if (!is_small) {
+            mpz_set(value, other.value);
+        }
+        other.set_small(0);
     }
 
     /**
@@ -92,10 +184,12 @@ class BigInt {
      */
     BigInt& operator=(BigInt&& other) {
         if (this != &other) {
-            mpz_set(value, other.value);
-            mpz_clear(other.value);
-            mpz_init(other.value);
-            mpz_set_ui(other.value, 0);
+            small_value = other.small_value;
+            is_small = other.is_small;
+            if (!is_small) {
+                mpz_swap(value, other.value);
+            }
+            other.set_small(0);
         }
         return *this;
     }
@@ -114,6 +208,11 @@ class BigInt {
      * @return The output stream after writing the BigInt object.
      */
     friend std::ostream& operator<<(std::ostream& os, BigInt const & tc) {
+        if (tc.is_small) {
+            os << tc.small_value;
+            return os;
+        }
+
         char *n_str = mpz_get_str(NULL, 10, tc.value);
         os << std::string(n_str);
         free(n_str);
@@ -126,7 +225,19 @@ class BigInt {
      * @return True if the BigInt objects are equal, false otherwise.
      */
     bool operator==(const BigInt& other) const {
-        return mpz_cmp(value, other.value) == 0;
+        if (is_small && other.is_small) {
+            return small_value == other.small_value;
+        }
+
+        if (!is_small && !other.is_small) {
+            return mpz_cmp(value, other.value) == 0;
+        }
+
+        if (is_small) {
+            return mpz_cmp_si(other.value, small_value) == 0;
+        }
+
+        return mpz_cmp_si(value, other.small_value) == 0;
     }
 
     /**
@@ -135,7 +246,7 @@ class BigInt {
      * @return True if the BigInt objects are not equal, false otherwise.
      */
     bool operator!=(const BigInt& other) const {
-        return mpz_cmp(value, other.value) != 0;
+        return !(*this == other);
     }
 
     /**
@@ -144,7 +255,21 @@ class BigInt {
      * @return A reference to this BigInt object after addition.
      */
     BigInt& operator+=(const BigInt& rhs) {
-        mpz_add(value, value, rhs.value);
+        if (is_small && rhs.is_small) {
+            int64_t result = 0;
+            if (!add_overflowed(small_value, rhs.small_value, &result)) {
+                set_small(result);
+                return *this;
+            }
+        }
+
+        promote_to_big();
+        if (rhs.is_small) {
+            add_int64_to_mpz(value, rhs.small_value);
+        } else {
+            mpz_add(value, value, rhs.value);
+        }
+        maybe_demote_to_small();
         return *this;
     }
 
@@ -154,7 +279,23 @@ class BigInt {
      * @return A reference to this BigInt object after subtraction.
      */
     BigInt& operator-=(const BigInt& rhs) {
-        mpz_sub(value, value, rhs.value);
+        if (is_small && rhs.is_small) {
+            int64_t result = 0;
+            if (rhs.small_value != std::numeric_limits<int64_t>::min()) {
+                if (!add_overflowed(small_value, -rhs.small_value, &result)) {
+                    set_small(result);
+                    return *this;
+                }
+            }
+        }
+
+        promote_to_big();
+        if (rhs.is_small) {
+            sub_int64_from_mpz(value, rhs.small_value);
+        } else {
+            mpz_sub(value, value, rhs.value);
+        }
+        maybe_demote_to_small();
         return *this;
     }
 
@@ -164,7 +305,21 @@ class BigInt {
      * @return A reference to this BigInt object after multiplication.
      */
     BigInt& operator*=(const BigInt& rhs) {
-        mpz_mul(value, value, rhs.value);
+        if (is_small && rhs.is_small) {
+            int64_t result = 0;
+            if (!mul_overflowed(small_value, rhs.small_value, &result)) {
+                set_small(result);
+                return *this;
+            }
+        }
+
+        promote_to_big();
+        if (rhs.is_small) {
+            mpz_mul_si(value, value, rhs.small_value);
+        } else {
+            mpz_mul(value, value, rhs.value);
+        }
+        maybe_demote_to_small();
         return *this;
     }
 
@@ -197,7 +352,22 @@ class BigInt {
      * @return The result of the division as a new BigInt object.
      */
     friend BigInt operator/(BigInt a, const BigInt& b) {
-        mpz_tdiv_q(a.value, a.value, b.value);
+        if (a.is_small && b.is_small && b.small_value != 0
+            && !(a.small_value == std::numeric_limits<int64_t>::min() && b.small_value == -1)) {
+            return BigInt(a.small_value / b.small_value);
+        }
+
+        a.promote_to_big();
+        if (b.is_small) {
+            mpz_t rhs;
+            mpz_init(rhs);
+            set_mpz_from_int64(rhs, b.small_value);
+            mpz_tdiv_q(a.value, a.value, rhs);
+            mpz_clear(rhs);
+        } else {
+            mpz_tdiv_q(a.value, a.value, b.value);
+        }
+        a.maybe_demote_to_small();
         return a;
     }
 
@@ -217,8 +387,14 @@ class BigInt {
      * @return The negated BigInt object as a new BigInt object.
      */
     BigInt operator- () const {
-        auto ret = BigInt();
-        mpz_neg(ret.value, value);
+        if (is_small && small_value != std::numeric_limits<int64_t>::min()) {
+            return BigInt(-small_value);
+        }
+
+        auto ret = BigInt(*this);
+        ret.promote_to_big();
+        mpz_neg(ret.value, ret.value);
+        ret.maybe_demote_to_small();
         return ret;
     }
 
@@ -228,13 +404,49 @@ class BigInt {
      * @return The remainder as a new BigInt object.
      */
     BigInt operator%(const BigInt& rhs) const {
+        if (is_small && rhs.is_small && rhs.small_value != 0
+            && !(small_value == std::numeric_limits<int64_t>::min() && rhs.small_value == -1)) {
+            int64_t mod = small_value % rhs.small_value;
+            if (mod < 0) {
+                if (rhs.small_value == std::numeric_limits<int64_t>::min()) {
+                    return BigInt(mod);
+                }
+                const int64_t abs_rhs = rhs.small_value < 0 ? -rhs.small_value : rhs.small_value;
+                mod += abs_rhs;
+            }
+            return BigInt(mod);
+        }
+
         auto ret = BigInt();
-        mpz_mod(ret.value, value, rhs.value);
+        ret.is_small = false;
+
+        mpz_t lhs_mpz;
+        mpz_t rhs_mpz;
+        mpz_init(lhs_mpz);
+        mpz_init(rhs_mpz);
+        export_to_mpz(lhs_mpz);
+        rhs.export_to_mpz(rhs_mpz);
+        mpz_mod(ret.value, lhs_mpz, rhs_mpz);
+        mpz_clear(lhs_mpz);
+        mpz_clear(rhs_mpz);
+        ret.maybe_demote_to_small();
         return ret;
     }
 
     bool operator<(const BigInt& rhs) const {
-        return mpz_cmp(value, rhs.value) < 0;
+        if (is_small && rhs.is_small) {
+            return small_value < rhs.small_value;
+        }
+
+        if (!is_small && !rhs.is_small) {
+            return mpz_cmp(value, rhs.value) < 0;
+        }
+
+        if (is_small) {
+            return mpz_cmp_si(rhs.value, small_value) > 0;
+        }
+
+        return mpz_cmp_si(value, rhs.small_value) < 0;
     }
 
     bool operator>(const BigInt& rhs) const {
@@ -251,9 +463,20 @@ class BigInt {
      * @param b The second BigInt object.
      * @return The GCD as a new BigInt object.
      */
-    friend BigInt gcd(BigInt a, BigInt b) {
+    friend BigInt gcd(BigInt& a, BigInt& b) {
         auto ret = BigInt();
-        mpz_gcd(ret.value, a.value, b.value);
+        ret.is_small = false;
+
+        mpz_t a_mpz;
+        mpz_t b_mpz;
+        mpz_init(a_mpz);
+        mpz_init(b_mpz);
+        a.export_to_mpz(a_mpz);
+        b.export_to_mpz(b_mpz);
+        mpz_gcd(ret.value, a_mpz, b_mpz);
+        mpz_clear(a_mpz);
+        mpz_clear(b_mpz);
+        ret.maybe_demote_to_small();
         return ret;
     }
 
@@ -263,13 +486,28 @@ class BigInt {
      * @param b The second BigInt object.
      * @return The LCM as a new BigInt object.
      */
-    friend BigInt lcm(BigInt a, BigInt b) {
+    friend BigInt lcm(BigInt& a, BigInt& b) {
         auto ret = BigInt();
-        mpz_lcm(ret.value, a.value, b.value);
+        ret.is_small = false;
+
+        mpz_t a_mpz;
+        mpz_t b_mpz;
+        mpz_init(a_mpz);
+        mpz_init(b_mpz);
+        a.export_to_mpz(a_mpz);
+        b.export_to_mpz(b_mpz);
+        mpz_lcm(ret.value, a_mpz, b_mpz);
+        mpz_clear(a_mpz);
+        mpz_clear(b_mpz);
+        ret.maybe_demote_to_small();
         return ret;
     }
 
     int64_t as_int64() const {
+        if (is_small) {
+            return small_value;
+        }
+
         if (!mpz_fits_slong_p(value)) {
             throw ParsingTypeException("BigInt value is too large to fit in a 64-bit integer");
         }
@@ -277,11 +515,14 @@ class BigInt {
     }
 
     double as_double() const {
+        if (is_small) {
+            return static_cast<double>(small_value);
+        }
         return mpz_get_d(value);
     }
 
     bool operator<=(const BigInt& other) const {
-        return mpz_cmp(value, other.value) <= 0;
+        return *this < other || *this == other;
     }
 };
 
