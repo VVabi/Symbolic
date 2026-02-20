@@ -9,6 +9,7 @@
 #include "interpreter/polish_notation/polish_comparison_operators.hpp"
 #include "interpreter/polish_notation/polish_utils.hpp"
 #include "interpreter/polish_notation/polish_list.hpp"
+#include "interpreter/polish_notation/polish_dict.hpp"
 #include "interpreter/polish_notation/polish_boolean_operators.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 #include "types/sym_types/math_types/rational_function_type.hpp"
@@ -191,6 +192,14 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListSet>(element);
             } else if (element.data == "list") {
                 return std::make_shared<PolishList>(element);
+            } else if (element.data == "dict_get") {
+                return std::make_shared<PolishDictGet>(element);
+            } else if (element.data == "dict_set") {
+                return std::make_shared<PolishDictSet>(element);
+            } else if (element.data == "dict") {
+                return std::make_shared<PolishDict>(element);
+            } else if (element.data == "dict_has_key") {
+                return std::make_shared<PolishDictHasKey>(element);
             } else if (element.data == "len") {
                 return std::make_shared<PolishLength>(element);
             } else if (element.data == "append") {
