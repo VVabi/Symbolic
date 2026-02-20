@@ -187,7 +187,7 @@ class BigInt {
             small_value = other.small_value;
             is_small = other.is_small;
             if (!is_small) {
-                mpz_set(value, other.value);
+                mpz_swap(value, other.value);
             }
             other.set_small(0);
         }
@@ -463,7 +463,7 @@ class BigInt {
      * @param b The second BigInt object.
      * @return The GCD as a new BigInt object.
      */
-    friend BigInt gcd(BigInt a, BigInt b) {
+    friend BigInt gcd(BigInt& a, BigInt& b) {
         auto ret = BigInt();
         ret.is_small = false;
 
@@ -486,7 +486,7 @@ class BigInt {
      * @param b The second BigInt object.
      * @return The LCM as a new BigInt object.
      */
-    friend BigInt lcm(BigInt a, BigInt b) {
+    friend BigInt lcm(BigInt& a, BigInt& b) {
         auto ret = BigInt();
         ret.is_small = false;
 
