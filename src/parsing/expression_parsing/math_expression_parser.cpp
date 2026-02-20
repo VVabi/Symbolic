@@ -72,7 +72,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     #if DEBUG_MATH_LEXER_OUTPUT
     std::cout << "Lexer output:\n";
     for (const auto& element : formula) {
-        std::cout << "MathLexerElement(type=" << element.type << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
+        std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
     }
     #endif
 

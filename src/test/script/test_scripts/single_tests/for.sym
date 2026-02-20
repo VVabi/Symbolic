@@ -1,5 +1,5 @@
-sum = 0,
+sum = 0
 for(p,1,100) {
     sum = sum+p
-},
+}
 println(sum)

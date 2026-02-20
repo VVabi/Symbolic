@@ -11,6 +11,10 @@
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
+bool is_separator(char c) {
+    return c == ',' || c == ';' || c == '\n';
+}
+
 /**
  * @brief Parses a mathematical expression string into a vector of lexer elements.
  *
@@ -62,29 +66,31 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
         } else if (isalpha(*it)) {
             std::string var = "";
 
-            while (isalpha(*it) && it != input.end()) {
+            while (it != input.end() && (isalpha(*it) || (*it == '_'))) {
                 var = var + *it;
                 it++;
             }
-            if (*it == '_') {
-                while (*it != '(' && it != input.end()) {
-                    var = var + *it;
-                    it++;
-                }
+
+            // TODO(vabi) this sucks balls, we need to look ahead to determine if this is a function or variable,
+            // but we also need to be able to report the correct position in case of an error,
+            // and we also need to be able to handle whitespace between the function name and the parenthesis, so we need to look back as well. This is just a mess.
+            while (it != input.end() && *it == ' ') {
+                it++;
+            }
+            if (it != input.end() && *it == '(') {
                 formula.push_back(MathLexerElement(FUNCTION, var, distance));
             } else {
-                if (*it == '(') {
-                    formula.push_back(MathLexerElement(FUNCTION, var, distance));
-                } else {
-                    formula.push_back(MathLexerElement(VARIABLE, var, distance));
-                }
+                formula.push_back(MathLexerElement(VARIABLE, var, distance));
             }
             it--;
+            while (it != input.begin() && *it == ' ') {
+                it--;
+            }
         } else {
             switch (*it) {
                 case '+':
                 case '-':
-                    if (previous == '(' || previous == ',' || previous == '=') {
+                    if (previous == '(' || is_separator(previous) || previous == '=') {
                         formula.push_back(MathLexerElement(NUMBER, "0", distance));
                         formula.push_back(MathLexerElement(INFIX, std::string(1, *it), distance));
                     } else {
@@ -96,7 +102,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                 case '^':
                 case '!':
                 case '=':
-                    if (previous == '(' || previous == ',') {
+                    if (previous == '(' || is_separator(previous)) {
                         char c = *it;
                         throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", distance);
                     }
@@ -109,17 +115,17 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
                     formula.push_back(MathLexerElement(RIGHT_PARENTHESIS, "", distance));
                     break;
                 case ',':
+                case ';':
+                case '\n':
                     formula.push_back(MathLexerElement(SEPARATOR, "", distance));
                     break;
                 case ' ':
-                    break;
-                case '\n':
                     break;
                 default:
                     throw ParsingException("Unknown symbol "+std::string(&(*it), 1), distance);
             }
         }
-        if (*it != ' ' && *it != '\n') {
+        if (*it != ' ') {
             previous = *it;
         }
         it++;
