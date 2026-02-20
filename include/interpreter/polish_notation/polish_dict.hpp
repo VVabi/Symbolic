@@ -1,0 +1,84 @@
+#pragma once
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+#include <map>
+#include "common/lexer_deque.hpp"
+#include "interpreter/polish_notation/polish.hpp"
+#include "exceptions/invalid_function_arg_exception.hpp"
+#include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/parsing_type_exception.hpp"
+#include "interpreter/polish_notation/polish_function_core.hpp"
+#include "types/sym_types/sym_dict.hpp"
+#include "types/sym_types/sym_void.hpp"
+#include "types/sym_types/sym_string_object.hpp"
+
+
+class PolishDict: public PolishFunction {
+ public:
+    PolishDict(ParsedCodeElement element): PolishFunction(element, 0, 0) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) {
+        UNUSED(context);
+        UNUSED(fp_size);
+        UNUSED(cmd_list);
+        std::map<std::string, std::shared_ptr<SymObject>> dict;
+        /*for (int64_t i = 0; i < get_num_args(); i += 2) {
+            auto key_raw = iterate_wrapped(cmd_list, context, fp_size);
+            auto key = std::dynamic_pointer_cast<SymStringObject>(key_raw);
+            if (!key) {
+                throw ParsingTypeException("Type error: Expected string as key in dict function");
+            }
+
+            auto value = iterate_wrapped(cmd_list, context, fp_size);
+            dict[key->as_string()] = value;
+        }*/
+
+        return std::make_shared<SymDictObject>(dict);
+    }
+};
+
+class PolishDictGet: public PolishFunction {
+ public:
+    PolishDictGet(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) {
+        UNUSED(context);
+        UNUSED(fp_size);
+        auto dict_raw = iterate_wrapped(cmd_list, context, fp_size);
+        auto dict = std::dynamic_pointer_cast<SymDictObject>(dict_raw);
+        if (!dict) {
+            throw ParsingTypeException("Type error: Expected dict as first argument in dict_get function");
+        }
+
+        auto key_raw = iterate_wrapped(cmd_list, context, fp_size);
+
+        return dict->get(key_raw);
+    }
+};
+
+class PolishDictSet: public PolishFunction {
+ public:
+    PolishDictSet(ParsedCodeElement element): PolishFunction(element, 3, 3) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) {
+        UNUSED(context);
+        UNUSED(fp_size);
+        auto dict_raw = iterate_wrapped(cmd_list, context, fp_size);
+        auto dict = std::dynamic_pointer_cast<SymDictObject>(dict_raw);
+        if (!dict) {
+            throw ParsingTypeException("Type error: Expected dict as first argument in dict_set function");
+        }
+        auto key_raw = iterate_wrapped(cmd_list, context, fp_size);
+        auto value = iterate_wrapped(cmd_list, context, fp_size);
+        dict->set(key_raw, value);
+        return std::make_shared<SymVoidObject>();
+    }
+};
