@@ -29,16 +29,17 @@ class PolishFor: public PolishFunction {
         }
 
         auto loop_index_var_name = variable->get_data();
-
-        auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
-        auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(iterate_wrapped(cmd_list, context, fp_size));
+        auto s = iterate_wrapped(cmd_list, context, fp_size);
+        auto e = iterate_wrapped(cmd_list, context, fp_size);
+        auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(s);
+        auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(e);
 
         if (!start || !end) {
             throw EvalException("Expected integer start and end values in for loop", variable->get_position());
         }
 
         if (start->as_value().get_denominator() != BigInt(1) || end->as_value().get_denominator() != BigInt(1)) {
-            throw EvalException("Expected integer start and end values in for loop", variable->get_position());
+            throw EvalException("Expected integer start and end values in for loop, not rationals", variable->get_position());
         }
 
         auto start_v = start->as_value().get_numerator();
