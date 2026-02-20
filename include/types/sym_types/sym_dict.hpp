@@ -29,7 +29,15 @@ class SymDictObject: public SymObject {
     }
 
     std::shared_ptr<SymObject> clone() const override {
-        return std::make_shared<SymDictObject>(data);
+        std::map<std::string, std::shared_ptr<SymObject>> copied;
+        for (const auto& entry : data) {
+            if (entry.second) {
+                copied[entry.first] = entry.second->clone();
+            } else {
+                copied[entry.first] = nullptr;
+            }
+        }
+        return std::make_shared<SymDictObject>(copied);
     }
 
     std::map<std::string, std::shared_ptr<SymObject>>& as_dict() {
