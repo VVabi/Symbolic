@@ -199,7 +199,9 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishDictSet>(element);
             } else if (element.data == "dict") {
                 return std::make_shared<PolishDict>(element);
-            }else if (element.data == "len") {
+            } else if (element.data == "dict_has_key") {
+                return std::make_shared<PolishDictHasKey>(element);
+            } else if (element.data == "len") {
                 return std::make_shared<PolishLength>(element);
             } else if (element.data == "append") {
                 return std::make_shared<PolishListAppend>(element);

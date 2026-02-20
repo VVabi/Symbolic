@@ -1,14 +1,19 @@
-fib(n) {
-    if(eq(n,0)) {
-        ret = 0
-    },
-    elif(eq(n,1)){
-        ret = 1
-    },
-    elif(true) {
-        ret = fib(n-1)+fib(n-2)
+fib(n, memo) {
+    if (dict_has_key(memo, n)) {
+        ret = dict_get(memo, n)
+    } elif (true) {
+        if(eq(n,0)) {
+            ret = 0
+        } elif(eq(n,1)){
+            ret = 1
+        } elif(true) {
+            ret = fib(n-1, memo)+fib(n-2, memo)
+        }
+        dict_set(memo, n, ret)
     }
     ret
-},
-println(fib(10))
-println(fib(20))
+}
+memo = dict()
+println(fib(10, memo))
+println(fib(20, memo))
+println(fib(100, memo))

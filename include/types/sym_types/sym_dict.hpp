@@ -51,4 +51,8 @@ class SymDictObject: public SymObject {
         }
         return value->second;
     }
+
+    bool has_key(std::shared_ptr<SymObject> key) {
+        return data.find(key->to_string()) != data.end();
+    }
 };

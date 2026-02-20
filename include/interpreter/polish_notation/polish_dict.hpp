@@ -13,7 +13,7 @@
 #include "types/sym_types/sym_dict.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "types/sym_types/sym_string_object.hpp"
-
+#include "types/sym_types/sym_boolean.hpp"
 
 class PolishDict: public PolishFunction {
  public:
@@ -80,5 +80,25 @@ class PolishDictSet: public PolishFunction {
         auto value = iterate_wrapped(cmd_list, context, fp_size);
         dict->set(key_raw, value);
         return std::make_shared<SymVoidObject>();
+    }
+};
+
+class PolishDictHasKey: public PolishFunction {
+ public:
+    PolishDictHasKey(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
+
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context,
+                                    const size_t fp_size) {
+        UNUSED(context);
+        UNUSED(fp_size);
+        auto dict_raw = iterate_wrapped(cmd_list, context, fp_size);
+        auto dict = std::dynamic_pointer_cast<SymDictObject>(dict_raw);
+        if (!dict) {
+            throw ParsingTypeException("Type error: Expected dict as first argument in dict_has_key function");
+        }
+        auto key_raw = iterate_wrapped(cmd_list, context, fp_size);
+
+        return std::make_shared<SymBooleanObject>(dict->has_key(key_raw));
     }
 };

@@ -10,7 +10,7 @@ check_prime(p) {
     prime
 }
 count = 0
-for (p,2,1000) {
+for (p,2,100000) {
     if (check_prime(p)) {
         count = count+1
     }
