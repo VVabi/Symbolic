@@ -14,6 +14,7 @@
 #include "shell/options/cmd_line_options.hpp"
 
 struct CommandResult;
+class InterpreterContext;
 
 /**
  * @brief Structure representing the parameters for the shell.
@@ -60,5 +61,37 @@ CommandResult handle_setparam_command(std::vector<std::string>& args, const std:
  * @return The result of the command execution.
  */
 CommandResult handle_getparam_command(std::vector<std::string>& args, const std::string& command_name);
+
+/**
+ * @brief Updates a specific parameter with the given value in the context.
+ * @param context The interpreter context containing shell parameters.
+ * @param parameter_name The name of the parameter to update.
+ * @param parameter_value The new value for the parameter.
+ * @return The result of the command execution.
+ */
+CommandResult update_parameters_in_context(InterpreterContext& context, const std::string& parameter_name, const std::string& parameter_value);
+
+/**
+ * @brief Gets a specific parameter value from the context.
+ * @param context The interpreter context containing shell parameters.
+ * @param parameter_name The name of the parameter to retrieve.
+ * @return The result of the command execution.
+ */
+CommandResult get_parameter_from_context(InterpreterContext& context, const std::string& parameter_name);
+
+/**
+ * @brief Gets all parameters as a formatted string from the context.
+ * @param context The interpreter context containing shell parameters.
+ * @param with_description Whether to include parameter descriptions.
+ * @return Formatted string containing all parameters.
+ */
+std::string get_list_of_parameters_from_context(InterpreterContext& context, bool with_description);
+
+/**
+ * @brief Gets all parameters from the context.
+ * @param context The interpreter context containing shell parameters.
+ * @return The result of the command execution.
+ */
+CommandResult get_all_parameters_from_context(InterpreterContext& context);
 
 #endif  // INCLUDE_SHELL_PARAMETERS_PARAMETERS_HPP_
