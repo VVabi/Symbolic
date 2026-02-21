@@ -16,51 +16,23 @@
 struct CommandResult;
 class InterpreterContext;
 
+#define DEFAULT_POWERSERIES_PRECISION 20
+
 /**
  * @brief Structure representing the parameters for the shell.
  */
 struct ShellParameters {
-    ShellParameters() : powerseries_expansion_size(1), profile_output(false), lexer_output(false), shunting_yard_output(false) {}
+    ShellParameters() : powerseries_expansion_size(DEFAULT_POWERSERIES_PRECISION), profile_output(false), lexer_output(false), shunting_yard_output(false) {}
+    ShellParameters(const CmdLineOptions& opts) : powerseries_expansion_size(DEFAULT_POWERSERIES_PRECISION), profile_output(opts.profile_output), lexer_output(opts.lexer_output), shunting_yard_output(opts.shunting_yard_output) {}
     uint32_t powerseries_expansion_size; /**< Size of the power series expansion. */
     bool profile_output; /**< Whether to output profiling information after each evaluation. */
     bool lexer_output; /**< Whether to output profiling information for the lexer. */
     bool shunting_yard_output; /**< Whether to output profiling information for the shunting yard algorithm. */
 };
 
-/**
- * @brief Initializes the shell parameters.
- */
-void initialize_shell_parameters(const CmdLineOptions& opts = CmdLineOptions());
+CommandResult handle_setparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name);
 
-/**
- * @brief Retrieves the shell parameters.
- * @return Pointer to the ShellParameters structure.9
- */
-const ShellParameters* get_shell_parameters();
-
-/**
- * @brief Updates a specific parameter with the given value.
- * @param parameter_name The name of the parameter to update.
- * @param parameter_value The new value for the parameter.
- * @return The result of the command execution.
- */
-CommandResult update_parameters(const std::string& parameter_name, const std::string& parameter_value);
-
-/**
- * @brief Handles the 'setparam' command.
- * @param args The arguments passed to the command.
- * @param command_name The name of the command.
- * @return The result of the command execution.
- */
-CommandResult handle_setparam_command(std::vector<std::string>& args, const std::string& command_name);
-
-/**
- * @brief Handles the 'getparam' command.
- * @param args The arguments passed to the command.
- * @param command_name The name of the command.
- * @return The result of the command execution.
- */
-CommandResult handle_getparam_command(std::vector<std::string>& args, const std::string& command_name);
+CommandResult handle_getparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name);
 
 /**
  * @brief Updates a specific parameter with the given value in the context.

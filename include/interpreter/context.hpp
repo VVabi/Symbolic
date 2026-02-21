@@ -81,18 +81,9 @@ class InterpreterContext {
      * @param handler A shared pointer to an InterpreterPrintHandler used for output operations.
      *                If nullptr, print operations will be silently ignored.
      */
-    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler) : output_handler(handler) {
+    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params) : output_handler(handler), shell_parameters(params) {
         initialize_constants();
         push_variables();  // Start with an initial variable scope
-    }
-
-    /**
-     * @brief Gets the shell parameters.
-     *
-     * @return Reference to the ShellParameters structure.
-     */
-    ShellParameters& get_shell_parameters() {
-        return shell_parameters;
     }
 
     /**
@@ -101,6 +92,15 @@ class InterpreterContext {
      * @return Const reference to the ShellParameters structure.
      */
     const ShellParameters& get_shell_parameters() const {
+        return shell_parameters;
+    }
+
+    /**
+     * @brief Gets the shell parameters (non-const version).
+     *
+     * @return Reference to the ShellParameters structure.
+     */
+    ShellParameters& get_shell_parameters_for_write() {
         return shell_parameters;
     }
 

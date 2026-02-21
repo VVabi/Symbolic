@@ -307,17 +307,23 @@ class FormulaParser {
     std::shared_ptr<InterpreterContext> context;
 
  public:
-    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler) {
-        context = std::make_shared<InterpreterContext>(print_handler);
+    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler, const ShellParameters& params) {
+        context = std::make_shared<InterpreterContext>(print_handler, params);
     }
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, const ShellParameters* parameters) {
+    CommandResult handle_command_input(const std::string& input) {
+            auto res = handle_command(*context, input);
+            return res;
+    }
+
+
+    std::unique_ptr<FormulaParsingResult> parse(const std::string& input) {
         auto now = std::chrono::high_resolution_clock::now();
 
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, context, parameters);
+             auto res = parse_formula(input, context);
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
@@ -327,7 +333,7 @@ class FormulaParser {
             ret = std::make_unique<FormulaParsingTypeExceptionResult>(e);
         }
 
-        if (parameters->profile_output) {
+        if (context->get_shell_parameters().profile_output) {
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
             std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
@@ -361,10 +367,10 @@ class SymbolicShellEvaluator {
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:
-    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) :
+    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output, const ShellParameters& params) :
         shell_input(input),
         shell_output(output),
-        parser(std::make_shared<ShellPrintHandler>(output)) {}
+        parser(std::make_shared<ShellPrintHandler>(output), params) {}
     void run();
     bool run_single_input();
 };

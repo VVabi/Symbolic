@@ -6,10 +6,9 @@
 #include "shell/command_handling.hpp"
 #include "shell/options/cmd_line_options.hpp"
 #include "interpreter/context.hpp"
+#include "cpp_utils/unused.hpp"
 
-static ShellParameters parameters;
 
-#define DEFAULT_POWERSERIES_PRECISION 20
 
 typedef std::function<std::string(ShellParameters&)> ParameterGetter;
 typedef std::function<CommandResult(ShellParameters&, const std::string&)> ParameterSetter;
@@ -108,87 +107,30 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
     };
 }
 
-void initialize_shell_parameters(const CmdLineOptions& opts) {
-    parameters.powerseries_expansion_size = DEFAULT_POWERSERIES_PRECISION;
-    parameters.profile_output = opts.profile_output;
-    parameters.lexer_output = opts.lexer_output;
-    parameters.shunting_yard_output = opts.shunting_yard_output;
-}
-
-const ShellParameters* get_shell_parameters() {
-    return &parameters;
-}
-
-CommandResult update_parameters(const std::string& parameter_name, const std::string& parameter_value) {
-    auto descriptions = create_parameter_descriptions();
-    auto it = descriptions.find(parameter_name);
-
-    if (it == descriptions.end()) {
-        return CommandResult{"Unknown parameter: "+parameter_name, false};
-    }
-
-    return it->second.setter(parameters, parameter_value);
-}
-
-CommandResult get_parameter(const std::string& parameter_name) {
-    auto descriptions = create_parameter_descriptions();
-    auto it = descriptions.find(parameter_name);
-
-    if (it == descriptions.end()) {
-        return CommandResult{"Unknown parameter: "+parameter_name, false};
-    }
-
-    return CommandResult{parameter_name+": "+it->second.getter(parameters), true};
-}
-
-std::string get_list_of_parameters(bool with_description) {
-    auto descriptions = create_parameter_descriptions();
-    std::stringstream result;
-    for (const auto& pair : descriptions) {
-        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(parameters);
-        if (with_description) {
-            result << " - " << pair.second.description;
-        }
-        result << "\n";
-    }
-    return result.str();
-}
-
-
-CommandResult get_all_parameters() {
-    return CommandResult{get_list_of_parameters(false), true};
-}
-
-std::string get_set_parameters_help(const std::string& command_name) {
-    return command_name+" <parameter_name> <parameter_value>: set a parameter\nAvailable parameters are:\n"+get_list_of_parameters(true);
-}
-
-std::string get_get_parameters_help(const std::string& command_name) {
-    return command_name+" <parameter_name>: get a parameter\nAvailable parameters are:\n"+get_list_of_parameters(true);
-}
-
-CommandResult handle_setparam_command(std::vector<std::string>& args, const std::string& command_name) {
+CommandResult handle_setparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name) {
+    UNUSED(command_name);
     if (args.size() == 1 && args[0] == "help") {
-        return CommandResult{get_set_parameters_help(command_name), true};
+        return CommandResult{get_list_of_parameters_from_context(context, true), true};
     }
     if (args.size() != 2) {
         return CommandResult{"Invalid number of arguments; expected 2", false};
     }
-    return update_parameters(args[0], args[1]);
+    return update_parameters_in_context(context, args[0], args[1]);
 }
 
-CommandResult handle_getparam_command(std::vector<std::string>& args, const std::string& command_name) {
+CommandResult handle_getparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name) {
+    UNUSED(command_name);
     if (args.size() == 1 && args[0] == "help") {
-        return CommandResult{get_get_parameters_help(command_name), true};
+        return CommandResult{get_list_of_parameters_from_context(context, true), true};
     }
     if (args.size() > 1) {
         return CommandResult{"Invalid number of arguments; expected 1", false};
     }
 
     if (args.size() == 0) {
-        return get_all_parameters();
+        return get_all_parameters_from_context(context);
     }
-    return get_parameter(args[0]);
+    return get_parameter_from_context(context, args[0]);
 }
 
 // Context-based parameter management functions
@@ -200,7 +142,7 @@ CommandResult update_parameters_in_context(InterpreterContext& context, const st
         return CommandResult{"Unknown parameter: "+parameter_name, false};
     }
 
-    return it->second.setter(context.get_shell_parameters(), parameter_value);
+    return it->second.setter(context.get_shell_parameters_for_write(), parameter_value);
 }
 
 CommandResult get_parameter_from_context(InterpreterContext& context, const std::string& parameter_name) {
@@ -211,14 +153,14 @@ CommandResult get_parameter_from_context(InterpreterContext& context, const std:
         return CommandResult{"Unknown parameter: "+parameter_name, false};
     }
 
-    return CommandResult{parameter_name+": "+it->second.getter(context.get_shell_parameters()), true};
+    return CommandResult{parameter_name+": "+it->second.getter(context.get_shell_parameters_for_write()), true};
 }
 
 std::string get_list_of_parameters_from_context(InterpreterContext& context, bool with_description) {
     auto descriptions = create_parameter_descriptions();
     std::stringstream result;
     for (const auto& pair : descriptions) {
-        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(context.get_shell_parameters());
+        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(context.get_shell_parameters_for_write());
         if (with_description) {
             result << " - " << pair.second.description;
         }
