@@ -107,7 +107,7 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
     };
 }
 
-CommandResult handle_setparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name) {
+CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext> context, std::vector<std::string>& args, const std::string& command_name) {
     UNUSED(command_name);
     if (args.size() == 1 && args[0] == "help") {
         return CommandResult{get_list_of_parameters_from_context(context, true), true};
@@ -118,7 +118,7 @@ CommandResult handle_setparam_command(InterpreterContext& context, std::vector<s
     return update_parameters_in_context(context, args[0], args[1]);
 }
 
-CommandResult handle_getparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name) {
+CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext> context, std::vector<std::string>& args, const std::string& command_name) {
     UNUSED(command_name);
     if (args.size() == 1 && args[0] == "help") {
         return CommandResult{get_list_of_parameters_from_context(context, true), true};
@@ -134,7 +134,7 @@ CommandResult handle_getparam_command(InterpreterContext& context, std::vector<s
 }
 
 // Context-based parameter management functions
-CommandResult update_parameters_in_context(InterpreterContext& context, const std::string& parameter_name, const std::string& parameter_value) {
+CommandResult update_parameters_in_context(std::shared_ptr<InterpreterContext> context, const std::string& parameter_name, const std::string& parameter_value) {
     auto descriptions = create_parameter_descriptions();
     auto it = descriptions.find(parameter_name);
 
@@ -142,10 +142,10 @@ CommandResult update_parameters_in_context(InterpreterContext& context, const st
         return CommandResult{"Unknown parameter: "+parameter_name, false};
     }
 
-    return it->second.setter(context.get_shell_parameters_for_write(), parameter_value);
+    return it->second.setter(context->get_shell_parameters_for_write(), parameter_value);
 }
 
-CommandResult get_parameter_from_context(InterpreterContext& context, const std::string& parameter_name) {
+CommandResult get_parameter_from_context(std::shared_ptr<InterpreterContext> context, const std::string& parameter_name) {
     auto descriptions = create_parameter_descriptions();
     auto it = descriptions.find(parameter_name);
 
@@ -153,14 +153,14 @@ CommandResult get_parameter_from_context(InterpreterContext& context, const std:
         return CommandResult{"Unknown parameter: "+parameter_name, false};
     }
 
-    return CommandResult{parameter_name+": "+it->second.getter(context.get_shell_parameters_for_write()), true};
+    return CommandResult{parameter_name+": "+it->second.getter(context->get_shell_parameters_for_write()), true};
 }
 
-std::string get_list_of_parameters_from_context(InterpreterContext& context, bool with_description) {
+std::string get_list_of_parameters_from_context(std::shared_ptr<InterpreterContext> context, bool with_description) {
     auto descriptions = create_parameter_descriptions();
     std::stringstream result;
     for (const auto& pair : descriptions) {
-        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(context.get_shell_parameters_for_write());
+        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(context->get_shell_parameters_for_write());
         if (with_description) {
             result << " - " << pair.second.description;
         }
@@ -169,6 +169,6 @@ std::string get_list_of_parameters_from_context(InterpreterContext& context, boo
     return result.str();
 }
 
-CommandResult get_all_parameters_from_context(InterpreterContext& context) {
+CommandResult get_all_parameters_from_context(std::shared_ptr<InterpreterContext> context) {
     return CommandResult{get_list_of_parameters_from_context(context, false), true};
 }

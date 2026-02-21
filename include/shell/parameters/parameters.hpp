@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <memory>
 #include "shell/command_handling.hpp"
 #include "common/common_datatypes.hpp"
 #include "shell/options/cmd_line_options.hpp"
@@ -30,9 +31,9 @@ struct ShellParameters {
     bool shunting_yard_output; /**< Whether to output profiling information for the shunting yard algorithm. */
 };
 
-CommandResult handle_setparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name);
+CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext>, std::vector<std::string>& args, const std::string& command_name);
 
-CommandResult handle_getparam_command(InterpreterContext& context, std::vector<std::string>& args, const std::string& command_name);
+CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext>, std::vector<std::string>& args, const std::string& command_name);
 
 /**
  * @brief Updates a specific parameter with the given value in the context.
@@ -41,7 +42,7 @@ CommandResult handle_getparam_command(InterpreterContext& context, std::vector<s
  * @param parameter_value The new value for the parameter.
  * @return The result of the command execution.
  */
-CommandResult update_parameters_in_context(InterpreterContext& context, const std::string& parameter_name, const std::string& parameter_value);
+CommandResult update_parameters_in_context(std::shared_ptr<InterpreterContext>, const std::string& parameter_name, const std::string& parameter_value);
 
 /**
  * @brief Gets a specific parameter value from the context.
@@ -49,7 +50,7 @@ CommandResult update_parameters_in_context(InterpreterContext& context, const st
  * @param parameter_name The name of the parameter to retrieve.
  * @return The result of the command execution.
  */
-CommandResult get_parameter_from_context(InterpreterContext& context, const std::string& parameter_name);
+CommandResult get_parameter_from_context(std::shared_ptr<InterpreterContext>, const std::string& parameter_name);
 
 /**
  * @brief Gets all parameters as a formatted string from the context.
@@ -57,13 +58,13 @@ CommandResult get_parameter_from_context(InterpreterContext& context, const std:
  * @param with_description Whether to include parameter descriptions.
  * @return Formatted string containing all parameters.
  */
-std::string get_list_of_parameters_from_context(InterpreterContext& context, bool with_description);
+std::string get_list_of_parameters_from_context(std::shared_ptr<InterpreterContext>, bool with_description);
 
 /**
  * @brief Gets all parameters from the context.
  * @param context The interpreter context containing shell parameters.
  * @return The result of the command execution.
  */
-CommandResult get_all_parameters_from_context(InterpreterContext& context);
+CommandResult get_all_parameters_from_context(std::shared_ptr<InterpreterContext>);
 
 #endif  // INCLUDE_SHELL_PARAMETERS_PARAMETERS_HPP_

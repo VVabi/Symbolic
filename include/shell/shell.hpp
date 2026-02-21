@@ -312,7 +312,7 @@ class FormulaParser {
     }
 
     CommandResult handle_command_input(const std::string& input) {
-            auto res = handle_command(*context, input);
+            auto res = handle_command(context, input);
             return res;
     }
 
