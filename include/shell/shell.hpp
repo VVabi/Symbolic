@@ -316,7 +316,6 @@ class FormulaParser {
             return res;
     }
 
-
     std::unique_ptr<FormulaParsingResult> parse(const std::string& input) {
         auto now = std::chrono::high_resolution_clock::now();
 

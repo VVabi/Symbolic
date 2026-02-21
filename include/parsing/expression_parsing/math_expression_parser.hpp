@@ -60,7 +60,7 @@ inline std::shared_ptr<MathWrapperType<double>> parse_power_series_from_string(c
         const uint32_t size,
         const double unit) {
     UNUSED(unit);
-    
+
     ShellParameters parameters = ShellParameters();
     parameters.powerseries_expansion_size = size;
     auto context = std::make_shared<InterpreterContext>(nullptr, parameters);
