@@ -61,7 +61,8 @@ std::vector<DoubleValueTestCase> double_test_cases = {
 TEST(ParsingTests, DoubleValueParsing) {
     for (const auto& test_case : double_test_cases) {
         auto context = std::make_shared<InterpreterContext>(nullptr);
-        auto result = RingCompanionHelper<double>::from_string(parse_formula(test_case.formula, context, 20), 1.0);
+        auto parameters = get_shell_parameters();
+        auto result = RingCompanionHelper<double>::from_string(parse_formula(test_case.formula, context, parameters), 1.0);
         EXPECT_TRUE(EqualityChecker<double>::check_equality(result, test_case.expected_result));
     }
 }
@@ -86,7 +87,8 @@ std::vector<RationalValueTestCase> rational_test_cases = {
 TEST(ParsingTests, RationalValueParsing) {
     for (const auto& test_case : rational_test_cases) {
         auto context = std::make_shared<InterpreterContext>(nullptr);
-        auto result = RingCompanionHelper<RationalNumber<BigInt>>::from_string(parse_formula(test_case.formula, context, 20), BigInt(1));
+        auto parameters = get_shell_parameters();
+        auto result = RingCompanionHelper<RationalNumber<BigInt>>::from_string(parse_formula(test_case.formula, context, parameters), BigInt(1));
         EXPECT_TRUE(EqualityChecker<RationalNumber<BigInt>>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
 }
@@ -131,7 +133,8 @@ ModLong parse_modlong_value(const std::string& input) {
 TEST(ParsingTests, ModValueParsing) {
     for (const auto& test_case : mod_test_cases) {
         auto context = std::make_shared<InterpreterContext>(nullptr);
-        auto result = parse_modlong_value(parse_formula(test_case.formula, context, 20));
+        auto parameters = get_shell_parameters();
+        auto result = parse_modlong_value(parse_formula(test_case.formula, context, parameters));
         EXPECT_TRUE(EqualityChecker<ModLong>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
 }

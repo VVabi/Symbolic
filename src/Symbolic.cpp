@@ -28,7 +28,7 @@ std::shared_ptr<ShellOutput> get_shell_output(const CmdLineOptions& opts) {
 
 int main(int argc, char **argv) {
     auto opts = parse_cmd_line_args(argc, argv);
-    initialize_shell_parameters();
+    initialize_shell_parameters(opts);
     initialize_command_handler();
 
     auto shell_input    = get_shell_input(opts);

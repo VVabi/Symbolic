@@ -9,7 +9,7 @@ CmdLineOptions parse_cmd_line_args(int argc, char **argv) {
     options.repl_mode       = true;
     int opt;
     optind = 0;  // necessary to reset getopt for non-global use (eg in tests)
-    while ((opt = getopt(argc, argv, "i:o:h")) != -1) {
+    while ((opt = getopt(argc, argv, "i:o:pslh")) != -1) {
         switch (opt) {
             case 'i':
                 options.input_file = optarg;
@@ -17,6 +17,15 @@ CmdLineOptions parse_cmd_line_args(int argc, char **argv) {
                 break;
             case 'o':
                 options.output_file = optarg;
+                break;
+            case 'p':
+                options.profile_output = true;
+                break;
+            case 's':
+                options.shunting_yard_output = true;
+                break;
+            case 'l':
+                options.lexer_output = true;
                 break;
             case 'h':
                 std::cerr << "Usage: " << argv[0] << " -i input_file -o output_file" << std::endl;

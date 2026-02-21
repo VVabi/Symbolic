@@ -18,12 +18,7 @@
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "common/common_datatypes.hpp"
-
-class FormulaParsingResult {
- public:
-    virtual void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) = 0;
-};
-
+#include "shell/parameters/parameters.hpp"
 
 class ShellInput {
  public:
@@ -316,14 +311,13 @@ class FormulaParser {
         context = std::make_shared<InterpreterContext>(print_handler);
     }
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, const uint32_t powerseries_expansion_size) {
-        #if SHELL_DEBUG_OUTPUT
+    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, const ShellParameters* parameters) {
         auto now = std::chrono::high_resolution_clock::now();
-        #endif
+
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, context, powerseries_expansion_size);
+             auto res = parse_formula(input, context, parameters);
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
@@ -333,14 +327,13 @@ class FormulaParser {
             ret = std::make_unique<FormulaParsingTypeExceptionResult>(e);
         }
 
-
-        #if SHELL_DEBUG_OUTPUT
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
-        std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
-        std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
-        std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
-        #endif
+        if (parameters->profile_output) {
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
+            std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
+            std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
+            std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
+        }
         return ret;
     }
 };

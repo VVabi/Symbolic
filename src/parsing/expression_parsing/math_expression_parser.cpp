@@ -6,35 +6,12 @@
 
 #include <vector>
 #include <map>
+#include "shell/parameters/parameters.hpp"
 #include "common/lexer_deque.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "interpreter/context.hpp"
 
-/**
- * @brief Infers the datatype from the lexer elements.
- *
- * This function iterates through the lexer elements and determines the datatype based on the element types and data.
- *
- * @param lexer The vector of MathLexerElement objects representing the lexer elements.
- * @return The inferred datatype.
- */
-Datatype infer_datatype_from_lexer(const std::vector<MathLexerElement>& lexer) {
-    for (const auto& x : lexer) {
-        if (x.type == NUMBER) {
-            if (x.data.find('.') != std::string::npos || x.data.find('e') != std::string::npos) {
-                return Datatype::DOUBLE;
-            }
-        }
-
-        if (x.type == FUNCTION) {
-            if (x.data == "Mod") {
-                return Datatype::MOD;
-            }
-        }
-    }
-    return Datatype::RATIONAL;
-}
 
 /**
  * @brief Parses a formula based on the given datatype.
@@ -66,15 +43,15 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
                     const uint32_t offset,
                     std::shared_ptr<InterpreterContext>& context,
-                    const uint32_t powerseries_expansion_size) {
+                    const ShellParameters* parameters) {
     auto formula = parse_math_expression_string(input_string, offset);
 
-    #if DEBUG_MATH_LEXER_OUTPUT
-    std::cout << "Lexer output:\n";
-    for (const auto& element : formula) {
-        std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
+    if (parameters->lexer_output) {
+        std::cout << "Lexer output:\n";
+        for (const auto& element : formula) {
+            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
+        }
     }
-    #endif
 
     std::reverse(formula.begin(), formula.end());
 
@@ -86,15 +63,15 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
 
     auto p = shunting_yard_algorithm(formula_deque);
 
-    #if DEBUG_SHUNTING_YARD_OUTPUT
-    std::cout << "Shunting Yard output:\n";
-    for (const auto & element : p) {
-        element.debug_print(std::cout, 0);
+    if (parameters->shunting_yard_output) {
+        std::cout << "Shunting Yard output:\n";
+        for (const auto & element : p) {
+            element.debug_print(std::cout, 0);
+        }
     }
-    #endif
 
     LexerDeque<ParsedCodeElement> polish(std::move(p));
-    return parse_formula_internal(polish, context, powerseries_expansion_size);
+    return parse_formula_internal(polish, context, parameters->powerseries_expansion_size);
 }
 
 /**
@@ -110,8 +87,8 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  */
 std::string parse_formula(const std::string& input,
                     std::shared_ptr<InterpreterContext>& context,
-                    const uint32_t powerseries_expansion_size) {
-    auto ret = parse_formula_as_sym_object(input, 0, context, powerseries_expansion_size);
+                    const ShellParameters* parameters) {
+    auto ret = parse_formula_as_sym_object(input, 0, context, parameters);
 
     auto ret_str = ret->to_string();
     context->set_variable("ANS", ret);

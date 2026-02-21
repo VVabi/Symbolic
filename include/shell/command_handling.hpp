@@ -11,7 +11,7 @@
 #include <memory>
 #include <functional>
 #include <vector>
-#include "shell/shell.hpp"
+#include "shell/formula_parsing_result.hpp"
 
 #define COMMAND_SETPARAM "setparam"
 #define COMMAND_GETPARAM "getparam"

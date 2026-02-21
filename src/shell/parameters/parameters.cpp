@@ -4,13 +4,17 @@
 #include "common/common_datatypes.hpp"
 #include "shell/parameters/parameters.hpp"
 #include "shell/command_handling.hpp"
+#include "shell/options/cmd_line_options.hpp"
 
 static ShellParameters parameters;
 
 #define DEFAULT_POWERSERIES_PRECISION 20
 
-void initialize_shell_parameters() {
+void initialize_shell_parameters(const CmdLineOptions& opts) {
     parameters.powerseries_expansion_size = DEFAULT_POWERSERIES_PRECISION;
+    parameters.profile_output = opts.profile_output;
+    parameters.lexer_output = opts.lexer_output;
+    parameters.shunting_yard_output = opts.shunting_yard_output;
 }
 
 const ShellParameters* get_shell_parameters() {
@@ -42,6 +46,66 @@ static std::map<std::string, ParameterDescription> parameter_descriptions = {
                     return CommandResult{"Parameter updated", true};
                 } catch (const std::exception& e) {
                     return CommandResult{"Invalid value for integer", false};
+                }
+            }
+        }
+    },
+    {
+        "profile_output", {
+            "bool",
+            "Whether to output profiling information after each evaluation",
+            []() -> std::string {
+                return parameters.profile_output ? "true" : "false";
+            },
+            [](const std::string& value) -> CommandResult {
+                if (value == "true") {
+                    parameters.profile_output = true;
+                    return CommandResult{"Parameter updated", true};
+                } else if (value == "false") {
+                    parameters.profile_output = false;
+                    return CommandResult{"Parameter updated", true};
+                } else {
+                    return CommandResult{"Invalid value for boolean; expected 'true' or 'false'", false};
+                }
+            }
+        }
+    },
+    {
+        "lexer_output", {
+            "bool",
+            "Whether to output profiling information for the lexer",
+            []() -> std::string {
+                return parameters.lexer_output ? "true" : "false";
+            },
+            [](const std::string& value) -> CommandResult {
+                if (value == "true") {
+                    parameters.lexer_output = true;
+                    return CommandResult{"Parameter updated", true};
+                } else if (value == "false") {
+                    parameters.lexer_output = false;
+                    return CommandResult{"Parameter updated", true};
+                } else {
+                    return CommandResult{"Invalid value for boolean; expected 'true' or 'false'", false};
+                }
+            }
+        }
+    },
+    {
+        "shunting_yard_output", {
+            "bool",
+            "Whether to output profiling information for the shunting yard algorithm",
+            []() -> std::string {
+                return parameters.shunting_yard_output ? "true" : "false";
+            },
+            [](const std::string& value) -> CommandResult {
+                if (value == "true") {
+                    parameters.shunting_yard_output = true;
+                    return CommandResult{"Parameter updated", true};
+                } else if (value == "false") {
+                    parameters.shunting_yard_output = false;
+                    return CommandResult{"Parameter updated", true};
+                } else {
+                    return CommandResult{"Invalid value for boolean; expected 'true' or 'false'", false};
                 }
             }
         }

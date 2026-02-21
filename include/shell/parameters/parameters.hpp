@@ -11,6 +11,7 @@
 #include <vector>
 #include "shell/command_handling.hpp"
 #include "common/common_datatypes.hpp"
+#include "shell/options/cmd_line_options.hpp"
 
 struct CommandResult;
 
@@ -18,17 +19,21 @@ struct CommandResult;
  * @brief Structure representing the parameters for the shell.
  */
 struct ShellParameters {
+    ShellParameters() : powerseries_expansion_size(1), profile_output(false), lexer_output(false), shunting_yard_output(false) {}
     uint32_t powerseries_expansion_size; /**< Size of the power series expansion. */
+    bool profile_output; /**< Whether to output profiling information after each evaluation. */
+    bool lexer_output; /**< Whether to output profiling information for the lexer. */
+    bool shunting_yard_output; /**< Whether to output profiling information for the shunting yard algorithm. */
 };
 
 /**
  * @brief Initializes the shell parameters.
  */
-void initialize_shell_parameters();
+void initialize_shell_parameters(const CmdLineOptions& opts = CmdLineOptions());
 
 /**
  * @brief Retrieves the shell parameters.
- * @return Pointer to the ShellParameters structure.
+ * @return Pointer to the ShellParameters structure.9
  */
 const ShellParameters* get_shell_parameters();
 
