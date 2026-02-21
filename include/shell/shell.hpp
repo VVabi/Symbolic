@@ -18,12 +18,8 @@
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "common/common_datatypes.hpp"
-
-class FormulaParsingResult {
- public:
-    virtual void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) = 0;
-};
-
+#include "shell/parameters/parameters.hpp"
+#include "shell/command_handling.hpp"
 
 class ShellInput {
  public:
@@ -312,18 +308,22 @@ class FormulaParser {
     std::shared_ptr<InterpreterContext> context;
 
  public:
-    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler) {
-        context = std::make_shared<InterpreterContext>(print_handler);
+    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler, const ShellParameters& params) {
+        context = std::make_shared<InterpreterContext>(print_handler, params);
     }
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, const uint32_t powerseries_expansion_size) {
-        #if SHELL_DEBUG_OUTPUT
+    CommandResult handle_command_input(const std::string& input) {
+            auto res = handle_command(context, input);
+            return res;
+    }
+
+    std::unique_ptr<FormulaParsingResult> parse(const std::string& input) {
         auto now = std::chrono::high_resolution_clock::now();
-        #endif
+
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, context, powerseries_expansion_size);
+             auto res = parse_formula(input, context);
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
@@ -333,14 +333,13 @@ class FormulaParser {
             ret = std::make_unique<FormulaParsingTypeExceptionResult>(e);
         }
 
-
-        #if SHELL_DEBUG_OUTPUT
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
-        std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
-        std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
-        std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
-        #endif
+        if (context->get_shell_parameters().profile_output) {
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
+            std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
+            std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
+            std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
+        }
         return ret;
     }
 };
@@ -368,10 +367,10 @@ class SymbolicShellEvaluator {
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:
-    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) :
+    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output, const ShellParameters& params) :
         shell_input(input),
         shell_output(output),
-        parser(std::make_shared<ShellPrintHandler>(output)) {}
+        parser(std::make_shared<ShellPrintHandler>(output), params) {}
     void run();
     bool run_single_input();
 };

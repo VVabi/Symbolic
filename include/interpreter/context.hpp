@@ -8,6 +8,7 @@
 #include "types/sym_types/sym_boolean.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "exceptions/parsing_type_exception.hpp"
+#include "shell/parameters/parameters.hpp"
 
 class PolishCustomFunction;
 
@@ -33,6 +34,7 @@ class InterpreterContext {
     std::shared_ptr<InterpreterPrintHandler> output_handler;
     std::map<std::string, std::shared_ptr<PolishCustomFunction>> custom_functions;
     uint64_t steps = 0;
+    ShellParameters shell_parameters;
 
  public:
     /**
@@ -79,9 +81,27 @@ class InterpreterContext {
      * @param handler A shared pointer to an InterpreterPrintHandler used for output operations.
      *                If nullptr, print operations will be silently ignored.
      */
-    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler) : output_handler(handler) {
+    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params) : output_handler(handler), shell_parameters(params) {
         initialize_constants();
         push_variables();  // Start with an initial variable scope
+    }
+
+    /**
+     * @brief Gets the shell parameters (const version).
+     *
+     * @return Const reference to the ShellParameters structure.
+     */
+    const ShellParameters& get_shell_parameters() const {
+        return shell_parameters;
+    }
+
+    /**
+     * @brief Gets the shell parameters (non-const version).
+     *
+     * @return Reference to the ShellParameters structure.
+     */
+    ShellParameters& get_shell_parameters_for_write() {
+        return shell_parameters;
     }
 
     /**

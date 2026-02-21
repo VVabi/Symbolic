@@ -28,7 +28,6 @@ class TestShellInput: public ShellInput {
 
 
 void test_shell_power_series_parsing() {
-    initialize_shell_parameters();
     initialize_command_handler();
     auto test_cases = get_power_series_parsing_test_cases();
 
@@ -50,7 +49,7 @@ void test_shell_power_series_parsing() {
         }
         auto out_shell = std::make_shared<TestShellOutput>();
         auto in_shell = std::make_shared<TestShellInput>(std::move(instream));
-        SymbolicShellEvaluator evaluator(in_shell, out_shell);
+        SymbolicShellEvaluator evaluator(in_shell, out_shell, ShellParameters());
 
         evaluator.run();
         EXPECT_EQ(out_shell->outputs.size(), expected_result.size() + 2) << "Failed for " << formula << ": Got " << out_shell->outputs.size() << " Expected " << expected_result.size()+1;
@@ -79,12 +78,11 @@ void test_shell_explicit_tests() {
     }
 
     for (auto test_folder : directories) {
-        initialize_shell_parameters();
         initialize_command_handler();
 
         auto shell_input = std::make_shared<FileShellLineInput>(test_folder+"/input.txt");
         auto shell_output = std::make_shared<TestShellOutput>();
-        SymbolicShellEvaluator evaluator(shell_input, shell_output);
+        SymbolicShellEvaluator evaluator(shell_input, shell_output, ShellParameters());
         evaluator.run();
 
         std::ifstream expected_output_file(test_folder+"/expected_output.txt");
@@ -136,7 +134,7 @@ void regenerate_outputs() {
     auto input              = std::make_unique<std::ifstream>(base_folder+"/input.txt");
     auto shell_input        = std::make_shared<TestShellInput>(std::move(input));
     auto shell_output       = std::make_shared<TestShellOutput>();
-    SymbolicShellEvaluator evaluator(shell_input, shell_output);
+    SymbolicShellEvaluator evaluator(shell_input, shell_output, ShellParameters());
 
     evaluator.run();
     std::cout << base_folder+"/expected_output.txt" << std::endl;

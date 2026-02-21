@@ -28,12 +28,12 @@ std::shared_ptr<ShellOutput> get_shell_output(const CmdLineOptions& opts) {
 
 int main(int argc, char **argv) {
     auto opts = parse_cmd_line_args(argc, argv);
-    initialize_shell_parameters();
     initialize_command_handler();
+    ShellParameters params = ShellParameters(opts);
 
     auto shell_input    = get_shell_input(opts);
     auto shell_output   = get_shell_output(opts);
-    SymbolicShellEvaluator evaluator(shell_input, shell_output);
+    SymbolicShellEvaluator evaluator(shell_input, shell_output, params);
     evaluator.run();
 
     return 0;

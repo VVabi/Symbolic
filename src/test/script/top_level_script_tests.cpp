@@ -11,7 +11,7 @@
 void test_single_script(const std::string& filename, const std::vector<std::string>& expected_outputs) {
     auto shell_input = std::make_shared<FileShellInput>(filename);
     auto shell_output = std::make_shared<TestShellOutput>();
-    SymbolicShellEvaluator evaluator(shell_input, shell_output);
+    SymbolicShellEvaluator evaluator(shell_input, shell_output, ShellParameters());
     evaluator.run();
 
     EXPECT_EQ(expected_outputs.size(), shell_output->printed_outputs.size()) << "Found different output sizes for " << filename;
@@ -36,7 +36,6 @@ void test_single_script_wrapper(const std::string& filename, const std::string& 
 }
 
 void test_script_interpretation() {
-    initialize_shell_parameters();
     initialize_command_handler();
     auto base_folder = "../src/test/script/test_scripts/single_tests";
 

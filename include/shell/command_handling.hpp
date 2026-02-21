@@ -11,10 +11,12 @@
 #include <memory>
 #include <functional>
 #include <vector>
-#include "shell/shell.hpp"
+#include "shell/formula_parsing_result.hpp"
 
 #define COMMAND_SETPARAM "setparam"
 #define COMMAND_GETPARAM "getparam"
+
+class InterpreterContext;
 
 /**
  * @struct CommandResult
@@ -49,7 +51,7 @@ struct CommandResult : FormulaParsingResult {
  */
 class CommandHandler {
  private:
-    std::map<std::string, std::function<CommandResult(std::vector<std::string>&, const std::string& command_name)>> handlers; /**< Map of command names to their corresponding handler functions. */
+    std::map<std::string, std::function<CommandResult(std::shared_ptr<InterpreterContext>, std::vector<std::string>&, const std::string& command_name)>> handlers; /**< Map of command names to their corresponding handler functions. */
 
  public:
     /**
@@ -68,7 +70,7 @@ class CommandHandler {
      * @param handler The handler function for the command.
      * @return True if the handler was added successfully, false if a handler for the command already exists.
      */
-    bool add_handler(const std::string& command, std::function<CommandResult(std::vector<std::string>&, const std::string& command_name)> handler) {
+    bool add_handler(const std::string& command, std::function<CommandResult(std::shared_ptr<InterpreterContext>, std::vector<std::string>&, const std::string& command_name)> handler) {
         if (handlers.count(command) > 0) {
             return false;
         }
@@ -94,7 +96,7 @@ class CommandHandler {
      * @param parts The parts of the command.
      * @return The result of the command execution.
      */
-    CommandResult handle_command(const std::vector<std::string>& parts) {
+    CommandResult handle_command(std::shared_ptr<InterpreterContext> context, std::vector<std::string>& parts) {
         if (parts.size() == 0) {
             return CommandResult("Empty command", false);
         }
@@ -104,7 +106,7 @@ class CommandHandler {
         }
 
         std::vector<std::string> args(parts.begin() + 1, parts.end());  // TODO(vabi) this is not efficient, but probably not a big deal
-        return handlers[parts[0]](args, parts[0]);
+        return handlers[parts[0]](context, args, parts[0]);
     }
 };
 
@@ -117,6 +119,6 @@ void initialize_command_handler();
  * @brief Handles the execution of a command.
  * @param command The command to be executed.
  */
-CommandResult handle_command(const std::string& command);
+CommandResult handle_command(std::shared_ptr<InterpreterContext> context, const std::string& command);
 
 #endif  // INCLUDE_SHELL_COMMAND_HANDLING_HPP_

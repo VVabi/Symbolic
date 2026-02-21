@@ -50,18 +50,18 @@ bool SymbolicShellEvaluator::run_single_input() {
     }
     switch (result.prefix) {
         case COMMAND: {
-            auto res = handle_command(result.processed_input);
+            auto res = parser.handle_command_input(result.processed_input);
             shell_output->handle_result(std::make_unique<CommandResult>(res), result.print_result());
             break;
         }
         case EXIT:
             return false;
             break;
-        case NO_PREFIX:
-            auto par = get_shell_parameters();
-            auto x = parser.parse(result.processed_input, par->powerseries_expansion_size);
+        case NO_PREFIX: {
+            auto x = parser.parse(result.processed_input);
             shell_output->handle_result(std::move(x), result.print_result());
             break;
+        }
     }
 
     return true;
