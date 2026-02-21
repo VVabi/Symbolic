@@ -19,6 +19,7 @@
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "common/common_datatypes.hpp"
 #include "shell/parameters/parameters.hpp"
+#include "shell/command_handling.hpp"
 
 class ShellInput {
  public:

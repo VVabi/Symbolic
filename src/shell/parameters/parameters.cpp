@@ -8,9 +8,7 @@
 #include "interpreter/context.hpp"
 #include "cpp_utils/unused.hpp"
 
-
-
-typedef std::function<std::string(ShellParameters&)> ParameterGetter;
+typedef std::function<std::string(const ShellParameters&)> ParameterGetter;
 typedef std::function<CommandResult(ShellParameters&, const std::string&)> ParameterSetter;
 
 struct ParameterDescription {
@@ -27,7 +25,7 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
             "powerseriesprecision", {
                 "uint32",
                 "Positive integer; the maximal number of terms in power series expansion",
-                [](ShellParameters& params) -> std::string {
+                [](const ShellParameters& params) -> std::string {
                     return std::to_string(params.powerseries_expansion_size);
                 },
                 [](ShellParameters& params, const std::string& value) -> CommandResult {
@@ -48,7 +46,7 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
             "profile_output", {
                 "bool",
                 "Whether to output profiling information after each evaluation",
-                [](ShellParameters& params) -> std::string {
+                [](const ShellParameters& params) -> std::string {
                     return params.profile_output ? "true" : "false";
                 },
                 [](ShellParameters& params, const std::string& value) -> CommandResult {
@@ -68,7 +66,7 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
             "lexer_output", {
                 "bool",
                 "Whether to output profiling information for the lexer",
-                [](ShellParameters& params) -> std::string {
+                [](const ShellParameters& params) -> std::string {
                     return params.lexer_output ? "true" : "false";
                 },
                 [](ShellParameters& params, const std::string& value) -> CommandResult {
@@ -88,7 +86,7 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
             "shunting_yard_output", {
                 "bool",
                 "Whether to output profiling information for the shunting yard algorithm",
-                [](ShellParameters& params) -> std::string {
+                [](const ShellParameters& params) -> std::string {
                     return params.shunting_yard_output ? "true" : "false";
                 },
                 [](ShellParameters& params, const std::string& value) -> CommandResult {
@@ -124,7 +122,7 @@ CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext> contex
         return CommandResult{get_list_of_parameters_from_context(context, true), true};
     }
     if (args.size() > 1) {
-        return CommandResult{"Invalid number of arguments; expected 1", false};
+        return CommandResult{"Invalid number of arguments; expected 0 or 1", false};
     }
 
     if (args.size() == 0) {
@@ -153,14 +151,14 @@ CommandResult get_parameter_from_context(std::shared_ptr<InterpreterContext> con
         return CommandResult{"Unknown parameter: "+parameter_name, false};
     }
 
-    return CommandResult{parameter_name+": "+it->second.getter(context->get_shell_parameters_for_write()), true};
+    return CommandResult{parameter_name+": "+it->second.getter(context->get_shell_parameters()), true};
 }
 
 std::string get_list_of_parameters_from_context(std::shared_ptr<InterpreterContext> context, bool with_description) {
     auto descriptions = create_parameter_descriptions();
     std::stringstream result;
     for (const auto& pair : descriptions) {
-        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(context->get_shell_parameters_for_write());
+        result << "    " << pair.first << ": " << pair.second.type << " with current value " << pair.second.getter(context->get_shell_parameters());
         if (with_description) {
             result << " - " << pair.second.description;
         }
