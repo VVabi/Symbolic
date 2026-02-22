@@ -80,7 +80,6 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  * @param input The input math expression formula as a string.
  * @param type The datatype to parse the formula as.
  * @param variables The map of variable names to their respective values
- * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a string.
  */
 std::string parse_formula(const std::string& input,

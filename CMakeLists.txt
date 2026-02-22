@@ -10,6 +10,7 @@ add_executable(Symbolic
         src/math/combinatorics/polya/partitions.cpp
         src/math/number_theory/moebius.cpp
         src/math/number_theory/euler_phi.cpp
+        src/preprocessor/preprocess.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
@@ -29,6 +30,7 @@ add_executable(Symbolic_tests
         src/math/combinatorics/polya/partitions.cpp
         src/math/number_theory/moebius.cpp
         src/math/number_theory/euler_phi.cpp
+        src/preprocessor/preprocess.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
@@ -59,6 +61,7 @@ add_executable(Symbolic_playground
         src/math/combinatorics/polya/partitions.cpp
         src/math/number_theory/moebius.cpp
         src/math/number_theory/euler_phi.cpp
+        src/preprocessor/preprocess.cpp
         src/parsing/expression_parsing/math_lexer.cpp
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
