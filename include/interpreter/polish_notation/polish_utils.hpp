@@ -48,12 +48,11 @@ class PolishPrint: public PolishFunction {
         PolishFunction(element, 1, 2), line_break(line_break) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext> &context,
-                                    const size_t fp_size) {
-        auto first = iterate_wrapped(cmd_list, context, fp_size);
+                                    std::shared_ptr<InterpreterContext> &context) {
+        auto first = iterate_wrapped(cmd_list, context);
         std::string mode_str = "raw";
         if (get_num_args() == 2) {
-            auto mode = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context, fp_size));
+            auto mode = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context));
             if (!mode) {
                 throw ParsingTypeException("Type error: Expected string as second argument in print function");
             }

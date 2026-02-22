@@ -19,11 +19,10 @@ class PolishList: public PolishFunction {
     PolishList(ParsedCodeElement element): PolishFunction(element, 0, UINT32_MAX) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
+                                        std::shared_ptr<InterpreterContext>& context) {
         std::vector<std::shared_ptr<SymObject>> elements;
         for (int64_t i = 0; i < get_num_args(); ++i) {
-            auto element = iterate_wrapped(cmd_list, context, fp_size);
+            auto element = iterate_wrapped(cmd_list, context);
             elements.push_back(element);
         }
 
@@ -36,15 +35,14 @@ class PolishListGet: public PolishFunction {
     PolishListGet(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as first argument in list_get function");
         }
 
-        auto index_raw = iterate_wrapped(cmd_list, context, fp_size);
+        auto index_raw = iterate_wrapped(cmd_list, context);
         auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_raw);
         if (!index) {
             throw ParsingTypeException("Type error: Expected natural number as index in list_get function");
@@ -69,15 +67,14 @@ class PolishListSet: public PolishFunction {
     PolishListSet(ParsedCodeElement element): PolishFunction(element, 3, 3) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as first argument in list_set function");
         }
 
-        auto index_raw = iterate_wrapped(cmd_list, context, fp_size);
+        auto index_raw = iterate_wrapped(cmd_list, context);
         auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_raw);
         if (!index) {
             throw ParsingTypeException("Type error: Expected natural number as index in list_set function");
@@ -93,7 +90,7 @@ class PolishListSet: public PolishFunction {
             throw ParsingTypeException("Type error: Index out of bounds in list_set function");
         }
 
-        auto new_value = iterate_wrapped(cmd_list, context, fp_size);
+        auto new_value = iterate_wrapped(cmd_list, context);
         list->set(idx, new_value);
         return std::make_shared<SymVoidObject>();
     }
@@ -104,9 +101,8 @@ class PolishLength: public PolishFunction {
     PolishLength(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in length function");
@@ -123,15 +119,14 @@ class PolishListAppend: public PolishFunction {
     PolishListAppend(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in append function");
         }
 
-        auto value = iterate_wrapped(cmd_list, context, fp_size);
+        auto value = iterate_wrapped(cmd_list, context);
         list->append(value);
         return std::make_shared<SymVoidObject>();
     }
@@ -142,9 +137,8 @@ class PolishListPop: public PolishFunction {
     PolishListPop(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in pop function");
@@ -163,15 +157,14 @@ class PolishListSlice: public PolishFunction {
     PolishListSlice(ParsedCodeElement element): PolishFunction(element, 3, 3) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in slice function");
         }
 
-        auto start_value = iterate_wrapped(cmd_list, context, fp_size);
+        auto start_value = iterate_wrapped(cmd_list, context);
         auto start_index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(start_value);
         if (!start_index) {
             throw ParsingTypeException("Type error: Expected natural number as start index in slice function");
@@ -187,7 +180,7 @@ class PolishListSlice: public PolishFunction {
             throw ParsingTypeException("Type error: Start index out of bounds in slice function");
         }
 
-        auto end_value = iterate_wrapped(cmd_list, context, fp_size);
+        auto end_value = iterate_wrapped(cmd_list, context);
         auto end_index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(end_value);
         if (!end_index) {
             throw ParsingTypeException("Type error: Expected natural number as end index in slice function");
@@ -215,9 +208,8 @@ class PolishListCopy: public PolishFunction {
     PolishListCopy(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto list_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto list_raw   = iterate_wrapped(cmd_list, context);
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in copy function");
@@ -236,9 +228,8 @@ class PolishStringToList: public PolishFunction {
     PolishStringToList(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto string_raw   = iterate_wrapped(cmd_list, context, fp_size);
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto string_raw   = iterate_wrapped(cmd_list, context);
         auto string       = std::dynamic_pointer_cast<SymStringObject>(string_raw);
         if (!string) {
             throw ParsingTypeException("Type error: Expected string as argument in as_list function");

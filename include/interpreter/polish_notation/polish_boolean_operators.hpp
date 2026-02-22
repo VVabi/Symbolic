@@ -29,10 +29,9 @@ class PolishBooleanOperator: public PolishFunction {
         PolishFunction(element, 2, 2), operator_type(type) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto first  = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
-        auto second = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
+                                    std::shared_ptr<InterpreterContext>& context) {
+        auto first  = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
+        auto second = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
 
         if (!first || !second) {
             throw ParsingTypeException("Boolean operator received non-boolean argument");
@@ -69,9 +68,8 @@ class PolishNotOperator: public PolishFunction {
     PolishNotOperator(ParsedCodeElement element): PolishFunction(element, 1, 1) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto operand = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
+                                    std::shared_ptr<InterpreterContext>& context) {
+        auto operand = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
 
         if (!operand) {
             throw ParsingTypeException("NOT operator received non-boolean argument");
