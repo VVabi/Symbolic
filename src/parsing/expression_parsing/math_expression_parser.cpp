@@ -24,9 +24,7 @@
  * @return The parsed formula as a SymObject.
  */
 std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>& input,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const uint32_t powerseries_expansion_size) {
-    UNUSED(powerseries_expansion_size); // TODO
+                                    std::shared_ptr<InterpreterContext>& context) {
     std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
     LexerDeque<std::shared_ptr<PolishNotationElement>> polish_input;
     while (!input.is_empty()) {
@@ -71,7 +69,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     }
 
     LexerDeque<ParsedCodeElement> polish(std::move(p));
-    return parse_formula_internal(polish, context, context->get_shell_parameters().powerseries_expansion_size);
+    return parse_formula_internal(polish, context);
 }
 
 /**
