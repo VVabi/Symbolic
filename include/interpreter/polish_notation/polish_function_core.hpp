@@ -31,8 +31,7 @@ class PolishCustomFunction: public PolishFunction {
     PolishCustomFunction(ParsedCodeElement element) : PolishFunction(element, 0, UINT32_MAX) {}
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) override {
+                                    std::shared_ptr<InterpreterContext>& context) override {
         auto subexpressions = get_sub_expressions();
 
         if (!subexpressions.is_empty()) {
@@ -70,7 +69,7 @@ class PolishCustomFunction: public PolishFunction {
 
             auto arg_values = std::vector<std::shared_ptr<SymObject>>();
             for (int i = 0; i < get_num_args(); i++) {
-                auto arg_value = iterate_wrapped(cmd_list, context, fp_size);
+                auto arg_value = iterate_wrapped(cmd_list, context);
                 arg_values.push_back(arg_value);
             }
 
@@ -89,7 +88,7 @@ class PolishCustomFunction: public PolishFunction {
 
             std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
             while (!subexpressions.is_empty()) {
-                ret = iterate_wrapped(subexpressions, context, fp_size);
+                ret = iterate_wrapped(subexpressions, context);
             }
             context->pop_variables();
             subexpressions.set_index(0);

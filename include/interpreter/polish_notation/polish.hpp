@@ -27,8 +27,7 @@ class PolishNotationElement {
     virtual ~PolishNotationElement() { }
 
     virtual inline std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) = 0;
+                                    std::shared_ptr<InterpreterContext>& context) = 0;
     uint32_t get_position() const {
         return base_element.position;
     }
@@ -65,5 +64,4 @@ class PolishNotationElement {
 
 
 std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-        std::shared_ptr<InterpreterContext>& context,
-        const size_t fp_size);
+        std::shared_ptr<InterpreterContext>& context);

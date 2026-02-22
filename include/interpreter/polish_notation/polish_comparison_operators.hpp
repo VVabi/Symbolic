@@ -27,10 +27,9 @@ class PolishEq: public PolishFunction {
         PolishFunction(element, 2, 2) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto first = iterate_wrapped(cmd_list, context, fp_size);
-        auto second = iterate_wrapped(cmd_list, context, fp_size);
+                                    std::shared_ptr<InterpreterContext>& context) {
+        auto first = iterate_wrapped(cmd_list, context);
+        auto second = iterate_wrapped(cmd_list, context);
 
         if (first->equals(second)) {
             return std::make_shared<SymBooleanObject>(true);
@@ -46,10 +45,9 @@ class PolishNeq: public PolishFunction {
         PolishFunction(element, 2, 2) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto first = iterate_wrapped(cmd_list, context, fp_size);
-        auto second = iterate_wrapped(cmd_list, context, fp_size);
+                                    std::shared_ptr<InterpreterContext>& context) {
+        auto first = iterate_wrapped(cmd_list, context);
+        auto second = iterate_wrapped(cmd_list, context);
 
         if (!first->equals(second)) {
             return std::make_shared<SymBooleanObject>(true);
@@ -101,10 +99,9 @@ class PolishComparison: public PolishFunction {
         PolishFunction(element, 2, 2), operator_type(operator_type) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto first  = iterate_wrapped(cmd_list, context, fp_size);
-        auto second = iterate_wrapped(cmd_list, context, fp_size);
+                                    std::shared_ptr<InterpreterContext>& context) {
+        auto first  = iterate_wrapped(cmd_list, context);
+        auto second = iterate_wrapped(cmd_list, context);
 
         auto first_num      = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
         auto second_num     = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);

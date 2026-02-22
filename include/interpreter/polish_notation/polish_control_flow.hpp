@@ -20,8 +20,7 @@ class PolishFor: public PolishFunction {
         PolishFunction(element, 3, UINT32_MAX) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
+                                        std::shared_ptr<InterpreterContext>& context) {
         auto variable = cmd_list.front();
         cmd_list.pop_front();
         if (variable->get_type() != VARIABLE) {
@@ -29,8 +28,8 @@ class PolishFor: public PolishFunction {
         }
 
         auto loop_index_var_name = variable->get_data();
-        auto s = iterate_wrapped(cmd_list, context, fp_size);
-        auto e = iterate_wrapped(cmd_list, context, fp_size);
+        auto s = iterate_wrapped(cmd_list, context);
+        auto e = iterate_wrapped(cmd_list, context);
         auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(s);
         auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(e);
 
@@ -57,7 +56,7 @@ class PolishFor: public PolishFunction {
         for (int64_t i = start_idx; i <= end_idx; i++) {
             context->set_variable(loop_index_var_name, std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(i), BigInt(1))));
             while (!subexpressions.is_empty()) {
-                iterate_wrapped(subexpressions, context, fp_size);
+                iterate_wrapped(subexpressions, context);
             }
             subexpressions.set_index(0);
         }
@@ -72,12 +71,11 @@ class PolishWhile: public PolishFunction {
         PolishFunction(element, 1, UINT32_MAX) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
+                                        std::shared_ptr<InterpreterContext>& context) {
         uint32_t original_index  = cmd_list.get_index();
         auto subexpressions = get_sub_expressions();
         while (true) {
-            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
+            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
             if (!condition) {
                 throw EvalException("Expected boolean condition in while statement", this->get_position());
             }
@@ -88,7 +86,7 @@ class PolishWhile: public PolishFunction {
             cmd_list.set_index(original_index);  // reset execution index to the start of the loop for the next iteration
 
             while (!subexpressions.is_empty()) {
-                iterate_wrapped(subexpressions, context, fp_size);
+                iterate_wrapped(subexpressions, context);
             }
             subexpressions.set_index(0);
         }
@@ -106,9 +104,8 @@ class PolishIf: public PolishFunction {
         PolishFunction(element, 1, UINT32_MAX), condition_already_fulfilled(false) { }
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                    std::shared_ptr<InterpreterContext>& context,
-                                    const size_t fp_size) {
-        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context, fp_size));
+                                    std::shared_ptr<InterpreterContext>& context) {
+        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
@@ -118,7 +115,7 @@ class PolishIf: public PolishFunction {
         if (condition->as_boolean() && !condition_already_fulfilled) {
             entered_branch = true;
             while (!subexpressions.is_empty()) {
-                iterate_wrapped(subexpressions, context, fp_size);
+                iterate_wrapped(subexpressions, context);
             }
         }
 
@@ -129,7 +126,7 @@ class PolishIf: public PolishFunction {
                 throw EvalException("Invalid elif branch after if statement", next.value()->get_position());
             }
             elif_branch->set_condition_already_fulfilled(entered_branch || condition_already_fulfilled);
-            iterate_wrapped(cmd_list, context, fp_size);
+            iterate_wrapped(cmd_list, context);
         }
 
         return std::make_shared<SymVoidObject>();
