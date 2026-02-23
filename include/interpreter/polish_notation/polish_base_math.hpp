@@ -166,12 +166,10 @@ class PolishAssign: public PolishNotationElement {
         auto next = cmd_list.front();
         cmd_list.pop_front();
 
-        if (next->get_type()!= expression_type::VARIABLE) {
-            throw ParsingTypeException("Type error: Expected variable name as first argument in assignment");
-        }
+
         auto var_value = iterate_wrapped(cmd_list, context);
 
-        context->set_variable(next->get_data(), var_value);
-        return var_value;
+        next->assign_to(var_value, context);
+        return std::make_shared<SymVoidObject>();
     }
 };

@@ -7,7 +7,9 @@
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/parsed_code_element.hpp"
 #include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 #include "interpreter/context.hpp"
+#include "cpp_utils/unused.hpp"
 
 class PolishNotationElement;
 
@@ -59,6 +61,12 @@ class PolishNotationElement {
         os << "Executing PolishNotationElement(type=" << base_element.type << ", data=\"" << base_element.data
            << "\", position=" << base_element.position << ", num_args=" << base_element.num_args
            << ", num_expressions=" << base_element.num_expressions << ")\n";
+    }
+
+    virtual void assign_to(const std::shared_ptr<SymObject>& value, std::shared_ptr<InterpreterContext>& context) {
+        UNUSED(value);
+        UNUSED(context);
+        throw ParsingException("Cannot assign to this element", get_position());
     }
 };
 

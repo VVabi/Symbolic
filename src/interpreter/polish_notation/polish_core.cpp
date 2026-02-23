@@ -58,6 +58,22 @@ class PolishVariable: public PolishNotationElement {
         }
         return existing_var->clone();
     }
+
+    void assign_to(const std::shared_ptr<SymObject>& value, std::shared_ptr<InterpreterContext>& context) override {
+        auto expressions = get_sub_expressions();
+        if (expressions.is_empty()) {
+            context->set_variable(get_data(), value);
+        } else {
+            auto existing_var = context->get_variable(get_data());
+            if (!existing_var) {
+                throw ParsingException("Attempted to assign to non-existent variable with subscript: " + get_data(), get_position());
+            }
+            auto var_with_subscript = iterate_wrapped(expressions, context);
+            auto assignable_var = existing_var->clone();
+            existing_var->assign_subscript(var_with_subscript, value);
+        }
+
+    }
 };
 
 class PolishString: public PolishNotationElement {

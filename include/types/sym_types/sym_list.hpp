@@ -55,4 +55,23 @@ class SymListObject: public SymObject {
         data.pop_back();
         return value;
     }
+
+    virtual void assign_subscript(const std::shared_ptr<SymObject>& subscript, const std::shared_ptr<SymObject>& value) {
+        auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(subscript);
+        if (!index) {
+            throw ParsingTypeException("Type error: Expected natural number as index in list assignment");
+        }
+
+        auto rational_index = index->as_value();
+        if (rational_index.get_denominator() != BigInt(1)) {
+            throw ParsingTypeException("Type error: Expected natural number as index in list assignment");
+        }
+
+        auto idx = rational_index.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+        if (idx < 0 || idx >= static_cast<int64_t>(data.size())) {
+            throw ParsingTypeException("Type error: Index out of bounds in list assignment");
+        }
+
+        set(idx, value);
+    }
 };

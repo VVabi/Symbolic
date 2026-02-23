@@ -2,6 +2,10 @@
 #include <string>
 #include <memory>
 #include "common/common_datatypes.hpp"
+#include "cpp_utils/unused.hpp"
+#include "exceptions/parsing_type_exception.hpp"
+
+class InterpreterContext;
 
 class SymObject {
  public:
@@ -14,5 +18,11 @@ class SymObject {
 
     virtual bool equals(const std::shared_ptr<SymObject>& other) const {
         return to_string() == other->to_string();
+    }
+
+    virtual void assign_subscript(const std::shared_ptr<SymObject>& subscript, const std::shared_ptr<SymObject>& value) {
+        UNUSED(subscript);
+        UNUSED(value);
+        throw ParsingTypeException("Cannot assign to subscript of this element");
     }
 };
