@@ -53,6 +53,10 @@ class PolishNotationElement {
         return sub_expressions;
     }
 
+    void set_sub_expressions(LexerDeque<std::shared_ptr<PolishNotationElement>> new_sub_expressions) {
+        sub_expressions = new_sub_expressions;
+    }
+
     expression_type get_type() const {
         return base_element.type;
     }
