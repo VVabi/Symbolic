@@ -20,9 +20,9 @@ class SymObject {
         return to_string() == other->to_string();
     }
 
-    virtual void assign_subscript(const std::shared_ptr<SymObject>& subscript, const std::shared_ptr<SymObject>& value) {
-        UNUSED(subscript);
-        UNUSED(value);
-        throw ParsingTypeException("Cannot assign to subscript of this element");
+    virtual std::shared_ptr<SymObject>& get_subscript(const std::shared_ptr<SymObject>& key, std::shared_ptr<InterpreterContext> &context) {
+        UNUSED(key);
+        UNUSED(context);
+        throw ParsingTypeException("Cannot subscript this element");
     }
 };

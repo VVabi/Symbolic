@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <ostream>
+#include <queue>
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/parsed_code_element.hpp"
@@ -67,8 +68,11 @@ class PolishNotationElement {
            << ", num_expressions=" << base_element.num_expressions << ")\n";
     }
 
-    virtual void assign_to(const std::shared_ptr<SymObject>& value, std::shared_ptr<InterpreterContext>& context) {
+    virtual void assign_to(const std::shared_ptr<SymObject>& value,
+        std::queue<std::shared_ptr<SymObject>>& subscripts,
+        std::shared_ptr<InterpreterContext>& context) {
         UNUSED(value);
+        UNUSED(subscripts);
         UNUSED(context);
         throw ParsingException("Cannot assign to this element", get_position());
     }

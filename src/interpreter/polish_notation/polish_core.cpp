@@ -18,6 +18,30 @@
 #include "types/sym_types/sym_string_object.hpp"
 #include "interpreter/context.hpp"
 
+size_t parse_as_list_index(const std::shared_ptr<SymObject>& subscript) {
+        auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(subscript);
+
+        if (!index) {
+            throw ParsingTypeException("Expected integer index in variable assignment subscript");
+        }
+
+        auto index_value = index->as_value();
+
+        if (index_value.get_denominator() != BigInt(1)) {
+            throw ParsingTypeException("Expected integer index in variable assignment subscript, found a non-integer rational");
+        }
+
+        auto index_v = index_value.get_numerator();
+
+        auto index_int = index_v.as_int64();
+
+        if (index_int < 0) {
+            throw ParsingTypeException("Negative index in variable assignment subscript is not supported");
+        }
+
+        return (size_t) index_int;
+}
+
 class PolishNumber: public PolishNotationElement {
     std::shared_ptr<SymObject> symobject_value;
  public:
@@ -46,32 +70,62 @@ class PolishVariable: public PolishNotationElement {
     PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context) {
-        UNUSED(cmd_list);
         auto existing_var = context->get_variable(get_data());
+        auto next = cmd_list.peek();
+        bool has_subscripts = next && next.value()->get_type() == ARRAY_ACCESS_START;
         if (!existing_var) {
+            if (has_subscripts) {
+                throw ParsingException("Attempted to subscript a non-existent variable: " + get_data(), get_position());
+            }
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
             return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
         }
 
-        if (existing_var->modifiable_in_place()) {
+        if (!has_subscripts) {
             return existing_var;
         }
-        return existing_var->clone();
+
+        auto array_scope = next.value();
+        auto expressions = array_scope->get_sub_expressions();
+        cmd_list.pop_front();
+        auto ret = existing_var->get_subscript(iterate_wrapped(expressions, context), context);
+
+        if (ret->modifiable_in_place()) {
+            return ret;
+        }
+        return ret->clone();
     }
 
-    void assign_to(const std::shared_ptr<SymObject>& value, std::shared_ptr<InterpreterContext>& context) override {
-        auto expressions = get_sub_expressions();
-        if (expressions.is_empty()) {
-            context->set_variable(get_data(), value);
-        } else {
-            auto existing_var = context->get_variable(get_data());
-            if (!existing_var) {
-                throw ParsingException("Attempted to assign to non-existent variable with subscript: " + get_data(), get_position());
-            }
-            auto var_with_subscript = iterate_wrapped(expressions, context);
-            auto assignable_var = existing_var->clone();
-            existing_var->assign_subscript(var_with_subscript, value);
+    void assign_to_internal(const std::shared_ptr<SymObject>& value,
+                std::shared_ptr<SymObject>& existing_var,
+                std::queue<std::shared_ptr<SymObject>>& subscripts,
+                std::shared_ptr<InterpreterContext>& context) {
+        auto index = subscripts.front();
+        subscripts.pop();
+        if (subscripts.empty()) {
+            existing_var->get_subscript(index, context) = value;
+            return;
         }
+
+        auto subscript = existing_var->get_subscript(index, context);
+        assign_to_internal(value, subscript, subscripts, context);
+    }
+
+    void assign_to(const std::shared_ptr<SymObject>& value,
+        std::queue<std::shared_ptr<SymObject>>& subscripts,
+        std::shared_ptr<InterpreterContext>& context) override {
+
+        if (subscripts.empty()) {
+            context->set_variable(get_data(), value);
+            return;
+        }
+        auto existing_var = context->get_variable(get_data());
+
+        if (!existing_var) {
+            throw ParsingException("Attempted to subscript a non-existent variable: " + get_data(), get_position());
+        }
+
+        assign_to_internal(value, existing_var, subscripts, context);
     }
 };
 
@@ -96,6 +150,18 @@ class PolishScopeStart: public PolishNotationElement {
         throw EvalException("Internal error: ScopeStart element should not be executed directly", this->get_position());
     }
 };
+
+class PolishArrayAccessStart: public PolishNotationElement {
+ public:
+    PolishArrayAccessStart(ParsedCodeElement element): PolishNotationElement(element) { }
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext> &context) {
+        UNUSED(cmd_list);
+        UNUSED(context);
+        throw EvalException("Internal error: ArrayAccessStart element should not be executed directly", this->get_position());
+    }
+};
+
 
 std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const ParsedCodeElement element) {
     switch (element.type) {
@@ -130,6 +196,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             break;
         case SCOPE_START:
             return std::make_shared<PolishScopeStart>(element);
+        case ARRAY_ACCESS_START:
+            return std::make_shared<PolishArrayAccessStart>(element);
         case FUNCTION: {
             if (element.num_args == -1) {
                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
