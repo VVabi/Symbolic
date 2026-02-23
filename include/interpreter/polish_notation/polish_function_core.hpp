@@ -32,8 +32,6 @@ class PolishCustomFunction: public PolishFunction {
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) override {
-
-
         auto existing_func = context->get_custom_function(get_data());
         if (!existing_func) {
             if (get_num_expressions() != get_num_args()) {

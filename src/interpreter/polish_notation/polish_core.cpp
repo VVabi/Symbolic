@@ -72,7 +72,6 @@ class PolishVariable: public PolishNotationElement {
             auto assignable_var = existing_var->clone();
             existing_var->assign_subscript(var_with_subscript, value);
         }
-
     }
 };
 
