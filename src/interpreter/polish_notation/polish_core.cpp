@@ -85,6 +85,8 @@ class PolishVariable: public PolishNotationElement {
             return existing_var;
         }
 
+        // TODO this should also support multiple subscripts, e.g. a[0][1]
+
         auto array_scope = next.value();
         auto expressions = array_scope->get_sub_expressions();
         cmd_list.pop_front();

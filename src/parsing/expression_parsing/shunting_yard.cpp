@@ -37,6 +37,8 @@ int32_t get_operator_precedence(char op) {
             return 3;
         case '!':
             return 4;
+        case '[':
+            return 5;
         default:
             throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
             return -1;
@@ -110,7 +112,7 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                 auto sub_expressions = shunting_yard_algorithm(input);
                 auto element = ParsedCodeElement(MathLexerElement(ARRAY_ACCESS_START, "", it.position));
                 element.set_sub_expressions(std::move(sub_expressions));
-                ret.push_back(element);
+                operators.push(MathLexerElement(ARRAY_ACCESS_START, "[", it.position));
                 break;
             }
             case SCOPE_START:
