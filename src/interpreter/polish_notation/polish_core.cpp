@@ -85,6 +85,10 @@ class PolishScopeStart: public PolishNotationElement {
 
 std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const ParsedCodeElement element) {
     switch (element.type) {
+        case ARRAY_ACCESS_START:
+            return std::make_shared<PolishArrayAccess>(element);
+        case ARRAY_ACCESS_END:
+            return std::make_shared<PolishArrayAccessEnd>(element);
         case NUMBER:
             return std::make_shared<PolishNumber>(element);
         case VARIABLE:

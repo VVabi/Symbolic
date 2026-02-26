@@ -242,3 +242,59 @@ class PolishStringToList: public PolishFunction {
         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(char_elements));
     }
 };
+
+BigInt parse_index(const std::shared_ptr<SymObjectContainer>& index_container) {
+    auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_container->get_object());
+    if (!index) {
+        throw ParsingTypeException("Type error: Expected natural number as index in subscript");
+    }
+
+    auto rational_index = index->as_value();
+    if (rational_index.get_denominator() != BigInt(1)) {
+        throw ParsingTypeException("Type error: Expected natural number as index in subscript");
+    }
+
+    auto idx = rational_index.get_numerator();
+    if (idx < 0) {
+        throw ParsingTypeException("Type error: Expected natural number as index in subscript");
+    }
+
+    return idx;
+}
+
+class PolishArrayAccess: public PolishNotationElement {
+ public:
+    PolishArrayAccess(ParsedCodeElement element): PolishNotationElement(element) {}
+
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto variable = iterate_wrapped(cmd_list, context);
+        auto index = iterate_wrapped(cmd_list, context);
+        auto index_int = parse_index(index).as_int64();
+
+        auto list_ptr = std::dynamic_pointer_cast<SymListObject>(variable->get_object());
+        if (!list_ptr) {
+            throw ParsingTypeException("Type error: Expected list as target of subscript operator");
+        }
+
+        auto next = cmd_list.peek();
+        if (!next || next.value()->get_type() != ARRAY_ACCESS_END) {
+            throw ParsingException("Expected closing bracket for array access", get_position());
+        }
+        cmd_list.pop_front();  // Consume the ARRAY_ACCESS_END token
+
+        return list_ptr->at(index_int);
+    }
+};
+
+class PolishArrayAccessEnd: public PolishNotationElement {
+ public:
+    PolishArrayAccessEnd(ParsedCodeElement element): PolishNotationElement(element) {}
+
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context) {
+        UNUSED(cmd_list);
+        UNUSED(context);
+        throw ParsingException("Unexpected array access end token", get_position());
+    }
+};

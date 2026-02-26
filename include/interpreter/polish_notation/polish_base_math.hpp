@@ -165,14 +165,18 @@ class PolishAssign: public PolishNotationElement {
         }
         auto next = cmd_list.peek();
 
-        if (!next || next.value()->get_type() != expression_type::VARIABLE) {
-            throw EvalException("Expected variable name to assign to", next ? next.value()->get_position() : this->get_position());
+        if (next && next.value()->get_type() == expression_type::VARIABLE) {
+            cmd_list.pop_front();
+
+            auto var_value = iterate_wrapped(cmd_list, context)->get_object();
+
+            context->set_variable(next.value()->get_data(), var_value);
+            return std::make_shared<SymObjectContainer>(var_value);
         }
-        cmd_list.pop_front();
 
-        auto var_value = iterate_wrapped(cmd_list, context)->get_object();
-
-        context->set_variable(next.value()->get_data(), var_value);
-        return std::make_shared<SymObjectContainer>(var_value);
+        auto target = iterate_wrapped(cmd_list, context);
+        auto value  = iterate_wrapped(cmd_list, context)->get_object();
+        target->set_object(value);
+        return target;
     }
 };

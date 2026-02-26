@@ -21,23 +21,23 @@
  * @brief Returns the precedence of a given mathematical operator.
  *
  * @param op The character representing the operator.
- * @return The precedence of the operator, or -1 if the operator is not recognized.
+ * @return The precedence of the operator
  */
 int32_t get_operator_precedence(char op) {
     switch (op) {
         case '=':
             return 0;
+        case '[':
+            return 1;
         case '+':
         case '-':
-            return 1;
+            return 2;
         case '*':
         case '/':
-            return 2;
-        case '^':
             return 3;
-        case '!':
+        case '^':
             return 4;
-        case '[':
+        case '!':
             return 5;
         default:
             throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
@@ -95,23 +95,34 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
             case ARRAY_ACCESS_END:
                 ret.push_back(ParsedCodeElement(it));
                 break;
-            case ARRAY_ACCESS_START:
+            case ARRAY_ACCESS_START: {
+                // TODO(vabi) maybe parse this as infix instead?
+                auto precedence = get_operator_precedence(it.data[0]);  // TODO(vabi) dont remember what the problem was...
                 while (operators.size() > 0) {
-                    auto op = operators.top();
-                    auto element = ParsedCodeElement(op);
-                    if (element.type == FUNCTION) {
+                    MathLexerElement candidate = operators.top();
+                    if (candidate.type == RIGHT_PARENTHESIS) {
+                        break;
+                    }
+
+                    if (candidate.type == FUNCTION) {
+                        ParsedCodeElement element = ParsedCodeElement(candidate);
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size() - last_expression_count);
-                        element.set_sub_expressions(std::move(last_popped_subexpressions));
+                        ret.push_back(element);
+                        operators.pop();
+                        continue;
                     }
-                    if (operators.top().type == RIGHT_PARENTHESIS) {
-                        throw ParsingException("Mismatched parentheses", operators.top().position);
+                    auto candidate_precedence = get_operator_precedence(candidate.data[0]);  // TODO(vabi) dont remember what the problem was...
+                    if ((candidate_precedence > precedence)) {
+                        ret.push_back(ParsedCodeElement(candidate));
+                        operators.pop();
+                    } else {
+                        break;
                     }
-                    ret.push_back(element);
-                    operators.pop();
                 }
                 operators.push(it);
                 break;
+            }
             case SCOPE_START:
                 while (operators.size() > 0) {
                     auto op = operators.top();

@@ -55,9 +55,9 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
             formula.push_back(MathLexerElement(SCOPE_END, "", distance));
             formula.push_back(MathLexerElement(SEPARATOR, "", distance));
         } else if (current == '[') {
-            formula.push_back(MathLexerElement(ARRAY_ACCESS_START, "", distance));
+            formula.push_back(MathLexerElement(ARRAY_ACCESS_START, "[", distance));
         } else if (current == ']') {
-            formula.push_back(MathLexerElement(ARRAY_ACCESS_END, "", distance));
+            formula.push_back(MathLexerElement(ARRAY_ACCESS_END, "]", distance));
         } else if (isdigit(current)) {
             std::string num = "";
 
