@@ -34,6 +34,8 @@ class PolishCustomFunction: public PolishFunction {
                                     std::shared_ptr<InterpreterContext>& context) override {
         auto existing_func = context->get_custom_function(get_data());
         if (!existing_func) {
+            auto subexpressions = LexerDeque<std::shared_ptr<PolishNotationElement>>();
+
             if (get_num_expressions() != get_num_args()) {
                 throw InvalidFunctionArgException("Function defined with incorrect number of expressions: "+std::to_string(get_num_expressions())+
                     ", expected " + std::to_string(get_num_args()), this->get_position());
@@ -47,11 +49,13 @@ class PolishCustomFunction: public PolishFunction {
                 }
                 arg_names.push_back(expr->get_data());
             }
-            auto subexpressions = LexerDeque<std::shared_ptr<PolishNotationElement>>();
+
             auto next = cmd_list.peek();
             if (!next || next.value()->get_type() != SCOPE_START) {
-                throw EvalException("Expected scope after function header", this->get_position());
+                throw EvalException("Expected scope after function definition", this->get_position());
             }
+
+
             cmd_list.pop_front();
             subexpressions = next.value()->get_sub_expressions();
             this->set_sub_expressions(subexpressions);

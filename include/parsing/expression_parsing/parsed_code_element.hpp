@@ -11,22 +11,17 @@ struct ParsedCodeElement;
 class ShuntingYardStackData {
     int num_args;
     ptrdiff_t num_expressions;
-    std::vector<ParsedCodeElement> sub_expressions;
 
  public:
     ShuntingYardStackData(int num_args, ptrdiff_t num_expressions):
         num_args(num_args), num_expressions(num_expressions) { }
 
-     int get_num_args() const {
+    int get_num_args() const {
         return num_args;
     }
 
     ptrdiff_t get_num_expressions() const {
         return num_expressions;
-    }
-
-    std::vector<ParsedCodeElement>& get_sub_expressions() {
-        return sub_expressions;
     }
 };
 

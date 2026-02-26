@@ -5,8 +5,6 @@
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 
-class InterpreterContext;
-
 class SymObject {
  public:
     virtual ~SymObject() = default;
@@ -18,11 +16,5 @@ class SymObject {
 
     virtual bool equals(const std::shared_ptr<SymObject>& other) const {
         return to_string() == other->to_string();
-    }
-
-    virtual std::shared_ptr<SymObject>& get_subscript(const std::shared_ptr<SymObject>& key, std::shared_ptr<InterpreterContext> &context) {
-        UNUSED(key);
-        UNUSED(context);
-        throw ParsingTypeException("Cannot subscript this element");
     }
 };

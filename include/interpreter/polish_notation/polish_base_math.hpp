@@ -170,25 +170,9 @@ class PolishAssign: public PolishNotationElement {
         }
         cmd_list.pop_front();
 
-        auto subscripts = get_array_subscripts(context, cmd_list);
-        auto var_value  = iterate_wrapped(cmd_list, context);
+        auto var_value = iterate_wrapped(cmd_list, context);
 
-        next.value()->assign_to(var_value, subscripts, context);
-        return std::make_shared<SymVoidObject>();
-    }
-
-    std::queue<std::shared_ptr<SymObject>> get_array_subscripts(std::shared_ptr<InterpreterContext>& context,
-                                                                    LexerDeque<std::shared_ptr<PolishNotationElement>>& subscript_cmd_list) {
-        std::queue<std::shared_ptr<SymObject>> subscripts;
-        auto next = subscript_cmd_list.peek();
-        while (next && next.value()->get_type() == expression_type::ARRAY_ACCESS_START) {
-            auto array_scope = next.value();
-            auto expressions = array_scope->get_sub_expressions();
-            subscripts.push(iterate_wrapped(expressions, context));
-            subscript_cmd_list.pop_front();
-            next = subscript_cmd_list.peek();
-        }
-
-        return subscripts;
+        context->set_variable(next.value()->get_data(), var_value);
+        return var_value;
     }
 };

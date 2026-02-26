@@ -37,8 +37,6 @@ int32_t get_operator_precedence(char op) {
             return 3;
         case '!':
             return 4;
-        case '[':
-            return 5;
         default:
             throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
             return -1;
@@ -92,29 +90,7 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
         auto it = input.front();
         input.pop_front();
         switch (it.type) {
-            case ARRAY_ACCESS_START:
-                while (operators.size() > 0) {
-                    auto op = operators.top();
-                    auto element = ParsedCodeElement(op);
-                    if (element.type == FUNCTION) {
-                        element.set_num_args(last_closed_bracket_args_count);
-                        element.set_num_expressions(ret.size() - last_expression_count);
-                    }
-                    if (operators.top().type == RIGHT_PARENTHESIS) {
-                        throw ParsingException("Mismatched parentheses", operators.top().position);
-                    }
-                    ret.push_back(element);
-                    operators.pop();
-                }
-                std::reverse(ret.begin(), ret.end());
-                return ret;
-            case ARRAY_ACCESS_END: {
-                auto sub_expressions = shunting_yard_algorithm(input);
-                auto element = ParsedCodeElement(MathLexerElement(ARRAY_ACCESS_START, "", it.position));
-                element.set_sub_expressions(std::move(sub_expressions));
-                operators.push(MathLexerElement(ARRAY_ACCESS_START, "[", it.position));
-                break;
-            }
+
             case SCOPE_START:
                 while (operators.size() > 0) {
                     auto op = operators.top();

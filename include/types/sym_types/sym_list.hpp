@@ -5,8 +5,6 @@
 #include <sstream>
 #include "types/sym_types/sym_object.hpp"
 
-size_t parse_as_list_index(const std::shared_ptr<SymObject>& subscript);
-
 class SymListObject: public SymObject {
     std::vector<std::shared_ptr<SymObject>> data;
 
@@ -56,14 +54,5 @@ class SymListObject: public SymObject {
         auto value = data.back();
         data.pop_back();
         return value;
-    }
-
-    std::shared_ptr<SymObject>& get_subscript(const std::shared_ptr<SymObject>& subscript, std::shared_ptr<InterpreterContext> &context) override {
-        UNUSED(context);
-        auto index = parse_as_list_index(subscript);
-        if (index >= data.size()) {
-            throw ParsingTypeException("Index out of bounds in SymListObject::get_subscript");
-        }
-        return data[index];
     }
 };
