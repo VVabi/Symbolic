@@ -25,8 +25,11 @@ class SymListObject: public SymObject {
     }
 
     std::shared_ptr<SymObject> clone() const override {
-        // TODO(vabi): this is a shallow clone, we may want to deep clone the elements depending on the use case
-        return std::make_shared<SymListObject>(data);
+        auto cloned_data = std::vector<std::shared_ptr<SymObjectContainer>>();
+        for (const auto& element : data) {
+            cloned_data.push_back(std::make_shared<SymObjectContainer>(element->get_object()->clone()));
+        }
+        return std::make_shared<SymListObject>(cloned_data);
     }
 
     std::vector<std::shared_ptr<SymObjectContainer>>& as_list() {

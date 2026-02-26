@@ -23,7 +23,7 @@ class PolishDict: public PolishFunction {
                                         std::shared_ptr<InterpreterContext>& context) {
         UNUSED(context);
         UNUSED(cmd_list);
-        std::map<std::string, std::shared_ptr<SymObject>> dict;
+        std::map<std::string, std::shared_ptr<SymObjectContainer>> dict;
         return std::make_shared<SymObjectContainer>(std::make_shared<SymDictObject>(dict));
     }
 };
@@ -42,7 +42,7 @@ class PolishDictGet: public PolishFunction {
 
         auto key_raw = iterate_wrapped(cmd_list, context)->get_object();
 
-        return std::make_shared<SymObjectContainer>(dict->get(key_raw));
+        return dict->get(key_raw);
     }
 };
 
@@ -58,7 +58,7 @@ class PolishDictSet: public PolishFunction {
             throw ParsingTypeException("Type error: Expected dict as first argument in dict_set function");
         }
         auto key_raw = iterate_wrapped(cmd_list, context)->get_object();
-        auto value = iterate_wrapped(cmd_list, context)->get_object();
+        auto value = iterate_wrapped(cmd_list, context);
         dict->set(key_raw, value);
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
