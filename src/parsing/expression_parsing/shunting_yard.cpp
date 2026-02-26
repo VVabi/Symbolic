@@ -27,18 +27,18 @@ int32_t get_operator_precedence(char op) {
     switch (op) {
         case '=':
             return 0;
-        case '[':
-            return 1;
         case '+':
         case '-':
-            return 2;
+            return 1;
         case '*':
         case '/':
-            return 3;
+            return 2;
         case '^':
-            return 4;
+            return 3;
         case '!':
-            return 5;
+            return 4;
+        case '[':
+            return 5;  // should be unused, but we need to handle it
         default:
             throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
             return -1;

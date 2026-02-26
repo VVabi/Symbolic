@@ -10,6 +10,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "interpreter/polish_notation/polish_function_core.hpp"
 #include "types/sym_types/sym_list.hpp"
+#include "types/sym_types/sym_dict.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "types/sym_types/sym_string_object.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
@@ -274,14 +275,19 @@ class PolishArrayAccess: public PolishNotationElement {
         if (!subexpressions.is_empty()) {
             throw ParsingException("Unexpected extra tokens in array access", get_position());
         }
-        auto index_int = parse_index(index).as_int64();
 
         auto list_ptr = std::dynamic_pointer_cast<SymListObject>(variable->get_object());
-        if (!list_ptr) {
-            throw ParsingTypeException("Type error: Expected list as target of subscript operator");
+        if (list_ptr) {
+            auto index_int = parse_index(index).as_int64();
+            return list_ptr->at(index_int);
         }
 
-        return list_ptr->at(index_int);
+        auto dict_ptr = std::dynamic_pointer_cast<SymDictObject>(variable->get_object());
+        if (dict_ptr) {
+            return dict_ptr->get(index->get_object());
+        }
+
+        throw ParsingTypeException("Type error: Expected list or dict as target of subscript operator");
     }
 };
 
