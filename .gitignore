@@ -36,3 +36,5 @@
 /.vscode/_codeql_build_dir/
 /.vscode/*
 _codeql_detected_source_root
+
+.cache/*
