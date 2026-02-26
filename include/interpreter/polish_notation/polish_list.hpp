@@ -20,10 +20,9 @@ class PolishList: public PolishFunction {
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        std::vector<std::shared_ptr<SymObject>> elements;
+        std::vector<std::shared_ptr<SymObjectContainer>> elements;
         for (int64_t i = 0; i < get_num_args(); ++i) {
-            auto element = iterate_wrapped(cmd_list, context)->get_object();
-            elements.push_back(element);
+            elements.push_back(iterate_wrapped(cmd_list, context));
         }
 
         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(elements));
@@ -58,7 +57,7 @@ class PolishListGet: public PolishFunction {
             throw ParsingTypeException("Type error: Index out of bounds in list_get function");
         }
 
-        return std::make_shared<SymObjectContainer>(list->as_list()[idx]);
+        return list->as_list()[idx];
     }
 };
 
@@ -90,7 +89,7 @@ class PolishListSet: public PolishFunction {
             throw ParsingTypeException("Type error: Index out of bounds in list_set function");
         }
 
-        auto new_value = iterate_wrapped(cmd_list, context)->get_object();
+        auto new_value = iterate_wrapped(cmd_list, context);
         list->set(idx, new_value);
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
@@ -126,7 +125,7 @@ class PolishListAppend: public PolishFunction {
             throw ParsingTypeException("Type error: Expected list as argument in append function");
         }
 
-        auto value = iterate_wrapped(cmd_list, context)->get_object();
+        auto value = iterate_wrapped(cmd_list, context);
         list->append(value);
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
@@ -148,7 +147,7 @@ class PolishListPop: public PolishFunction {
         if (!value) {
             throw ParsingTypeException("Type error: Cannot pop from an empty list");
         }
-        return std::make_shared<SymObjectContainer>(value);
+        return value;
     }
 };
 
@@ -196,10 +195,10 @@ class PolishListSlice: public PolishFunction {
             throw ParsingTypeException("Type error: End index out of bounds in slice function");
         }
         if (start_idx < end_idx) {
-            std::vector<std::shared_ptr<SymObject>> sliced_elements(list->as_list().begin() + start_idx, list->as_list().begin() + end_idx);
+            std::vector<std::shared_ptr<SymObjectContainer>> sliced_elements(list->as_list().begin() + start_idx, list->as_list().begin() + end_idx);
             return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(sliced_elements));
         }
-        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObject>>()));
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObjectContainer>>()));
     }
 };
 
@@ -215,9 +214,9 @@ class PolishListCopy: public PolishFunction {
             throw ParsingTypeException("Type error: Expected list as argument in copy function");
         }
 
-        std::vector<std::shared_ptr<SymObject>> copied_elements;
+        std::vector<std::shared_ptr<SymObjectContainer>> copied_elements;
         for (const auto& element : list->as_list()) {
-            copied_elements.push_back(element->clone());
+            copied_elements.push_back(std::make_shared<SymObjectContainer>(element->get_object()->clone()));
         }
         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(copied_elements));
     }
@@ -236,9 +235,9 @@ class PolishStringToList: public PolishFunction {
         }
 
         const auto& str = string->to_string();
-        std::vector<std::shared_ptr<SymObject>> char_elements;
+        std::vector<std::shared_ptr<SymObjectContainer>> char_elements;
         for (const auto& ch : str) {
-            char_elements.push_back(std::make_shared<SymStringObject>(std::string(1, ch)));
+            char_elements.push_back(std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(std::string(1, ch))));
         }
         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(char_elements));
     }

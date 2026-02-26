@@ -29,7 +29,7 @@ class SymObjectContainer {
         return contained_object;
     }
 
-    void set_object(std::shared_ptr<SymObject> new_obj) {
+    void set_object(std::shared_ptr<SymObject>& new_obj) {
         contained_object = new_obj;
     }
 };
