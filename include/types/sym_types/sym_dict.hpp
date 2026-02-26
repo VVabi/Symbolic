@@ -8,17 +8,17 @@
 #include "exceptions/parsing_type_exception.hpp"
 
 class SymDictObject: public SymObject {
-    std::map<std::string, std::shared_ptr<SymObject>> data;
+    std::map<std::string, std::shared_ptr<SymObjectContainer>> data;
 
  public:
-    SymDictObject(const std::map<std::string, std::shared_ptr<SymObject>>& data): data(data) { }
+    SymDictObject(const std::map<std::string, std::shared_ptr<SymObjectContainer>>& data): data(data) { }
 
     std::string to_string() const override {
         std::stringstream strm;
         strm << "{";
         size_t i = 0;
         for (const auto& pair : data) {
-            strm << "\"" << pair.first << "\": " << pair.second->to_string();
+            strm << "\"" << pair.first << "\": " << pair.second->get_object()->to_string();
             if (i < data.size() - 1) {
                 strm << ", ";
             }
@@ -29,10 +29,10 @@ class SymDictObject: public SymObject {
     }
 
     std::shared_ptr<SymObject> clone() const override {
-        std::map<std::string, std::shared_ptr<SymObject>> copied;
+        std::map<std::string, std::shared_ptr<SymObjectContainer>> copied;
         for (const auto& entry : data) {
             if (entry.second) {
-                copied[entry.first] = entry.second->clone();
+                copied[entry.first] = std::make_shared<SymObjectContainer>(entry.second->get_object()->clone());
             } else {
                 copied[entry.first] = nullptr;
             }
@@ -40,11 +40,11 @@ class SymDictObject: public SymObject {
         return std::make_shared<SymDictObject>(copied);
     }
 
-    std::map<std::string, std::shared_ptr<SymObject>>& as_dict() {
+    std::map<std::string, std::shared_ptr<SymObjectContainer>>& as_dict() {
         return data;
     }
 
-    void set(std::shared_ptr<SymObject> key, std::shared_ptr<SymObject> value) {
+    void set(const std::shared_ptr<SymObject>& key, const std::shared_ptr<SymObjectContainer>& value) {
         data[key->to_string()] = value;
     }
 
@@ -52,7 +52,7 @@ class SymDictObject: public SymObject {
         return true;
     }
 
-    std::shared_ptr<SymObject> get(std::shared_ptr<SymObject> key) {
+    std::shared_ptr<SymObjectContainer> get(const std::shared_ptr<SymObject>& key) {
         auto value = data.find(key->to_string());
         if (value == data.end()) {
             throw ParsingTypeException("Key not found in SymDictObject::get");
@@ -60,7 +60,7 @@ class SymDictObject: public SymObject {
         return value->second;
     }
 
-    bool has_key(std::shared_ptr<SymObject> key) {
+    bool has_key(const std::shared_ptr<SymObject>& key) {
         return data.find(key->to_string()) != data.end();
     }
 };

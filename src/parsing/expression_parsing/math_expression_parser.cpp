@@ -33,7 +33,7 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
         polish_input.push_back(polish_notation_element_from_lexer(element));
     }
     while (!polish_input.is_empty()) {
-        ret = iterate_wrapped(polish_input, context);
+        ret = iterate_wrapped(polish_input, context)->get_object();
     }
     return ret;
 }

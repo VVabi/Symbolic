@@ -3,11 +3,14 @@
 #include <memory>
 #include <string>
 #include <ostream>
+#include <queue>
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/parsed_code_element.hpp"
 #include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 #include "interpreter/context.hpp"
+#include "cpp_utils/unused.hpp"
 
 class PolishNotationElement;
 
@@ -26,7 +29,7 @@ class PolishNotationElement {
 
     virtual ~PolishNotationElement() { }
 
-    virtual inline std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    virtual inline std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) = 0;
     uint32_t get_position() const {
         return base_element.position;
@@ -51,6 +54,10 @@ class PolishNotationElement {
         return sub_expressions;
     }
 
+    void set_sub_expressions(LexerDeque<std::shared_ptr<PolishNotationElement>> new_sub_expressions) {
+        sub_expressions = new_sub_expressions;
+    }
+
     expression_type get_type() const {
         return base_element.type;
     }
@@ -63,5 +70,5 @@ class PolishNotationElement {
 };
 
 
-std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+std::shared_ptr<SymObjectContainer> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
         std::shared_ptr<InterpreterContext>& context);

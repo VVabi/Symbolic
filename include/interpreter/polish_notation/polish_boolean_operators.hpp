@@ -28,10 +28,10 @@ class PolishBooleanOperator: public PolishFunction {
     PolishBooleanOperator(ParsedCodeElement element, BooleanOperatorType type) :
         PolishFunction(element, 2, 2), operator_type(type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-        auto first  = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
-        auto second = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
+        auto first  = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context)->get_object());
+        auto second = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context)->get_object());
 
         if (!first || !second) {
             throw ParsingTypeException("Boolean operator received non-boolean argument");
@@ -58,7 +58,7 @@ class PolishBooleanOperator: public PolishFunction {
                 throw ParsingException("Invalid boolean operator type", get_position());
         }
 
-        return std::make_shared<SymBooleanObject>(result);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
     }
 };
 
@@ -67,15 +67,15 @@ class PolishNotOperator: public PolishFunction {
  public:
     PolishNotOperator(ParsedCodeElement element): PolishFunction(element, 1, 1) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-        auto operand = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
+        auto operand = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context)->get_object());
 
         if (!operand) {
             throw ParsingTypeException("NOT operator received non-boolean argument");
         }
 
         bool result = !operand->as_boolean();
-        return std::make_shared<SymBooleanObject>(result);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
     }
 };
