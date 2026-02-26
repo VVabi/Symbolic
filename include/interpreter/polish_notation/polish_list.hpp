@@ -18,15 +18,14 @@ class PolishList: public PolishFunction {
  public:
     PolishList(ParsedCodeElement element): PolishFunction(element, 0, UINT32_MAX) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        std::vector<std::shared_ptr<SymObject>> elements;
+        std::vector<std::shared_ptr<SymObjectContainer>> elements;
         for (int64_t i = 0; i < get_num_args(); ++i) {
-            auto element = iterate_wrapped(cmd_list, context);
-            elements.push_back(element);
+            elements.push_back(iterate_wrapped(cmd_list, context));
         }
 
-        return std::make_shared<SymListObject>(elements);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(elements));
     }
 };
 
@@ -34,15 +33,15 @@ class PolishListGet: public PolishFunction {
  public:
     PolishListGet(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as first argument in list_get function");
         }
 
-        auto index_raw = iterate_wrapped(cmd_list, context);
+        auto index_raw = iterate_wrapped(cmd_list, context)->get_object();
         auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_raw);
         if (!index) {
             throw ParsingTypeException("Type error: Expected natural number as index in list_get function");
@@ -66,15 +65,15 @@ class PolishListSet: public PolishFunction {
  public:
     PolishListSet(ParsedCodeElement element): PolishFunction(element, 3, 3) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as first argument in list_set function");
         }
 
-        auto index_raw = iterate_wrapped(cmd_list, context);
+        auto index_raw = iterate_wrapped(cmd_list, context)->get_object();
         auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_raw);
         if (!index) {
             throw ParsingTypeException("Type error: Expected natural number as index in list_set function");
@@ -92,7 +91,7 @@ class PolishListSet: public PolishFunction {
 
         auto new_value = iterate_wrapped(cmd_list, context);
         list->set(idx, new_value);
-        return std::make_shared<SymVoidObject>();
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
 };
 
@@ -100,16 +99,16 @@ class PolishLength: public PolishFunction {
  public:
     PolishLength(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in length function");
         }
 
         auto length = static_cast<int64_t>(list->as_list().size());
-        return std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(length), BigInt(1)));
+        return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(length), BigInt(1))));
     }
 };
 
@@ -118,9 +117,9 @@ class PolishListAppend: public PolishFunction {
  public:
     PolishListAppend(ParsedCodeElement element): PolishFunction(element, 2, 2) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in append function");
@@ -128,7 +127,7 @@ class PolishListAppend: public PolishFunction {
 
         auto value = iterate_wrapped(cmd_list, context);
         list->append(value);
-        return std::make_shared<SymVoidObject>();
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
 };
 
@@ -136,9 +135,9 @@ class PolishListPop: public PolishFunction {
  public:
     PolishListPop(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in pop function");
@@ -156,15 +155,15 @@ class PolishListSlice: public PolishFunction {
  public:
     PolishListSlice(ParsedCodeElement element): PolishFunction(element, 3, 3) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in slice function");
         }
 
-        auto start_value = iterate_wrapped(cmd_list, context);
+        auto start_value = iterate_wrapped(cmd_list, context)->get_object();
         auto start_index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(start_value);
         if (!start_index) {
             throw ParsingTypeException("Type error: Expected natural number as start index in slice function");
@@ -180,7 +179,7 @@ class PolishListSlice: public PolishFunction {
             throw ParsingTypeException("Type error: Start index out of bounds in slice function");
         }
 
-        auto end_value = iterate_wrapped(cmd_list, context);
+        auto end_value = iterate_wrapped(cmd_list, context)->get_object();
         auto end_index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(end_value);
         if (!end_index) {
             throw ParsingTypeException("Type error: Expected natural number as end index in slice function");
@@ -196,10 +195,10 @@ class PolishListSlice: public PolishFunction {
             throw ParsingTypeException("Type error: End index out of bounds in slice function");
         }
         if (start_idx < end_idx) {
-            std::vector<std::shared_ptr<SymObject>> sliced_elements(list->as_list().begin() + start_idx, list->as_list().begin() + end_idx);
-            return std::make_shared<SymListObject>(sliced_elements);
+            std::vector<std::shared_ptr<SymObjectContainer>> sliced_elements(list->as_list().begin() + start_idx, list->as_list().begin() + end_idx);
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(sliced_elements));
         }
-        return std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObject>>());
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObjectContainer>>()));
     }
 };
 
@@ -207,19 +206,19 @@ class PolishListCopy: public PolishFunction {
  public:
     PolishListCopy(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context);
+        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
         if (!list) {
             throw ParsingTypeException("Type error: Expected list as argument in copy function");
         }
 
-        std::vector<std::shared_ptr<SymObject>> copied_elements;
+        std::vector<std::shared_ptr<SymObjectContainer>> copied_elements;
         for (const auto& element : list->as_list()) {
-            copied_elements.push_back(element->clone());
+            copied_elements.push_back(std::make_shared<SymObjectContainer>(element->get_object()->clone()));
         }
-        return std::make_shared<SymListObject>(copied_elements);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(copied_elements));
     }
 };
 
@@ -227,19 +226,19 @@ class PolishStringToList: public PolishFunction {
  public:
     PolishStringToList(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto string_raw   = iterate_wrapped(cmd_list, context);
+        auto string_raw   = iterate_wrapped(cmd_list, context)->get_object();
         auto string       = std::dynamic_pointer_cast<SymStringObject>(string_raw);
         if (!string) {
             throw ParsingTypeException("Type error: Expected string as argument in as_list function");
         }
 
         const auto& str = string->to_string();
-        std::vector<std::shared_ptr<SymObject>> char_elements;
+        std::vector<std::shared_ptr<SymObjectContainer>> char_elements;
         for (const auto& ch : str) {
-            char_elements.push_back(std::make_shared<SymStringObject>(std::string(1, ch)));
+            char_elements.push_back(std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(std::string(1, ch))));
         }
-        return std::make_shared<SymListObject>(char_elements);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(char_elements));
     }
 };

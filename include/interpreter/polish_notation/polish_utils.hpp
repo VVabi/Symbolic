@@ -47,12 +47,12 @@ class PolishPrint: public PolishFunction {
     PolishPrint(ParsedCodeElement element, bool line_break) :
         PolishFunction(element, 1, 2), line_break(line_break) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context) {
-        auto first = iterate_wrapped(cmd_list, context);
+        auto first = iterate_wrapped(cmd_list, context)->get_object();
         std::string mode_str = "raw";
         if (get_num_args() == 2) {
-            auto mode = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context));
+            auto mode = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context)->get_object());
             if (!mode) {
                 throw ParsingTypeException("Type error: Expected string as second argument in print function");
             }
@@ -65,13 +65,13 @@ class PolishPrint: public PolishFunction {
             if (!res) {
                 context->handle_print(first->to_string(), line_break);
             }
-            return std::make_shared<SymVoidObject>();
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
         } else if (mode_str == "ascii") {
             if (!res) {
                 auto char_obj = as_ascii(first);
                 context->handle_print(std::string(1, char_obj), line_break);
             }
-            return std::make_shared<SymVoidObject>();
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
         } else {
             throw ParsingTypeException("Type error: Unknown print mode: " + mode_str);
         }

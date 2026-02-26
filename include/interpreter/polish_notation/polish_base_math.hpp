@@ -21,8 +21,8 @@ inline std::shared_ptr<SymObject> binary_operation(LexerDeque<std::shared_ptr<Po
                                         std::shared_ptr<InterpreterContext>& context,
                                         std::function<std::shared_ptr<SymMathObject>(std::shared_ptr<SymMathObject>, std::shared_ptr<SymMathObject>)> op
 ) {
-    std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context));
-    std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context));
+    std::shared_ptr<SymMathObject> left  = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context)->get_object());
+    std::shared_ptr<SymMathObject> right = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context)->get_object());
     if (left == nullptr || right == nullptr) {
         throw ParsingTypeException("Type error: Expected mathematical object as argument");
     }
@@ -34,23 +34,23 @@ class PolishPlus : public PolishNotationElement {
  public:
     PolishPlus(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto left = iterate_wrapped(cmd_list, context);
-        auto right = iterate_wrapped(cmd_list, context);
+        auto left = iterate_wrapped(cmd_list, context)->get_object();
+        auto right = iterate_wrapped(cmd_list, context)->get_object();
 
         auto left_math = std::dynamic_pointer_cast<SymMathObject>(left);
         auto right_math = std::dynamic_pointer_cast<SymMathObject>(right);
 
         if (left_math && right_math) {
-            return sym_add(left_math, right_math);
+            return std::make_shared<SymObjectContainer>(sym_add(left_math, right_math));
         }
 
         auto left_string = std::dynamic_pointer_cast<SymStringObject>(left);
         auto right_string = std::dynamic_pointer_cast<SymStringObject>(right);
 
         if (left_string && right_string) {
-            return std::make_shared<SymStringObject>(left_string->to_string() + right_string->to_string());
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(left_string->to_string() + right_string->to_string()));
         }
 
         throw ParsingTypeException("Type error: Expected mathematical objects or strings as argument for addition");
@@ -61,9 +61,9 @@ class PolishMinus : public PolishNotationElement {
  public:
     PolishMinus(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        return binary_operation(cmd_list, context, sym_subtract);
+        return std::make_shared<SymObjectContainer>(binary_operation(cmd_list, context, sym_subtract));
     }
 };
 
@@ -71,9 +71,9 @@ class PolishTimes : public PolishNotationElement {
  public:
     PolishTimes(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        return binary_operation(cmd_list, context, sym_multiply);
+        return std::make_shared<SymObjectContainer>(binary_operation(cmd_list, context, sym_multiply));
     }
 };
 
@@ -81,9 +81,9 @@ class PolishDiv : public PolishNotationElement {
  public:
     PolishDiv(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        return binary_operation(cmd_list, context, sym_divide);
+        return std::make_shared<SymObjectContainer>(binary_operation(cmd_list, context, sym_divide));
     }
 };
 
@@ -91,15 +91,15 @@ class PolishPow: public PolishNotationElement {
  public:
     PolishPow(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto left  = iterate_wrapped(cmd_list, context);
+        auto left  = iterate_wrapped(cmd_list, context)->get_object();
         auto math_object = std::dynamic_pointer_cast<SymMathObject>(left);
         if (!math_object) {
             throw ParsingTypeException("Type error: Expected mathematical object as argument in pow");
         }
         // TODO(vabi) check for emptyness
-        auto exponent_raw = iterate_wrapped(cmd_list, context);
+        auto exponent_raw = iterate_wrapped(cmd_list, context)->get_object();
 
         auto exponent = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(exponent_raw);
         if (exponent) {
@@ -108,7 +108,7 @@ class PolishPow: public PolishNotationElement {
                 throw EvalException("Expected number as exponent", this->get_position());  // TODO(vabi) also throw position in original string AND the violating string
             }
             math_object->pow(value.get_numerator());
-            return math_object;
+            return std::make_shared<SymObjectContainer>(math_object);
         }
 
         auto exponent_double = std::dynamic_pointer_cast<ValueType<double>>(exponent_raw);
@@ -116,14 +116,14 @@ class PolishPow: public PolishNotationElement {
             auto math_double_object = std::dynamic_pointer_cast<ValueType<double>>(math_object);
             if (math_double_object) {
                 math_double_object->pow(exponent_double->as_value());
-                return math_double_object;
+                return std::make_shared<SymObjectContainer>(math_double_object);
             }
 
             auto math_rational_object = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(math_object);
             if (math_rational_object) {
                 double value = math_rational_object->as_value().get_numerator().as_double()/math_rational_object->as_value().get_denominator().as_double();
                 value = std::pow(value, exponent_double->as_value());
-                return std::make_shared<ValueType<double>>(value);
+                return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<double>>(value));
             }
 
 
@@ -140,13 +140,13 @@ class PolishUnaryMinus: public PolishNotationElement {
  public:
     PolishUnaryMinus(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
-        auto result = iterate_wrapped(cmd_list, context);
+        auto result = iterate_wrapped(cmd_list, context)->get_object();
         auto math_type = std::dynamic_pointer_cast<SymMathObject>(result);
         if (math_type) {
             math_type->unary_minus();
-            return math_type;
+            return std::make_shared<SymObjectContainer>(math_type);
         }
         throw ParsingTypeException("Type error: Expected mathematical object as argument");
 
@@ -158,7 +158,7 @@ class PolishAssign: public PolishNotationElement {
  public:
     PolishAssign(ParsedCodeElement element) : PolishNotationElement(element) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
         if (cmd_list.is_empty()) {
             throw EvalException("Expected variable name to assign to", this->get_position());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
@@ -170,9 +170,9 @@ class PolishAssign: public PolishNotationElement {
         }
         cmd_list.pop_front();
 
-        auto var_value = iterate_wrapped(cmd_list, context);
+        auto var_value = iterate_wrapped(cmd_list, context)->get_object();
 
         context->set_variable(next.value()->get_data(), var_value);
-        return var_value;
+        return std::make_shared<SymObjectContainer>(var_value);
     }
 };

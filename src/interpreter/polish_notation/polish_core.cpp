@@ -33,49 +33,49 @@ class PolishNumber: public PolishNotationElement {
         }
     }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext> &context) {
                                         UNUSED(cmd_list);
                                         UNUSED(context);
-                                        return symobject_value->clone();
+                                        return std::make_shared<SymObjectContainer>(symobject_value->clone());
                                     }
 };
 
 class PolishVariable: public PolishNotationElement {
  public:
     PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context) {
         UNUSED(cmd_list);
         auto existing_var = context->get_variable(get_data());
         if (!existing_var) {
             auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
-            return std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res);
+            return std::make_shared<SymObjectContainer>(std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res));
         }
 
         if (existing_var->modifiable_in_place()) {
-            return existing_var;
+            return std::make_shared<SymObjectContainer>(existing_var);
         }
 
-        return existing_var->clone();
+        return std::make_shared<SymObjectContainer>(existing_var->clone());
     }
 };
 
 class PolishString: public PolishNotationElement {
  public:
     PolishString(ParsedCodeElement element): PolishNotationElement(element) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context) {
         UNUSED(cmd_list);
         UNUSED(context);
-        return std::make_shared<SymStringObject>(get_data());
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(get_data()));
     }
 };
 
 class PolishScopeStart: public PolishNotationElement {
  public:
     PolishScopeStart(ParsedCodeElement element): PolishNotationElement(element) { }
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext> &context) {
         UNUSED(cmd_list);
         UNUSED(context);
@@ -242,7 +242,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
     throw EvalException("Unknown element type " + element.data, element.position);
 }
 
-std::shared_ptr<SymObject> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+std::shared_ptr<SymObjectContainer> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
         std::shared_ptr<InterpreterContext> &context) {
     if (cmd_list.is_empty()) {
         throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step

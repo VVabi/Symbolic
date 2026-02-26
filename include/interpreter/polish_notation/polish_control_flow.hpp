@@ -19,7 +19,7 @@ class PolishFor: public PolishFunction {
     PolishFor(ParsedCodeElement element) :
         PolishFunction(element, 3, UINT32_MAX) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
         auto variable = cmd_list.front();
         cmd_list.pop_front();
@@ -28,8 +28,8 @@ class PolishFor: public PolishFunction {
         }
 
         auto loop_index_var_name = variable->get_data();
-        auto s = iterate_wrapped(cmd_list, context);
-        auto e = iterate_wrapped(cmd_list, context);
+        auto s = iterate_wrapped(cmd_list, context)->get_object();
+        auto e = iterate_wrapped(cmd_list, context)->get_object();
         auto start  = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(s);
         auto end    = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(e);
 
@@ -67,7 +67,7 @@ class PolishFor: public PolishFunction {
             subexpressions.set_index(0);
         }
 
-        return std::make_shared<SymVoidObject>();
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
 };
 
@@ -76,12 +76,12 @@ class PolishWhile: public PolishFunction {
     PolishWhile(ParsedCodeElement element) :
         PolishFunction(element, 1, UINT32_MAX) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
         uint32_t original_index  = cmd_list.get_index();
 
         while (true) {
-            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
+            auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context)->get_object());
             if (!condition) {
                 throw EvalException("Expected boolean condition in while statement", this->get_position());
             }
@@ -102,7 +102,7 @@ class PolishWhile: public PolishFunction {
             cmd_list.set_index(original_index);  // reset execution index to the start of the loop for the next iteration
         }
 
-        return std::make_shared<SymVoidObject>();
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
 };
 
@@ -114,9 +114,9 @@ class PolishIf: public PolishFunction {
     PolishIf(ParsedCodeElement element) :
         PolishFunction(element, 1, UINT32_MAX), condition_already_fulfilled(false) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context));
+        auto condition = std::dynamic_pointer_cast<SymBooleanObject>(iterate_wrapped(cmd_list, context)->get_object());
         if (!condition) {
             throw EvalException("Expected boolean condition in if statement", this->get_position());
         }
@@ -145,7 +145,7 @@ class PolishIf: public PolishFunction {
             iterate_wrapped(cmd_list, context);
         }
 
-        return std::make_shared<SymVoidObject>();
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     }
 
     void set_condition_already_fulfilled(bool fulfilled) {
