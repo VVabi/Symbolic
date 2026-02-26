@@ -30,7 +30,7 @@ class PolishCustomFunction: public PolishFunction {
     std::vector<std::string> arg_names;
     PolishCustomFunction(ParsedCodeElement element) : PolishFunction(element, 0, UINT32_MAX) {}
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) override {
         auto existing_func = context->get_custom_function(get_data());
         if (!existing_func) {
@@ -60,7 +60,7 @@ class PolishCustomFunction: public PolishFunction {
             subexpressions = next.value()->get_sub_expressions();
             this->set_sub_expressions(subexpressions);
             context->set_custom_function(get_data(), std::make_shared<PolishCustomFunction>(*this));
-            return std::make_shared<SymVoidObject>();
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
         } else {
             if (get_num_args() != existing_func->get_num_args()) {
                 throw EvalException("Function " + get_data() + " called with incorrect number of arguments: "+std::to_string(get_num_args())+
@@ -69,7 +69,7 @@ class PolishCustomFunction: public PolishFunction {
 
             auto arg_values = std::vector<std::shared_ptr<SymObject>>();
             for (int i = 0; i < get_num_args(); i++) {
-                auto arg_value = iterate_wrapped(cmd_list, context);
+                auto arg_value = iterate_wrapped(cmd_list, context)->get_object();
                 arg_values.push_back(arg_value);
             }
 
@@ -88,11 +88,11 @@ class PolishCustomFunction: public PolishFunction {
 
             std::shared_ptr<SymObject> ret = std::make_shared<SymVoidObject>();
             while (!subexpressions.is_empty()) {
-                ret = iterate_wrapped(subexpressions, context);
+                ret = iterate_wrapped(subexpressions, context)->get_object();
             }
             context->pop_variables();
             subexpressions.set_index(0);
-            return ret;
+            return std::make_shared<SymObjectContainer>(ret);
         }
     }
 };
