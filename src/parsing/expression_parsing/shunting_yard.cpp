@@ -90,7 +90,6 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
         auto it = input.front();
         input.pop_front();
         switch (it.type) {
-
             case SCOPE_START:
                 while (operators.size() > 0) {
                     auto op = operators.top();

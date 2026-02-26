@@ -67,15 +67,6 @@ class PolishNotationElement {
            << "\", position=" << base_element.position << ", num_args=" << base_element.num_args
            << ", num_expressions=" << base_element.num_expressions << ")\n";
     }
-
-    virtual void assign_to(const std::shared_ptr<SymObject>& value,
-        std::queue<std::shared_ptr<SymObject>>& subscripts,
-        std::shared_ptr<InterpreterContext>& context) {
-        UNUSED(value);
-        UNUSED(subscripts);
-        UNUSED(context);
-        throw ParsingException("Cannot assign to this element", get_position());
-    }
 };
 
 
