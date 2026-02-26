@@ -2,6 +2,8 @@
 #include <string>
 #include <memory>
 #include "common/common_datatypes.hpp"
+#include "cpp_utils/unused.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 
 class SymObject {
  public:

@@ -3,11 +3,14 @@
 #include <memory>
 #include <string>
 #include <ostream>
+#include <queue>
 #include "common/lexer_deque.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "parsing/expression_parsing/parsed_code_element.hpp"
 #include "exceptions/parsing_exceptions.hpp"
+#include "exceptions/parsing_type_exception.hpp"
 #include "interpreter/context.hpp"
+#include "cpp_utils/unused.hpp"
 
 class PolishNotationElement;
 
@@ -49,6 +52,10 @@ class PolishNotationElement {
             throw ParsingException("Sub expressions have already been accessed and not reset", get_position());
         }
         return sub_expressions;
+    }
+
+    void set_sub_expressions(LexerDeque<std::shared_ptr<PolishNotationElement>> new_sub_expressions) {
+        sub_expressions = new_sub_expressions;
     }
 
     expression_type get_type() const {

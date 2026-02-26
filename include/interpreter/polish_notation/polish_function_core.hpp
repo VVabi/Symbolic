@@ -32,9 +32,10 @@ class PolishCustomFunction: public PolishFunction {
 
     std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) override {
-        auto subexpressions = get_sub_expressions();
+        auto existing_func = context->get_custom_function(get_data());
+        if (!existing_func) {
+            auto subexpressions = LexerDeque<std::shared_ptr<PolishNotationElement>>();
 
-        if (!subexpressions.is_empty()) {
             if (get_num_expressions() != get_num_args()) {
                 throw InvalidFunctionArgException("Function defined with incorrect number of expressions: "+std::to_string(get_num_expressions())+
                     ", expected " + std::to_string(get_num_args()), this->get_position());
@@ -49,19 +50,18 @@ class PolishCustomFunction: public PolishFunction {
                 arg_names.push_back(expr->get_data());
             }
 
-            if (context->get_custom_function(get_data())) {
-                throw EvalException("Custom function with name " + get_data() + " already exists", this->get_position());
+            auto next = cmd_list.peek();
+            if (!next || next.value()->get_type() != SCOPE_START) {
+                throw EvalException("Expected scope after function definition", this->get_position());
             }
 
-            context->set_custom_function(get_data(), std::make_shared<PolishCustomFunction>(*this));
 
+            cmd_list.pop_front();
+            subexpressions = next.value()->get_sub_expressions();
+            this->set_sub_expressions(subexpressions);
+            context->set_custom_function(get_data(), std::make_shared<PolishCustomFunction>(*this));
             return std::make_shared<SymVoidObject>();
         } else {
-            auto existing_func = context->get_custom_function(get_data());
-            if (!existing_func) {
-                throw EvalException("Undefined or empty function: " + get_data(), this->get_position());
-            }
-
             if (get_num_args() != existing_func->get_num_args()) {
                 throw EvalException("Function " + get_data() + " called with incorrect number of arguments: "+std::to_string(get_num_args())+
                     ", expected " + std::to_string(existing_func->get_num_args()), this->get_position());

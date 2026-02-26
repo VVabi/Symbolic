@@ -56,6 +56,7 @@ class PolishVariable: public PolishNotationElement {
         if (existing_var->modifiable_in_place()) {
             return existing_var;
         }
+
         return existing_var->clone();
     }
 };
@@ -68,6 +69,17 @@ class PolishString: public PolishNotationElement {
         UNUSED(cmd_list);
         UNUSED(context);
         return std::make_shared<SymStringObject>(get_data());
+    }
+};
+
+class PolishScopeStart: public PolishNotationElement {
+ public:
+    PolishScopeStart(ParsedCodeElement element): PolishNotationElement(element) { }
+    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext> &context) {
+        UNUSED(cmd_list);
+        UNUSED(context);
+        throw EvalException("Internal error: ScopeStart element should not be executed directly", this->get_position());
     }
 };
 
@@ -102,6 +114,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             }
             throw EvalException("Unknown unary operator: " + element.data, element.position);
             break;
+        case SCOPE_START:
+            return std::make_shared<PolishScopeStart>(element);
         case FUNCTION: {
             if (element.num_args == -1) {
                 throw EvalException("Function argument count not set for function: " + element.data, element.position);

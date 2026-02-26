@@ -163,15 +163,16 @@ class PolishAssign: public PolishNotationElement {
         if (cmd_list.is_empty()) {
             throw EvalException("Expected variable name to assign to", this->get_position());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
         }
-        auto next = cmd_list.front();
+        auto next = cmd_list.peek();
+
+        if (!next || next.value()->get_type() != expression_type::VARIABLE) {
+            throw EvalException("Expected variable name to assign to", next ? next.value()->get_position() : this->get_position());
+        }
         cmd_list.pop_front();
 
-        if (next->get_type()!= expression_type::VARIABLE) {
-            throw ParsingTypeException("Type error: Expected variable name as first argument in assignment");
-        }
         auto var_value = iterate_wrapped(cmd_list, context);
 
-        context->set_variable(next->get_data(), var_value);
+        context->set_variable(next.value()->get_data(), var_value);
         return var_value;
     }
 };
