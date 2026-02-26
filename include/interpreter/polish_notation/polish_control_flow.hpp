@@ -88,8 +88,7 @@ class PolishWhile: public PolishFunction {
 
             auto next = cmd_list.peek();
             if (!next || next.value()->get_type() != SCOPE_START) {
-                    next.value()->debug_print(std::cout);
-                    throw EvalException("Expected scope after while loop header", this->get_position());
+                throw EvalException("Expected scope after while loop header", this->get_position());
             }
             cmd_list.pop_front();
                 if (!condition->as_boolean()) {
