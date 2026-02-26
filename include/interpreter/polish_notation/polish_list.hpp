@@ -269,19 +269,17 @@ class PolishArrayAccess: public PolishNotationElement {
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                         std::shared_ptr<InterpreterContext>& context) {
         auto variable = iterate_wrapped(cmd_list, context);
-        auto index = iterate_wrapped(cmd_list, context);
+        auto subexpressions = get_sub_expressions();
+        auto index = iterate_wrapped(subexpressions, context);
+        if (!subexpressions.is_empty()) {
+            throw ParsingException("Unexpected extra tokens in array access", get_position());
+        }
         auto index_int = parse_index(index).as_int64();
 
         auto list_ptr = std::dynamic_pointer_cast<SymListObject>(variable->get_object());
         if (!list_ptr) {
             throw ParsingTypeException("Type error: Expected list as target of subscript operator");
         }
-
-        auto next = cmd_list.peek();
-        if (!next || next.value()->get_type() != ARRAY_ACCESS_END) {
-            throw ParsingException("Expected closing bracket for array access", get_position());
-        }
-        cmd_list.pop_front();  // Consume the ARRAY_ACCESS_END token
 
         return list_ptr->at(index_int);
     }
