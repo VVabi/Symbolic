@@ -1,0 +1,23 @@
+factorial(n) {
+    if (eq(n, 0)) {
+        ret = 1
+    } elif (true) {
+        ret = n * factorial(n-1)
+    }
+    ret
+}
+println(factorial(0))
+println(factorial(1))
+println(factorial(5))
+println(factorial(10))
+
+sum_to_n(n) {
+    if (eq(n, 0)) {
+        ret = 0
+    } elif (true) {
+        ret = n + sum_to_n(n-1)
+    }
+    ret
+}
+println(sum_to_n(10))
+println(sum_to_n(100))
