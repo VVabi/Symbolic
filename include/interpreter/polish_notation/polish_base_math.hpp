@@ -177,6 +177,6 @@ class PolishAssign: public PolishNotationElement {
         auto target = iterate_wrapped(cmd_list, context);
         auto value  = iterate_wrapped(cmd_list, context)->get_object();
         target->set_object(value);
-        return target;
+        return std::make_shared<SymObjectContainer>(value);
     }
 };

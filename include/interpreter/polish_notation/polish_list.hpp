@@ -284,7 +284,11 @@ class PolishArrayAccess: public PolishNotationElement {
 
         auto dict_ptr = std::dynamic_pointer_cast<SymDictObject>(variable->get_object());
         if (dict_ptr) {
-            return dict_ptr->get(index->get_object());
+            if (dict_ptr->has_key(index->get_object())) {
+                return dict_ptr->get(index->get_object());
+            } else {
+                return std::make_shared<SymTempDictObjectContainer>(dict_ptr, index->get_object());
+            }
         }
 
         throw ParsingTypeException("Type error: Expected list or dict as target of subscript operator");
