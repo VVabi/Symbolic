@@ -64,3 +64,29 @@ class SymDictObject: public SymObject {
         return data.find(key->to_string()) != data.end();
     }
 };
+
+class SymTempDictObjectContainer: public SymObjectContainer {
+    std::shared_ptr<SymObject> key;
+ public:
+    SymTempDictObjectContainer(const std::shared_ptr<SymDictObject>& dict, const std::shared_ptr<SymObject>& key): SymObjectContainer(dict), key(key) { }
+
+    void set_object(const std::shared_ptr<SymObject>& new_value) override {
+        auto dict = std::dynamic_pointer_cast<SymDictObject>(SymObjectContainer::get_object());
+        if (!dict) {
+            throw ParsingTypeException("Type error: Expected dict in SymTempDictObjectContainer::set_object");
+        }
+
+        if (dict->has_key(key)) {
+            throw ParsingTypeException("Key already exists in dict when trying to set value in SymTempDictObjectContainer");
+        }
+        dict->set(key, std::make_shared<SymObjectContainer>(new_value));
+    }
+
+    std::shared_ptr<SymObject> get_object() const override {
+        auto dict = std::dynamic_pointer_cast<SymDictObject>(SymObjectContainer::get_object());
+        if (!dict) {
+            throw ParsingTypeException("Type error: Expected dict in SymTempDictObjectContainer::get_object");
+        }
+        return dict->get(key)->get_object();
+    }
+};

@@ -24,12 +24,12 @@ class SymObjectContainer {
 
  public:
     SymObjectContainer(std::shared_ptr<SymObject> obj): contained_object(obj) { }
-
-    std::shared_ptr<SymObject> get_object() const {
+    virtual ~SymObjectContainer() = default;
+    virtual std::shared_ptr<SymObject> get_object() const {
         return contained_object;
     }
 
-    void set_object(const std::shared_ptr<SymObject>& new_obj) {
+    virtual void set_object(const std::shared_ptr<SymObject>& new_obj) {
         contained_object = new_obj;
     }
 };

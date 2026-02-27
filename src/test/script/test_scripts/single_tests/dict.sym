@@ -7,3 +7,16 @@ println(dict_has_key(a, "hello"))
 println(dict_has_key(a, "ahsk"))
 dict_set(a, "b", "some_string")
 println(dict_get(a, "b"))
+a = dict()
+a["hello"] = 13
+a["b"] = 22
+println(a["b"])
+println(a["hello"])
+println(dict_has_key(a, "hello"))
+println(dict_has_key(a, "ahsk"))
+a["b"] = "some_string"
+println(a["b"])
+x = a["b"]
+a["b"] = 100
+println(x)
+println(a["b"])
