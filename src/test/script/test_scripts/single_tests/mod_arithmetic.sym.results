@@ -1,0 +1,12 @@
+Mod(5,7)
+Mod(1,7)
+Mod(3,7)
+Mod(1,7)
+Mod(0,256)
+Mod(1,256)
+Mod(255,256)
+Mod(0,256)
+Mod(44,256)
+true
+false
+true
