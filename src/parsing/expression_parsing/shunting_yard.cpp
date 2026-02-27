@@ -94,8 +94,7 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
         switch (it.type) {
             case ARRAY_ACCESS_START:
                 while (operators.size() > 0) {
-                    auto op = operators.top();
-                    auto element = ParsedCodeElement(op);
+                    auto element = operators.top();
                     if (element.type == FUNCTION) {
                         element.set_num_args(last_closed_bracket_args_count);
                         element.set_num_expressions(ret.size() - last_expression_count);
