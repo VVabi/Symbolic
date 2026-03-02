@@ -19,8 +19,8 @@ std::vector<SkippedTokens> preprocess_file(const std::string& file_name, std::st
     while (std::getline(file, line)) {
         if (line.rfind(import_marker, 0) == 0) {
             // Line starts with #import, skip it
-            auto path = line.substr(import_marker.size()); //Extract the path after #import (including space)
-            // TODO trim whitespaces from path
+            auto path = line.substr(import_marker.size());  // Extract the path after #import (including space)
+            // TODO(vabi): trim whitespaces from path
             include_paths.push_back(path);
         }
 
@@ -30,7 +30,7 @@ std::vector<SkippedTokens> preprocess_file(const std::string& file_name, std::st
             skipped_tokens.push_back({current_position + static_cast<uint32_t>(parts[0].size()), static_cast<uint32_t>(line.size() - parts[0].size() + 1)});
         }
 
-        current_position += static_cast<uint32_t>(line.size() + 1); // +1 for the newline character
+        current_position += static_cast<uint32_t>(line.size() + 1);  // +1 for the newline character
         if (parts.size() == 0) {
             // Empty line, just add a newline character
             output_strm << "\n";
@@ -40,9 +40,7 @@ std::vector<SkippedTokens> preprocess_file(const std::string& file_name, std::st
         if (parts[0].size() > 0) {
             output_strm << "\n";
         }
-
     }
-
     output = output_strm.str();
     return skipped_tokens;
 }

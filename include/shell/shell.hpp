@@ -40,6 +40,9 @@ class CmdLineShellInput : public ShellInput {
         std::cout << ">>> ";
         std::string input;
         std::getline(std::cin, input);
+        if (input == "exit") {
+            return nullptr;
+        }
         return std::make_unique<ReplInputObject>(input);
     }
 };
@@ -62,13 +65,18 @@ class ReadlineShellInput : public ShellInput {
             return nullptr;
         }
 
-        // Add input to readline history.
-        add_history(input);
-
         std::string input_str(input);
 
         // Free buffer that was allocated by readline
         free(input);
+
+        // Treat literal "exit" as EOF/termination for interactive REPL
+        if (input_str == "exit") {
+            return nullptr;
+        }
+
+        // Add input to readline history.
+        add_history(input_str.c_str());
 
         return std::make_unique<ReplInputObject>(input_str);
     }

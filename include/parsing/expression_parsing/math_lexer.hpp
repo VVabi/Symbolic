@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <cstdint>
 #include <map>
 #include "parsing/expression_parsing/lexer_types.hpp"

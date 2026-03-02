@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <vector>
 #include <iostream>
 #include "interpreter/polish_notation/polish.hpp"
 #include "interpreter/polish_notation/polish_function_core.hpp"
@@ -66,15 +67,17 @@ class PolishPrint: public PolishFunction {
                 context->handle_print(first->to_string(), line_break);
             }
             return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
-        } else if (mode_str == "ascii") {
+        }
+
+        if (mode_str == "ascii") {
             if (!res) {
                 auto char_obj = as_ascii(first);
                 context->handle_print(std::string(1, char_obj), line_break);
             }
             return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
-        } else {
-            throw ParsingTypeException("Type error: Unknown print mode: " + mode_str);
         }
+
+        throw ParsingTypeException("Type error: Unknown print mode: " + mode_str);
     }
 };
 
@@ -106,10 +109,7 @@ class PolishGetParam: public PolishFunction {
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-
-
         std::vector<std::string> args;
-
         if (get_num_args() == 1) {
             auto param_name_obj = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context)->get_object());
             if (!param_name_obj) {

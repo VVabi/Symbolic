@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <utility>
 #include <fstream>
 
 class FileLikeObject {
@@ -84,8 +85,9 @@ class CodePlaceIdentifier {
     uint32_t position;
 
     const PreprocessedFileNavigator& get_file_navigator() const {
-        return file_navigators->at(file_name); // TODO throw proper exception if file_name not found
+        return file_navigators->at(file_name);  // TODO(vabi): throw proper exception if file_name not found
     }
+
  public:
     CodePlaceIdentifier(const std::string& file_name, const uint32_t position, const std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>>& file_navigators) :
     file_name(file_name), file_navigators(file_navigators), position(position) { }
