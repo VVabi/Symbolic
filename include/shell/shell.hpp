@@ -20,10 +20,11 @@
 #include "common/common_datatypes.hpp"
 #include "shell/parameters/parameters.hpp"
 #include "shell/command_handling.hpp"
+#include "common/file_location.hpp"
 
 class ShellInput {
  public:
-    virtual std::string get_next_input() = 0;
+    virtual std::unique_ptr<FileLikeObject> get_next_input() = 0;
 };
 
 class ShellOutput {
@@ -34,11 +35,11 @@ class ShellOutput {
 
 class CmdLineShellInput : public ShellInput {
  public:
-    std::string get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         std::cout << ">>> ";
         std::string input;
         std::getline(std::cin, input);
-        return input;
+        return std::make_unique<ReplInputObject>(input);
     }
 };
 
@@ -52,12 +53,12 @@ class ReadlineShellInput : public ShellInput {
         using_history();
     }
 
-    std::string get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         char* input = readline(">> ");
 
         // Check for EOF.
         if (!input) {
-            return "exit";
+            return nullptr;
         }
 
         // Add input to readline history.
@@ -68,7 +69,7 @@ class ReadlineShellInput : public ShellInput {
         // Free buffer that was allocated by readline
         free(input);
 
-        return input_str;
+        return std::make_unique<ReplInputObject>(input_str);
     }
 };
 
@@ -96,39 +97,43 @@ class CmdLineShellOutput : public ShellOutput {
 
 class FileShellInput : public ShellInput {
  public:
-    std::ifstream file_stream;
-    FileShellInput(const std::string& filename): file_stream(filename) {
-        if (!file_stream.is_open()) {
+    std::string filename;
+    bool consumed = false;
+
+    FileShellInput(const std::string& filename): filename(filename), consumed(false) {
+        // Verify file exists by attempting to open it
+        std::ifstream file(filename);
+        if (!file.is_open()) {
             throw std::runtime_error("Failed to open file: " + filename);
         }
     }
 
-    std::string get_next_input() override {
-        std::stringstream buffer;
-        buffer << file_stream.rdbuf();
-        auto ret =  buffer.str();
-        if (ret.empty()) {
-            return "exit";
+    std::unique_ptr<FileLikeObject> get_next_input() override {
+        if (consumed) {
+            return nullptr;
         }
-        return ret;
+        consumed = true;
+        return std::make_unique<FileObject>(filename);
     }
 };
 
 class FileShellLineInput : public ShellInput {
  public:
     std::ifstream file_stream;
-    FileShellLineInput(const std::string& filename): file_stream(filename) {
+    std::string filename;
+
+    FileShellLineInput(const std::string& filename): file_stream(filename), filename(filename) {
         if (!file_stream.is_open()) {
             throw std::runtime_error("Failed to open file: " + filename);
         }
     }
 
-    std::string get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         std::string input;
         if (!std::getline(file_stream, input)) {
-            return "exit";
+            return nullptr;
         }
-        return input;
+        return std::make_unique<ReplInputObject>(input, filename);
     }
 };
 

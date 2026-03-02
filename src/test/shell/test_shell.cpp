@@ -15,13 +15,12 @@ class TestShellInput: public ShellInput {
     TestShellInput(std::unique_ptr<std::istream> in) {
         input_stream = std::move(in);
     }
-
-    std::string get_next_input() {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         std::string input;
         if (std::getline(*input_stream, input)) {
-            return input;
+            return std::make_unique<ReplInputObject>(input);
         }
-        return "exit";
+        return nullptr;
     }
 };
 

@@ -43,7 +43,13 @@ void SymbolicShellEvaluator::run() {
 }
 
 bool SymbolicShellEvaluator::run_single_input() {
-    auto input  = shell_input->get_next_input();
+    auto file_like = shell_input->get_next_input();
+    if (!file_like) {
+        // EOF or no more inputs for non-interactive sources
+        return false;
+    }
+
+    auto input = file_like->read();
     auto result = evaluate_input(input);
     if (result.skip) {
         return true;

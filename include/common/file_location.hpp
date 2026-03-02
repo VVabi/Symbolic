@@ -4,6 +4,49 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <fstream>
+
+class FileLikeObject {
+ public:
+    virtual ~FileLikeObject() = default;
+    virtual std::string read() = 0;
+    virtual std::string get_name() const = 0;
+};
+
+class FileObject : public FileLikeObject {
+    std::string filename;
+
+ public:
+    FileObject(std::string name) : filename(std::move(name)) {}
+
+    std::string read() override {
+        std::ifstream file(filename);
+        std::string content((std::istreambuf_iterator<char>(file)),
+                             std::istreambuf_iterator<char>());
+        return content;
+    }
+
+    std::string get_name() const override {
+        return filename;
+    }
+};
+
+class ReplInputObject : public FileLikeObject {
+    std::string input;
+    std::string filename;
+
+ public:
+    ReplInputObject(std::string input, std::string name = "") : input(std::move(input)), filename(std::move(name)) {}
+
+    std::string read() override {
+        return input;
+    }
+
+    std::string get_name() const override {
+        return filename;
+    }
+};
+
 
 struct SkippedTokens {
     uint32_t start;
@@ -55,10 +98,10 @@ class CodePlaceIdentifier {
 
     /**
      * @brief Creates a CodePlaceIdentifier for an unknown position.
-     * 
+     *
      * This is used when throwing exceptions from contexts where no code position is available
      * (e.g., type conversion errors, internal errors).
-     * 
+     *
      * @return A CodePlaceIdentifier representing an unknown location.
      */
     static CodePlaceIdentifier unknown() {
