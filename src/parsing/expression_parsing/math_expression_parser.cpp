@@ -40,9 +40,8 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
-                    const uint32_t offset,
                     std::shared_ptr<InterpreterContext>& context) {
-    auto formula = parse_math_expression_string(input_string, offset);
+    auto formula = parse_math_expression_string(input_string);
 
     if (context->get_shell_parameters().lexer_output) {
         std::cout << "Lexer output:\n";
@@ -84,7 +83,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  */
 std::string parse_formula(const std::string& input,
                     std::shared_ptr<InterpreterContext>& context) {
-    auto ret = parse_formula_as_sym_object(input, 0, context);
+    auto ret = parse_formula_as_sym_object(input, context);
 
     auto ret_str = ret->to_string();
     context->set_variable("ANS", ret);

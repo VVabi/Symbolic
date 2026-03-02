@@ -23,12 +23,9 @@ bool is_separator(char c) {
  * in the expression.
  *
  * @param input The mathematical expression string to parse.
- * @param position_offset offset of distance in input to real distance in original string.
- *         Eg when the original user input is f = 1+z, only the 1+z arrives here, but errors should still be reported relative to f = 1+z.
  * @return A vector of `MathLexerElement` objects representing the parsed expression.
  */
-std::vector<MathLexerElement> parse_math_expression_string(const std::string& input,
-                                                           const uint32_t position_offset) {
+std::vector<MathLexerElement> parse_math_expression_string(const std::string& input) {
     std::vector<MathLexerElement> formula;
 
     char previous = '(';
@@ -36,7 +33,7 @@ std::vector<MathLexerElement> parse_math_expression_string(const std::string& in
 
     while (it != input.end()) {
         char current = *it;
-        auto distance = std::distance(input.begin(), it)+position_offset;
+        auto distance = std::distance(input.begin(), it);
         if (current == '"') {
             it++;
             std::stringstream strm;

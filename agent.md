@@ -263,8 +263,14 @@ SET( CMAKE_CXX_FLAGS  "-std=c++2a -Wall -Werror -Wextra")
 
 ### Running Tests
 
+**IMPORTANT:** Tests should only be executed from a Release build, as Debug builds can be extremely slow (50+ seconds per test in some cases).
+
 ```bash
-# From repository root
+# Configure for Release build
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target Symbolic_tests
+
+# Run tests (from repository root)
 ./build/Symbolic_tests
 
 # Or from build directory
@@ -871,6 +877,7 @@ To add a new priority level (e.g., for matrices), override `get_priority()` and 
 
 ### Build & Test
 ```bash
+# IMPORTANT: Always use Release build for testing (Debug is extremely slow)
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ./build/Symbolic_tests

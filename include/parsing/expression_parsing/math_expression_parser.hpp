@@ -27,7 +27,6 @@
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
-                    const uint32_t offset,
                     std::shared_ptr<InterpreterContext>& context);
 
  /**
@@ -51,7 +50,7 @@ template<typename T> std::shared_ptr<MathWrapperType<T>> parse_power_series_from
     ShellParameters parameters = ShellParameters();
     parameters.powerseries_expansion_size = size;
     auto context = std::make_shared<InterpreterContext>(nullptr, parameters);
-    auto res = std::dynamic_pointer_cast<MathWrapperType<T>>(parse_formula_as_sym_object(input, 0, context));
+    auto res = std::dynamic_pointer_cast<MathWrapperType<T>>(parse_formula_as_sym_object(input, context));
     return res;
 }
 
@@ -66,7 +65,7 @@ inline std::shared_ptr<MathWrapperType<double>> parse_power_series_from_string(c
     auto context = std::make_shared<InterpreterContext>(nullptr, parameters);
     // workaround: force the parser to infer the type as double, so that we can parse things like exp(z) as power series in z, instead of trying to parse it as a rational function in z and then converting to a power series, which doesn't work since the rational function is not actually a rational function but a power series in disguise
     context->set_variable("z", std::make_shared<RationalFunctionType<double>>(RationalFunction<double>(Polynomial<double>({0, 1}), Polynomial<double>({1}))));
-    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, 0, context))->as_double();
+    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, context))->as_double();
     return std::dynamic_pointer_cast<MathWrapperType<double>>(res);
 }
 
@@ -79,7 +78,7 @@ inline std::shared_ptr<MathWrapperType<ModLong>> parse_power_series_from_string(
     auto context = std::make_shared<InterpreterContext>(nullptr, parameters);
     // workaround: force the parser to infer the type as modlong, so that we can parse things like exp(z) as power series in z, instead of trying to parse it as a rational function in z and then converting to a power series, which doesn't work since the rational function is not actually a rational function but a power series in disguise
     context->set_variable("z", std::make_shared<RationalFunctionType<ModLong>>(RationalFunction<ModLong>(Polynomial<ModLong>({ModLong(0, unit.get_modulus()), unit}), Polynomial<ModLong>({unit}))));
-    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, 0, context))->as_modlong(unit.get_modulus());
+    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(input, context))->as_modlong(unit.get_modulus());
     return std::dynamic_pointer_cast<MathWrapperType<ModLong>>(res);
 }
 
