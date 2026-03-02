@@ -8,6 +8,7 @@
 #include <map>
 #include "shell/parameters/parameters.hpp"
 #include "common/lexer_deque.hpp"
+#include "common/file_location.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "interpreter/context.hpp"
@@ -41,12 +42,16 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
                     std::shared_ptr<InterpreterContext>& context) {
-    auto formula = parse_math_expression_string(input_string);
+    // Create file navigators map with REPL entry (empty string key, empty skipped_tokens)
+    auto file_navigators = std::make_shared<std::map<std::string, PreprocessedFileNavigator>>();
+    file_navigators->emplace("", PreprocessedFileNavigator("", {}));
+
+    auto formula = parse_math_expression_string(input_string, "", file_navigators);
 
     if (context->get_shell_parameters().lexer_output) {
         std::cout << "Lexer output:\n";
         for (const auto& element : formula) {
-            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
+            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position.get_original_position() << ")\n";
         }
     }
 

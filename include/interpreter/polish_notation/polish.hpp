@@ -31,7 +31,7 @@ class PolishNotationElement {
 
     virtual inline std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) = 0;
-    uint32_t get_position() const {
+    CodePlaceIdentifier get_position() const {
         return base_element.position;
     }
 
@@ -64,7 +64,7 @@ class PolishNotationElement {
 
     virtual void debug_print(std::ostream& os) const {
         os << "Executing PolishNotationElement(type=" << base_element.type << ", data=\"" << base_element.data
-           << "\", position=" << base_element.position << ", num_args=" << base_element.num_args
+           << "\", position=" << base_element.position.get_original_position() << ", num_args=" << base_element.num_args
            << ", num_expressions=" << base_element.num_expressions << ")\n";
     }
 };

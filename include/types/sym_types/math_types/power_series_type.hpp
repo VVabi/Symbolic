@@ -83,7 +83,7 @@ class PowerSeriesType: public MathWrapperType<T> {
 
     void pow(const double& exponent) {
         UNUSED(exponent);
-        throw EvalException("Cannot raise a power series to a non-integer power", -1);
+        throw EvalException("Cannot raise a power series to a non-integer power", CodePlaceIdentifier::unknown());
     }
 
     std::string to_string() const {
@@ -118,7 +118,7 @@ class PowerSeriesType: public MathWrapperType<T> {
         auto ptr = std::dynamic_pointer_cast<MathWrapperType<T>>(input);
 
         if (!ptr) {
-            throw EvalException("Cannot evaluate power series at this input", -1);
+            throw EvalException("Cannot evaluate power series at this input", CodePlaceIdentifier::unknown());
         }
         return ptr->insert_into_power_series(value);
     }
@@ -148,7 +148,7 @@ inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::a
 
     for (uint32_t ind = 0; ind < value.num_coefficients(); ind++) {
         if (value[ind].get_denominator() == BigInt(0)) {
-            throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+            throw EvalException("Cannot convert rational function with zero denominator to double", CodePlaceIdentifier::unknown());
         }
         new_coefficients.push_back(value[ind].get_numerator().as_double()/value[ind].get_denominator().as_double());
     }
@@ -163,7 +163,7 @@ inline std::shared_ptr<SymMathObject> PowerSeriesType<RationalNumber<BigInt>>::a
 
     for (uint32_t ind = 0; ind < value.num_coefficients(); ind++) {
         if (value[ind].get_denominator() == BigInt(0)) {
-            throw EvalException("Cannot convert rational function with zero denominator to ModLong", -1);
+            throw EvalException("Cannot convert rational function with zero denominator to ModLong", CodePlaceIdentifier::unknown());
         }
         auto num = value[ind].get_numerator();
         auto den = value[ind].get_denominator();

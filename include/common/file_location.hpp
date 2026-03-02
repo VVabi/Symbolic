@@ -36,16 +36,41 @@ class PreprocessedFileNavigator {
 
 
 class CodePlaceIdentifier {
-    uint32_t file_id;
-    const std::shared_ptr<std::map<uint32_t, PreprocessedFileNavigator>> file_navigators;
+    std::string file_name;
+    std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>> file_navigators;
     uint32_t position;
 
     const PreprocessedFileNavigator& get_file_navigator() const {
-        return file_navigators->at(file_id); // TODO throw proper exception if file_id not found
+        return file_navigators->at(file_name); // TODO throw proper exception if file_name not found
     }
  public:
-    CodePlaceIdentifier(const uint32_t position, const std::shared_ptr<std::map<uint32_t, PreprocessedFileNavigator>>& file_navigators) : 
-    file_id(0), file_navigators(file_navigators), position(position) { }
+    CodePlaceIdentifier(const std::string& file_name, const uint32_t position, const std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>>& file_navigators) :
+    file_name(file_name), file_navigators(file_navigators), position(position) { }
+
+    // Default copy/move constructors and assignment operators
+    CodePlaceIdentifier(const CodePlaceIdentifier&) = default;
+    CodePlaceIdentifier(CodePlaceIdentifier&&) = default;
+    CodePlaceIdentifier& operator=(const CodePlaceIdentifier&) = default;
+    CodePlaceIdentifier& operator=(CodePlaceIdentifier&&) = default;
+
+    /**
+     * @brief Creates a CodePlaceIdentifier for an unknown position.
+     * 
+     * This is used when throwing exceptions from contexts where no code position is available
+     * (e.g., type conversion errors, internal errors).
+     * 
+     * @return A CodePlaceIdentifier representing an unknown location.
+     */
+    static CodePlaceIdentifier unknown() {
+        static auto empty_navigators = std::make_shared<std::map<std::string, PreprocessedFileNavigator>>();
+        static bool initialized = false;
+        if (!initialized) {
+            empty_navigators->emplace("", PreprocessedFileNavigator("", {}));
+            initialized = true;
+        }
+        return CodePlaceIdentifier("", 0, empty_navigators);
+    }
+
     const std::string get_file_name() const {
         return get_file_navigator().get_file_name();
     }

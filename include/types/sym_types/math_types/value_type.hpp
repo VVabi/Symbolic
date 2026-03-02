@@ -81,7 +81,7 @@ class ValueType: public MathWrapperType<T> {
 
     void pow(const double& exponent) {
         UNUSED(exponent);
-        throw EvalException("Cannot raise type to a non-integer power", -1);
+        throw EvalException("Cannot raise type to a non-integer power", CodePlaceIdentifier::unknown());
     }
 
     std::shared_ptr<MathWrapperType<T>> div(std::shared_ptr<MathWrapperType<T>> other) {
@@ -140,7 +140,7 @@ class ValueType: public MathWrapperType<T> {
 template<>
 inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_modlong(const int64_t& modulus) const {
     if (value.get_denominator() == BigInt(0)) {
-        throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+        throw EvalException("Cannot convert rational function with zero denominator to double", CodePlaceIdentifier::unknown());
     }
     auto num = (value.get_numerator() % modulus).as_int64();
     auto denom = (value.get_denominator() % modulus).as_int64();
@@ -156,7 +156,7 @@ inline std::shared_ptr<SymMathObject> ValueType<ModLong>::as_modlong(const int64
 template<>
 inline std::shared_ptr<SymMathObject> ValueType<RationalNumber<BigInt>>::as_double() const {
     if (value.get_denominator() == BigInt(0)) {
-        throw EvalException("Cannot convert rational function with zero denominator to double", -1);
+        throw EvalException("Cannot convert rational function with zero denominator to double", CodePlaceIdentifier::unknown());
     }
     return std::make_shared<ValueType<double>>(value.get_numerator().as_double()/value.get_denominator().as_double());
 }
