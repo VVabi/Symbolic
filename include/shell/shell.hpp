@@ -197,12 +197,6 @@ class TestShellOutput: public ShellOutput {
     }
 };
 
-enum InputPrefix {
-    COMMAND,
-    EXIT,
-    NO_PREFIX
-};
-
 enum InputPostfix {
     NO_POSTFIX,
     SUPPRESS_OUTPUT,
@@ -210,7 +204,6 @@ enum InputPostfix {
 
 struct ShellInputEvalResult {
     std::string processed_input;
-    InputPrefix prefix;
     InputPostfix postfix;
     bool skip;
 
@@ -241,7 +234,7 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
         auto pos = e.get_position();
         auto original_position = pos.get_original_position();
         auto file_name = pos.get_file_name();
-        
+
         if (file_name.empty()) {
             strm << "Parsing error at position " << original_position << ": " << e.what() << std::endl;
         } else {
@@ -325,11 +318,6 @@ class FormulaParser {
         context = std::make_shared<InterpreterContext>(print_handler, params);
     }
 
-    CommandResult handle_command_input(const std::string& input) {
-            auto res = handle_command(context, input);
-            return res;
-    }
-
     std::unique_ptr<FormulaParsingResult> parse(const std::string& input) {
         auto now = std::chrono::high_resolution_clock::now();
 
@@ -375,8 +363,6 @@ class SymbolicShellEvaluator {
     std::shared_ptr<ShellOutput> shell_output;
     FormulaParser parser;
 
-    bool is_exit(const std::string& input);
-    InputPrefix get_input_prefix(std::string& input);
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:

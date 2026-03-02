@@ -237,6 +237,10 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishBooleanOperator>(element, NOR);
             } else if (element.data == "not") {
                 return std::make_shared<PolishNotOperator>(element);
+            } else if (element.data == "setparam") {
+                return std::make_shared<PolishSetParam>(element);
+            } else if (element.data == "getparam") {
+                return std::make_shared<PolishGetParam>(element);
             } else {
                 return std::make_shared<PolishCustomFunction>(element);
             }

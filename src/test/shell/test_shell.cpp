@@ -39,7 +39,7 @@ void test_shell_power_series_parsing() {
 
         auto instream = std::make_unique<std::stringstream>();
         auto power_series_precision = expected_result.size() + additional_offset;
-        *instream << "#setparam powerseriesprecision " + std::to_string(power_series_precision) << std::endl;
+        *instream << "setparam(\"powerseriesprecision\", " + std::to_string(power_series_precision) << ")" << std::endl;
         *instream << "f = " + formula << std::endl;
         std::string coeff_function_name = exponential ? "egfcoeff" : "coeff";
 

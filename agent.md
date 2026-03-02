@@ -533,18 +533,6 @@ MSET(f, {1,3,5})    # Multisets with only 1, 3, or 5 elements
 CYC(f, >=1, <=10)   # Cycles of length 1 to 10
 ```
 
-### Shell Commands
-
-Prefix with `#` in REPL:
-
-```
-#setparam powerseriesprecision 50   # Set power series precision (default 20)
-#getparam powerseriesprecision      # Get parameter value
-#setparam profile_output 1          # Enable profiling
-#setparam lexer_output 1            # Debug lexer output
-#setparam shunting_yard_output 1    # Debug shunting yard output
-```
-
 ### Constants
 
 ```
@@ -853,9 +841,9 @@ To add a new priority level (e.g., for matrices), override `get_priority()` and 
 
 1. **Enable debug output:**
    ```
-   #setparam lexer_output 1
-   #setparam shunting_yard_output 1
-   #setparam profile_output 1
+   setparam("lexer_output", true)
+   setparam("shunting_yard_output", true)
+   setparam("profile_output", true)
    ```
 
 2. **Use the playground:**
