@@ -26,15 +26,15 @@ class PolishEq: public PolishFunction {
     PolishEq(ParsedCodeElement element) :
         PolishFunction(element, 2, 2) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-        auto first = iterate_wrapped(cmd_list, context);
-        auto second = iterate_wrapped(cmd_list, context);
+        auto first = iterate_wrapped(cmd_list, context)->get_object();
+        auto second = iterate_wrapped(cmd_list, context)->get_object();
 
         if (first->equals(second)) {
-            return std::make_shared<SymBooleanObject>(true);
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
         } else {
-            return std::make_shared<SymBooleanObject>(false);
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(false));
         }
     }
 };
@@ -44,15 +44,15 @@ class PolishNeq: public PolishFunction {
     PolishNeq(ParsedCodeElement element) :
         PolishFunction(element, 2, 2) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-        auto first = iterate_wrapped(cmd_list, context);
-        auto second = iterate_wrapped(cmd_list, context);
+        auto first = iterate_wrapped(cmd_list, context)->get_object();
+        auto second = iterate_wrapped(cmd_list, context)->get_object();
 
         if (!first->equals(second)) {
-            return std::make_shared<SymBooleanObject>(true);
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
         } else {
-            return std::make_shared<SymBooleanObject>(false);
+            return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(false));
         }
     }
 };
@@ -98,32 +98,32 @@ class PolishComparison: public PolishFunction {
     PolishComparison(ParsedCodeElement element, ComparisonOperatorType operator_type) :
         PolishFunction(element, 2, 2), operator_type(operator_type) { }
 
-    std::shared_ptr<SymObject> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
-        auto first  = iterate_wrapped(cmd_list, context);
-        auto second = iterate_wrapped(cmd_list, context);
+        auto first  = iterate_wrapped(cmd_list, context)->get_object();
+        auto second = iterate_wrapped(cmd_list, context)->get_object();
 
         auto first_num      = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
         auto second_num     = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);
 
         if (first_num && second_num) {
-            return handle_comparison<RationalNumber<BigInt>>(first_num, second_num, operator_type, get_position());
+            return std::make_shared<SymObjectContainer>(handle_comparison<RationalNumber<BigInt>>(first_num, second_num, operator_type, get_position()));
         }
 
         auto first_double   = std::dynamic_pointer_cast<ValueType<double>>(first);
         auto second_double  = std::dynamic_pointer_cast<ValueType<double>>(second);
         if (first_double && second_double) {
-            return handle_comparison<double>(first_double, second_double, operator_type, get_position());
+            return std::make_shared<SymObjectContainer>(handle_comparison<double>(first_double, second_double, operator_type, get_position()));
         }
 
         if (first_double && second_num) {
             auto second_as_double =  std::dynamic_pointer_cast<ValueType<double>>(second_num->as_double());
-            return handle_comparison<double>(first_double, second_as_double, operator_type, get_position());
+            return std::make_shared<SymObjectContainer>(handle_comparison<double>(first_double, second_as_double, operator_type, get_position()));
         }
 
         if (first_num && second_double) {
             auto first_as_double = std::dynamic_pointer_cast<ValueType<double>>(first_num->as_double());
-            return handle_comparison<double>(first_as_double, second_double, operator_type, get_position());
+            return std::make_shared<SymObjectContainer>(handle_comparison<double>(first_as_double, second_double, operator_type, get_position()));
         }
         throw EvalException("Expected numeric arguments for comparison operation", get_position());
     }

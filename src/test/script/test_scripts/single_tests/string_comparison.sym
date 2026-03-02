@@ -1,0 +1,11 @@
+println(eq("hello", "hello"))
+println(eq("hello", "world"))
+println(neq("hello", "world"))
+println(neq("hello", "hello"))
+println(eq("a", "a"))
+println(eq("a", "b"))
+println(eq("+", "+"))
+println(eq("+", "-"))
+s = "test"
+println(eq(s, "test"))
+println(eq(s, "other"))

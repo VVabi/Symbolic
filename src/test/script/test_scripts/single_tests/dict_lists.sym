@@ -1,0 +1,16 @@
+a = list(dict(), dict())
+a[1]["key"] = "dummy"
+a[0][2] = 1901283
+a[0]["random"] = 3.1415
+println(a[0]["random"])
+println(a[0][2])
+a[0][2] = 11
+println(a[0][2])
+println(a[0])
+a[0] = 189
+println(a[0])
+a = dict()
+a["key"] = list(1,2,3)
+println(a["key"][1])
+a["key"][0] = 187
+println(a["key"][0])

@@ -14,7 +14,9 @@ enum expression_type {
     SEPARATOR,              ///< Separator
     STRING,                 ///< String literal
     SCOPE_START,            ///< Scope start (used for function definitions and control flow constructs)
-    SCOPE_END               ///< Scope end (used for function definitions and control flow constructs)
+    SCOPE_END,              ///< Scope end (used for function definitions and control flow constructs)
+    ARRAY_ACCESS_START,     ///< Array access start (used for array indexing)
+    ARRAY_ACCESS_END        ///< Array access end (used for array indexing)
 };
 
 inline std::string expression_type_to_string(expression_type type) {
@@ -41,6 +43,12 @@ inline std::string expression_type_to_string(expression_type type) {
             return "SCOPE_START";
         case SCOPE_END:
             return "SCOPE_END";
+        case ARRAY_ACCESS_START:
+            return "ARRAY_ACCESS_START";
+        case ARRAY_ACCESS_END:
+            return "ARRAY_ACCESS_END";
+        default:
+            throw std::invalid_argument("Invalid expression type");
     }
 
     return "";  // unreachable
