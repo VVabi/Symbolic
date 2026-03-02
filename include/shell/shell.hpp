@@ -11,6 +11,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -234,6 +235,9 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
         auto pos = e.get_position();
         auto original_position = pos.get_original_position();
         auto file_name = pos.get_file_name();
+        if (!file_name.empty()) {
+            file_name = std::filesystem::relative(file_name).string();
+        }
 
         if (file_name.empty()) {
             strm << "Parsing error at position " << original_position << ": " << e.what() << std::endl;
@@ -318,13 +322,13 @@ class FormulaParser {
         context = std::make_shared<InterpreterContext>(print_handler, params);
     }
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input) {
+    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, std::shared_ptr<FileLikeObject> file_obj = nullptr) {
         auto now = std::chrono::high_resolution_clock::now();
 
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, context);
+             auto res = parse_formula(input, context, file_obj);
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, input);

@@ -24,10 +24,12 @@
 #include "types/sym_types/math_types/rational_function_type.hpp"
 #include "interpreter/context.hpp"
 #include "shell/parameters/parameters.hpp"
+#include "common/file_location.hpp"
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
-                    std::shared_ptr<InterpreterContext>& context);
+                    std::shared_ptr<InterpreterContext>& context,
+                    std::shared_ptr<FileLikeObject> file_obj = nullptr);
 
  /**
  * @brief Parses a mathematical expression string into a formal power series.
@@ -83,7 +85,8 @@ inline std::shared_ptr<MathWrapperType<ModLong>> parse_power_series_from_string(
 }
 
 std::string parse_formula(const std::string& input,
-                        std::shared_ptr<InterpreterContext>& context);
+                        std::shared_ptr<InterpreterContext>& context,
+                        std::shared_ptr<FileLikeObject> file_obj = nullptr);
 
 ModLong parse_modlong_value(const std::string& input);
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

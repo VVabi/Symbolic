@@ -6,23 +6,6 @@
 #include "common/common_datatypes.hpp"
 #include "shell/shell.hpp"
 
-// Command prefix handling removed: commands are now part of the language.
-
-InputPostfix SymbolicShellEvaluator::get_input_postfix(std::string& input) {
-    if (input.length() > 0 && input[input.length()-1] == ';') {
-        input = input.substr(0, input.length()-1);
-        return SUPPRESS_OUTPUT;
-    }
-    return NO_POSTFIX;
-}
-
-ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& input) {
-    std::string processed_input     = input;
-    auto postfix                    = get_input_postfix(processed_input);
-    auto skip                       = processed_input.length() == 0;
-    return {processed_input, postfix, skip};
-}
-
 void SymbolicShellEvaluator::run() {
     while (run_single_input()) { }
 }
@@ -34,13 +17,32 @@ bool SymbolicShellEvaluator::run_single_input() {
         return false;
     }
 
-    auto input = file_like->read();
+    // Move unique_ptr into shared_ptr so parser can access file metadata.
+    std::shared_ptr<FileLikeObject> shared_file_obj = std::move(file_like);
+
+    auto input = shared_file_obj->read();
     auto result = evaluate_input(input);
     if (result.skip) {
         return true;
     }
-    auto x = parser.parse(result.processed_input);
+
+    auto x = parser.parse(result.processed_input, shared_file_obj);
     shell_output->handle_result(std::move(x), result.print_result());
 
     return true;
+}
+
+InputPostfix SymbolicShellEvaluator::get_input_postfix(std::string& input) {
+    if (input.length() > 0 && input[input.length()-1] == ';') {
+        input = input.substr(0, input.length()-1);
+        return SUPPRESS_OUTPUT;
+    }
+    return NO_POSTFIX;
+}
+
+ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& input) {
+    std::string processed_input = input;
+    auto postfix = get_input_postfix(processed_input);
+    auto skip = processed_input.length() == 0;
+    return {processed_input, postfix, skip};
 }

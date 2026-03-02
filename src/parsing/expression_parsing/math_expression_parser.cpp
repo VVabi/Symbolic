@@ -41,12 +41,24 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     const std::string& input_string,
-                    std::shared_ptr<InterpreterContext>& context) {
+                    std::shared_ptr<InterpreterContext>& context,
+                    std::shared_ptr<FileLikeObject> file_obj) {
     // Create file navigators map with REPL entry (empty string key, empty skipped_tokens)
     auto file_navigators = std::make_shared<std::map<std::string, PreprocessedFileNavigator>>();
     file_navigators->emplace("", PreprocessedFileNavigator("", {}));
 
-    auto formula = parse_math_expression_string(input_string, "", file_navigators);
+    // If a file object was provided, use its name when lexing so error positions
+    // and file navigation can include the originating filename.
+    std::string file_name = "";
+    if (file_obj && !file_obj->get_name().empty()) {
+        file_name = file_obj->get_name();
+        // Ensure a navigator exists for this file name. Preprocessed skipped tokens
+        // are unknown at this stage, provide an empty navigator which is sufficient
+        // for position reporting.
+        file_navigators->emplace(file_name, PreprocessedFileNavigator(file_name, {}));
+    }
+
+    auto formula = parse_math_expression_string(input_string, file_name, file_navigators);
 
     if (context->get_shell_parameters().lexer_output) {
         std::cout << "Lexer output:\n";
@@ -87,8 +99,9 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  * @return The parsed formula as a string.
  */
 std::string parse_formula(const std::string& input,
-                    std::shared_ptr<InterpreterContext>& context) {
-    auto ret = parse_formula_as_sym_object(input, context);
+                    std::shared_ptr<InterpreterContext>& context,
+                    std::shared_ptr<FileLikeObject> file_obj) {
+    auto ret = parse_formula_as_sym_object(input, context, file_obj);
 
     auto ret_str = ret->to_string();
     context->set_variable("ANS", ret);
