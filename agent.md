@@ -13,8 +13,8 @@
 
 The primary focus is on **generating functions for enumerative combinatorics** rather than symbolic calculus (no differentiation/integration).
 
-**Version:** 0.1.0  
-**Author:** vabi  
+**Version:** 0.1.0
+**Author:** vabi
 **Language:** C++20 (`-std=c++2a`)
 
 ---
@@ -124,7 +124,7 @@ Cross-type math operations are implemented in `src/types/sym_types/sym_math.cpp`
 ## Directory Structure
 
 ```
-/home/ubuntu/code/Symbolic/
+./
 ├── CMakeLists.txt              # Build configuration
 ├── lint_test.sh                # cpplint wrapper script
 ├── .github/workflows/          # CI/CD configuration
@@ -252,8 +252,7 @@ SET( CMAKE_CXX_FLAGS  "-std=c++2a -Wall -Werror -Wextra")
 - **Warnings as errors:** `-Werror`
 - **All warnings enabled:** `-Wall -Wextra`
 
-**Note:** A pre-built `build/` directory already exists in the repository with compiled binaries.
-
+**Note:** Build artifacts are typically generated in a `build/` directory created by your build system; this directory is not expected to be committed to version control.
 ---
 
 ## Testing
@@ -646,20 +645,20 @@ Template specializations for `double`, `RationalNumber<BigInt>`, and `ModLong` p
    class PolishFoo : public PolishFunction {
     public:
        PolishFoo() : PolishFunction("foo", 2) {}  // Name and arity
-       
+
        std::shared_ptr<SymObject> call_internal(
            const std::vector<std::shared_ptr<SymObject>>& args) override {
            // Type check args[0] and args[1]
            auto x = std::dynamic_pointer_cast<SymMathObject>(args[0]);
            auto y = std::dynamic_pointer_cast<SymMathObject>(args[1]);
-           
+
            if (!x || !y) {
                throw EvalException("foo requires math objects", -1);
            }
-           
+
            // Implement logic
            // ...
-           
+
            return result;
        }
    };
@@ -683,7 +682,7 @@ Template specializations for `double`, `RationalNumber<BigInt>`, and `ModLong` p
    println(foo(1, 2))
    println(foo(z, z^2))
    ```
-   
+
    Create `src/test/script/test_scripts/single_tests/foo.sym.results`:
    ```
    <expected output>
@@ -813,7 +812,7 @@ To add a new priority level (e.g., for matrices), override `get_priority()` and 
        // Existing commands
        register_command("setparam", ...);
        register_command("getparam", ...);
-       
+
        // New command
        register_command("mycommand", [](const std::vector<std::string>& args) {
            // Implementation
@@ -886,8 +885,8 @@ cmake --build build
 ```
 
 ### Example .sym Script
+### Fibonacci with memoization
 ```
-# Fibonacci with memoization
 fib(n, memo) {
     if (dict_has_key(memo, n)) {
         dict_get(memo, n)
@@ -909,13 +908,11 @@ println(fib(100, memo))
 
 ### Generating Function Example
 ```
-# OGF for binary strings with no consecutive 1s
-# A = 1 + z + z*A*(1+z)  →  A = (1+z)/(1-z-z^2)
 a = (1+z)/(1-z-z^2)
 println(coeff(a, 10))    # 10th coefficient
 ```
 
 ---
 
-**Last Updated:** March 2026  
-**Repository:** https://github.com/VVabi/Symbolic (assumed based on git history)
+**Last Updated:** March 2026
+**Repository:** <repository URL>
