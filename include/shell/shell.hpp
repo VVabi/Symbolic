@@ -269,7 +269,6 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
             }
         }
         auto istrm = std::istringstream(file_content);
-        std::cout << file_content << std::endl;
         std::ptrdiff_t count = 0;
         std::string line;
         bool found_position = true;

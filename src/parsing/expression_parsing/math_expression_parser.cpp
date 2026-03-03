@@ -36,7 +36,6 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
     while (!polish_input.is_empty()) {
         ret = iterate_wrapped(polish_input, context)->get_object();
     }
-    
     return ret;
 }
 
@@ -48,8 +47,8 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     std::vector<std::string> include_paths;
     auto tokens = preprocess_file(file_obj, output, include_paths);
     auto navigator = PreprocessedFileNavigator(file_obj->get_name(), std::move(tokens));
-    context->set_file_navigator(file_obj->get_name(), navigator);                   
-    
+    context->set_file_navigator(file_obj->get_name(), navigator);
+
     for (const auto& path : include_paths) {
         parse_formula_as_sym_object(context, std::make_shared<FileObject>(path));
     }

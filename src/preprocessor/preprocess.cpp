@@ -26,7 +26,7 @@ std::vector<SkippedTokens> preprocess_file(const std::shared_ptr<FileLikeObject>
         auto parts = string_split(line, '#');
         if (parts.size() > 1) {
             // Line contains a comment, skip the comment part
-            skipped_tokens.push_back({current_position + static_cast<uint32_t>(parts[0].size()), static_cast<uint32_t>(line.size() - parts[0].size() + 1)});
+            skipped_tokens.push_back({current_position + static_cast<uint32_t>(parts[0].size()), static_cast<uint32_t>(line.size() - parts[0].size())});
         }
 
         current_position += static_cast<uint32_t>(line.size() + 1);  // +1 for the newline character

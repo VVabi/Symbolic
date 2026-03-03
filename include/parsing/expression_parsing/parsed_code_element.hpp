@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <memory>
 #include "parsing/expression_parsing/lexer_types.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "common/lexer_deque.hpp"
