@@ -330,16 +330,16 @@ class FormulaParser {
         context = std::make_shared<InterpreterContext>(print_handler, params);
     }
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, std::shared_ptr<FileLikeObject> file_obj = nullptr) {
+    std::unique_ptr<FormulaParsingResult> parse(std::shared_ptr<FileLikeObject> file_obj) {
         auto now = std::chrono::high_resolution_clock::now();
 
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, context, file_obj);
+             auto res = parse_formula(context, file_obj);
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
-            ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
+            ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, file_obj->read());
         } catch (ReachedUnreachableException &e) {
             ret = std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
         } catch (ParsingTypeException &e) {

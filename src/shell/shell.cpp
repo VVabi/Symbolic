@@ -20,14 +20,8 @@ bool SymbolicShellEvaluator::run_single_input() {
     // Move unique_ptr into shared_ptr so parser can access file metadata.
     std::shared_ptr<FileLikeObject> shared_file_obj = std::move(file_like);
 
-    auto input = shared_file_obj->read();
-    auto result = evaluate_input(input);
-    if (result.skip) {
-        return true;
-    }
-
-    auto x = parser.parse(result.processed_input, shared_file_obj);
-    shell_output->handle_result(std::move(x), result.print_result());
+    auto x = parser.parse(shared_file_obj);
+    shell_output->handle_result(std::move(x), true);
 
     return true;
 }

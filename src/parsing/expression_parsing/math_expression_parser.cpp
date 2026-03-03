@@ -12,7 +12,7 @@
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "interpreter/context.hpp"
-
+#include "preprocessor/preprocess.hpp"
 
 /**
  * @brief Parses a formula based on the given datatype.
@@ -36,11 +36,11 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
     while (!polish_input.is_empty()) {
         ret = iterate_wrapped(polish_input, context)->get_object();
     }
+    
     return ret;
 }
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
-                    const std::string& input_string,
                     std::shared_ptr<InterpreterContext>& context,
                     std::shared_ptr<FileLikeObject> file_obj) {
     // Create file navigators map with REPL entry (empty string key, empty skipped_tokens)
@@ -58,7 +58,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
         file_navigators->emplace(file_name, PreprocessedFileNavigator(file_name, {}));
     }
 
-    auto formula = parse_math_expression_string(input_string, file_name, file_navigators);
+    auto formula = parse_math_expression_string(file_obj->read(), file_name, file_navigators);
 
     if (context->get_shell_parameters().lexer_output) {
         std::cout << "Lexer output:\n";
@@ -98,10 +98,9 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  * @param variables The map of variable names to their respective values
  * @return The parsed formula as a string.
  */
-std::string parse_formula(const std::string& input,
-                    std::shared_ptr<InterpreterContext>& context,
+std::string parse_formula(std::shared_ptr<InterpreterContext>& context,
                     std::shared_ptr<FileLikeObject> file_obj) {
-    auto ret = parse_formula_as_sym_object(input, context, file_obj);
+    auto ret = parse_formula_as_sym_object(context, file_obj);
 
     auto ret_str = ret->to_string();
     context->set_variable("ANS", ret);
