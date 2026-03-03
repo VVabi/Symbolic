@@ -44,26 +44,22 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
                     std::shared_ptr<InterpreterContext>& context,
                     std::shared_ptr<FileLikeObject> file_obj) {
     // Create file navigators map with REPL entry (empty string key, empty skipped_tokens)
-    auto file_navigators = std::make_shared<std::map<std::string, PreprocessedFileNavigator>>();
-    file_navigators->emplace("", PreprocessedFileNavigator("", {}));
-
-    // If a file object was provided, use its name when lexing so error positions
-    // and file navigation can include the originating filename.
-    std::string file_name = "";
-    if (file_obj && !file_obj->get_name().empty()) {
-        file_name = file_obj->get_name();
-        // Ensure a navigator exists for this file name. Preprocessed skipped tokens
-        // are unknown at this stage, provide an empty navigator which is sufficient
-        // for position reporting.
-        file_navigators->emplace(file_name, PreprocessedFileNavigator(file_name, {}));
+    std::string output;
+    std::vector<std::string> include_paths;
+    auto tokens = preprocess_file(file_obj, output, include_paths);
+    auto navigator = PreprocessedFileNavigator(file_obj->get_name(), std::move(tokens));
+    context->set_file_navigator(file_obj->get_name(), navigator);                   
+    
+    for (const auto& path : include_paths) {
+        parse_formula_as_sym_object(context, std::make_shared<FileObject>(path));
     }
 
-    auto formula = parse_math_expression_string(file_obj->read(), file_name, file_navigators);
+    auto formula = parse_math_expression_string(output, file_obj->get_name());
 
     if (context->get_shell_parameters().lexer_output) {
         std::cout << "Lexer output:\n";
         for (const auto& element : formula) {
-            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position.get_original_position() << ")\n";
+            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position.get_original_position(context) << ")\n";
         }
     }
 
@@ -80,7 +76,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     if (context->get_shell_parameters().shunting_yard_output) {
         std::cout << "Shunting Yard output:\n";
         for (const auto & element : p) {
-            element.debug_print(std::cout, 0);
+            element.debug_print(std::cout, 0, context);
         }
     }
 

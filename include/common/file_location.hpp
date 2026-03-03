@@ -6,12 +6,14 @@
 #include <memory>
 #include <utility>
 #include <fstream>
+#include <sstream>
 
 class FileLikeObject {
  public:
     virtual ~FileLikeObject() = default;
     virtual std::string read() = 0;
     virtual std::string get_name() const = 0;
+    virtual std::stringstream read_stream() const = 0;
 };
 
 class FileObject : public FileLikeObject {
@@ -30,6 +32,13 @@ class FileObject : public FileLikeObject {
     std::string get_name() const override {
         return filename;
     }
+
+    std::stringstream read_stream() const {
+        std::ifstream file(filename);
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        return buffer;
+    }
 };
 
 class ReplInputObject : public FileLikeObject {
@@ -45,6 +54,10 @@ class ReplInputObject : public FileLikeObject {
 
     std::string get_name() const override {
         return filename;
+    }
+
+    std::stringstream read_stream() const override {
+        return std::stringstream(input);
     }
 };
 
@@ -78,19 +91,20 @@ class PreprocessedFileNavigator {
     }
 };
 
+class ContextInterface {
+ public:
+    virtual ~ContextInterface() = default;
+    virtual PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) = 0;
+};
 
 class CodePlaceIdentifier {
     std::string file_name;
-    std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>> file_navigators;
     uint32_t position;
 
-    const PreprocessedFileNavigator& get_file_navigator() const {
-        return file_navigators->at(file_name);  // TODO(vabi): throw proper exception if file_name not found
-    }
 
  public:
-    CodePlaceIdentifier(const std::string& file_name, const uint32_t position, const std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>>& file_navigators) :
-    file_name(file_name), file_navigators(file_navigators), position(position) { }
+    CodePlaceIdentifier(const std::string& file_name, const uint32_t position) :
+    file_name(file_name), position(position) { }
 
     // Default copy/move constructors and assignment operators
     CodePlaceIdentifier(const CodePlaceIdentifier&) = default;
@@ -107,20 +121,14 @@ class CodePlaceIdentifier {
      * @return A CodePlaceIdentifier representing an unknown location.
      */
     static CodePlaceIdentifier unknown() {
-        static auto empty_navigators = std::make_shared<std::map<std::string, PreprocessedFileNavigator>>();
-        static bool initialized = false;
-        if (!initialized) {
-            empty_navigators->emplace("", PreprocessedFileNavigator("", {}));
-            initialized = true;
-        }
-        return CodePlaceIdentifier("", 0, empty_navigators);
+        return CodePlaceIdentifier("", 0);
     }
 
     const std::string get_file_name() const {
-        return get_file_navigator().get_file_name();
+        return file_name;
     }
 
-    uint32_t get_original_position() const {
-        return get_file_navigator().get_original_position(position);
+    uint32_t get_original_position(const std::shared_ptr<ContextInterface>& context) const {
+        return context->get_file_navigator(file_name).get_original_position(position);
     }
 };

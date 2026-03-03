@@ -24,18 +24,16 @@ bool is_separator(char c) {
  *
  * @param input The mathematical expression string to parse.
  * @param file_name The name of the file the input came from (empty string for REPL).
- * @param file_navigators The map of file navigators for position translation.
  * @return A vector of `MathLexerElement` objects representing the parsed expression.
  */
 std::vector<MathLexerElement> parse_math_expression_string(
     const std::string& input,
-    const std::string& file_name,
-    const std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>>& file_navigators) {
+    const std::string& file_name) {
     std::vector<MathLexerElement> formula;
 
     // Helper lambda to create CodePlaceIdentifier from current position
     auto make_position = [&](auto distance) {
-        return CodePlaceIdentifier(file_name, static_cast<uint32_t>(distance), file_navigators);
+        return CodePlaceIdentifier(file_name, static_cast<uint32_t>(distance));
     };
 
     char previous = '(';

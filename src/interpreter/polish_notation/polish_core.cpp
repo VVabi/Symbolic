@@ -259,7 +259,7 @@ std::shared_ptr<SymObjectContainer> iterate_wrapped(LexerDeque<std::shared_ptr<P
     auto element = cmd_list.front();
     cmd_list.pop_front();
     #if DEBUG_EXECUTION
-    element->debug_print(std::cout);
+    element->debug_print(std::cout, context);
     #endif
     context->increment_steps();
     try {

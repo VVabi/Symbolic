@@ -42,7 +42,6 @@ struct MathLexerElement {
  */
 std::vector<MathLexerElement> parse_math_expression_string(
     const std::string& input,
-    const std::string& file_name,
-    const std::shared_ptr<std::map<std::string, PreprocessedFileNavigator>>& file_navigators);
+    const std::string& file_name);
 
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_

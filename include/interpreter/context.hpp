@@ -9,6 +9,7 @@
 #include "types/sym_types/sym_void.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "shell/parameters/parameters.hpp"
+#include "common/file_location.hpp"
 
 class PolishCustomFunction;
 
@@ -28,11 +29,12 @@ class InterpreterPrintHandler {
  *
  * @note This class uses virtual destruction to support potential inheritance.
  */
-class InterpreterContext {
+class InterpreterContext : public ContextInterface {
     std::stack<std::map<std::string, std::shared_ptr<SymObject>>> variables;
     std::map<std::string, std::shared_ptr<SymObject>> constants;
     std::shared_ptr<InterpreterPrintHandler> output_handler;
     std::map<std::string, std::shared_ptr<PolishCustomFunction>> custom_functions;
+    std::map<std::string, PreprocessedFileNavigator> file_navigators;
     uint64_t steps = 0;
     ShellParameters shell_parameters;
 
@@ -46,6 +48,18 @@ class InterpreterContext {
 
     void push_variables() {
         variables.push({});
+    }
+
+    PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) override {
+        auto it = file_navigators.find(file_name);
+        if (it == file_navigators.end()) {
+            throw ParsingTypeException("No file navigator found for file: " + file_name);
+        }
+        return it->second;
+    }
+
+    void set_file_navigator(const std::string& file_name, const PreprocessedFileNavigator& navigator) {
+        file_navigators.emplace(file_name, navigator);
     }
 
     void pop_variables() {

@@ -54,16 +54,16 @@ struct ParsedCodeElement {
         sub_expressions = LexerDeque<ParsedCodeElement>(std::move(sub_exprs));
     }
 
-    void debug_print(std::ostream& os, uint32_t offset) const {
+    void debug_print(std::ostream& os, uint32_t offset, const std::shared_ptr<ContextInterface>& context) const {
         std::string indent(offset, ' ');
-        os << indent << "ParsedCodeElement(type=" << expression_type_to_string(type) << ", data=\"" << data << "\", position=" << position.get_original_position()
+        os << indent << "ParsedCodeElement(type=" << expression_type_to_string(type) << ", data=\"" << data << "\", position=" << position.get_original_position(context)
            << ", num_args=" << num_args << ", num_expressions=" << num_expressions << ")\n";
         if (!sub_expressions.is_empty()) {
             os << indent << "Sub expressions:\n";
             auto sub_exprs = sub_expressions;
             while (!sub_exprs.is_empty()) {
                 auto sub_expr = sub_exprs.front();
-                sub_expr.debug_print(os, offset + 4);
+                sub_expr.debug_print(os, offset + 4, context);
                 sub_exprs.pop_front();
             }
         }

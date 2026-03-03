@@ -238,10 +238,10 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
     std::string error_message;
 
  public:
-    FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& input) {
+    FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& repl_input, const std::shared_ptr<ContextInterface>& context) {
         std::stringstream strm;
         auto pos = e.get_position();
-        auto original_position = pos.get_original_position();
+        auto original_position = pos.get_original_position(context);
         auto file_name = pos.get_file_name();
         if (!file_name.empty()) {
             file_name = std::filesystem::relative(file_name).string();
@@ -253,8 +253,23 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
             strm << "Parsing error in file '" << file_name << "' at position " << original_position << ": " << e.what() << std::endl;
         }
 
-        auto istrm = std::istringstream(input);
-
+        std::string file_content;
+        if (file_name.empty()) {
+            file_content = repl_input;
+        } else {
+            try {
+                std::ifstream file(file_name);
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                file_content = buffer.str();
+            } catch (const std::exception& ex) {
+                strm << "Additionally, failed to read file content for error context: " << ex.what() << std::endl;
+                error_message = strm.str();
+                return;
+            }
+        }
+        auto istrm = std::istringstream(file_content);
+        std::cout << file_content << std::endl;
         std::ptrdiff_t count = 0;
         std::string line;
         bool found_position = true;
@@ -276,7 +291,7 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
             }
             strm << "^ here";
         } else {
-            strm << "Could not determine error position in input (position " << original_position << " is out of bounds for input of length " << input.size() << ")";
+            strm << "Could not determine error position in input (position " << original_position << " is out of bounds for input of length " << file_content.size() << ")";
         }
 
         error_message = strm.str();
@@ -339,7 +354,7 @@ class FormulaParser {
              auto res = parse_formula(context, file_obj);
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
-            ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, file_obj->read());
+            ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, file_obj->read(), context);
         } catch (ReachedUnreachableException &e) {
             ret = std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
         } catch (ParsingTypeException &e) {

@@ -62,9 +62,9 @@ class PolishNotationElement {
         return base_element.type;
     }
 
-    virtual void debug_print(std::ostream& os) const {
+    virtual void debug_print(std::ostream& os, const std::shared_ptr<ContextInterface>& context) const {
         os << "Executing PolishNotationElement(type=" << base_element.type << ", data=\"" << base_element.data
-           << "\", position=" << base_element.position.get_original_position() << ", num_args=" << base_element.num_args
+           << "\", position=" << base_element.position.get_original_position(context) << ", num_args=" << base_element.num_args
            << ", num_expressions=" << base_element.num_expressions << ")\n";
     }
 };
