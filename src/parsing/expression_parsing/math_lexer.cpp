@@ -114,7 +114,7 @@ std::vector<MathLexerElement> parse_math_expression_string(
                 case '=':
                     if (previous == '(' || is_separator(previous)) {
                         char c = *it;
-                        throw ParsingException(std::string(&c, 1) + " cannot follow "+previous +" or be at the beginning", make_position(distance));
+                        throw ParsingException(std::string(&c, 1) + " cannot follow "+ std::string(1, previous) +" or be at the beginning", make_position(distance));
                     }
                     formula.push_back(MathLexerElement(INFIX, std::string(1, *it), make_position(distance)));
                     break;

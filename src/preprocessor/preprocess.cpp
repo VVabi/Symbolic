@@ -35,8 +35,8 @@ std::vector<SkippedTokens> preprocess_file(const std::shared_ptr<FileLikeObject>
             output_strm << "\n";
             continue;
         }
-        output_strm << parts[0];
         if (parts[0].size() > 0) {
+            output_strm << parts[0];
             output_strm << "\n";
         }
     }

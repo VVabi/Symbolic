@@ -59,7 +59,11 @@ class InterpreterContext : public ContextInterface {
     }
 
     void set_file_navigator(const std::string& file_name, const PreprocessedFileNavigator& navigator) {
-        file_navigators.emplace(file_name, navigator);
+        file_navigators.insert_or_assign(file_name, navigator);
+    }
+
+    bool has_file_navigator(const std::string& file_name) const override {
+        return file_navigators.find(file_name) != file_navigators.end();
     }
 
     void pop_variables() {

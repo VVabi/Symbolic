@@ -7,6 +7,8 @@
 #include <utility>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <iostream>
 
 class FileLikeObject {
  public:
@@ -18,12 +20,24 @@ class FileLikeObject {
 
 class FileObject : public FileLikeObject {
     std::string filename;
+    std::ifstream get_input_stream() const {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cout << std::filesystem::current_path() << std::endl;
+            auto test_path = "examples/lib/prime_check_naive.sym";
+            std::ifstream test(test_path);
+            std::cout << test.is_open() << std::endl;
+            std::cout << (test_path == filename) << std::endl;
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+        return file;
+    }
 
  public:
     FileObject(std::string name) : filename(std::move(name)) {}
 
     std::string read() override {
-        std::ifstream file(filename);
+        auto file = get_input_stream();
         std::string content((std::istreambuf_iterator<char>(file)),
                              std::istreambuf_iterator<char>());
         return content;
@@ -33,8 +47,8 @@ class FileObject : public FileLikeObject {
         return filename;
     }
 
-    std::stringstream read_stream() const {
-        std::ifstream file(filename);
+    std::stringstream read_stream() const override {
+        auto file = get_input_stream();
         std::stringstream buffer;
         buffer << file.rdbuf();
         return buffer;
@@ -95,6 +109,7 @@ class ContextInterface {
  public:
     virtual ~ContextInterface() = default;
     virtual PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) = 0;
+    virtual bool has_file_navigator(const std::string& file_name) const = 0;
 };
 
 class CodePlaceIdentifier {
@@ -129,6 +144,9 @@ class CodePlaceIdentifier {
     }
 
     uint32_t get_original_position(const std::shared_ptr<ContextInterface>& context) const {
+        if (!context->has_file_navigator(file_name)) {
+            throw std::runtime_error("Context does not have a file navigator for file: " + file_name);
+        }
         return context->get_file_navigator(file_name).get_original_position(position);
     }
 };

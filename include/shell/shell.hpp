@@ -113,6 +113,7 @@ class FileShellInput : public ShellInput {
         // Verify file exists by attempting to open it
         std::ifstream file(filename);
         if (!file.is_open()) {
+            std::cout << "FileShellInput: Failed to open file: " << filename << std::endl;
             throw std::runtime_error("Failed to open file: " + filename);
         }
     }
@@ -259,6 +260,10 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
         } else {
             try {
                 std::ifstream file(file_name);
+                if (!file.is_open()) {
+                    std::cout << "Failed to open file for error context: " << file_name << std::endl;
+                    throw std::runtime_error("Failed to open file: " + file_name);
+                }
                 std::stringstream buffer;
                 buffer << file.rdbuf();
                 file_content = buffer.str();
@@ -335,6 +340,22 @@ class FormulaParsingTypeExceptionResult : public FormulaParsingResult {
     }
 };
 
+class FormulaUnexpectedExceptionResult : public FormulaParsingResult {
+    std::string error_message;
+ public:
+    FormulaUnexpectedExceptionResult(std::exception &e) {
+        std::stringstream strm;
+        strm << "An unexpected error occurred during parsing: " << e.what();
+        error_message = strm.str();
+    }
+
+    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
+        UNUSED(print_result);
+        UNUSED(output_stream);
+        err_stream << error_message << std::endl;
+    }
+};
+
 class FormulaParser {
  private:
     std::shared_ptr<InterpreterContext> context;
@@ -350,7 +371,9 @@ class FormulaParser {
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
+             std::cout << "Parsing input..." << std::endl;
              auto res = parse_formula(context, file_obj);
+             std::cout << "Parsing and evaluation successful." << std::endl;
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, file_obj->read(), context);
@@ -358,6 +381,8 @@ class FormulaParser {
             ret = std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
         } catch (ParsingTypeException &e) {
             ret = std::make_unique<FormulaParsingTypeExceptionResult>(e);
+        } catch (std::exception &e) {
+            ret = std::make_unique<FormulaUnexpectedExceptionResult>(e);
         }
 
         if (context->get_shell_parameters().profile_output) {
