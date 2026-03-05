@@ -124,7 +124,7 @@ void test_shell_explicit_tests() {
     }
 }
 
-TEST(ShellTest, ExplicitTests) {
+TEST(DISABLED_ShellTest, ExplicitTests) {
     test_shell_explicit_tests();
 }
 

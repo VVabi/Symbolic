@@ -369,9 +369,7 @@ class FormulaParser {
         context->reset_steps();
         std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             std::cout << "Parsing input..." << std::endl;
              auto res = parse_formula(context, file_obj);
-             std::cout << "Parsing and evaluation successful." << std::endl;
              ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
             ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, file_obj->read(), context);
