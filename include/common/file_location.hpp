@@ -7,8 +7,6 @@
 #include <utility>
 #include <fstream>
 #include <sstream>
-#include <filesystem>
-#include <iostream>
 
 class FileLikeObject {
  public:
@@ -23,11 +21,6 @@ class FileObject : public FileLikeObject {
     std::ifstream get_input_stream() const {
         std::ifstream file(filename);
         if (!file.is_open()) {
-            std::cout << std::filesystem::current_path() << std::endl;
-            auto test_path = "examples/lib/prime_check_naive.sym";
-            std::ifstream test(test_path);
-            std::cout << test.is_open() << std::endl;
-            std::cout << (test_path == filename) << std::endl;
             throw std::runtime_error("Failed to open file: " + filename);
         }
         return file;

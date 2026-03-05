@@ -113,7 +113,6 @@ class FileShellInput : public ShellInput {
         // Verify file exists by attempting to open it
         std::ifstream file(filename);
         if (!file.is_open()) {
-            std::cout << "FileShellInput: Failed to open file: " << filename << std::endl;
             throw std::runtime_error("Failed to open file: " + filename);
         }
     }
@@ -261,7 +260,6 @@ class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
             try {
                 std::ifstream file(file_name);
                 if (!file.is_open()) {
-                    std::cout << "Failed to open file for error context: " << file_name << std::endl;
                     throw std::runtime_error("Failed to open file: " + file_name);
                 }
                 std::stringstream buffer;
