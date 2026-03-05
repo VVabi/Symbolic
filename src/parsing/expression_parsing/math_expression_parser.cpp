@@ -8,10 +8,11 @@
 #include <map>
 #include "shell/parameters/parameters.hpp"
 #include "common/lexer_deque.hpp"
+#include "common/file_location.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "types/sym_types/sym_void.hpp"
 #include "interpreter/context.hpp"
-
+#include "preprocessor/preprocess.hpp"
 
 /**
  * @brief Parses a formula based on the given datatype.
@@ -39,15 +40,25 @@ std::shared_ptr<SymObject> parse_formula_internal(LexerDeque<ParsedCodeElement>&
 }
 
 std::shared_ptr<SymObject> parse_formula_as_sym_object(
-                    const std::string& input_string,
-                    const uint32_t offset,
-                    std::shared_ptr<InterpreterContext>& context) {
-    auto formula = parse_math_expression_string(input_string, offset);
+                    std::shared_ptr<InterpreterContext>& context,
+                    std::shared_ptr<FileLikeObject> file_obj) {
+    // Create file navigators map with REPL entry (empty string key, empty skipped_tokens)
+    std::string output;
+    std::vector<std::string> include_paths;
+    auto tokens = preprocess_file(file_obj, output, include_paths);
+    auto navigator = PreprocessedFileNavigator(file_obj->get_name(), std::move(tokens));
+    context->set_file_navigator(file_obj->get_name(), navigator);
+
+    for (const auto& path : include_paths) {
+        parse_formula_as_sym_object(context, std::make_shared<FileObject>(path));
+    }
+
+    auto formula = parse_math_expression_string(output, file_obj->get_name());
 
     if (context->get_shell_parameters().lexer_output) {
         std::cout << "Lexer output:\n";
         for (const auto& element : formula) {
-            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position << ")\n";
+            std::cout << "MathLexerElement(type=" << expression_type_to_string(element.type) << ", data=\"" << element.data << "\", position=" << element.position.get_original_position(context) << ")\n";
         }
     }
 
@@ -64,7 +75,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     if (context->get_shell_parameters().shunting_yard_output) {
         std::cout << "Shunting Yard output:\n";
         for (const auto & element : p) {
-            element.debug_print(std::cout, 0);
+            element.debug_print(std::cout, 0, context);
         }
     }
 
@@ -80,12 +91,11 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
  * @param input The input math expression formula as a string.
  * @param type The datatype to parse the formula as.
  * @param variables The map of variable names to their respective values
- * @param powerseries_expansion_size number of terms in the power series expansion
  * @return The parsed formula as a string.
  */
-std::string parse_formula(const std::string& input,
-                    std::shared_ptr<InterpreterContext>& context) {
-    auto ret = parse_formula_as_sym_object(input, 0, context);
+std::string parse_formula(std::shared_ptr<InterpreterContext>& context,
+                    std::shared_ptr<FileLikeObject> file_obj) {
+    auto ret = parse_formula_as_sym_object(context, file_obj);
 
     auto ret_str = ret->to_string();
     context->set_variable("ANS", ret);

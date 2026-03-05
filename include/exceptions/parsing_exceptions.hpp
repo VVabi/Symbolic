@@ -9,6 +9,7 @@
 #include <exception>
 #include <string>
 #include <iostream>
+#include "common/file_location.hpp"
 
 /**
  * @brief Custom exception class for parsing errors.
@@ -20,7 +21,7 @@
 class ParsingException: public std::exception {
  private:
     std::string message;  ///< The error message.
-    int position;         ///< The position where the error occurred.
+    CodePlaceIdentifier position;  ///< The position where the error occurred.
 
  public:
     /**
@@ -29,9 +30,8 @@ class ParsingException: public std::exception {
      * @param message The error message.
      * @param position The position where the error occurred.
      */
-    ParsingException(const std::string &message, int position) {
-        this->message = message;
-        this->position = position;
+    ParsingException(const std::string &message, CodePlaceIdentifier position)
+        : message(message), position(position) {
     }
 
     /**
@@ -48,7 +48,7 @@ class ParsingException: public std::exception {
      *
      * @return The position where the error occurred.
      */
-    virtual int get_position() const {
+    virtual CodePlaceIdentifier get_position() const {
         return position;
     }
 };

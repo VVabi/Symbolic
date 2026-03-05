@@ -1,5 +1,6 @@
 #include <iostream>
 #include "common/lexer_deque.hpp"
+#include "common/file_location.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "interpreter/polish_notation/polish.hpp"
@@ -236,6 +237,10 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishBooleanOperator>(element, NOR);
             } else if (element.data == "not") {
                 return std::make_shared<PolishNotOperator>(element);
+            } else if (element.data == "setparam") {
+                return std::make_shared<PolishSetParam>(element);
+            } else if (element.data == "getparam") {
+                return std::make_shared<PolishGetParam>(element);
             } else {
                 return std::make_shared<PolishCustomFunction>(element);
             }
@@ -249,12 +254,12 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
 std::shared_ptr<SymObjectContainer> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
         std::shared_ptr<InterpreterContext> &context) {
     if (cmd_list.is_empty()) {
-        throw EvalException("Expression is not parseable", -1);  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+        throw EvalException("Expression is not parseable", CodePlaceIdentifier::unknown());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
     }
     auto element = cmd_list.front();
     cmd_list.pop_front();
     #if DEBUG_EXECUTION
-    element->debug_print(std::cout);
+    element->debug_print(std::cout, context);
     #endif
     context->increment_steps();
     try {
@@ -264,11 +269,6 @@ std::shared_ptr<SymObjectContainer> iterate_wrapped(LexerDeque<std::shared_ptr<P
     } catch (DatatypeInternalException&e ) {
         throw EvalException(e.what(), element->get_position());
     } catch (SubsetArgumentException& e) {
-        auto pos = element->get_position();
-        auto underscore_occurence = element->get_data().find("_");
-        if (underscore_occurence != std::string::npos) {
-            pos += underscore_occurence;
-        }
-        throw EvalException(e.what(), pos);
+        throw EvalException(e.what(), element->get_position());
     }
 }

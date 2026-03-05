@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include "common/lexer_deque.hpp"
+#include "common/file_location.hpp"
 #include "interpreter/polish_notation/polish.hpp"
 #include "interpreter/polish_notation/polish_functions.hpp"
 #include "interpreter/polish_notation/polish_base_math.hpp"
@@ -61,7 +62,7 @@ template<typename T>
 std::shared_ptr<SymObject> handle_comparison(std::shared_ptr<ValueType<T>> first_num,
                                             std::shared_ptr<ValueType<T>> second_num,
                                             ComparisonOperatorType operator_type,
-                                            uint32_t position) {
+                                            CodePlaceIdentifier position) {
     if (!first_num || !second_num) {
         throw EvalException("Expected numeric arguments for comparison operation", position);
     }

@@ -2,9 +2,11 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <memory>
 #include "parsing/expression_parsing/lexer_types.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "common/lexer_deque.hpp"
+#include "common/file_location.hpp"
 
 struct ParsedCodeElement;
 
@@ -28,7 +30,7 @@ class ShuntingYardStackData {
 struct ParsedCodeElement {
     expression_type type;   ///< Type of the element
     std::string data;       ///< Data of the element
-    int position;           ///< Position of the element in the input string
+    CodePlaceIdentifier position;  ///< Position of the element in the input string
     int num_args;           ///< Number of args between current brackets (used for function argument separation)
     ptrdiff_t num_expressions;    ///< Number of expressions between current brackets (used for control flow constructs)
     LexerDeque<ParsedCodeElement> sub_expressions;  ///< Sub expressions (used for control flow constructs)
@@ -53,16 +55,16 @@ struct ParsedCodeElement {
         sub_expressions = LexerDeque<ParsedCodeElement>(std::move(sub_exprs));
     }
 
-    void debug_print(std::ostream& os, uint32_t offset) const {
+    void debug_print(std::ostream& os, uint32_t offset, const std::shared_ptr<ContextInterface>& context) const {
         std::string indent(offset, ' ');
-        os << indent << "ParsedCodeElement(type=" << expression_type_to_string(type) << ", data=\"" << data << "\", position=" << position
+        os << indent << "ParsedCodeElement(type=" << expression_type_to_string(type) << ", data=\"" << data << "\", position=" << position.get_original_position(context)
            << ", num_args=" << num_args << ", num_expressions=" << num_expressions << ")\n";
         if (!sub_expressions.is_empty()) {
             os << indent << "Sub expressions:\n";
             auto sub_exprs = sub_expressions;
             while (!sub_exprs.is_empty()) {
                 auto sub_expr = sub_exprs.front();
-                sub_expr.debug_print(os, offset + 4);
+                sub_expr.debug_print(os, offset + 4, context);
                 sub_exprs.pop_front();
             }
         }

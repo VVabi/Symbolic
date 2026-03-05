@@ -84,7 +84,7 @@ class RationalFunctionType: public MathWrapperType<T> {
 
     void pow(const double& exponent) {
         UNUSED(exponent);
-        throw EvalException("Cannot raise a rational function to a non-integer power", -1);
+        throw EvalException("Cannot raise a rational function to a non-integer power", CodePlaceIdentifier::unknown());
     }
 
     std::string to_string() const {
@@ -138,7 +138,7 @@ class RationalFunctionType: public MathWrapperType<T> {
             return cast->insert_into_rational_function(value);
         }
 
-        throw EvalException("Cannot evaluate rational function at this input", -1);
+        throw EvalException("Cannot evaluate rational function at this input", CodePlaceIdentifier::unknown());
     }
 
     Datatype get_type() const override;

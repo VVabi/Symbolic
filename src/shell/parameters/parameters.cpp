@@ -105,7 +105,7 @@ static std::map<std::string, ParameterDescription> create_parameter_descriptions
     };
 }
 
-CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext> context, std::vector<std::string>& args, const std::string& command_name) {
+CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext> context, const std::vector<std::string>& args, const std::string& command_name) {
     UNUSED(command_name);
     if (args.size() == 1 && args[0] == "help") {
         return CommandResult{get_list_of_parameters_from_context(context, true), true};
@@ -116,7 +116,7 @@ CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext> contex
     return update_parameters_in_context(context, args[0], args[1]);
 }
 
-CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext> context, std::vector<std::string>& args, const std::string& command_name) {
+CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext> context, const std::vector<std::string>& args, const std::string& command_name) {
     UNUSED(command_name);
     if (args.size() == 1 && args[0] == "help") {
         return CommandResult{get_list_of_parameters_from_context(context, true), true};

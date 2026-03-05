@@ -10,6 +10,7 @@
 #include <fstream>
 #include <vector>
 #include "cpp_utils/unused.hpp"
+#include "common/file_location.hpp"
 
 int main(int argc, char **argv) {
     UNUSED(argc);

@@ -31,9 +31,9 @@ struct ShellParameters {
     bool shunting_yard_output; /**< Whether to output profiling information for the shunting yard algorithm. */
 };
 
-CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext>, std::vector<std::string>& args, const std::string& command_name);
+CommandResult handle_setparam_command(std::shared_ptr<InterpreterContext>, const std::vector<std::string>& args, const std::string& command_name);
 
-CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext>, std::vector<std::string>& args, const std::string& command_name);
+CommandResult handle_getparam_command(std::shared_ptr<InterpreterContext>, const std::vector<std::string>& args, const std::string& command_name);
 
 /**
  * @brief Updates a specific parameter with the given value in the context.
