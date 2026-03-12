@@ -126,14 +126,12 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             return std::make_shared<PolishBooleanOperator>(element, AND);
         case INFIX_LOGICAL_OR:
             return std::make_shared<PolishBooleanOperator>(element, OR);
-        case UNARY:
-            if (element.data == "-") {
+        case UNARY_MINUS:
             return std::make_shared<PolishUnaryMinus>(element);
-        } else if (element.data == "+") {
+        case UNARY_PLUS:
             return std::make_shared<PolishUnaryPlus>(element);
-        } else if (element.data == "!") {
+        case UNARY_NOT:
             return std::make_shared<PolishNotOperator>(element);
-        }
         throw EvalException("Unknown unary operator: " + element.data, element.position);
         break;
         case SCOPE_START:

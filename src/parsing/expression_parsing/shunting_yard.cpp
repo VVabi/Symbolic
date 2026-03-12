@@ -27,6 +27,8 @@ int32_t get_operator_precedence(const expression_type& op) {
     switch (op) {
         case INFIX_PLUS:
         case INFIX_MINUS:
+        case UNARY_MINUS:
+        case UNARY_PLUS:
             return 10;
         case INFIX_MULTIPLY:
         case INFIX_DIVIDE:
@@ -51,6 +53,8 @@ int32_t get_operator_precedence(const expression_type& op) {
             return 5;
         case INFIX_LOGICAL_OR:
             return 4;
+        case UNARY_NOT:
+            return 100;
         case ARRAY_ACCESS_START:
             return 1000;
         default:
@@ -83,6 +87,9 @@ bool is_right_associative(const expression_type& op) {
         case INFIX_LESS_EQUAL:
         case INFIX_EQUAL:
         case INFIX_NOT_EQUAL:
+        case UNARY_MINUS:
+        case UNARY_PLUS:
+        case UNARY_NOT:
             return false;
         default:
             throw ReachedUnreachableException("Unknown operator in is_right_associative: "+expression_type_to_string(op));
@@ -159,21 +166,6 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                 ret.push_back(element);
                 break;
             }
-            case UNARY:
-                while (operators.size() > 0) {
-                    ParsedCodeElement next_op = operators.top();
-                    if (next_op.type == FUNCTION) {
-                        operators.pop();
-                        auto element = ParsedCodeElement(next_op);
-                        element.set_num_args(last_closed_bracket_args_count);
-                        element.set_num_expressions(ret.size() - last_expression_count);
-                        ret.push_back(element);
-                    } else {
-                        break;
-                    }
-                }
-                ret.push_back(ParsedCodeElement(it));
-                break;
             case NUMBER:
             case VARIABLE:
             case STRING:
@@ -270,6 +262,9 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
             case INFIX_BITWISE_OR:
             case INFIX_LOGICAL_AND:
             case INFIX_LOGICAL_OR:
+            case UNARY_MINUS:
+            case UNARY_PLUS:
+            case UNARY_NOT:
                 auto precedence = get_operator_precedence(it.type);  // TODO(vabi) dont remember what the problem was...
                 auto right_associative = is_right_associative(it.type);  // TODO(vabi) dont remember what the problem was...
                 while (operators.size() > 0) {

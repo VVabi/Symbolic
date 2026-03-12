@@ -678,12 +678,12 @@ inline std::ostream& operator<<(std::ostream& os, PowerSeries<double> const & tc
     for (auto x : tc.coefficients) {
         if (!first && x >= 0.0) {
             os << "+";
+            x = std::abs(x);  // there are corner cases where x >= 0.0 returns true, but then -0.0 is printed, which is undesirable; this fixes that
         }
         first = false;
         os  << x << "*z^" << pw;
         pw++;
     }
-
     os << "+O(z^" << pw << ")";
     return os;
 }

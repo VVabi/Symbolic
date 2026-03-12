@@ -22,7 +22,9 @@ enum expression_type {
     INFIX_BITWISE_OR,            ///< Infix operator
     INFIX_LOGICAL_AND,           ///< Infix operator
     INFIX_LOGICAL_OR,            ///< Infix operator
-    UNARY,                  ///< Unary operator
+    UNARY_MINUS,
+    UNARY_NOT,
+    UNARY_PLUS,
     FUNCTION,               ///< Function
     NUMBER,                 ///< Number
     VARIABLE,               ///< Variable
@@ -70,8 +72,12 @@ inline std::string expression_type_to_string(expression_type type) {
             return "INFIX_LOGICAL_AND";
         case INFIX_LOGICAL_OR:
             return "INFIX_LOGICAL_OR";
-        case UNARY:
-            return "UNARY";
+        case UNARY_MINUS:
+            return "UNARY_MINUS";
+        case UNARY_NOT:
+            return "UNARY_NOT";
+        case UNARY_PLUS:
+            return "UNARY_PLUS";
         case FUNCTION:
             return "FUNCTION";
         case NUMBER:
