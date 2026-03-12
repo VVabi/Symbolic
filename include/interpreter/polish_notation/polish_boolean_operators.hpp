@@ -21,12 +21,12 @@ enum BooleanOperatorType {
     NOR
 };
 
-class PolishBooleanOperator: public PolishFunction {
+class PolishBooleanOperator: public PolishNotationElement {
     BooleanOperatorType operator_type;
 
  public:
     PolishBooleanOperator(ParsedCodeElement element, BooleanOperatorType type) :
-        PolishFunction(element, 2, 2), operator_type(type) { }
+        PolishNotationElement(element), operator_type(type) { }
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
@@ -63,9 +63,9 @@ class PolishBooleanOperator: public PolishFunction {
 };
 
 
-class PolishNotOperator: public PolishFunction {
+class PolishNotOperator: public PolishNotationElement {
  public:
-    PolishNotOperator(ParsedCodeElement element): PolishFunction(element, 1, 1) { }
+    PolishNotOperator(ParsedCodeElement element): PolishNotationElement(element) { }
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {

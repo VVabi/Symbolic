@@ -23,25 +23,42 @@
  * @param op The character representing the operator.
  * @return The precedence of the operator
  */
-int32_t get_operator_precedence(char op) {
+int32_t get_operator_precedence(const expression_type& op) {
     switch (op) {
-        case '=':
-            return 0;
-        case '+':
-        case '-':
-            return 1;
-        case '*':
-        case '/':
-            return 2;
-        case '^':
+        case INFIX_PLUS:
+        case INFIX_MINUS:
+        case UNARY_MINUS:
+        case UNARY_PLUS:
+            return 10;
+        case INFIX_MULTIPLY:
+        case INFIX_DIVIDE:
+            return 20;
+        case INFIX_POWER:
+            return 30;
+        case INFIX_ASSIGN:
             return 3;
-        case '!':
+        case INFIX_LESS:
+        case INFIX_GREATER:
+        case INFIX_GREATER_EQUAL:
+        case INFIX_LESS_EQUAL:
+            return 8;
+        case INFIX_EQUAL:
+        case INFIX_NOT_EQUAL:
+            return 9;
+        case INFIX_BITWISE_AND:
+            return 7;
+        case INFIX_BITWISE_OR:
+            return 6;
+        case INFIX_LOGICAL_AND:
+            return 5;
+        case INFIX_LOGICAL_OR:
             return 4;
-        case '[':
-            return 5;  // should be unused, but we need to handle it
+        case UNARY_NOT:
+            return 100;
+        case ARRAY_ACCESS_START:
+            return 1000;
         default:
-            throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
-            return -1;
+            throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+expression_type_to_string(op));
     }
 }
 
@@ -50,21 +67,31 @@ int32_t get_operator_precedence(char op) {
  * @param op The operator to check.
  * @return true if the operator is right associative, false otherwise.
  */
-bool is_right_associative(char op) {
+bool is_right_associative(const expression_type& op) {
     switch (op) {
-        case '+':
-        case '*':
-        case '=':
+        case INFIX_PLUS:
+        case INFIX_MULTIPLY:
+        case INFIX_ASSIGN:
+        case INFIX_BITWISE_AND:
+        case INFIX_BITWISE_OR:
+        case INFIX_LOGICAL_AND:
+        case INFIX_LOGICAL_OR:
             return true;
-        case '-':
-        case '/':
-        case '!':
+        case INFIX_MINUS:
+        case INFIX_DIVIDE:
+        case INFIX_POWER:
+        case INFIX_LESS:
+        case INFIX_GREATER:
+        case INFIX_GREATER_EQUAL:
+        case INFIX_LESS_EQUAL:
+        case INFIX_EQUAL:
+        case INFIX_NOT_EQUAL:
+        case UNARY_MINUS:
+        case UNARY_PLUS:
+        case UNARY_NOT:
             return false;
-        case '^':
-            return true;
         default:
-            throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+op);
-            return false;
+            throw ReachedUnreachableException("Unknown operator in is_right_associative: "+expression_type_to_string(op));
     }
 }
 
@@ -137,21 +164,6 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                 ret.push_back(element);
                 break;
             }
-            case UNARY:
-                while (operators.size() > 0) {
-                    ParsedCodeElement next_op = operators.top();
-                    if (next_op.type == FUNCTION) {
-                        operators.pop();
-                        auto element = ParsedCodeElement(next_op);
-                        element.set_num_args(last_closed_bracket_args_count);
-                        element.set_num_expressions(ret.size() - last_expression_count);
-                        ret.push_back(element);
-                    } else {
-                        break;
-                    }
-                }
-                ret.push_back(ParsedCodeElement(it));
-                break;
             case NUMBER:
             case VARIABLE:
             case STRING:
@@ -232,9 +244,27 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                 }
                 break;
             }
-            case INFIX:
-                auto precedence = get_operator_precedence(it.data[0]);  // TODO(vabi) dont remember what the problem was...
-                auto right_associative = is_right_associative(it.data[0]);  // TODO(vabi) dont remember what the problem was...
+            case INFIX_MINUS:
+            case INFIX_PLUS:
+            case INFIX_MULTIPLY:
+            case INFIX_DIVIDE:
+            case INFIX_POWER:
+            case INFIX_ASSIGN:
+            case INFIX_LESS:
+            case INFIX_GREATER:
+            case INFIX_EQUAL:
+            case INFIX_NOT_EQUAL:
+            case INFIX_GREATER_EQUAL:
+            case INFIX_LESS_EQUAL:
+            case INFIX_BITWISE_AND:
+            case INFIX_BITWISE_OR:
+            case INFIX_LOGICAL_AND:
+            case INFIX_LOGICAL_OR:
+            case UNARY_MINUS:
+            case UNARY_PLUS:
+            case UNARY_NOT:
+                auto precedence = get_operator_precedence(it.type);  // TODO(vabi) dont remember what the problem was...
+                auto right_associative = is_right_associative(it.type);  // TODO(vabi) dont remember what the problem was...
                 while (operators.size() > 0) {
                     ParsedCodeElement candidate = operators.top();
                     if (candidate.type == RIGHT_PARENTHESIS) {
@@ -249,7 +279,7 @@ std::vector<ParsedCodeElement> shunting_yard_algorithm(LexerDeque<MathLexerEleme
                         operators.pop();
                         continue;
                     }
-                    auto candidate_precedence = get_operator_precedence(candidate.data[0]);  // TODO(vabi) dont remember what the problem was...
+                    auto candidate_precedence = get_operator_precedence(candidate.type);  // TODO(vabi) dont remember what the problem was...
                     if ((candidate_precedence > precedence) || (candidate_precedence == precedence && right_associative)) {
                         ret.push_back(ParsedCodeElement(candidate));
                         operators.pop();

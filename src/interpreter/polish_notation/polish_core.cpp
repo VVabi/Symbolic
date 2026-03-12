@@ -96,29 +96,44 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             return std::make_shared<PolishVariable>(element);
         case STRING:
             return std::make_shared<PolishString>(element);
-        case INFIX:
-            if (element.data == "+") {
-                return std::make_shared<PolishPlus>(element);
-            } else if (element.data == "-") {
-                return std::make_shared<PolishMinus>(element);
-            } else if (element.data == "*") {
-                return std::make_shared<PolishTimes>(element);
-            } else if (element.data == "/") {
-                return std::make_shared<PolishDiv>(element);
-            } else if (element.data == "^") {
-                return std::make_shared<PolishPow>(element);
-            } else if (element.data == "=") {
-                return std::make_shared<PolishAssign>(element);
-            }
-
-            throw EvalException("Unknown infix operator: " + element.data, element.position);
-            break;
-        case UNARY:
-            if (element.data == "-") {
-                return std::make_shared<PolishUnaryMinus>(element);
-            }
-            throw EvalException("Unknown unary operator: " + element.data, element.position);
-            break;
+        case INFIX_PLUS:
+            return std::make_shared<PolishPlus>(element);
+        case INFIX_MINUS:
+            return std::make_shared<PolishMinus>(element);
+        case INFIX_MULTIPLY:
+            return std::make_shared<PolishTimes>(element);
+        case INFIX_DIVIDE:
+            return std::make_shared<PolishDiv>(element);
+        case INFIX_POWER:
+            return std::make_shared<PolishPow>(element);
+        case INFIX_ASSIGN:
+            return std::make_shared<PolishAssign>(element);
+        case INFIX_LESS:
+            return std::make_shared<PolishComparison>(element, LT);
+        case INFIX_GREATER:
+            return std::make_shared<PolishComparison>(element, GT);
+        case INFIX_EQUAL:
+            return std::make_shared<PolishEq>(element);
+        case INFIX_GREATER_EQUAL:
+            return std::make_shared<PolishComparison>(element, GTE);
+        case INFIX_LESS_EQUAL:
+            return std::make_shared<PolishComparison>(element, LTE);
+        case INFIX_BITWISE_AND:
+            throw EvalException("Bitwise operators are not supported", element.position);
+        case INFIX_BITWISE_OR:
+            throw EvalException("Bitwise operators are not supported", element.position);
+        case INFIX_LOGICAL_AND:
+            return std::make_shared<PolishBooleanOperator>(element, AND);
+        case INFIX_LOGICAL_OR:
+            return std::make_shared<PolishBooleanOperator>(element, OR);
+        case INFIX_NOT_EQUAL:
+            return std::make_shared<PolishNeq>(element);
+        case UNARY_MINUS:
+            return std::make_shared<PolishUnaryMinus>(element);
+        case UNARY_PLUS:
+            return std::make_shared<PolishUnaryPlus>(element);
+        case UNARY_NOT:
+            return std::make_shared<PolishNotOperator>(element);
         case SCOPE_START:
             return std::make_shared<PolishScopeStart>(element);
         case FUNCTION: {

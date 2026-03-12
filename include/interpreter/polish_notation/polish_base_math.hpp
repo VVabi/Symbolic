@@ -154,6 +154,21 @@ class PolishUnaryMinus: public PolishNotationElement {
     }
 };
 
+class PolishUnaryPlus: public PolishNotationElement {
+ public:
+    PolishUnaryPlus(ParsedCodeElement element) : PolishNotationElement(element) { }
+
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext>& context) {
+        auto result = iterate_wrapped(cmd_list, context)->get_object();
+        auto math_type = std::dynamic_pointer_cast<SymMathObject>(result);
+        if (math_type) {
+            return std::make_shared<SymObjectContainer>(math_type);
+        }
+        throw ParsingTypeException("Type error: Expected mathematical object as argument");
+    }
+};
+
 class PolishAssign: public PolishNotationElement {
  public:
     PolishAssign(ParsedCodeElement element) : PolishNotationElement(element) { }
