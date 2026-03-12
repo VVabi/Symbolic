@@ -22,10 +22,10 @@ enum ComparisonOperatorType {
     GTE
 };
 
-class PolishEq: public PolishFunction {
+class PolishEq: public PolishNotationElement {
  public:
     PolishEq(ParsedCodeElement element) :
-        PolishFunction(element, 2, 2) { }
+        PolishNotationElement(element) { }
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
@@ -40,10 +40,10 @@ class PolishEq: public PolishFunction {
     }
 };
 
-class PolishNeq: public PolishFunction {
+class PolishNeq: public PolishNotationElement {
  public:
     PolishNeq(ParsedCodeElement element) :
-        PolishFunction(element, 2, 2) { }
+        PolishNotationElement(element) { }
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {
@@ -92,12 +92,12 @@ std::shared_ptr<SymObject> handle_comparison(std::shared_ptr<ValueType<T>> first
 }
 
 
-class PolishComparison: public PolishFunction {
+class PolishComparison: public PolishNotationElement {
     ComparisonOperatorType operator_type;
 
  public:
     PolishComparison(ParsedCodeElement element, ComparisonOperatorType operator_type) :
-        PolishFunction(element, 2, 2), operator_type(operator_type) { }
+        PolishNotationElement(element), operator_type(operator_type) { }
 
     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                     std::shared_ptr<InterpreterContext>& context) {

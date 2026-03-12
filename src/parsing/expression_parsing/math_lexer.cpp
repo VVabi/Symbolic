@@ -25,26 +25,33 @@ bool is_operator(char c) {
     return operators.find(c) != operators.end();
 }
 
-
+std::map<std::string, expression_type> allowed_operators = {
+    {"+", INFIX_PLUS}, {"-", INFIX_MINUS}, {"*", INFIX_MULTIPLY}, {"/", INFIX_DIVIDE}, {"^", INFIX_POWER},
+    {"=", INFIX_ASSIGN}, {"<", INFIX_LESS}, {">", INFIX_GREATER}, {"==", INFIX_EQUAL}, {">=", INFIX_GREATER_EQUAL},
+    {"<=", INFIX_LESS_EQUAL}, {"&", INFIX_BITWISE_AND}, {"|", INFIX_BITWISE_OR},
+    {"&&", INFIX_LOGICAL_AND}, {"||", INFIX_LOGICAL_OR}
+};
 
 MathLexerElement parse_operator(const std::string& op, const char previous, CodePlaceIdentifier position) {
     if (op == "-") {
         if (previous == '(' || is_separator(previous) || previous == '=') {
             return MathLexerElement(UNARY, op, position);
         } else {
-            return MathLexerElement(INFIX, op, position);
+            return MathLexerElement(INFIX_MINUS, op, position);
         }
     } else if (op == "+") {
         if (previous == '(' || is_separator(previous) || previous == '=') {
             return MathLexerElement(UNARY, op, position);
         } else {
-            return MathLexerElement(INFIX, op, position);
+            return MathLexerElement(INFIX_PLUS, op, position);
         }
-    } else if (op == "*" || op == "/" || op == "^" || op == "!" || op == "=" || op == "<" || op == ">" || op == "&" || op == "|" || op == "^") {
+    } else if (op == "!") {
+            return MathLexerElement(UNARY, op, position);
+    } else if (allowed_operators.find(op) != allowed_operators.end()) {
         if (previous == '(' || is_separator(previous)) {
             throw ParsingException(op + " cannot follow "+ std::string(1, previous) +" or be at the beginning", position);
         }
-        return MathLexerElement(INFIX, op, position);
+        return MathLexerElement(allowed_operators[op], op, position);
     } else {
         throw ParsingException("Unknown operator: " + op, position);
     }

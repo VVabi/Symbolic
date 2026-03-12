@@ -3,8 +3,25 @@
 /**
  * @brief Enum representing the type of an expression element.
  */
+
+
 enum expression_type {
-    INFIX,                  ///< Infix operator
+    INFIX_PLUS,                  ///< Infix operator
+    INFIX_MINUS,                 ///< Infix operator
+    INFIX_MULTIPLY,              ///< Infix operator
+    INFIX_DIVIDE,                ///< Infix operator
+    INFIX_POWER,                 ///< Infix operator
+    INFIX_ASSIGN,                ///< Infix operator
+    INFIX_LESS,                  ///< Infix operator
+    INFIX_GREATER,               ///< Infix operator
+    INFIX_EQUAL,                 ///< Infix operator
+    INFIX_NOT_EQUAL,             ///< Infix operator
+    INFIX_GREATER_EQUAL,         ///< Infix operator
+    INFIX_LESS_EQUAL,            ///< Infix operator
+    INFIX_BITWISE_AND,           ///< Infix operator
+    INFIX_BITWISE_OR,            ///< Infix operator
+    INFIX_LOGICAL_AND,           ///< Infix operator
+    INFIX_LOGICAL_OR,            ///< Infix operator
     UNARY,                  ///< Unary operator
     FUNCTION,               ///< Function
     NUMBER,                 ///< Number
@@ -21,8 +38,38 @@ enum expression_type {
 
 inline std::string expression_type_to_string(expression_type type) {
     switch (type) {
-        case INFIX:
-            return "INFIX";
+        case INFIX_NOT_EQUAL:
+            return "INFIX_NOT_EQUAL";
+        case INFIX_PLUS:
+            return "INFIX_PLUS";
+        case INFIX_MINUS:
+            return "INFIX_MINUS";
+        case INFIX_MULTIPLY:
+            return "INFIX_MULTIPLY";
+        case INFIX_DIVIDE:
+            return "INFIX_DIVIDE";
+        case INFIX_POWER:
+            return "INFIX_POWER";
+        case INFIX_ASSIGN:
+            return "INFIX_ASSIGN";
+        case INFIX_LESS:
+            return "INFIX_LESS";
+        case INFIX_GREATER:
+            return "INFIX_GREATER";
+        case INFIX_EQUAL:
+            return "INFIX_EQUAL";
+        case INFIX_GREATER_EQUAL:
+            return "INFIX_GREATER_EQUAL";
+        case INFIX_LESS_EQUAL:
+            return "INFIX_LESS_EQUAL";
+        case INFIX_BITWISE_AND:
+            return "INFIX_BITWISE_AND";
+        case INFIX_BITWISE_OR:
+            return "INFIX_BITWISE_OR";
+        case INFIX_LOGICAL_AND:
+            return "INFIX_LOGICAL_AND";
+        case INFIX_LOGICAL_OR:
+            return "INFIX_LOGICAL_OR";
         case UNARY:
             return "UNARY";
         case FUNCTION:
