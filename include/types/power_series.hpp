@@ -12,6 +12,7 @@
 #include <string>
 #include <algorithm>
 #include <utility>
+#include <cmath>
 #include "types/rationals.hpp"
 #include "exceptions/eval_exception.hpp"
 #include "types/modLong.hpp"

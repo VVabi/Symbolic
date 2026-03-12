@@ -36,7 +36,7 @@ int32_t get_operator_precedence(const expression_type& op) {
         case INFIX_POWER:
             return 30;
         case INFIX_ASSIGN:
-            return 5;
+            return 3;
         case INFIX_LESS:
         case INFIX_GREATER:
         case INFIX_GREATER_EQUAL:
@@ -59,7 +59,6 @@ int32_t get_operator_precedence(const expression_type& op) {
             return 1000;
         default:
             throw ReachedUnreachableException("Unknown operator in get_operator_precedence: "+expression_type_to_string(op));
-            return -1;
     }
 }
 
@@ -93,7 +92,6 @@ bool is_right_associative(const expression_type& op) {
             return false;
         default:
             throw ReachedUnreachableException("Unknown operator in is_right_associative: "+expression_type_to_string(op));
-            return -1;
     }
 }
 

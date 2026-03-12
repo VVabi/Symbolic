@@ -166,8 +166,6 @@ class PolishUnaryPlus: public PolishNotationElement {
             return std::make_shared<SymObjectContainer>(math_type);
         }
         throw ParsingTypeException("Type error: Expected mathematical object as argument");
-
-        return nullptr;
     }
 };
 
