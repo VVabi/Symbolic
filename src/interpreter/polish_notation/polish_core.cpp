@@ -116,6 +116,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
         case UNARY:
             if (element.data == "-") {
                 return std::make_shared<PolishUnaryMinus>(element);
+            } else if (element.data == "+") {
+                return std::make_shared<PolishUnaryPlus>(element);
             }
             throw EvalException("Unknown unary operator: " + element.data, element.position);
             break;

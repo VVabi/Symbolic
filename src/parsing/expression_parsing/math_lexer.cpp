@@ -8,11 +8,46 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <set>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
 bool is_separator(char c) {
     return c == ',' || c == ';' || c == '\n';
+}
+
+std::set<char> get_operators() {
+    return {'+', '-', '*', '/', '^', '!', '=', '<', '>', '&', '|', '^'};
+}
+
+bool is_operator(char c) {
+    static std::set<char> operators = get_operators();
+    return operators.find(c) != operators.end();
+}
+
+
+
+MathLexerElement parse_operator(const std::string& op, const char previous, CodePlaceIdentifier position) {
+    if (op == "-") {
+        if (previous == '(' || is_separator(previous) || previous == '=') {
+            return MathLexerElement(UNARY, op, position);
+        } else {
+            return MathLexerElement(INFIX, op, position);
+        }
+    } else if (op == "+") {
+        if (previous == '(' || is_separator(previous) || previous == '=') {
+            return MathLexerElement(UNARY, op, position);
+        } else {
+            return MathLexerElement(INFIX, op, position);
+        }
+    } else if (op == "*" || op == "/" || op == "^" || op == "!" || op == "=" || op == "<" || op == ">" || op == "&" || op == "|" || op == "^") {
+        if (previous == '(' || is_separator(previous)) {
+            throw ParsingException(op + " cannot follow "+ std::string(1, previous) +" or be at the beginning", position);
+        }
+        return MathLexerElement(INFIX, op, position);
+    } else {
+        throw ParsingException("Unknown operator: " + op, position);
+    }
 }
 
 /**
@@ -96,28 +131,22 @@ std::vector<MathLexerElement> parse_math_expression_string(
             while (it != input.begin() && *it == ' ') {
                 it--;
             }
+        } else if (is_operator(*it)) {
+            std::stringstream current_operator;
+
+            while (it != input.end() && is_operator(*it)) {
+                current_operator << *it;
+                it++;
+            }
+            if (it != input.end()) {
+                it--;
+            }
+            std::string op = current_operator.str();
+
+            auto element = parse_operator(op, previous, make_position(distance));
+            formula.push_back(element);
         } else {
             switch (*it) {
-                case '+':
-                case '-':
-                    if (previous == '(' || is_separator(previous) || previous == '=') {
-                        formula.push_back(MathLexerElement(NUMBER, "0", make_position(distance)));
-                        formula.push_back(MathLexerElement(INFIX, std::string(1, *it), make_position(distance)));
-                    } else {
-                        formula.push_back(MathLexerElement(INFIX, std::string(1, *it), make_position(distance)));
-                    }
-                    break;
-                case '*':
-                case '/':
-                case '^':
-                case '!':
-                case '=':
-                    if (previous == '(' || is_separator(previous)) {
-                        char c = *it;
-                        throw ParsingException(std::string(&c, 1) + " cannot follow "+ std::string(1, previous) +" or be at the beginning", make_position(distance));
-                    }
-                    formula.push_back(MathLexerElement(INFIX, std::string(1, *it), make_position(distance)));
-                    break;
                 case '(':
                     formula.push_back(MathLexerElement(LEFT_PARENTHESIS, "", make_position(distance)));
                     break;
