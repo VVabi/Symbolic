@@ -35,13 +35,13 @@ std::map<std::string, expression_type> allowed_operators = {
 std::vector<MathLexerElement> parse_operator(const std::string& op, const char previous, CodePlaceIdentifier position) {
     auto ret = std::vector<MathLexerElement>();
     if (op == "-") {
-        if (previous == '(' || is_separator(previous) || previous == '=') {
+        if (previous == '(' || is_separator(previous) || is_operator(previous)) {
             ret.push_back(MathLexerElement(UNARY_MINUS, op, position));
         } else {
             ret.push_back(MathLexerElement(INFIX_MINUS, op, position));
         }
     } else if (op == "+") {
-        if (previous == '(' || is_separator(previous) || previous == '=') {
+        if (previous == '(' || is_separator(previous) || is_operator(previous)) {
             ret.push_back(MathLexerElement(UNARY_PLUS, op, position));
         } else {
             ret.push_back(MathLexerElement(INFIX_PLUS, op, position));
@@ -49,7 +49,7 @@ std::vector<MathLexerElement> parse_operator(const std::string& op, const char p
     } else if (op == "!") {
             ret.push_back(MathLexerElement(UNARY_NOT, op, position));
     } else if (allowed_operators.find(op) != allowed_operators.end()) {
-        if (previous == '(' || previous == '{' || previous == '['|| is_separator(previous)) {
+        if (previous == '(' || previous == '{' || previous == '['|| is_separator(previous) || is_operator(previous)) {
             throw ParsingException(op + " cannot follow "+ std::string(1, previous) +" or be at the beginning", position);
         }
         ret.push_back(MathLexerElement(allowed_operators[op], op, position));

@@ -2,9 +2,9 @@ fib(n, memo) {
     if (dict_has_key(memo, n)) {
         ret = dict_get(memo, n)
     } elif (true) {
-        if(eq(n,0)) {
+        if(n == 0) {
             ret = 0
-        } elif(eq(n,1)){
+        } elif(n == 1){
             ret = 1
         } elif(true) {
             ret = fib(n-1, memo)+fib(n-2, memo)
