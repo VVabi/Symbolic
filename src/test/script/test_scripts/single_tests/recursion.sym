@@ -1,5 +1,5 @@
 factorial(n) {
-    if (eq(n, 0)) {
+    if (n == 0) {
         ret = 1
     } elif (true) {
         ret = n * factorial(n-1)
@@ -12,7 +12,7 @@ println(factorial(5))
 println(factorial(10))
 
 sum_to_n(n) {
-    if (eq(n, 0)) {
+    if (n == 0) {
         ret = 0
     } elif (true) {
         ret = n + sum_to_n(n-1)

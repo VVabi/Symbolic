@@ -1,6 +1,6 @@
 k = 1
 sum = 0
-while(lte(k,1000)) {
+while(k <= 1000) {
     sum = sum+k
     k = k+1
 }
