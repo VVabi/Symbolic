@@ -9,6 +9,7 @@
 #include <map>
 #include <sstream>
 #include <set>
+#include <cctype>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
@@ -31,6 +32,14 @@ std::map<std::string, expression_type> allowed_operators = {
     {"<=", INFIX_LESS_EQUAL}, {"&", INFIX_BITWISE_AND}, {"|", INFIX_BITWISE_OR},
     {"&&", INFIX_LOGICAL_AND}, {"||", INFIX_LOGICAL_OR}
 };
+
+bool is_valid_variable_content(const char c) {
+    return isalpha(static_cast<unsigned char>(c)) || c == '_' || isdigit(static_cast<unsigned char>(c)) || c == '.';
+}
+
+bool is_valid_variable_start(const char c) {
+    return isalpha(static_cast<unsigned char>(c)) || c == '_';
+}
 
 std::vector<MathLexerElement> parse_operator(const std::string& op, const char previous, CodePlaceIdentifier position) {
     auto ret = std::vector<MathLexerElement>();
@@ -119,21 +128,25 @@ std::vector<MathLexerElement> parse_math_expression_string(
             formula.push_back(MathLexerElement(ARRAY_ACCESS_START, "[", make_position(distance)));
         } else if (current == ']') {
             formula.push_back(MathLexerElement(ARRAY_ACCESS_END, "]", make_position(distance)));
-        } else if (isdigit(current)) {
+        } else if (isdigit(static_cast<unsigned char>(current))) {
             std::string num = "";
 
-            while (isdigit(*it) || *it == '.' || *it =='e' || (*it == '-' && previous == 'e') || (*it == '+' && previous == 'e')) {
+            while (isdigit(static_cast<unsigned char>(*it)) || *it == '.' || *it =='e' || (*it == '-' && previous == 'e') || (*it == '+' && previous == 'e')) {
                 num = num+*it;
                 previous = *it;
                 it++;
             }
+
+            if (it != input.end() && is_valid_variable_content(*it)) {
+                throw ParsingException("Invalid character in number literal: "+std::string(1, *it), make_position(distance));
+            }
             formula.push_back(MathLexerElement(NUMBER, num, make_position(distance)));
             it--;
-        } else if (isalpha(*it)) {
-            std::string var = "";
+        } else if (is_valid_variable_start(current)) {
+            std::stringstream var;
 
-            while (it != input.end() && (isalpha(*it) || (*it == '_'))) {
-                var = var + *it;
+            while (it != input.end() && is_valid_variable_content(*it)) {
+                var << *it;
                 it++;
             }
 
@@ -144,9 +157,9 @@ std::vector<MathLexerElement> parse_math_expression_string(
                 it++;
             }
             if (it != input.end() && *it == '(') {
-                formula.push_back(MathLexerElement(FUNCTION, var, make_position(distance)));
+                formula.push_back(MathLexerElement(FUNCTION, var.str(), make_position(distance)));
             } else {
-                formula.push_back(MathLexerElement(VARIABLE, var, make_position(distance)));
+                formula.push_back(MathLexerElement(VARIABLE, var.str(), make_position(distance)));
             }
             it--;
             while (it != input.begin() && *it == ' ') {
