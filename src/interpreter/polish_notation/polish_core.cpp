@@ -142,8 +142,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             }
             if (element.data.find('.') != std::string::npos) {
                  return std::make_shared<PolishModuleFunction>(element);
-            }
-            else if (element.data == "exp") {
+            } else if (element.data == "exp") {
                 return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::EXP);
             } else if (element.data == "sqrt") {
                 return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::SQRT);

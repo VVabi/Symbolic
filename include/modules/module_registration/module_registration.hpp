@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <map>
+#include <vector>
+#include <memory>
 #include <functional>
 #include <queue>
 #include "types/sym_types/sym_object.hpp"

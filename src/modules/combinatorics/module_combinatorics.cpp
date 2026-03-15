@@ -1,6 +1,7 @@
 #include <memory>
 #include <stdexcept>
 #include "modules/module_registration/module_registration.hpp"
+#include "modules/combinatorics/symbolic_method/module_combinatorics_symbolic_method.hpp"
 #include "types/sym_types/sym_object.hpp"
 #include "types/sym_types/sym_string_object.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -24,5 +25,7 @@ Module create_combinatorics_module() {
             }
             return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(result, BigInt(1))));
         });
+
+        ret.register_submodule("symbolic", create_symbolic_method_module());
         return ret;
 }

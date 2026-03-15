@@ -6,10 +6,7 @@
  * @date Feb 11, 2024
  * @author vabi
  */
-
-#ifndef INCLUDE_PARSING_SUBSET_PARSING_SUBSET_PARSER_HPP_
-#define INCLUDE_PARSING_SUBSET_PARSING_SUBSET_PARSER_HPP_
-
+#pragma once
 #include <string>
 #include <set>
 #include <algorithm>
@@ -121,5 +118,3 @@ struct Subset {
         }
     }
 };
-
-#endif  // INCLUDE_PARSING_SUBSET_PARSING_SUBSET_PARSER_HPP_

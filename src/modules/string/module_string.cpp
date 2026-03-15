@@ -53,7 +53,7 @@ Module create_string_module() {
                 }
             return std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(result.str()));
             }
-        }   );
+        });
     ret.register_function("split", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
             auto str_obj = std::dynamic_pointer_cast<SymStringObject>(args[0]->get_object());
             if (!str_obj) {
@@ -73,7 +73,7 @@ Module create_string_module() {
                     auto next = str.substr(pos);
                     if (!next.empty()) {
                         elements.push_back(std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(next)));
-                    } 
+                    }
                     break;
                 } else {
                     auto next = str.substr(pos, next_pos - pos);
