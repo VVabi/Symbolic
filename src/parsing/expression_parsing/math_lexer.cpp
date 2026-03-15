@@ -32,6 +32,14 @@ std::map<std::string, expression_type> allowed_operators = {
     {"&&", INFIX_LOGICAL_AND}, {"||", INFIX_LOGICAL_OR}
 };
 
+bool is_valid_variable_content(const char c) {
+    return isalpha(c) || c == '_' || isdigit(c) || c == '.';
+}
+
+bool is_valid_variable_start(const char c) {
+    return isalpha(c) || c == '_';
+}
+
 std::vector<MathLexerElement> parse_operator(const std::string& op, const char previous, CodePlaceIdentifier position) {
     auto ret = std::vector<MathLexerElement>();
     if (op == "-") {
@@ -127,13 +135,17 @@ std::vector<MathLexerElement> parse_math_expression_string(
                 previous = *it;
                 it++;
             }
+
+            if (is_valid_variable_content(*it)) {
+                throw ParsingException("Invalid character in number literal: "+std::string(1, *it), make_position(distance));
+            }
             formula.push_back(MathLexerElement(NUMBER, num, make_position(distance)));
             it--;
-        } else if (isalpha(*it)) {
-            std::string var = "";
+        } else if (is_valid_variable_start(current)) {
+            std::stringstream var;
 
-            while (it != input.end() && (isalpha(*it) || (*it == '_'))) {
-                var = var + *it;
+            while (it != input.end() && is_valid_variable_content(*it)) {
+                var << *it;
                 it++;
             }
 
@@ -144,9 +156,9 @@ std::vector<MathLexerElement> parse_math_expression_string(
                 it++;
             }
             if (it != input.end() && *it == '(') {
-                formula.push_back(MathLexerElement(FUNCTION, var, make_position(distance)));
+                formula.push_back(MathLexerElement(FUNCTION, var.str(), make_position(distance)));
             } else {
-                formula.push_back(MathLexerElement(VARIABLE, var, make_position(distance)));
+                formula.push_back(MathLexerElement(VARIABLE, var.str(), make_position(distance)));
             }
             it--;
             while (it != input.begin() && *it == ' ') {
