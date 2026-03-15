@@ -10,6 +10,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "shell/parameters/parameters.hpp"
 #include "common/file_location.hpp"
+#include "modules/module_registration/module_registration.hpp"
 
 class PolishCustomFunction;
 
@@ -37,6 +38,7 @@ class InterpreterContext : public ContextInterface {
     std::map<std::string, PreprocessedFileNavigator> file_navigators;
     uint64_t steps = 0;
     ShellParameters shell_parameters;
+    ModuleRegister modules;
 
  public:
     /**
@@ -76,8 +78,7 @@ class InterpreterContext : public ContextInterface {
      * @param handler A shared pointer to an InterpreterPrintHandler used for output operations.
      *                If nullptr, print operations will be silently ignored.
      */
-    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params);
-
+    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params, ModuleRegister modules);
     /**
      * @brief Gets the shell parameters (const version).
      *

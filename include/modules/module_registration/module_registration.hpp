@@ -21,6 +21,7 @@ class ModuleFunction {
 class Module {
     std::map<std::string, ModuleFunction> functions;
     std::map<std::string, Module> submodules;
+    std::string name;
  public:
     void register_function(const std::string& name, uint32_t min_num_args, uint32_t max_num_args,
         std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func);
@@ -28,6 +29,9 @@ class Module {
 
     std::shared_ptr<SymObjectContainer> call_function(std::queue<std::string>& module_path,
             std::vector<std::shared_ptr<SymObjectContainer>>& args);
+    const std::string& get_name() const {
+        return name;
+    }
 };
 
 class ModuleRegister {

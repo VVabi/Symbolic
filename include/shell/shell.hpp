@@ -22,6 +22,7 @@
 #include "shell/parameters/parameters.hpp"
 #include "shell/command_handling.hpp"
 #include "common/file_location.hpp"
+#include "modules/module_factory.hpp"
 
 class ShellInput {
  public:
@@ -360,7 +361,7 @@ class FormulaParser {
 
  public:
     FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler, const ShellParameters& params) {
-        context = std::make_shared<InterpreterContext>(print_handler, params);
+        context = std::make_shared<InterpreterContext>(print_handler, params, create_module_register());
     }
 
     std::unique_ptr<FormulaParsingResult> parse(std::shared_ptr<FileLikeObject> file_obj) {

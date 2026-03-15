@@ -6,9 +6,10 @@
 #include <gtest/gtest.h>
 #include "shell/parameters/parameters.hpp"
 #include "interpreter/context.hpp"
+#include "modules/module_factory.hpp"
 
 TEST(ShellParameterTests, PowerSeriesPrecisionUpdate) {
-    auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters());
+    auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters(), create_module_register());
     for (uint32_t ind = 1; ind < 300; ind++) {
         auto result = update_parameters_in_context(context, "powerseriesprecision", std::to_string(ind));
         EXPECT_TRUE(result.success_flag);
@@ -34,7 +35,7 @@ TEST(ShellParameterTests, PowerSeriesPrecisionUpdate) {
 }
 
 TEST(ShellParameterTests, InvalidParameterUpdate) {
-    auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters());
+    auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters(), create_module_register());
     auto checker_par = context->get_shell_parameters();
 
     auto result = update_parameters_in_context(context, "invalid", "1");

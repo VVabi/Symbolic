@@ -4,8 +4,8 @@
 #include "exceptions/parsing_type_exception.hpp"
 
 // Constructor
-InterpreterContext::InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params)
-    : output_handler(handler), shell_parameters(params) {
+InterpreterContext::InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params, ModuleRegister modules)
+    : output_handler(handler), shell_parameters(params), modules(modules) {
     initialize_constants();
     push_variables();  // Start with an initial variable scope
 }
