@@ -9,6 +9,7 @@
 #include <map>
 #include <sstream>
 #include <set>
+#include <cctype>
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 
@@ -33,11 +34,11 @@ std::map<std::string, expression_type> allowed_operators = {
 };
 
 bool is_valid_variable_content(const char c) {
-    return isalpha(c) || c == '_' || isdigit(c) || c == '.';
+    return isalpha(static_cast<unsigned char>(c)) || c == '_' || isdigit(static_cast<unsigned char>(c)) || c == '.';
 }
 
 bool is_valid_variable_start(const char c) {
-    return isalpha(c) || c == '_';
+    return isalpha(static_cast<unsigned char>(c)) || c == '_';
 }
 
 std::vector<MathLexerElement> parse_operator(const std::string& op, const char previous, CodePlaceIdentifier position) {
@@ -127,16 +128,16 @@ std::vector<MathLexerElement> parse_math_expression_string(
             formula.push_back(MathLexerElement(ARRAY_ACCESS_START, "[", make_position(distance)));
         } else if (current == ']') {
             formula.push_back(MathLexerElement(ARRAY_ACCESS_END, "]", make_position(distance)));
-        } else if (isdigit(current)) {
+        } else if (isdigit(static_cast<unsigned char>(current))) {
             std::string num = "";
 
-            while (isdigit(*it) || *it == '.' || *it =='e' || (*it == '-' && previous == 'e') || (*it == '+' && previous == 'e')) {
+            while (isdigit(static_cast<unsigned char>(*it)) || *it == '.' || *it =='e' || (*it == '-' && previous == 'e') || (*it == '+' && previous == 'e')) {
                 num = num+*it;
                 previous = *it;
                 it++;
             }
 
-            if (is_valid_variable_content(*it)) {
+            if (it != input.end() && is_valid_variable_content(*it)) {
                 throw ParsingException("Invalid character in number literal: "+std::string(1, *it), make_position(distance));
             }
             formula.push_back(MathLexerElement(NUMBER, num, make_position(distance)));
