@@ -1,3 +1,4 @@
+#include <utility>
 #include "interpreter/context.hpp"
 #include "types/sym_types/sym_boolean.hpp"
 #include "types/sym_types/sym_void.hpp"
@@ -5,7 +6,7 @@
 
 // Constructor
 InterpreterContext::InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params, ModuleRegister modules)
-    : output_handler(handler), shell_parameters(params), modules(modules) {
+    : output_handler(handler), shell_parameters(params), modules(std::move(modules)) {
     initialize_constants();
     push_variables();  // Start with an initial variable scope
 }

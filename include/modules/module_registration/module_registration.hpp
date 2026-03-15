@@ -5,8 +5,8 @@
 #include <memory>
 #include <functional>
 #include <queue>
+#include <cstdint>
 #include "types/sym_types/sym_object.hpp"
-
 
 class ModuleFunction {
     uint32_t min_num_args;

@@ -29,9 +29,7 @@ Module create_string_module() {
             return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(elements));
         });
     ret.register_function("concat", 1, UINT32_MAX, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
-            if (args.empty()) {
-                return std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(""));
-            } else if (args.size() == 1) {
+            if (args.size() == 1) {
                 auto list = std::dynamic_pointer_cast<SymListObject>(args[0]->get_object());
                 if (!list) {
                     throw ParsingTypeException("Expected a list argument for string.concat function when called with a single argument");
@@ -66,6 +64,9 @@ Module create_string_module() {
             std::vector<std::shared_ptr<SymObjectContainer>> elements;
             std::string str = str_obj->to_string();
             std::string delimiter = delimiter_obj->to_string();
+            if (delimiter.empty()) {
+                 throw ParsingTypeException("Delimiter for string.split function cannot be empty");
+             }
             size_t pos = 0;
             while (true) {
                 size_t next_pos = str.find(delimiter, pos);

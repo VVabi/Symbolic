@@ -1,9 +1,9 @@
 #include "modules/module_registration/module_registration.hpp"
-
+#include "exceptions/parsing_type_exception.hpp"
 
 std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>> args) const {
     if (args.size() < min_num_args || args.size() > max_num_args) {
-        throw std::runtime_error("Incorrect number of arguments for module function, expected between "+std::to_string(min_num_args)+
+        throw ParsingTypeException("Incorrect number of arguments for module function, expected between "+std::to_string(min_num_args)+
             " and "+std::to_string(max_num_args)+", got "+std::to_string(args.size()));
     }
     return func(args);

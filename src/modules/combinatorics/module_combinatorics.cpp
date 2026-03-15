@@ -15,7 +15,12 @@ Module create_combinatorics_module() {
             if (!num_obj) {
                 throw ParsingTypeException("Expected a rational number argument for factorial function");
             }
-            auto num = num_obj->as_value().as_base_type();
+            BigInt num;
+            try {
+                num = num_obj->as_value().as_base_type();
+            } catch (DatatypeInternalException& e) {
+                throw ParsingTypeException("Expected an integer argument for factorial function");
+            }
             if (num < BigInt(0)) {
                 throw ParsingTypeException("Expected a non-negative integer argument for factorial function");
             }
