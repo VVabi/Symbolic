@@ -46,6 +46,15 @@ void test_script_interpretation() {
         }
     }
 
+    base_folder = "../src/test/script/test_scripts/module_tests";
+
+    for (const auto& entry : std::filesystem::directory_iterator(base_folder)) {
+        if (entry.path().extension() == ".sym") {
+            std::cout << entry.path() << std::endl;
+            test_single_script_wrapper(entry.path().string(), entry.path().string()+".results");
+        }
+    }
+
     std::vector<std::string> fizzbuzz_expected({"1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz", "11", "Fizz", "13", "14", "Fizz Buzz", "16", "17", "Fizz", "19", "Buzz"});
     test_single_script("../examples/fizzbuzz.sym", fizzbuzz_expected);
     test_single_script("../examples/less_naive_prime_counting.sym", std::vector<std::string>({"168"}));
