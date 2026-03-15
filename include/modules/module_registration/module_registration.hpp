@@ -29,7 +29,7 @@ class Module {
 
     void register_function(const std::string& name, uint32_t min_num_args, uint32_t max_num_args,
         std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func);
-        void register_submodule(const std::string& name, const Module& submodule);
+    void register_submodule(const std::string& name, const Module& submodule);
 
     std::shared_ptr<SymObjectContainer> call_function(std::queue<std::string>& module_path,
             std::vector<std::shared_ptr<SymObjectContainer>>& args) const;
