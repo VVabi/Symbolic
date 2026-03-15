@@ -45,7 +45,6 @@ std::shared_ptr<SymObjectContainer> Module::call_function(std::queue<std::string
 }
 
 void ModuleRegister::register_module(const std::string& name, const Module& new_module) {
-    std::cout << "Registering module: " << name << std::endl;
     if (!modules.insert({name, new_module}).second) {
         throw std::runtime_error("Failed to register module with name: " + name);
     }
