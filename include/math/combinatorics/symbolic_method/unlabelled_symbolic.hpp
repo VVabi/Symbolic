@@ -10,7 +10,7 @@
 #include <set>
 #include "types/power_series.hpp"
 #include "math/combinatorics/polya/cycle_index.hpp"
-#include "parsing/subset_parsing/subset_parser.hpp"
+#include "common/subset_parser.hpp"
 #include "math/number_theory/euler_phi.hpp"
 #include "math/number_theory/moebius.hpp"
 

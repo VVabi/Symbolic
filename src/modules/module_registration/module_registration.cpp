@@ -2,18 +2,20 @@
 
 
 std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>> args) {
-    if (args.size() != num_args) {
-        throw std::runtime_error("Incorrect number of arguments for module function, expected "+std::to_string(num_args)+
-            ", got "+std::to_string(args.size()));
+    if (args.size() < min_num_args || args.size() > max_num_args) {
+        throw std::runtime_error("Incorrect number of arguments for module function, expected between "+std::to_string(min_num_args)+
+            " and "+std::to_string(max_num_args)+", got "+std::to_string(args.size()));
     }
     return func(args);
 }
 
-void Module::register_function(const std::string& name, uint32_t num_args,
-    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func) {
-        if (!functions.insert({name, ModuleFunction(num_args, func)}).second) {
-            throw std::runtime_error("Failed to register module function with name: " + name);
-        }
+void Module::register_function(const std::string& name,
+                                uint32_t min_num_args,
+                                uint32_t max_num_args,
+                                std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func) {
+    if (!functions.insert({name, ModuleFunction(min_num_args, max_num_args, func)}).second) {
+        throw std::runtime_error("Failed to register module function with name: " + name);
+    }
 }
 
 void Module::register_submodule(const std::string& name, const Module& submodule) {
@@ -23,7 +25,7 @@ void Module::register_submodule(const std::string& name, const Module& submodule
 }
 
 std::shared_ptr<SymObjectContainer> Module::call_function(std::queue<std::string>& module_path,
-        std::vector<std::shared_ptr<SymObjectContainer>> args) {
+                                                            std::vector<std::shared_ptr<SymObjectContainer>>& args) {
     auto name = module_path.front();
     module_path.pop();
 
@@ -58,7 +60,7 @@ std::shared_ptr<Module> ModuleRegister::get_module(const std::string& name) {
 }
 
 std::shared_ptr<SymObjectContainer> ModuleRegister::call_module_function(std::queue<std::string>& module_path,
-        std::vector<std::shared_ptr<SymObjectContainer>> args) {
+        std::vector<std::shared_ptr<SymObjectContainer>>& args) {
     auto name = module_path.front();
     module_path.pop();
     auto module_it = modules.find(name);
