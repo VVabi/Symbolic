@@ -96,3 +96,28 @@ class PolishCustomFunction: public PolishFunction {
         }
     }
 };
+
+class PolishModuleFunction: public PolishFunction {
+ public:
+    PolishModuleFunction(ParsedCodeElement element): PolishFunction(element, 0, UINT32_MAX) { }
+
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                    std::shared_ptr<InterpreterContext>& context) override {
+            std::vector<std::shared_ptr<SymObjectContainer>> arg_values;
+            for (int i = 0; i < get_num_args(); i++) {
+                auto arg_value = iterate_wrapped(cmd_list, context);
+                arg_values.push_back(arg_value);
+            }
+
+            auto module_path = std::queue<std::string>();
+            auto parts = string_split(get_data(), '.');
+            for (const auto& part : parts) {
+                module_path.push(part);
+            }
+            try {
+                return context->get_module_register().call_module_function(module_path, arg_values);
+            } catch (std::exception& e) {
+                throw EvalException(std::string("Error calling module function: ") + e.what(), this->get_position());
+            }
+        }
+};

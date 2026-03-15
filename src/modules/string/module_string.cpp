@@ -7,7 +7,7 @@
 #include "types/sym_types/math_types/value_type.hpp"
 
 Module create_string_module() {
-    Module ret;
+    Module ret = Module("string");
     ret.register_function("len", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
             auto str_obj = std::dynamic_pointer_cast<SymStringObject>(args[0]->get_object());
             if (!str_obj) {

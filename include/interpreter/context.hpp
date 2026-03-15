@@ -141,4 +141,8 @@ class InterpreterContext : public ContextInterface {
     void reset_steps() {
         steps = 0;
     }
+
+    const ModuleRegister& get_module_register() const {
+        return modules;
+    }
 };
