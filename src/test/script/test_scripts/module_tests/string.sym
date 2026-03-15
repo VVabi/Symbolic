@@ -1,0 +1,17 @@
+test_str = "abrakadabra"
+println(string.len(test_str))
+list_str = string.as_list(test_str)
+println(list_str)
+splits = string.split(test_str, "a")
+println(splits)
+splits = string.split(test_str, "x")
+println(splits)
+splits = string.split(test_str, "ab")
+println(splits)
+splits = string.split(test_str, "ra")
+println(splits)
+println(string.concat(splits))
+a = "hello"
+b = " "
+c = "world"
+println(string.concat(a,b,c))

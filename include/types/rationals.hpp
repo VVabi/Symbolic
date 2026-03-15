@@ -201,6 +201,13 @@ class RationalNumber {
         }
         return numerator*other.denominator >= denominator*other.numerator;
     }
+
+    T as_base_type() const {
+        if (denominator != RingCompanionHelper<T>::get_unit(numerator)) {
+            throw DatatypeInternalException("Cannot convert a non-integer rational number to the base type");
+        }
+        return numerator;
+    }
 };
 
 template <typename T>
