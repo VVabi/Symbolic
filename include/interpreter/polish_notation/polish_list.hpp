@@ -203,26 +203,6 @@ class PolishListSlice: public PolishFunction {
     }
 };
 
-class PolishListCopy: public PolishFunction {
- public:
-    PolishListCopy(ParsedCodeElement element): PolishFunction(element, 1, 1) {}
-
-    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context) {
-        auto list_raw   = iterate_wrapped(cmd_list, context)->get_object();
-        auto list       = std::dynamic_pointer_cast<SymListObject>(list_raw);
-        if (!list) {
-            throw ParsingTypeException("Type error: Expected list as argument in copy function");
-        }
-
-        std::vector<std::shared_ptr<SymObjectContainer>> copied_elements;
-        for (const auto& element : list->as_list()) {
-            copied_elements.push_back(std::make_shared<SymObjectContainer>(element->get_object()->clone()));
-        }
-        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(copied_elements));
-    }
-};
-
 BigInt parse_index(const std::shared_ptr<SymObjectContainer>& index_container) {
     auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_container->get_object());
     if (!index) {

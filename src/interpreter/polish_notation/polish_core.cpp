@@ -141,7 +141,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
             }
             if (element.data.find('.') != std::string::npos) {
-                 return std::make_shared<PolishModuleFunction>(element);
+                return std::make_shared<PolishModuleFunction>(element);
             } else if (element.data == "exp") {
                 return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::EXP);
             } else if (element.data == "sqrt") {
@@ -238,8 +238,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListPop>(element);
             } else if (element.data == "slice") {
                 return std::make_shared<PolishListSlice>(element);
-            } else if (element.data == "copy") {
-                return std::make_shared<PolishListCopy>(element);
             } else if (element.data == "and") {
                 return std::make_shared<PolishBooleanOperator>(element, AND);
             } else if (element.data == "or") {

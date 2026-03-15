@@ -36,6 +36,10 @@ class Module {
     const std::string& get_name() const {
         return name;
     }
+
+    bool has_function(const std::string& func_name) const {
+        return functions.find(func_name) != functions.end();
+    }
 };
 
 class ModuleRegister {
@@ -45,4 +49,5 @@ class ModuleRegister {
     std::shared_ptr<Module> get_module(const std::string& name);
     std::shared_ptr<SymObjectContainer> call_module_function(std::queue<std::string>& module_path,
         std::vector<std::shared_ptr<SymObjectContainer>>& args) const;
+    bool is_builtin(const std::string& name) const;
 };

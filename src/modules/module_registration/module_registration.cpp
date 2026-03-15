@@ -50,7 +50,7 @@ void ModuleRegister::register_module(const std::string& name, const Module& new_
     }
 }
 
-std::shared_ptr<Module> ModuleRegister::get_module(const std::string& name) {
+std::shared_ptr<Module> ModuleRegister::get_module(const std::string& name){
     auto it = modules.find(name);
     if (it == modules.end()) {
         throw std::runtime_error("No module found with name: " + name);
@@ -67,4 +67,12 @@ std::shared_ptr<SymObjectContainer> ModuleRegister::call_module_function(std::qu
         throw std::runtime_error("No module found with name: " + name);
     }
     return module_it->second.call_function(module_path, args);
+}
+
+bool ModuleRegister::is_builtin(const std::string& name) const {
+    auto builtins = modules.find("builtins");
+    if (builtins == modules.end()) {
+        throw std::runtime_error("Internal error: builtins module not found in module register");
+    }
+    return builtins->second.has_function(name);
 }

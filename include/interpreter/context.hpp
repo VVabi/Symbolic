@@ -145,4 +145,13 @@ class InterpreterContext : public ContextInterface {
     const ModuleRegister& get_module_register() const {
         return modules;
     }
+
+    bool is_builtin(const std::string& name) const override {
+        try {
+            modules.is_builtin(name);
+            return true;
+        } catch (std::runtime_error&) {
+            return false;
+        }
+    }
 };
