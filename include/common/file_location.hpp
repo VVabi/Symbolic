@@ -103,12 +103,12 @@ class ContextInterface {
     virtual ~ContextInterface() = default;
     virtual PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) = 0;
     virtual bool has_file_navigator(const std::string& file_name) const = 0;
+    virtual bool is_builtin(const std::string& name) const = 0;
 };
 
 class CodePlaceIdentifier {
     std::string file_name;
     uint32_t position;
-
 
  public:
     CodePlaceIdentifier(const std::string& file_name, const uint32_t position) :

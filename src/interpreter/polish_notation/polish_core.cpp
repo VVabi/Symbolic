@@ -10,7 +10,6 @@
 #include "interpreter/polish_notation/polish_comparison_operators.hpp"
 #include "interpreter/polish_notation/polish_utils.hpp"
 #include "interpreter/polish_notation/polish_list.hpp"
-#include "interpreter/polish_notation/polish_dict.hpp"
 #include "interpreter/polish_notation/polish_boolean_operators.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 #include "types/sym_types/math_types/rational_function_type.hpp"
@@ -141,7 +140,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
             }
             if (element.data.find('.') != std::string::npos) {
-                 return std::make_shared<PolishModuleFunction>(element);
+                return std::make_shared<PolishModuleFunction>(element);
             } else if (element.data == "exp") {
                 return std::make_shared<PolishPowerSeriesFunction>(element, PowerSeriesBuiltinFunctionType::EXP);
             } else if (element.data == "sqrt") {
@@ -204,10 +203,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishEq>(element);
             } else if (element.data == "neq") {
                 return std::make_shared<PolishNeq>(element);
-            } else if (element.data == "print") {
-                return std::make_shared<PolishPrint>(element, false);
-            } else if (element.data == "println") {
-                return std::make_shared<PolishPrint>(element, true);
             } else if (element.data == "lt") {
                 return std::make_shared<PolishComparison>(element, LT);
             } else if (element.data == "lte") {
@@ -216,31 +211,7 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishComparison>(element, GT);
             } else if (element.data == "gte") {
                 return std::make_shared<PolishComparison>(element, GTE);
-            } else if (element.data == "list_get") {
-                return std::make_shared<PolishListGet>(element);
-            } else if (element.data == "list_set") {
-                return std::make_shared<PolishListSet>(element);
-            } else if (element.data == "list") {
-                return std::make_shared<PolishList>(element);
-            } else if (element.data == "dict_get") {
-                return std::make_shared<PolishDictGet>(element);
-            } else if (element.data == "dict_set") {
-                return std::make_shared<PolishDictSet>(element);
-            } else if (element.data == "dict") {
-                return std::make_shared<PolishDict>(element);
-            } else if (element.data == "dict_has_key") {
-                return std::make_shared<PolishDictHasKey>(element);
-            } else if (element.data == "len") {
-                return std::make_shared<PolishLength>(element);
-            } else if (element.data == "append") {
-                return std::make_shared<PolishListAppend>(element);
-            } else if (element.data == "pop") {
-                return std::make_shared<PolishListPop>(element);
-            } else if (element.data == "slice") {
-                return std::make_shared<PolishListSlice>(element);
-            } else if (element.data == "copy") {
-                return std::make_shared<PolishListCopy>(element);
-            } else if (element.data == "and") {
+             } else if (element.data == "and") {
                 return std::make_shared<PolishBooleanOperator>(element, AND);
             } else if (element.data == "or") {
                 return std::make_shared<PolishBooleanOperator>(element, OR);

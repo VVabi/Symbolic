@@ -17,7 +17,7 @@ class PolishCustomFunction;
 class InterpreterPrintHandler {
  public:
     virtual ~InterpreterPrintHandler() = default;
-    virtual void handle_print(const std::string& output, bool line_break = true) = 0;
+    virtual void handle_print(const std::string& output, bool line_break = true) const = 0;
 };
 
 /**
@@ -30,7 +30,7 @@ class InterpreterPrintHandler {
  *
  * @note This class uses virtual destruction to support potential inheritance.
  */
-class InterpreterContext : public ContextInterface {
+class InterpreterContext : public ContextInterface, public ModuleContextInterface {
     std::stack<std::map<std::string, std::shared_ptr<SymObject>>> variables;
     std::map<std::string, std::shared_ptr<SymObject>> constants;
     std::shared_ptr<InterpreterPrintHandler> output_handler;
@@ -84,7 +84,7 @@ class InterpreterContext : public ContextInterface {
      *
      * @return Const reference to the ShellParameters structure.
      */
-    const ShellParameters& get_shell_parameters() const {
+    const ShellParameters& get_shell_parameters() const override {
         return shell_parameters;
     }
 
@@ -104,7 +104,7 @@ class InterpreterContext : public ContextInterface {
      *
      * @note If no output handler is registered, this call has no effect.
      */
-    void handle_print(const std::string& output, bool line_break = true) {
+    void handle_print(const std::string& output, bool line_break = true) const override {
         if (output_handler) {
             output_handler->handle_print(output, line_break);
         }
@@ -144,5 +144,13 @@ class InterpreterContext : public ContextInterface {
 
     const ModuleRegister& get_module_register() const {
         return modules;
+    }
+
+    bool is_builtin(const std::string& name) const override {
+        try {
+            return modules.is_builtin(name);
+        } catch (std::runtime_error&) {
+            return false;
+        }
     }
 };

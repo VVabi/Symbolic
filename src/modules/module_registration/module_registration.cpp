@@ -1,18 +1,18 @@
 #include "modules/module_registration/module_registration.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 
-std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>> args) const {
+std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) const {
     if (args.size() < min_num_args || args.size() > max_num_args) {
         throw ParsingTypeException("Incorrect number of arguments for module function, expected between "+std::to_string(min_num_args)+
             " and "+std::to_string(max_num_args)+", got "+std::to_string(args.size()));
     }
-    return func(args);
+    return func(args, context);
 }
 
 void Module::register_function(const std::string& name,
                                 uint32_t min_num_args,
                                 uint32_t max_num_args,
-                                std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func) {
+                                std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func) {
     if (!functions.insert({name, ModuleFunction(min_num_args, max_num_args, func)}).second) {
         throw std::runtime_error("Failed to register module function with name: " + name);
     }
@@ -25,7 +25,8 @@ void Module::register_submodule(const std::string& name, const Module& submodule
 }
 
 std::shared_ptr<SymObjectContainer> Module::call_function(std::queue<std::string>& module_path,
-                                                            std::vector<std::shared_ptr<SymObjectContainer>>& args) const  {
+                                                            std::vector<std::shared_ptr<SymObjectContainer>>& args,
+                                                            const std::shared_ptr<ModuleContextInterface>& context) const  {
     auto name = module_path.front();
     module_path.pop();
 
@@ -34,13 +35,13 @@ std::shared_ptr<SymObjectContainer> Module::call_function(std::queue<std::string
         if (function_it == functions.end()) {
             throw std::runtime_error("No function found with name: " + name + " in module");
         }
-        return function_it->second.call(args);
+        return function_it->second.call(args, context);
     } else {
         auto submodule_it = submodules.find(name);
         if (submodule_it == submodules.end()) {
             throw std::runtime_error("No submodule found with name: " + name + " in module");
         }
-        return submodule_it->second.call_function(module_path, args);
+        return submodule_it->second.call_function(module_path, args, context);
     }
 }
 
@@ -59,12 +60,21 @@ std::shared_ptr<Module> ModuleRegister::get_module(const std::string& name) {
 }
 
 std::shared_ptr<SymObjectContainer> ModuleRegister::call_module_function(std::queue<std::string>& module_path,
-        std::vector<std::shared_ptr<SymObjectContainer>>& args) const {
+        std::vector<std::shared_ptr<SymObjectContainer>>& args,
+        const std::shared_ptr<ModuleContextInterface>& context) const {
     auto name = module_path.front();
     module_path.pop();
     auto module_it = modules.find(name);
     if (module_it == modules.end()) {
         throw std::runtime_error("No module found with name: " + name);
     }
-    return module_it->second.call_function(module_path, args);
+    return module_it->second.call_function(module_path, args, context);
+}
+
+bool ModuleRegister::is_builtin(const std::string& name) const {
+    auto builtins = modules.find("builtins");
+    if (builtins == modules.end()) {
+        throw std::runtime_error("Internal error: builtins module not found in module register");
+    }
+    return builtins->second.has_function(name);
 }

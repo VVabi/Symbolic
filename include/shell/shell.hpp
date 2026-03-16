@@ -400,7 +400,7 @@ class ShellPrintHandler: public InterpreterPrintHandler {
  public:
     ShellPrintHandler(std::shared_ptr<ShellOutput> output) : shell_output(output) {  }
 
-    void handle_print(const std::string& output, bool line_break = true) override {
+    void handle_print(const std::string& output, bool line_break = true) const override {
         shell_output->handle_print(output, line_break);
     }
 };

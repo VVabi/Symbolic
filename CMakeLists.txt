@@ -26,6 +26,7 @@ add_executable(Symbolic
         src/modules/module_registration/module_registration.cpp
         src/modules/module_factory.cpp
         src/modules/string/module_string.cpp
+        src/modules/builtins/module_builtins.cpp
         src/modules/combinatorics/module_combinatorics.cpp
         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
 )
@@ -52,6 +53,7 @@ add_executable(Symbolic_tests
         src/modules/module_registration/module_registration.cpp
         src/modules/module_factory.cpp
         src/modules/string/module_string.cpp
+        src/modules/builtins/module_builtins.cpp
         src/modules/combinatorics/module_combinatorics.cpp
         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
         src/test/test_data/power_series_parsing_testdata.cpp
@@ -90,6 +92,7 @@ add_executable(Symbolic_playground
         src/test/shell/test_shell.cpp
         src/test/script/top_level_script_tests.cpp
         src/test/shell/options/test_options.cpp
+        src/modules/builtins/module_builtins.cpp
         src/modules/module_registration/module_registration.cpp
         src/modules/module_factory.cpp
         src/modules/string/module_string.cpp

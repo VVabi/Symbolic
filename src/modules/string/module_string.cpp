@@ -9,7 +9,8 @@
 
 Module create_string_module() {
     Module ret = Module("string");
-    ret.register_function("len", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
+    ret.register_function("len", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+            UNUSED(context);
             auto str_obj = std::dynamic_pointer_cast<SymStringObject>(args[0]->get_object());
             if (!str_obj) {
                 throw ParsingTypeException("Expected a string argument for string length function");
@@ -17,7 +18,8 @@ Module create_string_module() {
             auto length = str_obj->to_string().size();
             return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(length), BigInt(1))));
         });
-    ret.register_function("as_list", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
+    ret.register_function("as_list", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+            UNUSED(context);
             auto str_obj = std::dynamic_pointer_cast<SymStringObject>(args[0]->get_object());
             if (!str_obj) {
                 throw ParsingTypeException("Expected a string argument for string.as_list function");
@@ -28,7 +30,8 @@ Module create_string_module() {
             }
             return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(elements));
         });
-    ret.register_function("concat", 1, UINT32_MAX, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
+    ret.register_function("concat", 1, UINT32_MAX, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+            UNUSED(context);
             if (args.size() == 1) {
                 auto list = std::dynamic_pointer_cast<SymListObject>(args[0]->get_object());
                 if (!list) {
@@ -52,7 +55,8 @@ Module create_string_module() {
             return std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(result.str()));
             }
         });
-    ret.register_function("split", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args) {
+    ret.register_function("split", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+            UNUSED(context);
             auto str_obj = std::dynamic_pointer_cast<SymStringObject>(args[0]->get_object());
             if (!str_obj) {
                 throw ParsingTypeException("Expected a string as the first argument for string.split function");
