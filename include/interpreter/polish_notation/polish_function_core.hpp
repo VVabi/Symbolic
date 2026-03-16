@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <queue>
 #include "common/lexer_deque.hpp"
 #include "interpreter/polish_notation/polish.hpp"
 #include "exceptions/invalid_function_arg_exception.hpp"
@@ -95,4 +96,31 @@ class PolishCustomFunction: public PolishFunction {
             return std::make_shared<SymObjectContainer>(ret);
         }
     }
+};
+
+class PolishModuleFunction: public PolishFunction {
+ public:
+    PolishModuleFunction(ParsedCodeElement element): PolishFunction(element, 0, UINT32_MAX) { }
+
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                    std::shared_ptr<InterpreterContext>& context) override {
+            std::vector<std::shared_ptr<SymObjectContainer>> arg_values;
+            for (int i = 0; i < get_num_args(); i++) {
+                auto arg_value = iterate_wrapped(cmd_list, context);
+                arg_values.push_back(arg_value);
+            }
+
+            auto module_path = std::queue<std::string>();
+            auto parts = string_split(get_data(), '.');
+            for (const auto& part : parts) {
+                module_path.push(part);
+            }
+            try {
+                return context->get_module_register().call_module_function(module_path, arg_values);
+            } catch(ParsingTypeException& e) {
+                throw EvalException(std::string("Type error when calling module function: ") + e.what(), this->get_position());
+            } catch (std::exception& e) {
+                throw EvalException(std::string("Error calling module function: ") + e.what(), this->get_position());
+            }
+        }
 };

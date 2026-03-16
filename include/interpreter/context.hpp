@@ -10,6 +10,7 @@
 #include "exceptions/parsing_type_exception.hpp"
 #include "shell/parameters/parameters.hpp"
 #include "common/file_location.hpp"
+#include "modules/module_registration/module_registration.hpp"
 
 class PolishCustomFunction;
 
@@ -37,6 +38,7 @@ class InterpreterContext : public ContextInterface {
     std::map<std::string, PreprocessedFileNavigator> file_navigators;
     uint64_t steps = 0;
     ShellParameters shell_parameters;
+    ModuleRegister modules;
 
  public:
     /**
@@ -50,13 +52,7 @@ class InterpreterContext : public ContextInterface {
         variables.push({});
     }
 
-    PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) override {
-        auto it = file_navigators.find(file_name);
-        if (it == file_navigators.end()) {
-            throw ParsingTypeException("No file navigator found for file: " + file_name);
-        }
-        return it->second;
-    }
+    PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) override;
 
     void set_file_navigator(const std::string& file_name, const PreprocessedFileNavigator& navigator) {
         file_navigators.insert_or_assign(file_name, navigator);
@@ -66,32 +62,15 @@ class InterpreterContext : public ContextInterface {
         return file_navigators.find(file_name) != file_navigators.end();
     }
 
-    void pop_variables() {
-        if (variables.empty()) {
-            throw ParsingTypeException("Attempted to pop variable scope when no scopes are available");
-        }
-        variables.pop();
-    }
+    void pop_variables();
 
-    std::shared_ptr<PolishCustomFunction> get_custom_function(const std::string& name) {
-        auto it = custom_functions.find(name);
-        if (it != custom_functions.end()) {
-            return it->second;
-        }
-        return nullptr;
-    }
+    std::shared_ptr<PolishCustomFunction> get_custom_function(const std::string& name);
 
     void set_custom_function(const std::string& name, std::shared_ptr<PolishCustomFunction> func) {
         custom_functions[name] = func;
     }
 
-    void initialize_constants() {
-        std::shared_ptr<SymBooleanObject> true_const = std::make_shared<SymBooleanObject>(true);
-        constants["true"] = true_const;
-        std::shared_ptr<SymBooleanObject> false_const = std::make_shared<SymBooleanObject>(false);
-        constants["false"] = false_const;
-        constants["null"] = std::make_shared<SymVoidObject>();
-    }
+    void initialize_constants();
 
     /**
      * @brief Constructs an InterpreterContext with a print handler.
@@ -99,11 +78,7 @@ class InterpreterContext : public ContextInterface {
      * @param handler A shared pointer to an InterpreterPrintHandler used for output operations.
      *                If nullptr, print operations will be silently ignored.
      */
-    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params) : output_handler(handler), shell_parameters(params) {
-        initialize_constants();
-        push_variables();  // Start with an initial variable scope
-    }
-
+    InterpreterContext(std::shared_ptr<InterpreterPrintHandler> handler, const ShellParameters& params, ModuleRegister modules);
     /**
      * @brief Gets the shell parameters (const version).
      *
@@ -143,22 +118,7 @@ class InterpreterContext : public ContextInterface {
      * @return A shared pointer to the SymObject associated with the given name,
      *         or nullptr if the variable does not exist.
      */
-    std::shared_ptr<SymObject> get_variable(const std::string& name) {
-        auto current_vars = variables.empty() ? nullptr : &variables.top();
-
-        if (!current_vars) {
-            throw ParsingTypeException("No variable scope available when trying to access variable: " + name);
-        }
-        auto it = current_vars->find(name);
-        if (it != current_vars->end()) {
-            return it->second;
-        }
-        auto const_it = constants.find(name);
-        if (const_it != constants.end()) {
-            return const_it->second;
-        }
-        return nullptr;
-    }
+    std::shared_ptr<SymObject> get_variable(const std::string& name);
 
     /**
      * @brief Stores or updates a variable in the context.
@@ -168,15 +128,7 @@ class InterpreterContext : public ContextInterface {
      *
      * @note If a variable with the given name already exists, it will be overwritten.
      */
-    void set_variable(const std::string& name, std::shared_ptr<SymObject> value) {
-        if (constants.find(name) != constants.end()) {
-            throw ParsingTypeException("Cannot modify constant: " + name);
-        }
-        if (variables.empty()) {
-            throw ParsingTypeException("No variable scope available when trying to set variable: " + name);
-        }
-        variables.top()[name] = value;
-    }
+    void set_variable(const std::string& name, std::shared_ptr<SymObject> value);
 
     inline void increment_steps() {
         steps++;
@@ -188,5 +140,9 @@ class InterpreterContext : public ContextInterface {
 
     void reset_steps() {
         steps = 0;
+    }
+
+    const ModuleRegister& get_module_register() const {
+        return modules;
     }
 };

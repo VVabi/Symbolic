@@ -15,6 +15,7 @@ add_executable(Symbolic
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/interpreter/polish_notation/polish_core.cpp
+        src/interpreter/context.cpp
         src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
@@ -22,6 +23,11 @@ add_executable(Symbolic
         src/shell/options/cmd_line_options.cpp
         src/types/sym_types/sym_math.cpp
         src/common/common_datatypes.cpp
+        src/modules/module_registration/module_registration.cpp
+        src/modules/module_factory.cpp
+        src/modules/string/module_string.cpp
+        src/modules/combinatorics/module_combinatorics.cpp
+        src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
 )
 
 add_executable(Symbolic_tests
@@ -35,6 +41,7 @@ add_executable(Symbolic_tests
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/interpreter/polish_notation/polish_core.cpp
+        src/interpreter/context.cpp
         src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
@@ -42,6 +49,11 @@ add_executable(Symbolic_tests
         src/shell/options/cmd_line_options.cpp
         src/common/common_datatypes.cpp
         src/types/sym_types/sym_math.cpp
+        src/modules/module_registration/module_registration.cpp
+        src/modules/module_factory.cpp
+        src/modules/string/module_string.cpp
+        src/modules/combinatorics/module_combinatorics.cpp
+        src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
         src/test/test_data/power_series_parsing_testdata.cpp
         src/test/parsing/test_power_series_parsing.cpp
         src/test/parsing/test_value_parsing.cpp
@@ -66,6 +78,7 @@ add_executable(Symbolic_playground
         src/parsing/expression_parsing/shunting_yard.cpp
         src/parsing/expression_parsing/math_expression_parser.cpp
         src/interpreter/polish_notation/polish_core.cpp
+        src/interpreter/context.cpp
         src/math/power_series/power_series_functions.cpp
         src/shell/parameters/parameters.cpp
         src/shell/shell.cpp
@@ -77,6 +90,11 @@ add_executable(Symbolic_playground
         src/test/shell/test_shell.cpp
         src/test/script/top_level_script_tests.cpp
         src/test/shell/options/test_options.cpp
+        src/modules/module_registration/module_registration.cpp
+        src/modules/module_factory.cpp
+        src/modules/string/module_string.cpp
+        src/modules/combinatorics/module_combinatorics.cpp
+        src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

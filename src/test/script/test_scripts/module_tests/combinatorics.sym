@@ -1,0 +1,4 @@
+println(combinatorics.factorial(10))
+a = combinatorics.factorial(5)
+b = combinatorics.factorial(6)
+println(a+b+combinatorics.factorial(4))
