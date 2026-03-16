@@ -51,7 +51,7 @@ void ModuleRegister::register_module(const std::string& name, const Module& new_
     }
 }
 
-std::shared_ptr<Module> ModuleRegister::get_module(const std::string& name){
+std::shared_ptr<Module> ModuleRegister::get_module(const std::string& name) {
     auto it = modules.find(name);
     if (it == modules.end()) {
         throw std::runtime_error("No module found with name: " + name);

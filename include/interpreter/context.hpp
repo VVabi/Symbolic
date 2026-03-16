@@ -153,6 +153,4 @@ class InterpreterContext : public ContextInterface, public ModuleContextInterfac
             return false;
         }
     }
-
-
 };

@@ -209,22 +209,21 @@ Module create_builtins_module() {
     ret.register_function("slice", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = get_list_argument(args[0]->get_object(), "slice");
-        
+
         int64_t start_idx = extract_integer_index(args[1]->get_object(), "slice");
         if (start_idx < 0 || start_idx > static_cast<int64_t>(list_obj->as_list().size())) {
             throw ParsingTypeException("Type error: Start index out of bounds in slice function");
         }
-        
+
         int64_t end_idx = extract_integer_index(args[2]->get_object(), "slice");
         if (end_idx < 0 || end_idx > static_cast<int64_t>(list_obj->as_list().size())) {
             throw ParsingTypeException("Type error: End index out of bounds in slice function");
         }
-        
+
         if (start_idx < end_idx) {
             std::vector<std::shared_ptr<SymObjectContainer>> sliced_elements(
-                list_obj->as_list().begin() + start_idx, 
-                list_obj->as_list().begin() + end_idx
-            );
+                list_obj->as_list().begin() + start_idx,
+                list_obj->as_list().begin() + end_idx);
             return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(sliced_elements));
         }
         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObjectContainer>>()));
