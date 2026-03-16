@@ -72,15 +72,15 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
 
     auto p = shunting_yard_algorithm(formula_deque);
 
+    for (auto& element : p) {
+        element.replace_builtins(context);
+    }
+
     if (context->get_shell_parameters().shunting_yard_output) {
         std::cout << "Shunting Yard output:\n";
         for (const auto & element : p) {
             element.debug_print(std::cout, 0, context);
         }
-    }
-
-    for (auto& element : p) {
-        element.replace_builtins(context);
     }
     LexerDeque<ParsedCodeElement> polish(std::move(p));
     return parse_formula_internal(polish, context);

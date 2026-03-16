@@ -204,10 +204,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishEq>(element);
             } else if (element.data == "neq") {
                 return std::make_shared<PolishNeq>(element);
-            } else if (element.data == "print") {
-                return std::make_shared<PolishPrint>(element, false);
-            } else if (element.data == "println") {
-                return std::make_shared<PolishPrint>(element, true);
             } else if (element.data == "lt") {
                 return std::make_shared<PolishComparison>(element, LT);
             } else if (element.data == "lte") {
@@ -222,6 +218,8 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishListSet>(element);
             } else if (element.data == "list") {
                 return std::make_shared<PolishList>(element);
+            } else if (element.data == "len") {
+                return std::make_shared<PolishLength>(element);
             } else if (element.data == "dict_get") {
                 return std::make_shared<PolishDictGet>(element);
             } else if (element.data == "dict_set") {
@@ -230,8 +228,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishDict>(element);
             } else if (element.data == "dict_has_key") {
                 return std::make_shared<PolishDictHasKey>(element);
-            } else if (element.data == "len") {
-                return std::make_shared<PolishLength>(element);
             } else if (element.data == "append") {
                 return std::make_shared<PolishListAppend>(element);
             } else if (element.data == "pop") {

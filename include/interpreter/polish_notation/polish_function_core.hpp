@@ -116,7 +116,8 @@ class PolishModuleFunction: public PolishFunction {
                 module_path.push(part);
             }
             try {
-                return context->get_module_register().call_module_function(module_path, arg_values);
+                return context->get_module_register().call_module_function(
+                    module_path, arg_values, std::static_pointer_cast<ModuleContextInterface>(context));
             } catch(ParsingTypeException& e) {
                 throw EvalException(std::string("Type error when calling module function: ") + e.what(), this->get_position());
             } catch (std::exception& e) {

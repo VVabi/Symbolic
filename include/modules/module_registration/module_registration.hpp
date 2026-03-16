@@ -7,17 +7,26 @@
 #include <queue>
 #include <cstdint>
 #include "types/sym_types/sym_object.hpp"
+#include "shell/parameters/parameters.hpp"
+
+class ModuleContextInterface {
+ public:
+    virtual ~ModuleContextInterface() = default;
+    virtual const ShellParameters& get_shell_parameters() const = 0;
+    virtual void handle_print(const std::string& output, bool line_break = true) const  = 0;
+};
+
 
 class ModuleFunction {
     uint32_t min_num_args;
     uint32_t max_num_args;
-    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func;
+    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func;
  public:
     ModuleFunction(uint32_t min_num_args, uint32_t max_num_args,
-    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func) :
+    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func) :
     min_num_args(min_num_args), max_num_args(max_num_args), func(func) { }
 
-    std::shared_ptr<SymObjectContainer> call(std::vector<std::shared_ptr<SymObjectContainer>> args) const;
+    std::shared_ptr<SymObjectContainer> call(std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) const;
 };
 
 class Module {
@@ -28,11 +37,12 @@ class Module {
     Module(std::string name): name(name) { }
 
     void register_function(const std::string& name, uint32_t min_num_args, uint32_t max_num_args,
-        std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>)> func);
+        std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func);
     void register_submodule(const std::string& name, const Module& submodule);
 
     std::shared_ptr<SymObjectContainer> call_function(std::queue<std::string>& module_path,
-            std::vector<std::shared_ptr<SymObjectContainer>>& args) const;
+            std::vector<std::shared_ptr<SymObjectContainer>>& args,
+            const std::shared_ptr<ModuleContextInterface>& context) const;
     const std::string& get_name() const {
         return name;
     }
@@ -48,6 +58,7 @@ class ModuleRegister {
     void register_module(const std::string& name, const Module& new_module);
     std::shared_ptr<Module> get_module(const std::string& name);
     std::shared_ptr<SymObjectContainer> call_module_function(std::queue<std::string>& module_path,
-        std::vector<std::shared_ptr<SymObjectContainer>>& args) const;
+        std::vector<std::shared_ptr<SymObjectContainer>>& args,
+        const std::shared_ptr<ModuleContextInterface>& context) const;
     bool is_builtin(const std::string& name) const;
 };

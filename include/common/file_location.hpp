@@ -110,7 +110,6 @@ class CodePlaceIdentifier {
     std::string file_name;
     uint32_t position;
 
-
  public:
     CodePlaceIdentifier(const std::string& file_name, const uint32_t position) :
     file_name(file_name), position(position) { }
