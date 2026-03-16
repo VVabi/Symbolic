@@ -116,45 +116,23 @@ Module create_builtins_module() {
     });
     ret.register_function("list_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
-        auto list_obj = std::dynamic_pointer_cast<SymListObject>(args[0]->get_object());
-        if (!list_obj) {
-            throw ParsingTypeException("Type error: Expected list as first argument for list_set function");
-        }
-        auto index_obj = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(args[1]->get_object());
-        if (!index_obj) {
-            throw ParsingTypeException("Type error: Expected integer as second argument for list_set function");
-        }
-        auto index_value = index_obj->as_value();
-        if (index_value.get_denominator() != BigInt(1)) {
-            throw ParsingTypeException("Type error: Expected integer value for index in list_set function");
-        }
-        auto int_index = index_value.get_numerator().as_int64();  // TODO(vabi): potential overflow issues
+        auto list_obj = get_list_argument(args[0]->get_object(), "list_set");
+        int64_t int_index = extract_integer_index(args[1]->get_object(), "list_set");
         if (int_index < 0 || static_cast<size_t>(int_index) >= list_obj->as_list().size()) {
             throw ParsingTypeException("Index out of bounds in list_set function");
         }
         list_obj->set(static_cast<size_t>(int_index), args[2]);
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     });
-     ret.register_function("list_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
-         UNUSED(context);
-         auto list_obj = std::dynamic_pointer_cast<SymListObject>(args[0]->get_object());
-         if (!list_obj) {
-             throw ParsingTypeException("Type error: Expected list as first argument for list_get function");
-         }
-         auto index_obj = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(args[1]->get_object());
-         if (!index_obj) {
-             throw ParsingTypeException("Type error: Expected integer as second argument for list_get function");
-         }
-         auto index_value = index_obj->as_value();
-         if (index_value.get_denominator() != BigInt(1)) {
-             throw ParsingTypeException("Type error: Expected integer value for index in list_get function");
-         }
-         auto int_index = index_value.get_numerator().as_int64();  // TODO(vabi): potential overflow issues
-         if (int_index < 0 || static_cast<size_t>(int_index) >= list_obj->as_list().size()) {
-             throw ParsingTypeException("Index out of bounds in list_get function");
-         }
-         return list_obj->at(static_cast<size_t>(int_index));
-     });
+    ret.register_function("list_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto list_obj = get_list_argument(args[0]->get_object(), "list_get");
+        int64_t int_index = extract_integer_index(args[1]->get_object(), "list_get");
+        if (int_index < 0 || static_cast<size_t>(int_index) >= list_obj->as_list().size()) {
+            throw ParsingTypeException("Index out of bounds in list_get function");
+        }
+        return list_obj->at(static_cast<size_t>(int_index));
+    });
 
     // Dict functions
     ret.register_function("dict", 0, 0, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
