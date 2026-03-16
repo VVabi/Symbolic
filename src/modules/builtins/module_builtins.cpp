@@ -91,21 +91,21 @@ std::shared_ptr<SymObjectContainer> print(std::vector<std::shared_ptr<SymObjectC
 
 Module create_builtins_module() {
     Module ret = Module("builtins");
-    ret.register_function("copy", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("copy", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         return std::make_shared<SymObjectContainer>(args[0]->get_object()->clone());
     });
-    ret.register_function("print", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("print", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return print(args, context, false);
     });
-    ret.register_function("println", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("println", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return print(args, context, true);
     });
-    ret.register_function("list", 0, UINT32_MAX, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("list", 0, UINT32_MAX, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(args));
     });
-    ret.register_function("len", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("len", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = std::dynamic_pointer_cast<SymListObject>(args[0]->get_object());
         if (!list_obj) {
@@ -114,7 +114,7 @@ Module create_builtins_module() {
         auto length = static_cast<int64_t>(list_obj->as_list().size());
         return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(length), BigInt(1))));
     });
-    ret.register_function("list_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("list_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = get_list_argument(args[0]->get_object(), "list_set");
         int64_t int_index = extract_integer_index(args[1]->get_object(), "list_set");
@@ -124,7 +124,7 @@ Module create_builtins_module() {
         list_obj->set(static_cast<size_t>(int_index), args[2]);
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     });
-    ret.register_function("list_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("list_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = get_list_argument(args[0]->get_object(), "list_get");
         int64_t int_index = extract_integer_index(args[1]->get_object(), "list_get");
@@ -135,21 +135,21 @@ Module create_builtins_module() {
     });
 
     // Dict functions
-    ret.register_function("dict", 0, 0, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("dict", 0, 0, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(args);
         UNUSED(context);
         std::map<std::string, std::shared_ptr<SymObjectContainer>> empty_dict;
         return std::make_shared<SymObjectContainer>(std::make_shared<SymDictObject>(empty_dict));
     });
 
-    ret.register_function("dict_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("dict_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto dict_obj = get_dict_argument(args[0]->get_object(), "dict_get");
         auto key = args[1]->get_object();
         return dict_obj->get(key);
     });
 
-    ret.register_function("dict_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("dict_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto dict_obj = get_dict_argument(args[0]->get_object(), "dict_set");
         auto key = args[1]->get_object();
@@ -158,7 +158,7 @@ Module create_builtins_module() {
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     });
 
-    ret.register_function("dict_has_key", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("dict_has_key", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto dict_obj = get_dict_argument(args[0]->get_object(), "dict_has_key");
         auto key = args[1]->get_object();
@@ -166,7 +166,7 @@ Module create_builtins_module() {
     });
 
     // List functions: append, pop, slice
-    ret.register_function("append", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("append", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = get_list_argument(args[0]->get_object(), "append");
         auto value = args[1];
@@ -174,7 +174,7 @@ Module create_builtins_module() {
         return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
     });
 
-    ret.register_function("pop", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("pop", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = get_list_argument(args[0]->get_object(), "pop");
         auto value = list_obj->pop();
@@ -184,7 +184,7 @@ Module create_builtins_module() {
         return value;
     });
 
-    ret.register_function("slice", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("slice", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         UNUSED(context);
         auto list_obj = get_list_argument(args[0]->get_object(), "slice");
 

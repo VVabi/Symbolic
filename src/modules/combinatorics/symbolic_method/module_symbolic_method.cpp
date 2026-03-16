@@ -2,13 +2,12 @@
 #include "types/sym_types/sym_string_object.hpp"
 #include "types/sym_types/sym_math_object.hpp"
 #include "common/subset_parser.hpp"
-#include "exceptions/invalid_function_arg_exception.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 #include "math/combinatorics/symbolic_method/symbolic_method_core.hpp"
 
 // Helper function to apply symbolic method operators
 inline std::shared_ptr<SymObjectContainer> apply_symbolic_method_operator(
-    std::vector<std::shared_ptr<SymObjectContainer>> args,
+    std::vector<std::shared_ptr<SymObjectContainer>>& args,
     const std::shared_ptr<ModuleContextInterface>& context,
     SymbolicMethodOperator op,
     const std::string& operator_name) {
@@ -35,31 +34,31 @@ inline std::shared_ptr<SymObjectContainer> apply_symbolic_method_operator(
 Module create_symbolic_method_module() {
     Module ret = Module("symbolic_method");
 
-    ret.register_function("SEQ", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("SEQ", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::SEQ, "SEQ");
     });
 
-    ret.register_function("MSET", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("MSET", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::MSET, "MSET");
     });
 
-    ret.register_function("PSET", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("PSET", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::PSET, "PSET");
     });
 
-    ret.register_function("CYC", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("CYC", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::CYC, "CYC");
     });
 
-    ret.register_function("LSET", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("LSET", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::LSET, "LSET");
     });
 
-    ret.register_function("LCYC", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("LCYC", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::LCYC, "LCYC");
     });
 
-    ret.register_function("INVMSET", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+    ret.register_function("INVMSET", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
         return apply_symbolic_method_operator(args, context, SymbolicMethodOperator::INV_MSET, "INVMSET");
     });
 

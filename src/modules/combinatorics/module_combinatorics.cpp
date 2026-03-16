@@ -10,7 +10,7 @@
 
 Module create_combinatorics_module() {
         Module ret = Module("combinatorics");
-        ret.register_function("factorial", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) {
+        ret.register_function("factorial", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
             UNUSED(context);
             auto num_obj = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(args[0]->get_object());
             if (!num_obj) {

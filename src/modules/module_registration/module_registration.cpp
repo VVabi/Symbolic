@@ -1,7 +1,7 @@
 #include "modules/module_registration/module_registration.hpp"
 #include "exceptions/parsing_type_exception.hpp"
 
-std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) const {
+std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) const {
     if (args.size() < min_num_args || args.size() > max_num_args) {
         throw ParsingTypeException("Incorrect number of arguments for module function, expected between "+std::to_string(min_num_args)+
             " and "+std::to_string(max_num_args)+", got "+std::to_string(args.size()));
@@ -12,7 +12,7 @@ std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared
 void Module::register_function(const std::string& name,
                                 uint32_t min_num_args,
                                 uint32_t max_num_args,
-                                std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func) {
+                                std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>&, const std::shared_ptr<ModuleContextInterface>&)> func) {
     if (!functions.insert({name, ModuleFunction(min_num_args, max_num_args, func)}).second) {
         throw std::runtime_error("Failed to register module function with name: " + name);
     }
