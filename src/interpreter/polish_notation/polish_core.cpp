@@ -212,14 +212,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishComparison>(element, GT);
             } else if (element.data == "gte") {
                 return std::make_shared<PolishComparison>(element, GTE);
-            } else if (element.data == "list_get") {
-                return std::make_shared<PolishListGet>(element);
-            } else if (element.data == "list_set") {
-                return std::make_shared<PolishListSet>(element);
-            } else if (element.data == "list") {
-                return std::make_shared<PolishList>(element);
-            } else if (element.data == "len") {
-                return std::make_shared<PolishLength>(element);
             } else if (element.data == "dict_get") {
                 return std::make_shared<PolishDictGet>(element);
             } else if (element.data == "dict_set") {
