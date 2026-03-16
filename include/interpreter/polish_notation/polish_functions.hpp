@@ -124,36 +124,6 @@ class PolishCoefficient: public PolishFunction {
     }
 };
 
-class PolishSymbolicMethodOperator: public PolishFunction {
-    SymbolicMethodOperator op;
-
- public:
-    PolishSymbolicMethodOperator(ParsedCodeElement element,
-        const SymbolicMethodOperator op): PolishFunction(element, 1, 2), op(op) {}
-    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context) {
-        auto result = std::dynamic_pointer_cast<SymMathObject>(iterate_wrapped(cmd_list, context)->get_object());
-        if (!result) {
-            throw ParsingTypeException("Type error: Expected mathematical object as argument in symbolic method operator");
-        }
-
-        std::string subset_str = "";
-        if (get_num_args() == 2) {
-            if (op == SymbolicMethodOperator::INV_MSET) {
-                throw InvalidFunctionArgException("Explicit subset arg for inv mset not allowed", this->get_position());
-            }
-            auto arg = std::dynamic_pointer_cast<SymStringObject>(iterate_wrapped(cmd_list, context)->get_object());
-            if (!arg) {
-                throw ParsingTypeException("Type error: Expected string object as second argument in symbolic method operator");
-            }
-            subset_str = arg->to_string();
-        }
-        auto fp_size = context->get_shell_parameters().powerseries_expansion_size;
-        auto subset = Subset(subset_str, fp_size);
-        return std::make_shared<SymObjectContainer>(result->symbolic_method(op, fp_size, subset));
-    }
-};
-
 class PolishEval: public PolishFunction {
  public:
     PolishEval(ParsedCodeElement element): PolishFunction(element, 2, 2) {

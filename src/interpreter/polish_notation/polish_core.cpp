@@ -157,23 +157,9 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                 return std::make_shared<PolishLandau>(element);
             } else if (element.data == "coeff") {
                 return std::make_shared<PolishCoefficient>(element, false);
-            } else if (element.data == "egfcoeff") {
-                return std::make_shared<PolishCoefficient>(element, true);
-            } else if (element.data == "PSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::PSET);
-            } else if (element.data == "MSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::MSET);
-            } else if (element.data == "CYC") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::CYC);
-            } else if (element.data == "SEQ") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::SEQ);
-            } else if (element.data == "LSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::LSET);
-            } else if (element.data == "LCYC") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::LCYC);
-            } else if (element.data == "INVMSET") {
-                return std::make_shared<PolishSymbolicMethodOperator>(element, SymbolicMethodOperator::INV_MSET);
-            } else if (element.data == "eval") {
+             } else if (element.data == "egfcoeff") {
+                 return std::make_shared<PolishCoefficient>(element, true);
+             } else if (element.data == "eval") {
                 return std::make_shared<PolishEval>(element);
             } else if (element.data == "Mod") {
                 return std::make_shared<PolishMod>(element);

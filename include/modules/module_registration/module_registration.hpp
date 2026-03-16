@@ -20,13 +20,13 @@ class ModuleContextInterface {
 class ModuleFunction {
     uint32_t min_num_args;
     uint32_t max_num_args;
-    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func;
+    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>&, const std::shared_ptr<ModuleContextInterface>&)> func;
  public:
     ModuleFunction(uint32_t min_num_args, uint32_t max_num_args,
-    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func) :
+    std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>&, const std::shared_ptr<ModuleContextInterface>&)> func) :
     min_num_args(min_num_args), max_num_args(max_num_args), func(func) { }
 
-    std::shared_ptr<SymObjectContainer> call(std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context) const;
+    std::shared_ptr<SymObjectContainer> call(std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) const;
 };
 
 class Module {
@@ -37,7 +37,7 @@ class Module {
     Module(std::string name): name(name) { }
 
     void register_function(const std::string& name, uint32_t min_num_args, uint32_t max_num_args,
-        std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>, const std::shared_ptr<ModuleContextInterface>&)> func);
+        std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>&, const std::shared_ptr<ModuleContextInterface>&)> func);
     void register_submodule(const std::string& name, const Module& submodule);
 
     std::shared_ptr<SymObjectContainer> call_function(std::queue<std::string>& module_path,
