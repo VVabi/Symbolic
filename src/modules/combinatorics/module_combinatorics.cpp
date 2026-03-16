@@ -32,6 +32,6 @@ Module create_combinatorics_module() {
             return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(result, BigInt(1))));
         });
 
-        ret.register_submodule("symbolic", create_symbolic_method_module());
+        ret.register_submodule("symbolic_method", create_symbolic_method_module());
         return ret;
 }
