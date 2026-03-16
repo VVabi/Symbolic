@@ -1,0 +1,55 @@
+=== Test copy() ===
+[1, 2, 3]
+[1, 2, 3]
+=== Test len() ===
+5
+0
+=== Test list() ===
+[10, 20, 30]
+[]
+=== Test list_get() and list_set() ===
+100
+200
+300
+[100, 999, 300]
+=== Test append() ===
+[1, 2, 3, 4]
+[1, 2, 3, 4, 5, 6]
+=== Test pop() ===
+50
+[10, 20, 30, 40]
+40
+[10, 20, 30]
+=== Test slice() ===
+[1, 2, 3]
+[3, 4, 5]
+[]
+[6, 7, 8]
+=== Test dict() ===
+{}
+=== Test dict_set() and dict_get() ===
+Alice
+30
+NYC
+=== Test dict_has_key() ===
+true
+false
+=== Test assignment vs copy for lists ===
+[99, 2, 3]
+[99, 2, 3]
+[10, 20, 30]
+[88, 20, 30]
+=== Test assignment vs copy for dicts ===
+modified
+modified
+original
+changed
+=== Test nested lists and dicts ===
+[[1, 2], [3, 4, 5]]
+[1, 2]
+[100, 200]
+42
+=== Test combining operations ===
+[20, 30]
+40
+[5, 20, 30]
