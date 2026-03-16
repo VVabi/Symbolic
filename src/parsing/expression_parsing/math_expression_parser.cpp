@@ -79,6 +79,9 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
         }
     }
 
+    for (auto& element : p) {
+        element.replace_builtins(context);
+    }
     LexerDeque<ParsedCodeElement> polish(std::move(p));
     return parse_formula_internal(polish, context);
 }

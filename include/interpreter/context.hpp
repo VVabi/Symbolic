@@ -148,8 +148,7 @@ class InterpreterContext : public ContextInterface {
 
     bool is_builtin(const std::string& name) const override {
         try {
-            modules.is_builtin(name);
-            return true;
+            return modules.is_builtin(name);
         } catch (std::runtime_error&) {
             return false;
         }
