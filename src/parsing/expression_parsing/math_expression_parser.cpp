@@ -53,8 +53,10 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     for (const auto& path : include_paths) {
         parse_formula_as_sym_object(context, std::make_shared<FileObject>(path));
     }
-
-    context->set_using_namespaces(std::move(using_namespaces));
+    if (file_obj->get_name() != "") {
+        context->clear_using_namespaces();
+    }
+    context->add_using_namespaces(std::move(using_namespaces));
 
     auto formula = parse_math_expression_string(output, file_obj->get_name());
 

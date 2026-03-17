@@ -165,8 +165,12 @@ class InterpreterContext : public ContextInterface, public ModuleContextInterfac
         }
     }
 
-    void set_using_namespaces(const std::vector<std::string>&& namespaces) {
-        using_namespaces = std::move(namespaces);
+    void add_using_namespaces(const std::vector<std::string>&& namespaces) {
+        using_namespaces.insert(using_namespaces.end(), namespaces.begin(), namespaces.end());
+    }
+
+    void clear_using_namespaces() {
+        using_namespaces.clear();
     }
 
     const std::vector<std::string>& get_using_namespaces() const override {
