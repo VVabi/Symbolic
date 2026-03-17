@@ -42,23 +42,31 @@ class PolishNumber: public PolishNotationElement {
 };
 
 class PolishVariable: public PolishNotationElement {
- public:
-    PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
-    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext> &context) {
-        UNUSED(cmd_list);
-        auto existing_var = context->get_variable(get_data());
-        if (!existing_var) {
-            auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
-            return std::make_shared<SymObjectContainer>(std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res));
-        }
+  public:
+     PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
+     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                         std::shared_ptr<InterpreterContext> &context) {
+         UNUSED(cmd_list);
+         
+         // First, try to get a local variable
+         auto existing_var = context->get_variable(get_data());
+         if (existing_var) {
+             if (existing_var->modifiable_in_place()) {
+                 return std::make_shared<SymObjectContainer>(existing_var);
+             }
+             return std::make_shared<SymObjectContainer>(existing_var->clone());
+         }
 
-        if (existing_var->modifiable_in_place()) {
-            return std::make_shared<SymObjectContainer>(existing_var);
-        }
+         // Second, try to get a module constant
+         auto module_constant = context->get_module_constant(get_data());
+         if (module_constant) {
+             return module_constant;
+         }
 
-        return std::make_shared<SymObjectContainer>(existing_var->clone());
-    }
+         // Third, default to symbolic variable (polynomial)
+         auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
+         return std::make_shared<SymObjectContainer>(std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res));
+     }
 };
 
 class PolishString: public PolishNotationElement {

@@ -13,6 +13,7 @@
 #include "shell/parameters/parameters.hpp"
 #include "common/file_location.hpp"
 #include "modules/module_registration/module_registration.hpp"
+#include "string_utils/string_utils.hpp"
 
 class PolishCustomFunction;
 
@@ -146,34 +147,50 @@ class InterpreterContext : public ContextInterface, public ModuleContextInterfac
     }
 
     const ModuleRegister& get_module_register() const {
-        return modules;
-    }
+         return modules;
+     }
 
-    bool is_builtin(const std::string& name) const override {
-        try {
-            return modules.is_builtin(name);
-        } catch (std::runtime_error&) {
-            return false;
-        }
-    }
+     bool is_builtin(const std::string& name) const override {
+         try {
+             return modules.is_builtin(name);
+         } catch (std::runtime_error&) {
+             return false;
+         }
+     }
 
-    bool is_module_element(const std::string& name) const override {
-        try {
-            return modules.is_valid_function(name);
-        } catch (std::runtime_error&) {
-            return false;
-        }
-    }
+     bool is_module_element(const std::string& name) const override {
+         try {
+             return modules.is_module_element(name);
+         } catch (std::runtime_error&) {
+             return false;
+         }
+     }
 
-    void add_using_namespaces(const std::vector<std::string>&& namespaces) {
-        using_namespaces.insert(using_namespaces.end(), namespaces.begin(), namespaces.end());
-    }
+     std::shared_ptr<SymObjectContainer> get_module_constant(const std::string& constant_path) const {
+         try {
+             auto parts = string_split(constant_path, '.');
+             if (parts.empty()) {
+                 throw std::runtime_error("Invalid constant path: " + constant_path);
+             }
+             std::queue<std::string> path;
+             for (size_t i = 0; i < parts.size(); ++i) {
+                 path.push(parts[i]);
+             }
+             return modules.get_module_constant(path);
+         } catch (std::runtime_error&) {
+             return nullptr;
+         }
+     }
 
-    void clear_using_namespaces() {
-        using_namespaces.clear();
-    }
+     void add_using_namespaces(const std::vector<std::string>&& namespaces) {
+         using_namespaces.insert(using_namespaces.end(), namespaces.begin(), namespaces.end());
+     }
 
-    const std::vector<std::string>& get_using_namespaces() const override {
-        return using_namespaces;
-    }
+     void clear_using_namespaces() {
+         using_namespaces.clear();
+     }
+
+     const std::vector<std::string>& get_using_namespaces() const override {
+         return using_namespaces;
+     }
 };

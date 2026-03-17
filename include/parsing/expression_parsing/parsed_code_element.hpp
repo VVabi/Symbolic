@@ -80,21 +80,21 @@ struct ParsedCodeElement {
     }
 
     void replace_using_namespaces(const std::shared_ptr<ContextInterface>& context) {
-        if (type == FUNCTION) {
-            for (const auto& name : context->get_using_namespaces()) {
-                if (context->is_module_element(name + "." + data)) {
-                    data = name + "." + data;
-                    break;
-                }
-            }
-        }
+        if (type == FUNCTION || type == VARIABLE) {
+             for (const auto& name : context->get_using_namespaces()) {
+                 if (context->is_module_element(name + "." + data)) {
+                     data = name + "." + data;
+                     break;
+                 }
+             }
+         }
 
-        auto index = sub_expressions.get_index();
-        while (!sub_expressions.is_empty()) {
-            auto& sub_expr = sub_expressions.front();
-            sub_expr.replace_using_namespaces(context);
-            sub_expressions.pop_front();
-        }
-        sub_expressions.set_index(index);
-    }
+         auto index = sub_expressions.get_index();
+         while (!sub_expressions.is_empty()) {
+             auto& sub_expr = sub_expressions.front();
+             sub_expr.replace_using_namespaces(context);
+             sub_expressions.pop_front();
+         }
+         sub_expressions.set_index(index);
+     }
 };

@@ -29,6 +29,7 @@ add_executable(Symbolic
         src/modules/builtins/module_builtins.cpp
         src/modules/combinatorics/module_combinatorics.cpp
         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
+        src/modules/math/module_math.cpp
 )
 
 add_executable(Symbolic_tests
@@ -56,6 +57,7 @@ add_executable(Symbolic_tests
         src/modules/builtins/module_builtins.cpp
         src/modules/combinatorics/module_combinatorics.cpp
         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
+        src/modules/math/module_math.cpp
         src/test/test_data/power_series_parsing_testdata.cpp
         src/test/parsing/test_power_series_parsing.cpp
         src/test/parsing/test_value_parsing.cpp
@@ -98,6 +100,7 @@ add_executable(Symbolic_playground
         src/modules/string/module_string.cpp
         src/modules/combinatorics/module_combinatorics.cpp
         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
+        src/modules/math/module_math.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
