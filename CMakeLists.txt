@@ -55,20 +55,21 @@ add_executable(Symbolic_tests
         src/modules/module_factory.cpp
         src/modules/string/module_string.cpp
         src/modules/builtins/module_builtins.cpp
-        src/modules/combinatorics/module_combinatorics.cpp
-        src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
-        src/modules/math/module_math.cpp
-        src/test/test_data/power_series_parsing_testdata.cpp
-        src/test/parsing/test_power_series_parsing.cpp
-        src/test/parsing/test_value_parsing.cpp
-        src/test/parsing/test_rational_function_parsing.cpp
-        src/test/types/bigint_tests.cpp
-        src/test/types/modlong_tests.cpp
-        src/test/types/polynomial_tests.cpp
-        src/test/shell/parameters/parameter_tests.cpp
-        src/test/shell/test_shell.cpp
-        src/test/script/top_level_script_tests.cpp
-        src/test/shell/options/test_options.cpp
+         src/modules/combinatorics/module_combinatorics.cpp
+         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
+         src/modules/math/module_math.cpp
+         src/test/test_data/power_series_parsing_testdata.cpp
+         src/test/parsing/test_power_series_parsing.cpp
+         src/test/parsing/test_value_parsing.cpp
+         src/test/parsing/test_rational_function_parsing.cpp
+         src/test/types/bigint_tests.cpp
+         src/test/types/modlong_tests.cpp
+         src/test/types/polynomial_tests.cpp
+         src/test/modules/module_constants_tests.cpp
+         src/test/shell/parameters/parameter_tests.cpp
+         src/test/shell/test_shell.cpp
+         src/test/script/top_level_script_tests.cpp
+         src/test/shell/options/test_options.cpp
 )
 
 add_executable(Symbolic_playground
