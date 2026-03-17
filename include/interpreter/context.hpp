@@ -36,6 +36,7 @@ class InterpreterContext : public ContextInterface, public ModuleContextInterfac
     std::shared_ptr<InterpreterPrintHandler> output_handler;
     std::map<std::string, std::shared_ptr<PolishCustomFunction>> custom_functions;
     std::map<std::string, PreprocessedFileNavigator> file_navigators;
+    std::vector<std::string> using_namespaces;
     uint64_t steps = 0;
     ShellParameters shell_parameters;
     ModuleRegister modules;
@@ -152,5 +153,21 @@ class InterpreterContext : public ContextInterface, public ModuleContextInterfac
         } catch (std::runtime_error&) {
             return false;
         }
+    }
+
+    bool is_module_element(const std::string& name) const override {
+        try {
+            return modules.is_valid_function(name);
+        } catch (std::runtime_error&) {
+            return false;
+        }
+    }
+
+    void set_using_namespaces(const std::vector<std::string>&& namespaces) {
+        using_namespaces = std::move(namespaces);
+    }
+
+    const std::vector<std::string>& get_using_namespaces() const override {
+        return using_namespaces;
     }
 };
