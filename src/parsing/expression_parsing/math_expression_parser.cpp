@@ -45,13 +45,18 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
     // Create file navigators map with REPL entry (empty string key, empty skipped_tokens)
     std::string output;
     std::vector<std::string> include_paths;
-    auto tokens = preprocess_file(file_obj, output, include_paths);
+    std::vector<std::string> using_namespaces;
+    auto tokens = preprocess_file(file_obj, output, include_paths, using_namespaces);
     auto navigator = PreprocessedFileNavigator(file_obj->get_name(), std::move(tokens));
     context->set_file_navigator(file_obj->get_name(), navigator);
 
     for (const auto& path : include_paths) {
         parse_formula_as_sym_object(context, std::make_shared<FileObject>(path));
     }
+    if (file_obj->get_name() != "") {
+        context->clear_using_namespaces();
+    }
+    context->add_using_namespaces(std::move(using_namespaces));
 
     auto formula = parse_math_expression_string(output, file_obj->get_name());
 
@@ -74,6 +79,7 @@ std::shared_ptr<SymObject> parse_formula_as_sym_object(
 
     for (auto& element : p) {
         element.replace_builtins(context);
+        element.replace_using_namespaces(context);
     }
 
     if (context->get_shell_parameters().shunting_yard_output) {

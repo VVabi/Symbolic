@@ -8,19 +8,25 @@
 
 std::vector<SkippedTokens> preprocess_file(const std::shared_ptr<FileLikeObject>& file_obj,
                                             std::string& output,
-                                            std::vector<std::string>& include_paths) {
+                                            std::vector<std::string>& include_paths,
+                                            std::vector<std::string>& using_namespaces) {
     std::stringstream file_input = file_obj->read_stream();
     std::stringstream output_strm;
     std::vector<SkippedTokens> skipped_tokens;
     std::string line;
     uint32_t current_position = 0;
     const std::string import_marker = "#import ";
+    const std::string using_marker = "#using ";
     while (std::getline(file_input, line)) {
         if (line.rfind(import_marker, 0) == 0) {
             // Line starts with #import, skip it
             auto path = line.substr(import_marker.size());  // Extract the path after #import (including space)
             // TODO(vabi): trim whitespaces from path
             include_paths.push_back(path);
+        } else if (line.rfind(using_marker, 0) == 0) {
+            auto ns = line.substr(using_marker.size());  // Extract the namespace after #using (including space)
+            // TODO(vabi): trim whitespaces from ns
+            using_namespaces.push_back(ns);
         }
 
         auto parts = string_split(line, '#');

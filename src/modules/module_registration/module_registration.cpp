@@ -1,5 +1,6 @@
 #include "modules/module_registration/module_registration.hpp"
 #include "exceptions/parsing_type_exception.hpp"
+#include "string_utils/string_utils.hpp"
 
 std::shared_ptr<SymObjectContainer> ModuleFunction::call(std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) const {
     if (args.size() < min_num_args || args.size() > max_num_args) {
@@ -72,9 +73,47 @@ std::shared_ptr<SymObjectContainer> ModuleRegister::call_module_function(std::qu
 }
 
 bool ModuleRegister::is_builtin(const std::string& name) const {
-    auto builtins = modules.find("builtins");
-    if (builtins == modules.end()) {
-        throw std::runtime_error("Internal error: builtins module not found in module register");
-    }
-    return builtins->second.has_function(name);
+     auto builtins = modules.find("builtins");
+     if (builtins == modules.end()) {
+         throw std::runtime_error("Internal error: builtins module not found in module register");
+     }
+     return builtins->second.has_function(name);
+}
+
+bool Module::is_valid_function(std::queue<std::string>& module_path) const {
+     if (module_path.empty()) {
+         return false;
+     }
+
+     auto name = module_path.front();
+     module_path.pop();
+
+     if (module_path.empty()) {
+         return has_function(name);
+     } else {
+         const Module* submodule = get_submodule(name);
+         if (submodule == nullptr) {
+             return false;
+         }
+         return submodule->is_valid_function(module_path);
+     }
+}
+
+bool ModuleRegister::is_valid_function(const std::string& function_path) const {
+     auto parts = string_split(function_path, '.');
+     if (parts.empty()) {
+         return false;
+     }
+
+     auto module_it = modules.find(parts[0]);
+     if (module_it == modules.end()) {
+         return false;
+     }
+
+     std::queue<std::string> path;
+     for (size_t i = 1; i < parts.size(); ++i) {
+         path.push(parts[i]);
+     }
+
+     return module_it->second.is_valid_function(path);
 }

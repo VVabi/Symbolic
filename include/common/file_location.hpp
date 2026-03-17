@@ -104,6 +104,8 @@ class ContextInterface {
     virtual PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) = 0;
     virtual bool has_file_navigator(const std::string& file_name) const = 0;
     virtual bool is_builtin(const std::string& name) const = 0;
+    virtual bool is_module_element(const std::string& name) const = 0;
+    virtual const std::vector<std::string>& get_using_namespaces() const = 0;
 };
 
 class CodePlaceIdentifier {
