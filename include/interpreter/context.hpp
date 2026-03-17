@@ -4,6 +4,8 @@
 #include <map>
 #include <cstdint>
 #include <stack>
+#include <vector>
+#include <utility>
 #include "types/sym_types/sym_object.hpp"
 #include "types/sym_types/sym_boolean.hpp"
 #include "types/sym_types/sym_void.hpp"

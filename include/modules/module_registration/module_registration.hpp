@@ -33,6 +33,7 @@ class Module {
     std::map<std::string, ModuleFunction> functions;
     std::map<std::string, Module> submodules;
     std::string name;
+
  public:
     Module(std::string name): name(name) { }
 
@@ -68,7 +69,7 @@ class Module {
 
 class ModuleRegister {
      std::map<std::string, Module> modules;
-  public:
+ public:
      void register_module(const std::string& name, const Module& new_module);
      std::shared_ptr<Module> get_module(const std::string& name);
      std::shared_ptr<SymObjectContainer> call_module_function(std::queue<std::string>& module_path,

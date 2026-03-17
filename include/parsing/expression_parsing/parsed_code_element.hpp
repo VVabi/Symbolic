@@ -81,9 +81,9 @@ struct ParsedCodeElement {
 
     void replace_using_namespaces(const std::shared_ptr<ContextInterface>& context) {
         if (type == FUNCTION) {
-            for (const auto& ns : context->get_using_namespaces()) {
-                if (context->is_module_element(ns + "." + data)) {
-                    data = ns + "." + data;
+            for (const auto& name : context->get_using_namespaces()) {
+                if (context->is_module_element(name + "." + data)) {
+                    data = name + "." + data;
                     break;
                 }
             }

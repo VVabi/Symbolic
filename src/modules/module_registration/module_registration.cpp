@@ -78,7 +78,7 @@ bool ModuleRegister::is_builtin(const std::string& name) const {
          throw std::runtime_error("Internal error: builtins module not found in module register");
      }
      return builtins->second.has_function(name);
- }
+}
 
 bool Module::is_valid_function(std::queue<std::string>& module_path) const {
      if (module_path.empty()) {
@@ -97,7 +97,7 @@ bool Module::is_valid_function(std::queue<std::string>& module_path) const {
          }
          return submodule->is_valid_function(module_path);
      }
- }
+}
 
 bool ModuleRegister::is_valid_function(const std::string& function_path) const {
      auto parts = string_split(function_path, '.');
@@ -116,4 +116,4 @@ bool ModuleRegister::is_valid_function(const std::string& function_path) const {
      }
 
      return module_it->second.is_valid_function(path);
- }
+}
