@@ -42,12 +42,12 @@ class PolishNumber: public PolishNotationElement {
 };
 
 class PolishVariable: public PolishNotationElement {
-  public:
+ public:
      PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
      std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
                                          std::shared_ptr<InterpreterContext> &context) {
          UNUSED(cmd_list);
-         
+
          // First, try to get a local variable
          auto existing_var = context->get_variable(get_data());
          if (existing_var) {

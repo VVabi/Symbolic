@@ -4,6 +4,7 @@
 #include <map>
 #include <cstdint>
 #include <stack>
+#include <queue>
 #include <vector>
 #include <utility>
 #include "types/sym_types/sym_object.hpp"
