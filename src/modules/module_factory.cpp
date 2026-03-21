@@ -2,12 +2,14 @@
 #include "modules/builtins/module_builtins.hpp"
 #include "modules/string/module_string.hpp"
 #include "modules/combinatorics/module_combinatorics.hpp"
+#include "modules/math/module_math.hpp"
 
 ModuleRegister create_module_register() {
     std::vector<std::function<Module()>> module_creators = {
         create_builtins_module,
         create_string_module,
-        create_combinatorics_module
+        create_combinatorics_module,
+        create_math_module
     };
 
     ModuleRegister ret;

@@ -55,6 +55,217 @@ The primary focus is on **generating functions for enumerative combinatorics** r
 └─────────────────────────────────────────────────────────┘
 ```
 
+### Module System
+
+The module system provides a structured way to organize and expose functionality to the scripting language. Modules contain **functions** (callable via `module.function()` syntax) and **constants** (accessible via `module.CONSTANT` syntax without parentheses).
+
+#### Core Components
+
+**Module Registration** (`include/modules/module_registration/module_registration.hpp`):
+
+```
+ModuleFunction: Wraps a C++ function with arity information
+ModuleConstant: Wraps a SymObjectContainer value (read-only)
+Module:         Container for functions, constants, and submodules
+ModuleRegister: Global registry of all modules
+InterpreterContext::get_module_constant(): Resolves dotted paths to constants
+```
+
+#### Module Structure
+
+**File structure:**
+```
+include/modules/
+├── module_registration/       # Core module system
+│   ├── module_registration.hpp
+│   └── module_registration.cpp
+├── math/                       # Example: math module
+│   ├── module_math.hpp
+│   └── (implementation)
+├── builtins/                   # Built-in functions module
+└── combinatorics/              # Analytic combinatorics
+```
+
+#### Registering a Module
+
+**Step 1: Create module header**
+
+File: `include/modules/mymodule/module_mymodule.hpp`
+
+```cpp
+#pragma once
+#include "modules/module_registration/module_registration.hpp"
+
+Module create_mymodule();
+```
+
+**Step 2: Implement module**
+
+File: `src/modules/mymodule/module_mymodule.cpp`
+
+```cpp
+#include "modules/mymodule/module_mymodule.hpp"
+
+Module create_mymodule() {
+    Module ret = Module("mymodule");
+
+    // Register constants
+    auto pi_val = std::make_shared<SymObjectContainer>(
+        std::make_shared<ValueType<double>>(3.14159));
+    ret.register_constant("PI", pi_val);
+
+    // Register functions
+    ret.register_function("double", 1, 1,
+        [](std::vector<std::shared_ptr<SymObjectContainer>>& args,
+           const std::shared_ptr<ModuleContextInterface>& context) {
+            // Implementation: multiply by 2
+            auto val = std::dynamic_pointer_cast<ValueType<double>>(
+                args[0]->get_object());
+            if (!val) throw std::runtime_error("Expected double");
+            double result = val->get_value() * 2.0;
+            return std::make_shared<SymObjectContainer>(
+                std::make_shared<ValueType<double>>(result));
+        });
+
+    return ret;
+}
+```
+
+**Step 3: Register with interpreter**
+
+File: `src/interpreter/context.cpp` (in `InterpreterContext::initialize_modules()`)
+
+```cpp
+ModuleRegister& registry = ModuleRegister::get_instance();
+registry.register_module("mymodule", create_mymodule());
+```
+
+**Step 4: Update CMakeLists.txt**
+
+Add implementation files to build targets:
+```cmake
+add_executable(Symbolic_tests
+    src/modules/mymodule/module_mymodule.cpp
+    # ... other sources
+)
+```
+
+#### Using Modules in Scripts
+
+**Access constants (no parentheses):**
+```
+println(math.PI)      # 3.14159...
+result = math.E * 2   # 2.71828... * 2
+```
+
+**Call functions (with parentheses):**
+```
+println(string.len("hello"))     # 5
+println(math.floor(3.7))         # 3 (if implemented)
+```
+
+**Using #using directive:**
+```
+#using math
+println(PI)           # PI accessible without module prefix
+e_doubled = E * 2     # Works after #using
+```
+
+**Nested modules:**
+```
+# Access nested module constants/functions
+println(math.constants.GOLDEN_RATIO)
+```
+
+#### Module Constant Features
+
+**Read-only:** Module constants are immutable from the script perspective. They cannot be reassigned:
+```
+math.PI = 5  # ERROR: Cannot assign to module constant
+```
+
+**Type support:** Constants can be any `SymObjectContainer` type:
+- Numbers (double, BigInt, RationalNumber, ModLong)
+- Strings
+- Lists
+- Dicts
+- And any other supported type
+
+**Collision detection:** Attempting to register a function and constant with the same name in the same module throws `std::runtime_error`:
+```cpp
+module.register_function("VALUE", ...);
+module.register_constant("VALUE", ...);  // ERROR: Collision!
+```
+
+**Path resolution:** The interpreter uses `std::queue<std::string>` to traverse nested module paths:
+```cpp
+std::queue<std::string> path;
+path.push("math");
+path.push("constants");
+path.push("GOLDEN_RATIO");
+auto value = registry.get_module_constant(path);
+```
+
+#### Built-in Modules
+
+**math:** Mathematical constants (PI, E)
+
+**string:** String operations (len, split, concat, as_list)
+
+**combinatorics:** Symbolic method operators (SEQ, MSET, PSET, CYC, etc.)
+
+**builtins:** Built-in functions (list, dict, append, pop, etc.)
+
+#### Extending the Module System
+
+**To add a new module:**
+
+1. Create `include/modules/mymodule/module_mymodule.hpp` and `.cpp`
+2. Implement `create_mymodule()` function
+3. Register in `InterpreterContext::initialize_modules()`
+4. Add to CMakeLists.txt build targets
+5. Add tests in `src/test/modules/`
+
+**To add constants to existing module:**
+
+```cpp
+auto value = std::make_shared<SymObjectContainer>(...);
+module.register_constant("MY_CONST", value);
+```
+
+**To add functions to existing module:**
+
+```cpp
+module.register_function("my_func", min_args, max_args, lambda_function);
+```
+
+#### Module-Related Classes
+
+| Class | Purpose |
+|-------|---------|
+| `ModuleFunction` | Wraps a C++ callable with arity checking |
+| `ModuleConstant` | Wraps a `SymObjectContainer` value |
+| `Module` | Container for functions, constants, submodules |
+| `ModuleRegister` | Global registry (singleton pattern) |
+| `ModuleContextInterface` | Interface for passing context to module functions |
+
+#### Testing Modules
+
+**Unit tests:** `src/test/modules/module_constants_tests.cpp`
+
+**Script tests:** `src/test/script/test_scripts/module_tests/`
+
+Example: `src/test/script/test_scripts/module_tests/math.sym`
+
+```
+println(math.PI)
+println(math.E)
+result = math.PI * 2
+println(result)
+```
+
+---
+
 ### Type System: User-Visible vs. Internal
 
 #### User-Visible Mathematical Types
