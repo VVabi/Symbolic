@@ -130,7 +130,7 @@ bool test_derangements() {
     bool ret = true;
     auto primes = get_test_primes();
     for (auto p : primes) {
-        auto derangements_gf = "exp(Mod(1,"+std::to_string(p)+")*(-z))/(1-z)";
+        auto derangements_gf = "math.exp(Mod(1,"+std::to_string(p)+")*(-z))/(1-z)";
         uint32_t num_coeffs         = 10000;
         auto res                    = parse_as_power_series<ModLong>(derangements_gf, num_coeffs, ModLong(1, p)).first;
         auto factorial_generator    = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
@@ -158,7 +158,7 @@ bool test_catalan_numbers() {
 
     auto primes = get_test_primes();
     for (auto p : primes) {
-        auto catalan_gf = "(Mod(1,"+std::to_string(p)+")-sqrt(Mod(1, "+std::to_string(p)+")-4*z))/(2*z)";
+        auto catalan_gf = "(Mod(1,"+std::to_string(p)+")-math.sqrt(Mod(1, "+std::to_string(p)+")-4*z))/(2*z)";
         uint32_t num_coeffs = 10000;
         auto res = parse_as_power_series<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p)).first;
 
