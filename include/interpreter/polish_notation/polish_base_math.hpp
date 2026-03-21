@@ -181,6 +181,12 @@ class PolishAssign: public PolishNotationElement {
         auto next = cmd_list.peek();
 
         if (next && next.value()->get_type() == expression_type::VARIABLE) {
+            if (next.value()->get_data() == "_") {
+                throw EvalException("Cannot assign to _", this->get_position());
+            }
+            if (next.value()->get_data().find('.') != std::string::npos) {
+                throw EvalException("Cannot assign to constant", this->get_position());
+            }
             cmd_list.pop_front();
 
             auto var_value = iterate_wrapped(cmd_list, context)->get_object();

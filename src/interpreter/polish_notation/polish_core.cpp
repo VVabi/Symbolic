@@ -60,7 +60,7 @@ class PolishVariable: public PolishNotationElement {
          // Second, try to get a module constant
          auto module_constant = context->get_module_constant(get_data());
          if (module_constant) {
-             return module_constant;
+             return std::make_shared<SymObjectContainer>(module_constant->get_object()->clone());
          }
 
          // Third, default to symbolic variable (polynomial)
