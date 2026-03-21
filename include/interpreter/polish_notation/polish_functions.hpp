@@ -10,24 +10,6 @@
 #include "exceptions/parsing_exceptions.hpp"
 #include "interpreter/polish_notation/polish_function_core.hpp"
 
-class PolishPowerSeriesFunction: public PolishFunction {
-    PowerSeriesBuiltinFunctionType type;
-
- public:
-    PolishPowerSeriesFunction(ParsedCodeElement element, PowerSeriesBuiltinFunctionType type) : PolishFunction(element, 1, 1), type(type) { }
-
-    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
-                                        std::shared_ptr<InterpreterContext>& context) {
-        auto result = iterate_wrapped(cmd_list, context)->get_object();
-        auto math_obj = std::dynamic_pointer_cast<SymMathObject>(result);
-        if (!math_obj) {
-            throw ParsingTypeException("Type error: Expected mathematical object for power series function");
-        }
-        auto fp_size = context->get_shell_parameters().powerseries_expansion_size;
-        return std::make_shared<SymObjectContainer>(math_obj->power_series_function(type, fp_size));
-    }
-};
-
 
 class PolishLandau: public PolishFunction {
  public:
