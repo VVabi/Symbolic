@@ -181,30 +181,54 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                     throw EvalException("Number of expressions inside if statement not set", element.position);
                 }
                 return std::make_shared<PolishIf>(element);
-            } else if (element.data == "eq") {
-                return std::make_shared<PolishEq>(element);
-            } else if (element.data == "neq") {
-                return std::make_shared<PolishNeq>(element);
-            } else if (element.data == "lt") {
-                return std::make_shared<PolishComparison>(element, LT);
-            } else if (element.data == "lte") {
-                return std::make_shared<PolishComparison>(element, LTE);
-            } else if (element.data == "gt") {
-                return std::make_shared<PolishComparison>(element, GT);
-            } else if (element.data == "gte") {
-                return std::make_shared<PolishComparison>(element, GTE);
-             } else if (element.data == "and") {
-                return std::make_shared<PolishBooleanOperator>(element, AND);
-            } else if (element.data == "or") {
-                return std::make_shared<PolishBooleanOperator>(element, OR);
-            } else if (element.data == "xor") {
-                return std::make_shared<PolishBooleanOperator>(element, XOR);
-            } else if (element.data == "nand") {
-                return std::make_shared<PolishBooleanOperator>(element, NAND);
-            } else if (element.data == "nor") {
-                return std::make_shared<PolishBooleanOperator>(element, NOR);
-            } else if (element.data == "not") {
-                return std::make_shared<PolishNotOperator>(element);
+             } else if (element.data == "eq") {
+                 auto op_element = element;
+                 op_element.data = "builtins.eq";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "neq") {
+                 auto op_element = element;
+                 op_element.data = "builtins.neq";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "lt") {
+                 auto op_element = element;
+                 op_element.data = "builtins.lt";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "lte") {
+                 auto op_element = element;
+                 op_element.data = "builtins.lte";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "gt") {
+                 auto op_element = element;
+                 op_element.data = "builtins.gt";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "gte") {
+                 auto op_element = element;
+                 op_element.data = "builtins.gte";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+              } else if (element.data == "and") {
+                 auto op_element = element;
+                 op_element.data = "builtins.and";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "or") {
+                 auto op_element = element;
+                 op_element.data = "builtins.or";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "xor") {
+                 auto op_element = element;
+                 op_element.data = "builtins.xor";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "nand") {
+                 auto op_element = element;
+                 op_element.data = "builtins.nand";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "nor") {
+                 auto op_element = element;
+                 op_element.data = "builtins.nor";
+                 return std::make_shared<PolishModuleFunction>(op_element);
+             } else if (element.data == "not") {
+                 auto op_element = element;
+                 op_element.data = "builtins.not";
+                 return std::make_shared<PolishModuleFunction>(op_element);
             } else if (element.data == "setparam") {
                 return std::make_shared<PolishSetParam>(element);
             } else if (element.data == "getparam") {
