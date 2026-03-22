@@ -1,297 +1,112 @@
 === Test copy() ===
-null
 [1, 2, 3]
 [1, 2, 3]
-[1, 2, 3]
-null
-[1, 2, 3]
-null
-null
 === Test len() ===
-null
-[1, 2, 3, 4, 5]
 5
-null
-[]
 0
-null
-null
 === Test list() ===
-null
 [10, 20, 30]
-[10, 20, 30]
-null
 []
-[]
-null
-null
 === Test list_get() and list_set() ===
-null
-[100, 200, 300]
 100
-null
 200
-null
 300
-null
-null
 [100, 999, 300]
-null
-null
 === Test append() ===
-null
-[1, 2, 3]
-null
 [1, 2, 3, 4]
-null
-null
-null
 [1, 2, 3, 4, 5, 6]
-null
-null
 === Test pop() ===
-null
-[10, 20, 30, 40, 50]
 50
-50
-null
 [10, 20, 30, 40]
-null
 40
-40
-null
 [10, 20, 30]
-null
-null
 === Test slice() ===
-null
-[1, 2, 3, 4, 5, 6, 7, 8]
 [1, 2, 3]
-[1, 2, 3]
-null
 [3, 4, 5]
-[3, 4, 5]
-null
 []
-[]
-null
 [6, 7, 8]
-[6, 7, 8]
-null
-null
 === Test dict() ===
-null
 {}
-{}
-null
-null
 === Test dict_set() and dict_get() ===
-null
-{}
-null
-null
-null
 Alice
-null
 30
-null
 NYC
-null
-null
 === Test dict_has_key() ===
-null
-{}
-null
 true
-null
 false
-null
-null
 === Test assignment vs copy for lists ===
-null
-[1, 2, 3]
-[1, 2, 3]
-99
 [99, 2, 3]
-null
 [99, 2, 3]
-null
 [10, 20, 30]
-[10, 20, 30]
-88
-[10, 20, 30]
-null
 [88, 20, 30]
-null
-null
 === Test assignment vs copy for dicts ===
-null
-{}
-null
-{"key1": value1}
-null
 modified
-null
 modified
-null
-{}
-null
-{"key2": original}
-null
 original
-null
 changed
-null
-null
 === Test nested lists and dicts ===
-null
 [[1, 2], [3, 4, 5]]
-[[1, 2], [3, 4, 5]]
-null
 [1, 2]
-null
-{}
-null
-null
 [100, 200]
-null
 42
-null
-null
 === Test combining operations ===
-null
-[10, 20, 30]
-null
-5
 [20, 30]
-[20, 30]
-null
 40
-40
-null
 [5, 20, 30]
-null
-null
 === Test comparison operators ===
-null
 true
-null
 false
-null
 true
-null
 false
-null
 true
-null
 false
-null
 true
-null
 false
-null
 true
-null
 false
-null
 true
-null
 false
-null
-null
 === Test equality with different types ===
-null
 true
-null
 false
-null
 true
-null
 false
-null
-null
 === Test boolean operators ===
-null
 true
-null
 false
-null
 false
-null
 false
-null
-null
 === Test or operator ===
-null
 true
-null
 true
-null
 true
-null
 false
-null
-null
 === Test xor operator ===
-null
 false
-null
 true
-null
 true
-null
 false
-null
-null
 === Test nand operator ===
-null
 false
-null
 true
-null
 true
-null
 true
-null
-null
 === Test nor operator ===
-null
 false
-null
 false
-null
 false
-null
 true
-null
-null
 === Test not operator ===
-null
 false
-null
 true
-null
-null
 === Test infix comparison operators ===
-null
 true
-null
 true
-null
 true
-null
 true
-null
 true
-null
 true
-null
-null
 === Test infix boolean operators ===
-null
 true
-null
 true
-null
 true
-null
