@@ -121,7 +121,11 @@ std::shared_ptr<SymObjectContainer> perform_numeric_comparison(
     throw ParsingTypeException("Type error: Expected numeric arguments for " + op + " operator");
 }
 
-// Helper: Perform binary boolean operation
+// Unified boolean operation logic for AND, OR, XOR, NAND, NOR
+// Uses eager evaluation with C++ boolean operators (&&, ||, !, !=)
+// This matches the semantics of infix operators and is called by both
+// the builtins module functions (and, or, xor, nand, nor) and the
+// infix operators (&&, ||) via PolishModuleFunction delegation
 std::shared_ptr<SymObjectContainer> perform_binary_boolean_operation(
     const std::shared_ptr<SymObject>& first,
     const std::shared_ptr<SymObject>& second,

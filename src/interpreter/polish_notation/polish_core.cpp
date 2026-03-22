@@ -9,7 +9,6 @@
 #include "interpreter/polish_notation/polish_control_flow.hpp"
 #include "interpreter/polish_notation/polish_utils.hpp"
 #include "interpreter/polish_notation/polish_list.hpp"
-#include "interpreter/polish_notation/polish_boolean_operators.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 #include "types/sym_types/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -153,10 +152,20 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
              throw EvalException("Bitwise operators are not supported", element.position);
          case INFIX_BITWISE_OR:
              throw EvalException("Bitwise operators are not supported", element.position);
-         case INFIX_LOGICAL_AND:
-             return std::make_shared<PolishBooleanOperator>(element, AND);
-         case INFIX_LOGICAL_OR:
-             return std::make_shared<PolishBooleanOperator>(element, OR);
+          case INFIX_LOGICAL_AND: {
+              auto elem = element;
+              elem.data = "builtins.and";
+              elem.num_args = 2;
+              elem.num_expressions = 2;
+              return std::make_shared<PolishModuleFunction>(elem);
+          }
+          case INFIX_LOGICAL_OR: {
+              auto elem = element;
+              elem.data = "builtins.or";
+              elem.num_args = 2;
+              elem.num_expressions = 2;
+              return std::make_shared<PolishModuleFunction>(elem);
+          }
          case INFIX_NOT_EQUAL: {
              auto elem = element;
              elem.data = "builtins.neq";
@@ -168,8 +177,13 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             return std::make_shared<PolishUnaryMinus>(element);
         case UNARY_PLUS:
             return std::make_shared<PolishUnaryPlus>(element);
-        case UNARY_NOT:
-            return std::make_shared<PolishNotOperator>(element);
+        case UNARY_NOT: {
+            auto elem = element;
+            elem.data = "builtins.not";
+            elem.num_args = 1;
+            elem.num_expressions = 1;
+            return std::make_shared<PolishModuleFunction>(elem);
+        }
         case SCOPE_START:
             return std::make_shared<PolishScopeStart>(element);
         case FUNCTION: {
