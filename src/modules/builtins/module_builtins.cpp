@@ -77,12 +77,12 @@ template<typename T>
 bool compare_values(std::shared_ptr<ValueType<T>> first_val, std::shared_ptr<ValueType<T>> second_val, const std::string& op) {
     auto first = first_val->as_value();
     auto second = second_val->as_value();
-    
+
     if (op == "lt") return first < second;
     if (op == "lte") return first <= second;
     if (op == "gt") return first > second;
     if (op == "gte") return first >= second;
-    
+
     throw ParsingTypeException("Type error: Unknown comparison operator: " + op);
 }
 
@@ -235,7 +235,7 @@ Module create_builtins_module() {
          UNUSED(context);
          auto first = args[0]->get_object();
          auto second = args[1]->get_object();
-         
+
          if (first->equals(second)) {
              return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
          } else {
@@ -247,7 +247,7 @@ Module create_builtins_module() {
          UNUSED(context);
          auto first = args[0]->get_object();
          auto second = args[1]->get_object();
-         
+
          if (!first->equals(second)) {
              return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
          } else {
@@ -441,4 +441,4 @@ Module create_builtins_module() {
      });
 
      return ret;
- }
+}
