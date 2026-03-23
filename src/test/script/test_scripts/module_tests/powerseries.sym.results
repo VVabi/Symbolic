@@ -1,0 +1,33 @@
+=== Test O() function - direct access with pure powers ===
+0*z^0+0*z^1+0*z^2+0*z^3+0*z^4+O(z^5)
+0*z^0+0*z^1+0*z^2+0*z^3+0*z^4+0*z^5+0*z^6+0*z^7+0*z^8+0*z^9+O(z^10)
+0*z^0+0*z^1+0*z^2+0*z^3+0*z^4+0*z^5+0*z^6+0*z^7+0*z^8+0*z^9+0*z^10+0*z^11+0*z^12+0*z^13+0*z^14+0*z^15+0*z^16+0*z^17+0*z^18+0*z^19+O(z^20)
+=== Test coeff() function - direct access ===
+1
+1
+1
+=== Test egfcoeff() function - direct access ===
+1
+1
+6
+=== Test eval() function - direct access ===
+1
+2
+3
+=== Test using directive with powerseries module ===
+=== Test O() with using directive and pure powers ===
+0*z^0+0*z^1+0*z^2+0*z^3+0*z^4+O(z^5)
+0*z^0+0*z^1+0*z^2+0*z^3+0*z^4+0*z^5+0*z^6+0*z^7+0*z^8+0*z^9+0*z^10+0*z^11+0*z^12+0*z^13+0*z^14+O(z^15)
+=== Test coeff() with using directive ===
+1
+1
+=== Test egfcoeff() with using directive ===
+2
+24
+=== Test eval() with using directive ===
+3/2
+2/3
+=== Test combined operations ===
+1
+2
+0*z^0+0*z^1+0*z^2+0*z^3+0*z^4+0*z^5+0*z^6+O(z^7)

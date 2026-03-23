@@ -178,25 +178,17 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
         }
         case SCOPE_START:
             return std::make_shared<PolishScopeStart>(element);
-        case FUNCTION: {
-            if (element.num_args == -1) {
-                throw EvalException("Function argument count not set for function: " + element.data, element.position);
-            }
-            if (element.data.find('.') != std::string::npos) {
-                return std::make_shared<PolishModuleFunction>(element);
-            } else if (element.data == "O") {
-                return std::make_shared<PolishLandau>(element);
-            } else if (element.data == "coeff") {
-                return std::make_shared<PolishCoefficient>(element, false);
-             } else if (element.data == "egfcoeff") {
-                 return std::make_shared<PolishCoefficient>(element, true);
-             } else if (element.data == "eval") {
-                return std::make_shared<PolishEval>(element);
-            } else if (element.data == "Mod") {
-                return std::make_shared<PolishMod>(element);
-            } else if (element.data == "ModValue") {
-                return std::make_shared<PolishModValue>(element);
-            } else if (element.data == "for") {
+         case FUNCTION: {
+             if (element.num_args == -1) {
+                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
+             }
+             if (element.data.find('.') != std::string::npos) {
+                 return std::make_shared<PolishModuleFunction>(element);
+             } else if (element.data == "Mod") {
+                 return std::make_shared<PolishMod>(element);
+             } else if (element.data == "ModValue") {
+                 return std::make_shared<PolishModValue>(element);
+             } else if (element.data == "for") {
                 if (element.num_expressions == -1) {
                     throw EvalException("Number of expressions inside for loop not set", element.position);
                 }

@@ -25,11 +25,12 @@ add_executable(Symbolic
         src/common/common_datatypes.cpp
         src/modules/module_registration/module_registration.cpp
         src/modules/module_factory.cpp
-        src/modules/string/module_string.cpp
-        src/modules/builtins/module_builtins.cpp
-        src/modules/combinatorics/module_combinatorics.cpp
-        src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
-        src/modules/math/module_math.cpp
+         src/modules/string/module_string.cpp
+         src/modules/builtins/module_builtins.cpp
+         src/modules/combinatorics/module_combinatorics.cpp
+         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
+         src/modules/math/module_math.cpp
+         src/modules/powerseries/module_powerseries.cpp
 )
 
 add_executable(Symbolic_tests
@@ -54,10 +55,11 @@ add_executable(Symbolic_tests
         src/modules/module_registration/module_registration.cpp
         src/modules/module_factory.cpp
         src/modules/string/module_string.cpp
-        src/modules/builtins/module_builtins.cpp
+         src/modules/builtins/module_builtins.cpp
          src/modules/combinatorics/module_combinatorics.cpp
          src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
          src/modules/math/module_math.cpp
+         src/modules/powerseries/module_powerseries.cpp
          src/test/test_data/power_series_parsing_testdata.cpp
          src/test/parsing/test_power_series_parsing.cpp
          src/test/parsing/test_value_parsing.cpp
@@ -99,9 +101,10 @@ add_executable(Symbolic_playground
         src/modules/module_registration/module_registration.cpp
         src/modules/module_factory.cpp
         src/modules/string/module_string.cpp
-        src/modules/combinatorics/module_combinatorics.cpp
-        src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
-        src/modules/math/module_math.cpp
+         src/modules/combinatorics/module_combinatorics.cpp
+         src/modules/combinatorics/symbolic_method/module_symbolic_method.cpp
+         src/modules/math/module_math.cpp
+         src/modules/powerseries/module_powerseries.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
