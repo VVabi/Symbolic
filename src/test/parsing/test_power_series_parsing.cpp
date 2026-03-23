@@ -68,7 +68,7 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
 
     auto string_rep = parsing_result.second;
 
-    auto checker = parse_as_power_series(string_rep, fp_size, unit);
+    auto checker = parse_as_power_series("#using powerseries\n" + string_rep, fp_size, unit);
     EXPECT_EQ(check_power_series_near_equality(checker.first, power_series), true) << "Parsing failed for " << formula << " with size " << fp_size << " and unit " << unit;
 
     return ret;

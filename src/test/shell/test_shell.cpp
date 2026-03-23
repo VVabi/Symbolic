@@ -41,7 +41,7 @@ void test_shell_power_series_parsing() {
         auto power_series_precision = expected_result.size() + additional_offset;
         *instream << "setparam(\"powerseriesprecision\", " + std::to_string(power_series_precision) << ")" << std::endl;
         *instream << "f = " + formula << std::endl;
-        std::string coeff_function_name = exponential ? "egfcoeff" : "coeff";
+        std::string coeff_function_name = exponential ? "powerseries.egfcoeff" : "powerseries.coeff";
 
         for (uint32_t ind = 0; ind < expected_result.size(); ind++) {
             *instream << coeff_function_name + "(f, " + std::to_string(ind) + ")" << std::endl;
