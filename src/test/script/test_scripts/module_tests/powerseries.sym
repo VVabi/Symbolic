@@ -1,0 +1,43 @@
+println("=== Test O() function - direct access with pure powers ===")
+println(powerseries.O(x^5))
+println(powerseries.O(x^10))
+println(powerseries.O(x^20))
+
+println("=== Test coeff() function - direct access ===")
+println(powerseries.coeff(1/(1-x), 0))
+println(powerseries.coeff(1/(1-x), 1))
+println(powerseries.coeff(1/(1-x), 5))
+
+println("=== Test egfcoeff() function - direct access ===")
+println(powerseries.egfcoeff(1/(1-x), 0))
+println(powerseries.egfcoeff(1/(1-x), 1))
+println(powerseries.egfcoeff(1/(1-x), 3))
+
+println("=== Test eval() function - direct access ===")
+println(powerseries.eval(1/(1-x), 0))
+println(powerseries.eval(1/(1-x), 1/2))
+println(powerseries.eval((1+x)/(1-x), 1/2))
+
+println("=== Test using directive with powerseries module ===")
+#using powerseries
+
+println("=== Test O() with using directive and pure powers ===")
+println(O(x^5))
+println(O(x^15))
+
+println("=== Test coeff() with using directive ===")
+println(coeff(1/(1-x), 2))
+println(coeff(1/(1-x), 4))
+
+println("=== Test egfcoeff() with using directive ===")
+println(egfcoeff(1/(1-x), 2))
+println(egfcoeff(1/(1-x), 4))
+
+println("=== Test eval() with using directive ===")
+println(eval(1/(1-x), 1/3))
+println(eval((2*x)/(1-x), 1/4))
+
+println("=== Test combined operations ===")
+println(coeff(1/(1-x), 3))
+println(eval(1/(1-x), 1/2))
+println(O(x^7))
