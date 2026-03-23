@@ -63,6 +63,96 @@ inline std::shared_ptr<SymDictObject> get_dict_argument(const std::shared_ptr<Sy
     return dict_obj;
 }
 
+// Helper: Get boolean argument
+inline std::shared_ptr<SymBooleanObject> get_boolean_argument(const std::shared_ptr<SymObject>& obj, const std::string& func_name) {
+    auto bool_obj = std::dynamic_pointer_cast<SymBooleanObject>(obj);
+    if (!bool_obj) {
+        throw ParsingTypeException("Type error: Expected boolean argument in " + func_name);
+    }
+    return bool_obj;
+}
+
+// Helper: Compare two numeric values of the same type
+template<typename T>
+bool compare_values(std::shared_ptr<ValueType<T>> first_val, std::shared_ptr<ValueType<T>> second_val, const std::string& op) {
+    auto first = first_val->as_value();
+    auto second = second_val->as_value();
+
+    if (op == "lt") return first < second;
+    if (op == "lte") return first <= second;
+    if (op == "gt") return first > second;
+    if (op == "gte") return first >= second;
+
+    throw ParsingTypeException("Type error: Unknown comparison operator: " + op);
+}
+
+// Helper: Perform numeric comparison between two objects
+std::shared_ptr<SymObjectContainer> perform_numeric_comparison(
+    const std::shared_ptr<SymObject>& first,
+    const std::shared_ptr<SymObject>& second,
+    const std::string& op) {
+    auto first_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
+    auto second_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);
+
+    if (first_num && second_num) {
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<RationalNumber<BigInt>>(first_num, second_num, op)));
+    }
+
+    auto first_double = std::dynamic_pointer_cast<ValueType<double>>(first);
+    auto second_double = std::dynamic_pointer_cast<ValueType<double>>(second);
+    if (first_double && second_double) {
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<double>(first_double, second_double, op)));
+    }
+
+    if (first_double && second_num) {
+        auto second_as_double = std::dynamic_pointer_cast<ValueType<double>>(second_num->as_double());
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<double>(first_double, second_as_double, op)));
+    }
+
+    if (first_num && second_double) {
+        auto first_as_double = std::dynamic_pointer_cast<ValueType<double>>(first_num->as_double());
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<double>(first_as_double, second_double, op)));
+    }
+
+    throw ParsingTypeException("Type error: Expected numeric arguments for " + op + " operator");
+}
+
+// Unified boolean operation logic for AND, OR, XOR, NAND, NOR
+// Uses eager evaluation with C++ boolean operators (&&, ||, !, !=)
+// This matches the semantics of infix operators and is called by both
+// the builtins module functions (and, or, xor, nand, nor) and the
+// infix operators (&&, ||) via PolishModuleFunction delegation
+std::shared_ptr<SymObjectContainer> perform_binary_boolean_operation(
+    const std::shared_ptr<SymObject>& first,
+    const std::shared_ptr<SymObject>& second,
+    const std::string& op) {
+    auto first_bool = get_boolean_argument(first, op);
+    auto second_bool = get_boolean_argument(second, op);
+
+    bool first_val = first_bool->as_boolean();
+    bool second_val = second_bool->as_boolean();
+    bool result;
+
+    if (op == "and") {
+        result = first_val && second_val;
+    } else if (op == "or") {
+        result = first_val || second_val;
+    } else if (op == "xor") {
+        result = first_val != second_val;
+    } else if (op == "nand") {
+        result = !(first_val && second_val);
+    } else if (op == "nor") {
+        result = !(first_val || second_val);
+    } else {
+        throw ParsingTypeException("Type error: Unknown boolean operator: " + op);
+    }
+
+    return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
+}
 
 std::shared_ptr<SymObjectContainer> print(std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context, bool line_break) {
     auto first = args[0]->get_object();
@@ -184,28 +274,107 @@ Module create_builtins_module() {
         return value;
     });
 
-    ret.register_function("slice", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
-        UNUSED(context);
-        auto list_obj = get_list_argument(args[0]->get_object(), "slice");
+     ret.register_function("slice", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto list_obj = get_list_argument(args[0]->get_object(), "slice");
 
-        int64_t start_idx = extract_integer_index(args[1]->get_object(), "slice");
-        if (start_idx < 0 || start_idx > static_cast<int64_t>(list_obj->as_list().size())) {
-            throw ParsingTypeException("Type error: Start index out of bounds in slice function");
-        }
+         int64_t start_idx = extract_integer_index(args[1]->get_object(), "slice");
+         if (start_idx < 0 || start_idx > static_cast<int64_t>(list_obj->as_list().size())) {
+             throw ParsingTypeException("Type error: Start index out of bounds in slice function");
+         }
 
-        int64_t end_idx = extract_integer_index(args[2]->get_object(), "slice");
-        if (end_idx < 0 || end_idx > static_cast<int64_t>(list_obj->as_list().size())) {
-            throw ParsingTypeException("Type error: End index out of bounds in slice function");
-        }
+         int64_t end_idx = extract_integer_index(args[2]->get_object(), "slice");
+         if (end_idx < 0 || end_idx > static_cast<int64_t>(list_obj->as_list().size())) {
+             throw ParsingTypeException("Type error: End index out of bounds in slice function");
+         }
 
-        if (start_idx < end_idx) {
-            std::vector<std::shared_ptr<SymObjectContainer>> sliced_elements(
-                list_obj->as_list().begin() + start_idx,
-                list_obj->as_list().begin() + end_idx);
-            return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(sliced_elements));
-        }
-        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObjectContainer>>()));
-    });
+         if (start_idx < end_idx) {
+             std::vector<std::shared_ptr<SymObjectContainer>> sliced_elements(
+                 list_obj->as_list().begin() + start_idx,
+                 list_obj->as_list().begin() + end_idx);
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(sliced_elements));
+         }
+         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObjectContainer>>()));
+     });
 
-    return ret;
+     // Comparison operators
+     ret.register_function("eq", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto first = args[0]->get_object();
+         auto second = args[1]->get_object();
+
+         if (first->equals(second)) {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
+         } else {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(false));
+         }
+     });
+
+     ret.register_function("neq", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto first = args[0]->get_object();
+         auto second = args[1]->get_object();
+
+         if (!first->equals(second)) {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
+         } else {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(false));
+         }
+     });
+
+      // Numeric comparison operators
+      ret.register_function("lt", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "lt");
+      });
+
+      ret.register_function("lte", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "lte");
+      });
+
+      ret.register_function("gt", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "gt");
+      });
+
+      ret.register_function("gte", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "gte");
+      });
+
+     // Boolean operators
+      ret.register_function("and", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "and");
+      });
+
+      ret.register_function("or", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "or");
+      });
+
+      ret.register_function("xor", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "xor");
+      });
+
+      ret.register_function("nand", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "nand");
+      });
+
+      ret.register_function("nor", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "nor");
+      });
+
+     ret.register_function("not", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto operand = get_boolean_argument(args[0]->get_object(), "not");
+         bool result = !operand->as_boolean();
+         return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
+     });
+
+     return ret;
 }

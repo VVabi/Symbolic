@@ -7,10 +7,8 @@
 #include "interpreter/polish_notation/polish_base_math.hpp"
 #include "interpreter/polish_notation/polish_functions.hpp"
 #include "interpreter/polish_notation/polish_control_flow.hpp"
-#include "interpreter/polish_notation/polish_comparison_operators.hpp"
 #include "interpreter/polish_notation/polish_utils.hpp"
 #include "interpreter/polish_notation/polish_list.hpp"
-#include "interpreter/polish_notation/polish_boolean_operators.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
 #include "types/sym_types/math_types/rational_function_type.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -115,32 +113,69 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
             return std::make_shared<PolishPow>(element);
         case INFIX_ASSIGN:
             return std::make_shared<PolishAssign>(element);
-        case INFIX_LESS:
-            return std::make_shared<PolishComparison>(element, LT);
-        case INFIX_GREATER:
-            return std::make_shared<PolishComparison>(element, GT);
-        case INFIX_EQUAL:
-            return std::make_shared<PolishEq>(element);
-        case INFIX_GREATER_EQUAL:
-            return std::make_shared<PolishComparison>(element, GTE);
-        case INFIX_LESS_EQUAL:
-            return std::make_shared<PolishComparison>(element, LTE);
-        case INFIX_BITWISE_AND:
-            throw EvalException("Bitwise operators are not supported", element.position);
-        case INFIX_BITWISE_OR:
-            throw EvalException("Bitwise operators are not supported", element.position);
-        case INFIX_LOGICAL_AND:
-            return std::make_shared<PolishBooleanOperator>(element, AND);
-        case INFIX_LOGICAL_OR:
-            return std::make_shared<PolishBooleanOperator>(element, OR);
-        case INFIX_NOT_EQUAL:
-            return std::make_shared<PolishNeq>(element);
+         case INFIX_LESS: {
+             auto elem = element;
+             elem.data = "builtins.lt";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_GREATER: {
+             auto elem = element;
+             elem.data = "builtins.gt";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.eq";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_GREATER_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.gte";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_LESS_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.lte";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_BITWISE_AND:
+             throw EvalException("Bitwise operators are not supported", element.position);
+         case INFIX_BITWISE_OR:
+             throw EvalException("Bitwise operators are not supported", element.position);
+          case INFIX_LOGICAL_AND: {
+              auto elem = element;
+              elem.data = "builtins.and";
+              elem.num_args = 2;
+              return std::make_shared<PolishModuleFunction>(elem);
+          }
+          case INFIX_LOGICAL_OR: {
+              auto elem = element;
+              elem.data = "builtins.or";
+              elem.num_args = 2;
+              return std::make_shared<PolishModuleFunction>(elem);
+          }
+         case INFIX_NOT_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.neq";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
         case UNARY_MINUS:
             return std::make_shared<PolishUnaryMinus>(element);
         case UNARY_PLUS:
             return std::make_shared<PolishUnaryPlus>(element);
-        case UNARY_NOT:
-            return std::make_shared<PolishNotOperator>(element);
+        case UNARY_NOT: {
+            auto elem = element;
+            elem.data = "builtins.not";
+            elem.num_args = 1;
+            elem.num_expressions = 1;
+            return std::make_shared<PolishModuleFunction>(elem);
+        }
         case SCOPE_START:
             return std::make_shared<PolishScopeStart>(element);
         case FUNCTION: {
@@ -181,30 +216,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
                     throw EvalException("Number of expressions inside if statement not set", element.position);
                 }
                 return std::make_shared<PolishIf>(element);
-            } else if (element.data == "eq") {
-                return std::make_shared<PolishEq>(element);
-            } else if (element.data == "neq") {
-                return std::make_shared<PolishNeq>(element);
-            } else if (element.data == "lt") {
-                return std::make_shared<PolishComparison>(element, LT);
-            } else if (element.data == "lte") {
-                return std::make_shared<PolishComparison>(element, LTE);
-            } else if (element.data == "gt") {
-                return std::make_shared<PolishComparison>(element, GT);
-            } else if (element.data == "gte") {
-                return std::make_shared<PolishComparison>(element, GTE);
-             } else if (element.data == "and") {
-                return std::make_shared<PolishBooleanOperator>(element, AND);
-            } else if (element.data == "or") {
-                return std::make_shared<PolishBooleanOperator>(element, OR);
-            } else if (element.data == "xor") {
-                return std::make_shared<PolishBooleanOperator>(element, XOR);
-            } else if (element.data == "nand") {
-                return std::make_shared<PolishBooleanOperator>(element, NAND);
-            } else if (element.data == "nor") {
-                return std::make_shared<PolishBooleanOperator>(element, NOR);
-            } else if (element.data == "not") {
-                return std::make_shared<PolishNotOperator>(element);
             } else if (element.data == "setparam") {
                 return std::make_shared<PolishSetParam>(element);
             } else if (element.data == "getparam") {
