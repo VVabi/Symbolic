@@ -117,35 +117,30 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
              auto elem = element;
              elem.data = "builtins.lt";
              elem.num_args = 2;
-             elem.num_expressions = 2;
              return std::make_shared<PolishModuleFunction>(elem);
          }
          case INFIX_GREATER: {
              auto elem = element;
              elem.data = "builtins.gt";
              elem.num_args = 2;
-             elem.num_expressions = 2;
              return std::make_shared<PolishModuleFunction>(elem);
          }
          case INFIX_EQUAL: {
              auto elem = element;
              elem.data = "builtins.eq";
              elem.num_args = 2;
-             elem.num_expressions = 2;
              return std::make_shared<PolishModuleFunction>(elem);
          }
          case INFIX_GREATER_EQUAL: {
              auto elem = element;
              elem.data = "builtins.gte";
              elem.num_args = 2;
-             elem.num_expressions = 2;
              return std::make_shared<PolishModuleFunction>(elem);
          }
          case INFIX_LESS_EQUAL: {
              auto elem = element;
              elem.data = "builtins.lte";
              elem.num_args = 2;
-             elem.num_expressions = 2;
              return std::make_shared<PolishModuleFunction>(elem);
          }
          case INFIX_BITWISE_AND:
@@ -156,21 +151,18 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
               auto elem = element;
               elem.data = "builtins.and";
               elem.num_args = 2;
-              elem.num_expressions = 2;
               return std::make_shared<PolishModuleFunction>(elem);
           }
           case INFIX_LOGICAL_OR: {
               auto elem = element;
               elem.data = "builtins.or";
               elem.num_args = 2;
-              elem.num_expressions = 2;
               return std::make_shared<PolishModuleFunction>(elem);
           }
          case INFIX_NOT_EQUAL: {
              auto elem = element;
              elem.data = "builtins.neq";
              elem.num_args = 2;
-             elem.num_expressions = 2;
              return std::make_shared<PolishModuleFunction>(elem);
          }
         case UNARY_MINUS:

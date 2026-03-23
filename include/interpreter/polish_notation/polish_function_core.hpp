@@ -18,10 +18,6 @@ class PolishFunction: public PolishNotationElement {
                             throw InvalidFunctionArgException("Function called with incorrect number of arguments: "+std::to_string(element.num_args)+
                                 ", expected between "+std::to_string(min_num_args)+" and "+std::to_string(max_num_args), element.position);
                         }
-
-                        if (element.num_expressions == -1) {
-                            throw InvalidFunctionArgException("Internal error: Function element missing num_expressions data", element.position);
-                        }
                     }
     virtual ~PolishFunction() { }
 };
