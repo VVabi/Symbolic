@@ -43,12 +43,15 @@ static auto create_landau_function() {
             if (deg <= 0) {
                 deg = 1;
             }
+
+            uint32_t udeg = static_cast<uint32_t>(deg);
+
             auto fp_size = context->get_shell_parameters().powerseries_expansion_size;
-            if (deg > fp_size) {
-                deg = fp_size;
+            if (udeg > fp_size) {
+                udeg = fp_size;
             }
             return std::make_shared<SymObjectContainer>(std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(
-                PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), (uint32_t) deg)));
+                PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), udeg)));
         }
 
         // Try ModLong rational function
