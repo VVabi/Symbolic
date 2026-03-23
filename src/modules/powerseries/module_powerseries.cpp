@@ -7,7 +7,6 @@
 #include "types/bigint.hpp"
 #include "types/rationals.hpp"
 #include "exceptions/parsing_type_exception.hpp"
-#include "exceptions/eval_exception.hpp"
 
 /**
  * @brief Creates the O() Landau symbol function.
@@ -40,7 +39,7 @@ static auto create_landau_function() {
         // Try double rational function
         auto double_result = std::dynamic_pointer_cast<RationalFunctionType<double>>(result);
         if (double_result) {
-            uint32_t deg = double_result->as_rational_function().get_numerator().degree();
+            int32_t deg = double_result->as_rational_function().get_numerator().degree();
             if (deg <= 0) {
                 deg = 1;
             }
@@ -49,7 +48,7 @@ static auto create_landau_function() {
                 deg = fp_size;
             }
             return std::make_shared<SymObjectContainer>(std::make_shared<PowerSeriesType<RationalNumber<BigInt>>>(
-                PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), deg)));
+                PowerSeries<RationalNumber<BigInt>>::get_zero(RationalNumber<BigInt>(1), (uint32_t) deg)));
         }
 
         // Try ModLong rational function
