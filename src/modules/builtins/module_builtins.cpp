@@ -386,7 +386,7 @@ Module create_builtins_module() {
       //   Examples: mod(5, 7) returns 5 mod 7
       //            mod(1/2, 7) returns 4 (the modular inverse of 2 mod 7)
       //   Throws ParsingTypeException if b is not invertible modulo m.
-      ret.register_function("mod", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+      ret.register_function("Mod", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
             UNUSED(context);
             auto arg_raw    = args[0]->get_object();
             auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(arg_raw);

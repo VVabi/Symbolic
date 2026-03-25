@@ -695,7 +695,7 @@ print(expr, "ascii")    # Print with ASCII formatting
 #### Modular Arithmetic
 ```
 Mod(value, modulus)     # Create modular integer
-ModValue(mod_int)       # Extract value from modular integer
+mod_value(mod_int)       # Extract value from modular integer
 ```
 
 #### Power Series Functions

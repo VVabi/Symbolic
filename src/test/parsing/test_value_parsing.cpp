@@ -91,12 +91,12 @@ TEST(ParsingTests, RationalValueParsing) {
     }
 }
 
-struct ModValueTestCase {
+struct mod_valueTestCase {
     std::string formula;
     ModLong expected_result;
 };
 
-std::vector<ModValueTestCase> mod_test_cases = {
+std::vector<mod_valueTestCase> mod_test_cases = {
     {"1+Mod(3,5)", ModLong(4, 5)},
     {"Mod(2,5)+Mod(3,5)", ModLong(0, 5)},
     {"Mod(3,5)*Mod(2,5)", ModLong(1, 5)},
@@ -128,7 +128,7 @@ ModLong parse_modlong_value(const std::string& input) {
 }
 
 
-TEST(ParsingTests, ModValueParsing) {
+TEST(ParsingTests, mod_valueParsing) {
     for (const auto& test_case : mod_test_cases) {
         auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters(), create_module_register());
         auto result = parse_modlong_value(parse_formula(context, std::make_shared<ReplInputObject>(test_case.formula)));

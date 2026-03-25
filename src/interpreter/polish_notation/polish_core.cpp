@@ -183,16 +183,6 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
              }
               if (element.data.find('.') != std::string::npos) {
                   return std::make_shared<PolishModuleFunction>(element);
-              } else if (element.data == "Mod") {
-                  auto elem = element;
-                  elem.data = "builtins.mod";
-                  elem.num_args = 2;
-                  return std::make_shared<PolishModuleFunction>(elem);
-              } else if (element.data == "ModValue") {
-                  auto elem = element;
-                  elem.data = "builtins.mod_value";
-                  elem.num_args = 1;
-                  return std::make_shared<PolishModuleFunction>(elem);
               } else if (element.data == "for") {
                 if (element.num_expressions == -1) {
                     throw EvalException("Number of expressions inside for loop not set", element.position);
