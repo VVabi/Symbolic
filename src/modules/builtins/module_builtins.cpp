@@ -410,6 +410,10 @@ Module create_builtins_module() {
 
             auto a = value.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
             auto b = value.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+
+            if (b > INT32_MAX || b < INT32_MIN) {
+                throw ParsingTypeException("Type error: Denominator too large in mod function");
+            }
             if (modulus_num == 1 && b == 1) {
                 return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<ModLong>>(ModLong(0, 1)));
             }
