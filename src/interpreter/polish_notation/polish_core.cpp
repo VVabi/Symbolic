@@ -5,7 +5,6 @@
 #include "exceptions/parsing_exceptions.hpp"
 #include "interpreter/polish_notation/polish.hpp"
 #include "interpreter/polish_notation/polish_base_math.hpp"
-#include "interpreter/polish_notation/polish_functions.hpp"
 #include "interpreter/polish_notation/polish_control_flow.hpp"
 #include "interpreter/polish_notation/polish_utils.hpp"
 #include "interpreter/polish_notation/polish_list.hpp"
@@ -182,13 +181,19 @@ std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const 
              if (element.num_args == -1) {
                  throw EvalException("Function argument count not set for function: " + element.data, element.position);
              }
-             if (element.data.find('.') != std::string::npos) {
-                 return std::make_shared<PolishModuleFunction>(element);
-             } else if (element.data == "Mod") {
-                 return std::make_shared<PolishMod>(element);
-             } else if (element.data == "ModValue") {
-                 return std::make_shared<PolishModValue>(element);
-             } else if (element.data == "for") {
+              if (element.data.find('.') != std::string::npos) {
+                  return std::make_shared<PolishModuleFunction>(element);
+              } else if (element.data == "Mod") {
+                  auto elem = element;
+                  elem.data = "builtins.mod";
+                  elem.num_args = 2;
+                  return std::make_shared<PolishModuleFunction>(elem);
+              } else if (element.data == "ModValue") {
+                  auto elem = element;
+                  elem.data = "builtins.mod_value";
+                  elem.num_args = 1;
+                  return std::make_shared<PolishModuleFunction>(elem);
+              } else if (element.data == "for") {
                 if (element.num_expressions == -1) {
                     throw EvalException("Number of expressions inside for loop not set", element.position);
                 }
