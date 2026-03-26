@@ -11,7 +11,7 @@ void SymbolicShellEvaluator::run() {
 }
 
 bool SymbolicShellEvaluator::run_single_input() {
-    auto file_like = shell_input->get_next_input();
+    auto file_like = shell_input->get_next_input(parser.get_autocompletable_names());
     if (!file_like) {
         // EOF or no more inputs for non-interactive sources
         return false;
@@ -41,25 +41,23 @@ ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& i
     return {processed_input, postfix, skip};
 }
 
-static std::function<std::vector<std::string>()> autocomplete_cb;
-static std::vector<std::string> autocomplete_names;
+static std::vector<std::string> autocomplete_names_local;
 
 static char * character_name_generator(const char *text, int state) {
     static int list_index, len;
     const char *name;
 
-    if (!autocomplete_cb) {
+    if (autocomplete_names_local.empty()) {
         return nullptr;
     }
 
     if (!state) {
         list_index = 0;
         len = strlen(text);
-        autocomplete_names = autocomplete_cb();
     }
 
-    for (size_t index = list_index; index < autocomplete_names.size(); index++) {
-        name = autocomplete_names[index].c_str();
+    for (size_t index = list_index; index < autocomplete_names_local.size(); index++) {
+        name = autocomplete_names_local[index].c_str();
         if (strncmp(name, text, len) == 0) {
             list_index = index + 1;
             return strdup(name);
@@ -73,11 +71,12 @@ static char ** character_name_completion(const char *text, int start, int end) {
     UNUSED(start);
     UNUSED(end);
     rl_completion_append_character = '\0';
-    rl_attempted_completion_over = 1;
+    rl_attempted_completion_over = 1;  // to disable filename completion
     return rl_completion_matches(text, character_name_generator);
 }
 
-std::unique_ptr<FileLikeObject> ReadlineShellInput::get_next_input() {
+std::unique_ptr<FileLikeObject> ReadlineShellInput::get_next_input(const std::vector<std::string>& autocomplete_names) {
+    autocomplete_names_local = autocomplete_names;
     rl_attempted_completion_function = character_name_completion;
     char* input = readline(">> ");
 
@@ -100,8 +99,4 @@ std::unique_ptr<FileLikeObject> ReadlineShellInput::get_next_input() {
     add_history(input_str.c_str());
 
     return std::make_unique<ReplInputObject>(input_str);
-}
-
-void ReadlineShellInput::set_autocomplete_callback(const std::function<std::vector<std::string>()>& callback) {
-    autocomplete_cb = callback;
 }

@@ -27,10 +27,7 @@
 
 class ShellInput {
  public:
-    virtual std::unique_ptr<FileLikeObject> get_next_input() = 0;
-    virtual void set_autocomplete_callback(const std::function<std::vector<std::string>()>& callback) {
-        UNUSED(callback);
-    }
+    virtual std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) = 0;
 };
 
 class ShellOutput {
@@ -41,7 +38,9 @@ class ShellOutput {
 
 class CmdLineShellInput : public ShellInput {
  public:
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
+         std::cout << ">>> ";
         std::cout << ">>> ";
         std::string input;
         std::getline(std::cin, input);
@@ -62,9 +61,7 @@ class ReadlineShellInput : public ShellInput {
         using_history();
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override;
-
-    void set_autocomplete_callback(const std::function<std::vector<std::string>()>& callback);
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override;
 };
 
 class CmdLineShellOutput : public ShellOutput {
@@ -102,7 +99,8 @@ class FileShellInput : public ShellInput {
         }
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
         if (consumed) {
             return nullptr;
         }
@@ -122,7 +120,8 @@ class FileShellLineInput : public ShellInput {
         }
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
         std::string input;
         if (!std::getline(file_stream, input)) {
             return nullptr;
@@ -405,11 +404,7 @@ class SymbolicShellEvaluator {
     SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output, const ShellParameters& params) :
         shell_input(input),
         shell_output(output),
-        parser(std::make_shared<ShellPrintHandler>(output), params) {
-            input->set_autocomplete_callback([this]() {
-                return parser.get_autocompletable_names();
-            });
-        }
+        parser(std::make_shared<ShellPrintHandler>(output), params) {}
     void run();
     bool run_single_input();
 };
