@@ -11,29 +11,24 @@
 #include <memory>
 #include <functional>
 #include <vector>
-#include "shell/shell.hpp"
+#include "shell/formula_parsing_result.hpp"
 
 #define COMMAND_SETPARAM "setparam"
 #define COMMAND_GETPARAM "getparam"
+
+class InterpreterContext;
 
 /**
  * @struct CommandResult
  * @brief Represents the result of a command execution.
  */
-struct CommandResult : FormulaParsingResult {
+struct CommandResult {
     std::string result; /**< The result of the command. */
     bool success_flag; /**< Flag indicating whether the command was executed successfully. */
 
-    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) override {
-        if (success_flag) {
-            if (print_result) {
-                output_stream << result;
-            }
-        } else {
-            err_stream << result;
-        }
+    std::string to_string() const {
+        return result;
     }
-
     /**
      * @brief Constructor for CommandResult.
      * @param result The result of the command.
@@ -49,7 +44,7 @@ struct CommandResult : FormulaParsingResult {
  */
 class CommandHandler {
  private:
-    std::map<std::string, std::function<CommandResult(std::vector<std::string>&, const std::string& command_name)>> handlers; /**< Map of command names to their corresponding handler functions. */
+    std::map<std::string, std::function<CommandResult(std::shared_ptr<InterpreterContext>, const std::vector<std::string>&, const std::string& command_name)>> handlers; /**< Map of command names to their corresponding handler functions. */
 
  public:
     /**
@@ -68,7 +63,7 @@ class CommandHandler {
      * @param handler The handler function for the command.
      * @return True if the handler was added successfully, false if a handler for the command already exists.
      */
-    bool add_handler(const std::string& command, std::function<CommandResult(std::vector<std::string>&, const std::string& command_name)> handler) {
+    bool add_handler(const std::string& command, std::function<CommandResult(std::shared_ptr<InterpreterContext>, const std::vector<std::string>&, const std::string& command_name)> handler) {
         if (handlers.count(command) > 0) {
             return false;
         }
@@ -94,17 +89,12 @@ class CommandHandler {
      * @param parts The parts of the command.
      * @return The result of the command execution.
      */
-    CommandResult handle_command(const std::vector<std::string>& parts) {
-        if (parts.size() == 0) {
-            return CommandResult("Empty command", false);
+    CommandResult handle_command(std::shared_ptr<InterpreterContext> context, const std::string& command_name, const std::vector<std::string>& parts) {
+        if (handlers.count(command_name) == 0) {
+            return CommandResult("Unknown command "+command_name, false);
         }
 
-        if (handlers.count(parts[0]) == 0) {
-            return CommandResult("Unknown command "+parts[0], false);
-        }
-
-        std::vector<std::string> args(parts.begin() + 1, parts.end());  // TODO(vabi) this is not efficient, but probably not a big deal
-        return handlers[parts[0]](args, parts[0]);
+        return handlers[command_name](context, parts, command_name);
     }
 };
 
@@ -117,6 +107,6 @@ void initialize_command_handler();
  * @brief Handles the execution of a command.
  * @param command The command to be executed.
  */
-CommandResult handle_command(const std::string& command);
+CommandResult handle_command(std::shared_ptr<InterpreterContext> context, const std::string& command, const std::vector<std::string>& args);
 
 #endif  // INCLUDE_SHELL_COMMAND_HANDLING_HPP_

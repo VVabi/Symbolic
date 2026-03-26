@@ -205,7 +205,6 @@ template<> class RingCompanionHelper<ModLong> {
         BigInt modulus_num = BigInt(unit.get_modulus());
         auto res = num % modulus_num;
 
-
         return ModLong(res.as_int64(), unit.get_modulus());
     }
 };

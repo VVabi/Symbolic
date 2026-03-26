@@ -8,45 +8,12 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <cstdint>
 #include <map>
+#include "parsing/expression_parsing/lexer_types.hpp"
+#include "common/file_location.hpp"
 
-/**
- * @brief Enum representing the type of an expression element.
- */
-enum expression_type {
-    INFIX,                  ///< Infix operator
-    UNARY,                  ///< Unary operator
-    FUNCTION,               ///< Function
-    NUMBER,                 ///< Number
-    VARIABLE,               ///< Variable
-    LEFT_PARENTHESIS,       ///< Left parenthesis
-    RIGHT_PARENTHESIS,      ///< Right parenthesis
-    SEPARATOR               ///< Separator
-};
-
-inline std::string expression_type_to_string(expression_type type) {
-    switch (type) {
-        case INFIX:
-            return "INFIX";
-        case UNARY:
-            return "UNARY";
-        case FUNCTION:
-            return "FUNCTION";
-        case NUMBER:
-            return "NUMBER";
-        case VARIABLE:
-            return "VARIABLE";
-        case LEFT_PARENTHESIS:
-            return "LEFT_PARENTHESIS";
-        case RIGHT_PARENTHESIS:
-            return "RIGHT_PARENTHESIS";
-        case SEPARATOR:
-            return "SEPARATOR";
-    }
-
-    return "";  // unreachable
-}
 
 /**
  * @brief Struct representing an element in a mathematical expression.
@@ -54,8 +21,7 @@ inline std::string expression_type_to_string(expression_type type) {
 struct MathLexerElement {
     expression_type type;   ///< Type of the element
     std::string data;       ///< Data of the element
-    int position;           ///< Position of the element in the input string
-    int num_args;     ///< Number of args between current brackets (used for function argument separation)
+    CodePlaceIdentifier position;  ///< Position of the element in the input string
 
     /**
      * @brief Constructor for MathLexerElement.
@@ -63,21 +29,19 @@ struct MathLexerElement {
      * @param data The data of the element.
      * @param position The position of the element in the input string.
      */
-    MathLexerElement(expression_type type, std::string data, int position, int num_args = -1)
-        : type(type), data(data), position(position), num_args(num_args) {}
-
-    void set_num_args(int num) {
-        num_args = num;
-    }
+    MathLexerElement(expression_type type, std::string data, CodePlaceIdentifier position)
+        : type(type), data(data), position(position) {}
 };
 
 /**
  * @brief Parses a math expression string into a vector of MathLexerElement objects.
  * @param input The input math expression string.
+ * @param file_name The name of the file the input came from (empty string for REPL).
+ * @param file_navigators The map of file navigators for position translation.
  * @return A vector of MathLexerElement objects representing the parsed math expression.
  */
-std::vector<MathLexerElement> parse_math_expression_string(const std::string& input,
-                                            const std::map<std::string, std::vector<MathLexerElement>>& variables,
-                                            const uint32_t position_offset);
+std::vector<MathLexerElement> parse_math_expression_string(
+    const std::string& input,
+    const std::string& file_name);
 
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_LEXER_HPP_

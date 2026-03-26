@@ -68,7 +68,7 @@ template<typename T> bool run_power_series_parsing_test_case(const std::string& 
 
     auto string_rep = parsing_result.second;
 
-    auto checker = parse_as_power_series(string_rep, fp_size, unit);
+    auto checker = parse_as_power_series("#using powerseries\n" + string_rep, fp_size, unit);
     EXPECT_EQ(check_power_series_near_equality(checker.first, power_series), true) << "Parsing failed for " << formula << " with size " << fp_size << " and unit " << unit;
 
     return ret;
@@ -128,9 +128,9 @@ std::vector<int64_t> get_test_primes() {
 
 bool test_derangements() {
     bool ret = true;
-    auto derangements_gf = "exp(-z)/(1-z)";
     auto primes = get_test_primes();
     for (auto p : primes) {
+        auto derangements_gf = "math.exp(Mod(1,"+std::to_string(p)+")*(-z))/(1-z)";
         uint32_t num_coeffs         = 10000;
         auto res                    = parse_as_power_series<ModLong>(derangements_gf, num_coeffs, ModLong(1, p)).first;
         auto factorial_generator    = FactorialGenerator<ModLong>(num_coeffs, ModLong(1, p));
@@ -155,9 +155,10 @@ bool test_derangements() {
 
 bool test_catalan_numbers() {
     bool ret = true;
-    auto catalan_gf = "(1-sqrt(1-4*z))/(2*z)";
+
     auto primes = get_test_primes();
     for (auto p : primes) {
+        auto catalan_gf = "(Mod(1,"+std::to_string(p)+")-math.sqrt(Mod(1, "+std::to_string(p)+")-4*z))/(2*z)";
         uint32_t num_coeffs = 10000;
         auto res = parse_as_power_series<ModLong>(catalan_gf, num_coeffs+1, ModLong(1, p)).first;
 
@@ -209,4 +210,3 @@ TEST(ParsingTests, ModCatalan) {
 TEST(ParsingTests, ModDerangements) {
   EXPECT_EQ(test_derangements(), true);
 }
-

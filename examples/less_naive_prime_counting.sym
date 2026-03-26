@@ -1,0 +1,8 @@
+#import ../examples/lib/prime_check_naive.sym
+count = 0
+for (p,2,1000) {
+    if (check_prime(p)) {
+        count = count+1
+    }
+}
+println(count)

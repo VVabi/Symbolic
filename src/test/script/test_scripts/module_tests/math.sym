@@ -1,0 +1,50 @@
+println("Test direct math constants")
+println(math.PI)
+println(math.E)
+
+println("Test math constants in expressions")
+result1 = math.PI * 2
+println(result1)
+
+result2 = math.E + math.PI
+println(result2)
+
+result3 = math.PI / math.E
+println(result3)
+
+println("Test math constants with variables")
+radius = 5
+area = math.PI * radius * radius
+println(area)
+
+circumference = 2 * math.PI * radius
+println(circumference)
+
+println("Test using directive with math module")
+#using math
+println(PI)
+println(E)
+
+println("Test combined calculations with using")
+compound = PI + E
+println(compound)
+
+power_calc = PI * PI
+println(power_calc)
+
+println("Test nested expressions")
+complex_expr = (math.PI + math.E) * (math.PI - math.E)
+println(complex_expr)
+
+nested_calc = math.PI * math.PI + math.E * math.E
+println(nested_calc)
+
+println("Test math constants in more complex operations")
+value1 = math.PI + 1
+println(value1)
+
+value2 = math.E * 3
+println(value2)
+
+value3 = math.PI - math.E
+println(value3)

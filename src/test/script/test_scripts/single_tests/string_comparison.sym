@@ -1,0 +1,11 @@
+println("hello" == "hello")
+println("hello" == "world")
+println("hello" != "world")
+println("hello" != "hello")
+println("a" == "a")
+println("a" == "b")
+println("+" == "+")
+println("+" == "-")
+s = "test"
+println(s == "test")
+println(s == "other")

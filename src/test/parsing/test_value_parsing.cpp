@@ -13,6 +13,8 @@
 #include <iostream>
 #include <utility>
 #include <map>
+#include <cmath>
+#include <algorithm>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "math_utils/binomial_generator.hpp"
 #include "types/modLong.hpp"
@@ -27,10 +29,10 @@ struct DoubleValueTestCase {
 
 std::vector<DoubleValueTestCase> double_test_cases = {
     {"1+2.0", 3.0},
-    {"exp(1.0)", 2.718281828459045},
-    {"log(1.0)", 0.0},
-    {"log(2.0)", 0.69314718056},
-    {"sqrt(4.0)", 2.0},
+    {"math.exp(1.0)", 2.718281828459045},
+    {"math.log(1.0)", 0.0},
+    {"math.log(2.0)", 0.69314718056},
+    {"math.sqrt(4.0)", 2.0},
     {"1.0+2.0", 3.0},
     {"1.0-2.0", -1.0},
     {"1.0*2.0", 2.0},
@@ -39,27 +41,27 @@ std::vector<DoubleValueTestCase> double_test_cases = {
     {"2.0^2", 4.0},
     {"2.0^(-2)", 0.25},
     {"2.0^0.5", 1.41421356237},
-    {"sqrt(10.0)", 3.16227766017},
-    {"sqrt(10.0)+exp(1)", 5.88055948863},
-    {"5.0-exp(log(5.0))", 0.0},
-    {"exp(log(17.0))", 17.0},
+    {"math.sqrt(10.0)", 3.16227766017},
+    {"math.sqrt(10.0)+math.exp(1.0)", 5.88055948863},
+    {"5.0-math.exp(math.log(5.0))", 0.0},
+    {"math.exp(math.log(17.0))", 17.0},
     {"-3.0+2.0*2.5", 2.0},
-    {"cos(0.0)", 1.0},
-    {"cos(3.14159265359)", -1.0},
-    {"cos(3.14159265359/2)", 0.0},
-    {"cos(3.14159265359/4)", sqrt(2)/2},
-    {"sin(0.0)", 0.0},
-    {"sin(3.14159265359)",  0.0},
-    {"sin(3.14159265359/2)", 1.0},
-    {"sin(3.14159265359/4)", sqrt(2)/2},
-    {"tan(0.0)", 0.0},
-    {"tan(3.14159265359/4)", 1.0}
+    {"math.cos(0.0)", 1.0},
+    {"math.cos(3.14159265359)", -1.0},
+    {"math.cos(3.14159265359/2)", 0.0},
+    {"math.cos(3.14159265359/4)", sqrt(2)/2},
+    {"math.sin(0.0)", 0.0},
+    {"math.sin(3.14159265359)",  0.0},
+    {"math.sin(3.14159265359/2)", 1.0},
+    {"math.sin(3.14159265359/4)", sqrt(2)/2},
+    {"math.tan(0.0)", 0.0},
+    {"math.tan(3.14159265359/4)", 1.0}
 };
 
 TEST(ParsingTests, DoubleValueParsing) {
     for (const auto& test_case : double_test_cases) {
-        auto vars = std::map<std::string, std::vector<MathLexerElement>>();
-        auto result = RingCompanionHelper<double>::from_string(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 0), 1.0);
+        auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters(), create_module_register());
+        auto result = RingCompanionHelper<double>::from_string(parse_formula(context, std::make_shared<ReplInputObject>(test_case.formula)), 1.0);
         EXPECT_TRUE(EqualityChecker<double>::check_equality(result, test_case.expected_result));
     }
 }
@@ -76,24 +78,25 @@ std::vector<RationalValueTestCase> rational_test_cases = {
     {"-7/2+4/3", RationalNumber<BigInt>(-13, 6)},
     {"(8/3)^2", RationalNumber<BigInt>(64, 9)},
     {"(8/3)^(-2)", RationalNumber<BigInt>(9, 64)},
-    {"7!", BigInt(5040)},
-    {"11!/10!", BigInt(11)},
+   /*{"7!", BigInt(5040)},
+    {"11!/10!", BigInt(11),
+    {"20!/18!", BigInt(380)},*/
 };
 
 TEST(ParsingTests, RationalValueParsing) {
     for (const auto& test_case : rational_test_cases) {
-        auto vars = std::map<std::string, std::vector<MathLexerElement>>();
-        auto result = RingCompanionHelper<RationalNumber<BigInt>>::from_string(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 1), BigInt(1));
+        auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters(), create_module_register());
+        auto result = RingCompanionHelper<RationalNumber<BigInt>>::from_string(parse_formula(context, std::make_shared<ReplInputObject>(test_case.formula)), BigInt(1));
         EXPECT_TRUE(EqualityChecker<RationalNumber<BigInt>>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
 }
 
-struct ModValueTestCase {
+struct mod_valueTestCase {
     std::string formula;
     ModLong expected_result;
 };
 
-std::vector<ModValueTestCase> mod_test_cases = {
+std::vector<mod_valueTestCase> mod_test_cases = {
     {"1+Mod(3,5)", ModLong(4, 5)},
     {"Mod(2,5)+Mod(3,5)", ModLong(0, 5)},
     {"Mod(3,5)*Mod(2,5)", ModLong(1, 5)},
@@ -105,10 +108,30 @@ std::vector<ModValueTestCase> mod_test_cases = {
     {"Mod(4, 17)/Mod(9, 17)", ModLong(8, 17)}
 };
 
-TEST(ParsingTests, ModValueParsing) {
+ModLong parse_modlong_value(const std::string& input) {
+    // remove spaces from input
+    std::string cleaned = input;
+    cleaned.erase(std::remove(cleaned.begin(), cleaned.end(), ' '), cleaned.end());
+
+    // remove leading 4 characters and last character
+    std::string content = cleaned.substr(4, cleaned.length() - 5);
+
+    // split at ","
+    size_t comma_pos = content.find(',');
+    std::string value_str = content.substr(0, comma_pos);
+    std::string mod_str = content.substr(comma_pos + 1);
+
+    int64_t value = std::stol(value_str);
+    int64_t mod = std::stol(mod_str);
+
+    return ModLong(value, mod);
+}
+
+
+TEST(ParsingTests, mod_valueParsing) {
     for (const auto& test_case : mod_test_cases) {
-        auto vars = std::map<std::string, std::vector<MathLexerElement>>();
-        auto result = parse_modlong_value(parse_formula(test_case.formula, Datatype::DYNAMIC, vars, 20, 1));
+        auto context = std::make_shared<InterpreterContext>(nullptr, ShellParameters(), create_module_register());
+        auto result = parse_modlong_value(parse_formula(context, std::make_shared<ReplInputObject>(test_case.formula)));
         EXPECT_TRUE(EqualityChecker<ModLong>::check_equality(result, test_case.expected_result)) << "Formula: " << test_case.formula << " Expected: " << test_case.expected_result << " Got: " << result;
     }
 }

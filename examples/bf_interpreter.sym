@@ -1,0 +1,65 @@
+code = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
+source = string.as_list(code)
+ram = list()
+for(p, 0, 2^15-1) {
+    append(ram, Mod(0, 256))
+}
+programpointer = 0
+memorypointer = 0
+while (programpointer < len(source)) {
+    current = source[programpointer]
+    if (current == "+") {
+        ram[memorypointer] = ram[memorypointer]+1
+        programpointer = programpointer+1
+    } elif (current == "-") {
+        ram[memorypointer] = ram[memorypointer]-1
+        programpointer = programpointer+1
+    } elif (current ==  ".") {
+        value = ram[memorypointer]
+        print(value, "ascii")
+        programpointer = programpointer+1
+    } elif (current== "[") {
+        value = ram[memorypointer]
+        programpointer = programpointer+1
+        count = 0
+        if(value == Mod(0,256)) {
+            count = 1
+        }
+        while(count > 0) {
+            sourcecurrent = source[programpointer]
+            if(sourcecurrent == "]") {
+                count = count-1
+            }
+            if(sourcecurrent == "[") {
+                count = count+1
+            }
+            programpointer = programpointer+1
+        }
+    } elif (current == "]") {
+        value = ram[memorypointer],
+        if(value != Mod(0,256)) {
+            programpointer = programpointer-1
+            count = 1
+            while(count > 0) {
+                sourcecurrent = source[programpointer]
+                if(sourcecurrent == "[") {
+                    count = count-1
+                },
+                if(sourcecurrent == "]") {
+                    count = count+1
+                }
+                programpointer = programpointer-1
+            }
+            programpointer = programpointer+1
+        }
+        if(value == Mod(0, 256)) {
+            programpointer=programpointer+1
+        }
+    } elif (current == "<") {
+        memorypointer = memorypointer-1,
+        programpointer = programpointer+1
+    } elif (current == ">") {
+        memorypointer = memorypointer+1,
+        programpointer = programpointer+1
+    }
+}

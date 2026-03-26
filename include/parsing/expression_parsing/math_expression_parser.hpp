@@ -8,7 +8,6 @@
 #ifndef INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
 #define INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_
 
-#include <deque>
 #include <utility>
 #include <memory>
 #include <string>
@@ -18,17 +17,26 @@
 #include "common/common_datatypes.hpp"
 #include "types/power_series.hpp"
 #include "parsing/expression_parsing/math_lexer.hpp"
-#include "parsing/polish_notation/polish_notation.hpp"
+#include "interpreter/polish_notation/polish.hpp"
 #include "parsing/expression_parsing/shunting_yard.hpp"
 #include "exceptions/parsing_exceptions.hpp"
-#include "parsing/expression_parsing/parsing_wrapper.hpp"
+#include "types/sym_types/math_types/parsing_wrapper.hpp"
+#include "types/sym_types/math_types/rational_function_type.hpp"
+#include "interpreter/context.hpp"
+#include "shell/parameters/parameters.hpp"
+#include "common/file_location.hpp"
+#include "modules/module_factory.hpp"
+
+std::shared_ptr<SymObject> parse_formula_as_sym_object(
+                    std::shared_ptr<InterpreterContext>& context,
+                    std::shared_ptr<FileLikeObject> file_obj);
 
  /**
  * @brief Parses a mathematical expression string into a formal power series.
- * 
- * This function takes a string representing a mathematical expression and a size, and parses 
- * the expression into a formal power series of the given size. The function uses the 
- * Shunting Yard algorithm to convert the expression into Polish Notation, 
+ *
+ * This function takes a string representing a mathematical expression and a size, and parses
+ * the expression into a formal power series of the given size. The function uses the
+ * Shunting Yard algorithm to convert the expression into Polish Notation,
  * and then evaluates the polish notation  expression to obtain the power series.
  *
  * @tparam T The type of the coefficients of the power series.
@@ -37,31 +45,47 @@
  * @param unit The multiplicative identity of type `T`.
  * @return The parsed power series.
  */
-template<typename T> std::unique_ptr<ParsingWrapperType<T>> parse_power_series_from_string(const std::string& input,
+template<typename T> std::shared_ptr<MathWrapperType<T>> parse_power_series_from_string(const std::string& input,
         const uint32_t size,
         const T unit) {
-    auto formula = parse_math_expression_string(input, std::map<std::string, std::vector<MathLexerElement>>(), 0);
-    auto p = shunting_yard_algorithm(formula);
-
-    std::deque<MathLexerElement> polish;
-
-    for (MathLexerElement x : p) {
-        polish.push_back(x);
-    }
-    auto res = iterate_wrapped<T>(polish, unit, size);
-
-    if (polish.size() != 0) {
-        throw ParsingException("Parsing error: Unconsumed tokens", polish.front().position);
-    }
+    UNUSED(unit);
+    ShellParameters parameters = ShellParameters();
+    parameters.powerseries_expansion_size = size;
+    auto context = std::make_shared<InterpreterContext>(nullptr, parameters, create_module_register());
+    auto res = std::dynamic_pointer_cast<MathWrapperType<T>>(parse_formula_as_sym_object(context, std::make_shared<ReplInputObject>(input)));
     return res;
 }
 
-std::string parse_formula(const std::string& input,
-                        const Datatype type,
-                        std::map<std::string,
-                        std::vector<MathLexerElement>>& variables,
-                        const uint32_t powerseries_expansion_size,
-                        const int64_t default_modulus);
+template<>
+inline std::shared_ptr<MathWrapperType<double>> parse_power_series_from_string(const std::string& input,
+        const uint32_t size,
+        const double unit) {
+    UNUSED(unit);
+
+    ShellParameters parameters = ShellParameters();
+    parameters.powerseries_expansion_size = size;
+    auto context = std::make_shared<InterpreterContext>(nullptr, parameters, create_module_register());
+    // workaround: force the parser to infer the type as double, so that we can parse things like exp(z) as power series in z, instead of trying to parse it as a rational function in z and then converting to a power series, which doesn't work since the rational function is not actually a rational function but a power series in disguise
+    context->set_variable("z", std::make_shared<RationalFunctionType<double>>(RationalFunction<double>(Polynomial<double>({0, 1}), Polynomial<double>({1}))));
+    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(context, std::make_shared<ReplInputObject>(input)));
+    return std::dynamic_pointer_cast<MathWrapperType<double>>(res);
+}
+
+template<>
+inline std::shared_ptr<MathWrapperType<ModLong>> parse_power_series_from_string(const std::string& input,
+        const uint32_t size,
+        const ModLong unit) {
+    ShellParameters parameters = ShellParameters();
+    parameters.powerseries_expansion_size = size;
+    auto context = std::make_shared<InterpreterContext>(nullptr, parameters, create_module_register());
+    // workaround: force the parser to infer the type as modlong, so that we can parse things like exp(z) as power series in z, instead of trying to parse it as a rational function in z and then converting to a power series, which doesn't work since the rational function is not actually a rational function but a power series in disguise
+    context->set_variable("z", std::make_shared<RationalFunctionType<ModLong>>(RationalFunction<ModLong>(Polynomial<ModLong>({ModLong(0, unit.get_modulus()), unit}), Polynomial<ModLong>({unit}))));
+    auto res = std::dynamic_pointer_cast<SymMathObject>(parse_formula_as_sym_object(context, std::make_shared<ReplInputObject>(input)));
+    return std::dynamic_pointer_cast<MathWrapperType<ModLong>>(res);
+}
+
+std::string parse_formula(std::shared_ptr<InterpreterContext>& context,
+                        std::shared_ptr<FileLikeObject> file_obj);
 
 ModLong parse_modlong_value(const std::string& input);
 #endif  // INCLUDE_PARSING_EXPRESSION_PARSING_MATH_EXPRESSION_PARSER_HPP_

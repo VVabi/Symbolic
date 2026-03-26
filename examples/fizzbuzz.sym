@@ -1,0 +1,14 @@
+for(i,1,20) {
+    if(mod_value(Mod(i, 15)) == 0) {
+        println("Fizz Buzz")
+    },
+    elif(mod_value(Mod(i, 5)) == 0) {
+        println("Buzz")
+    },
+    elif(mod_value(Mod(i, 3)) == 0) {
+        println("Fizz")
+    },
+    elif(true) {
+        println(i)
+    }
+}

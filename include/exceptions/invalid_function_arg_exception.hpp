@@ -19,7 +19,7 @@ class InvalidFunctionArgException: public ParsingException  {
      * @param message The error message.
      * @param position The position where the error occurred.
      */
-    InvalidFunctionArgException(const std::string &message, const uint32_t position): ParsingException(message, position) {}
+    InvalidFunctionArgException(const std::string &message, CodePlaceIdentifier position): ParsingException(message, position) {}
 };
 
 

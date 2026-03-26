@@ -1,0 +1,12 @@
+check_prime(p) {
+    prime=true
+    i=2
+    # Try out all divisors until i*i >p
+    while (i*i <= p) {
+        if (Mod(p,i) == Mod(0,i)){
+            prime=false
+        }
+        i=i+1
+    }
+    prime
+}

@@ -6,20 +6,24 @@
 #include "common/common_datatypes.hpp"
 #include "shell/shell.hpp"
 
-bool SymbolicShellEvaluator::is_exit(const std::string& input) {
-    return input == "exit";
+void SymbolicShellEvaluator::run() {
+    while (run_single_input()) { }
 }
 
-InputPrefix SymbolicShellEvaluator::get_input_prefix(std::string& input) {
-    if (is_exit(input)) {
-        return EXIT;
-    }
-    if (input.length() > 0 && input[0] == '#') {
-        input = input.substr(1);
-        return COMMAND;
+bool SymbolicShellEvaluator::run_single_input() {
+    auto file_like = shell_input->get_next_input();
+    if (!file_like) {
+        // EOF or no more inputs for non-interactive sources
+        return false;
     }
 
-    return NO_PREFIX;
+    // Move unique_ptr into shared_ptr so parser can access file metadata.
+    std::shared_ptr<FileLikeObject> shared_file_obj = std::move(file_like);
+
+    auto x = parser.parse(shared_file_obj);
+    shell_output->handle_result(std::move(x), true);
+
+    return true;
 }
 
 InputPostfix SymbolicShellEvaluator::get_input_postfix(std::string& input) {
@@ -31,38 +35,8 @@ InputPostfix SymbolicShellEvaluator::get_input_postfix(std::string& input) {
 }
 
 ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& input) {
-    std::string processed_input     = input;
-    auto prefix                     = get_input_prefix(processed_input);
-    auto postfix                    = get_input_postfix(processed_input);
-    auto skip                       = processed_input.length() == 0;
-    return {processed_input, prefix, postfix, skip};
-}
-
-void SymbolicShellEvaluator::run() {
-    while (run_single_input()) { }
-}
-
-bool SymbolicShellEvaluator::run_single_input() {
-    auto input  = shell_input->get_next_input();
-    auto result = evaluate_input(input);
-    if (result.skip) {
-        return true;
-    }
-    switch (result.prefix) {
-        case COMMAND: {
-            auto res = handle_command(result.processed_input);
-            shell_output->handle_output(std::make_unique<CommandResult>(res), result.print_result());
-            break;
-        }
-        case EXIT:
-            return false;
-            break;
-        case NO_PREFIX:
-            auto par = get_shell_parameters();
-            auto x = parser.parse(result.processed_input, par->parsing_type, par->powerseries_expansion_size, par->default_modulus);
-            shell_output->handle_output(std::move(x), result.print_result());
-            break;
-    }
-
-    return true;
+    std::string processed_input = input;
+    auto postfix = get_input_postfix(processed_input);
+    auto skip = processed_input.length() == 0;
+    return {processed_input, postfix, skip};
 }

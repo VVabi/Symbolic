@@ -4,11 +4,14 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <memory>
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <map>
 #include <vector>
 #include <fstream>
+#include <sstream>
+#include <filesystem>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -16,30 +19,32 @@
 #include "parsing/expression_parsing/math_lexer.hpp"
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "common/common_datatypes.hpp"
-
-class FormulaParsingResult {
- public:
-    virtual void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) = 0;
-};
-
+#include "shell/parameters/parameters.hpp"
+#include "shell/command_handling.hpp"
+#include "common/file_location.hpp"
+#include "modules/module_factory.hpp"
 
 class ShellInput {
  public:
-    virtual std::string get_next_input() = 0;
+    virtual std::unique_ptr<FileLikeObject> get_next_input() = 0;
 };
 
 class ShellOutput {
  public:
-    virtual void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
+    virtual void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) = 0;
+    virtual void handle_print(const std::string& output, bool line_break = true) = 0;
 };
 
 class CmdLineShellInput : public ShellInput {
  public:
-    std::string get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         std::cout << ">>> ";
         std::string input;
         std::getline(std::cin, input);
-        return input;
+        if (input == "exit") {
+            return nullptr;
+        }
+        return std::make_unique<ReplInputObject>(input);
     }
 };
 
@@ -53,33 +58,48 @@ class ReadlineShellInput : public ShellInput {
         using_history();
     }
 
-    std::string get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         char* input = readline(">> ");
 
         // Check for EOF.
         if (!input) {
-            return "exit";
+            return nullptr;
         }
-
-        // Add input to readline history.
-        add_history(input);
 
         std::string input_str(input);
 
         // Free buffer that was allocated by readline
         free(input);
 
-        return input_str;
+        // Treat literal "exit" as EOF/termination for interactive REPL
+        if (input_str == "exit") {
+            return nullptr;
+        }
+
+        // Add input to readline history.
+        add_history(input_str.c_str());
+
+        return std::make_unique<ReplInputObject>(input_str);
     }
 };
 
 class CmdLineShellOutput : public ShellOutput {
+    bool repl_mode;
+
  public:
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
-        result->print_result(std::cout, std::cerr, print_result);
+    CmdLineShellOutput(bool repl_mode) : repl_mode(repl_mode) {  }
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+        result->print_result(std::cout, std::cerr, print_result && repl_mode);
         // TODO(vabi): this is architecturally questionable...
-        if (print_result) {
+        if (print_result && repl_mode) {
             std::cout << std::endl;
+        }
+    }
+
+    void handle_print(const std::string& output, bool line_break = true) override {
+        std::cout << output;
+        if (line_break) {
+             std::cout << std::endl;
         }
     }
 };
@@ -87,21 +107,46 @@ class CmdLineShellOutput : public ShellOutput {
 
 class FileShellInput : public ShellInput {
  public:
+    std::string filename;
+    bool consumed = false;
+
+    FileShellInput(const std::string& filename): filename(filename), consumed(false) {
+        // Verify file exists by attempting to open it
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+    }
+
+    std::unique_ptr<FileLikeObject> get_next_input() override {
+        if (consumed) {
+            return nullptr;
+        }
+        consumed = true;
+        return std::make_unique<FileObject>(filename);
+    }
+};
+
+class FileShellLineInput : public ShellInput {
+ public:
     std::ifstream file_stream;
-    FileShellInput(const std::string& filename): file_stream(filename) {
+    std::string filename;
+
+    FileShellLineInput(const std::string& filename): file_stream(filename), filename(filename) {
         if (!file_stream.is_open()) {
             throw std::runtime_error("Failed to open file: " + filename);
         }
     }
 
-    std::string get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input() override {
         std::string input;
-        if (std::getline(file_stream, input)) {
-            return input;
+        if (!std::getline(file_stream, input)) {
+            return nullptr;
         }
-        return "exit";
+        return std::make_unique<ReplInputObject>(input, filename);
     }
 };
+
 
 class FileShellOutput: public ShellOutput {
  public:
@@ -112,16 +157,54 @@ class FileShellOutput: public ShellOutput {
         }
     }
 
-    void handle_output(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
         result->print_result(file_stream, std::cerr, print_result);
         file_stream << std::endl;
     }
+
+    void handle_print(const std::string& output, bool line_break = true) override {
+        file_stream << output;
+        if (line_break) {
+            file_stream << std::endl;
+        }
+    }
 };
 
-enum InputPrefix {
-    COMMAND,
-    EXIT,
-    NO_PREFIX
+class TestShellOutput: public ShellOutput {
+ public:
+    std::stringstream out;
+    std::stringstream err;
+
+    std::vector<std::string> outputs;
+    std::vector<std::string> errs;
+    std::vector<std::string> printed_outputs;
+
+    TestShellOutput() {
+        out = std::stringstream();
+        err = std::stringstream();
+    }
+
+    void handle_result(std::unique_ptr<FormulaParsingResult> result, bool print_result) override {
+        result->print_result(out, err, print_result);
+        outputs.push_back(out.str());
+
+        auto error_string = err.str();
+
+        for (auto str : string_split(error_string, '\n')) {
+            errs.push_back(str);
+        }
+
+        if (error_string.size() == 0) {
+            errs.push_back(error_string);
+        }
+        out.str("");
+        err.str("");
+    }
+
+    void handle_print(const std::string& output, bool line_break = true) override {
+        UNUSED(line_break);
+        printed_outputs.push_back(output);
+    }
 };
 
 enum InputPostfix {
@@ -131,7 +214,6 @@ enum InputPostfix {
 
 struct ShellInputEvalResult {
     std::string processed_input;
-    InputPrefix prefix;
     InputPostfix postfix;
     bool skip;
 
@@ -155,15 +237,66 @@ class SuccessfulFormulaParsingResult : public FormulaParsingResult {
 
 class FormulaParsingParsingExceptionResult : public FormulaParsingResult {
     std::string error_message;
+
  public:
-    FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& input) {
+    FormulaParsingParsingExceptionResult(ParsingException& e, const std::string& repl_input, const std::shared_ptr<ContextInterface>& context) {
         std::stringstream strm;
-        strm << "Parsing error at position " << e.get_position() << ": " << e.what() << std::endl;
-        strm << input << std::endl;
-        for (int32_t i = 0; i < e.get_position(); i++) {
-            strm << " ";
+        auto pos = e.get_position();
+        auto original_position = pos.get_original_position(context);
+        auto file_name = pos.get_file_name();
+        if (!file_name.empty()) {
+            file_name = std::filesystem::relative(file_name).string();
         }
-        strm << "^ here";
+
+        if (file_name.empty()) {
+            strm << "Parsing error at position " << original_position << ": " << e.what() << std::endl;
+        } else {
+            strm << "Parsing error in file '" << file_name << "' at position " << original_position << ": " << e.what() << std::endl;
+        }
+
+        std::string file_content;
+        if (file_name.empty()) {
+            file_content = repl_input;
+        } else {
+            try {
+                std::ifstream file(file_name);
+                if (!file.is_open()) {
+                    throw std::runtime_error("Failed to open file: " + file_name);
+                }
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                file_content = buffer.str();
+            } catch (const std::exception& ex) {
+                strm << "Additionally, failed to read file content for error context: " << ex.what() << std::endl;
+                error_message = strm.str();
+                return;
+            }
+        }
+        auto istrm = std::istringstream(file_content);
+        std::ptrdiff_t count = 0;
+        std::string line;
+        bool found_position = true;
+        uint32_t line_number = 0;
+        while (count <= static_cast<std::ptrdiff_t>(original_position)) {
+            line_number++;
+            if (!std::getline(istrm, line)) {
+                found_position = false;
+                break;
+            }
+            count += line.size() + 1;  // +1 for the newline character
+        }
+
+        if (found_position) {
+            strm << "Error occurred at line " << line_number << ":" << std::endl;
+            strm << line << std::endl;
+            for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(original_position) - (count - (std::ptrdiff_t) line.size() - 1); i++) {
+            strm << " ";
+            }
+            strm << "^ here";
+        } else {
+            strm << "Could not determine error position in input (position " << original_position << " is out of bounds for input of length " << file_content.size() << ")";
+        }
+
         error_message = strm.str();
     }
 
@@ -206,23 +339,69 @@ class FormulaParsingTypeExceptionResult : public FormulaParsingResult {
     }
 };
 
+class FormulaUnexpectedExceptionResult : public FormulaParsingResult {
+    std::string error_message;
+ public:
+    FormulaUnexpectedExceptionResult(std::exception &e) {
+        std::stringstream strm;
+        strm << "An unexpected error occurred during parsing: " << e.what();
+        error_message = strm.str();
+    }
+
+    void print_result(std::ostream& output_stream, std::ostream& err_stream, bool print_result) {
+        UNUSED(print_result);
+        UNUSED(output_stream);
+        err_stream << error_message << std::endl;
+    }
+};
+
 class FormulaParser {
  private:
-    std::map<std::string, std::vector<MathLexerElement>> variables = std::map<std::string, std::vector<MathLexerElement>>();
- public:
-    FormulaParser() {  }
+    std::shared_ptr<InterpreterContext> context;
 
-    std::unique_ptr<FormulaParsingResult> parse(const std::string& input, Datatype parsing_type, uint32_t powerseries_expansion_size, uint32_t default_modulus) {
+ public:
+    FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler, const ShellParameters& params) {
+        context = std::make_shared<InterpreterContext>(print_handler, params, create_module_register());
+    }
+
+    std::unique_ptr<FormulaParsingResult> parse(std::shared_ptr<FileLikeObject> file_obj) {
+        auto now = std::chrono::high_resolution_clock::now();
+
+        context->reset_steps();
+        std::unique_ptr<FormulaParsingResult> ret = nullptr;
         try {
-             auto res = parse_formula(input, parsing_type, variables, powerseries_expansion_size, default_modulus);
-             return std::make_unique<SuccessfulFormulaParsingResult>(res);
+             auto res = parse_formula(context, file_obj);
+             ret = std::make_unique<SuccessfulFormulaParsingResult>(res);
         } catch (ParsingException &e) {
-            return std::make_unique<FormulaParsingParsingExceptionResult>(e, input);
+            ret = std::make_unique<FormulaParsingParsingExceptionResult>(e, file_obj->read(), context);
         } catch (ReachedUnreachableException &e) {
-            return std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
+            ret = std::make_unique<FormulaParsingUnreachableCodeExceptionResult>(e);
         } catch (ParsingTypeException &e) {
-            return std::make_unique<FormulaParsingTypeExceptionResult>(e);
+            ret = std::make_unique<FormulaParsingTypeExceptionResult>(e);
+        } catch (std::exception &e) {
+            ret = std::make_unique<FormulaUnexpectedExceptionResult>(e);
         }
+
+        if (context->get_shell_parameters().profile_output) {
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
+            std::cout << "Parsing and evaluation took " << duration << " ms and " << context->get_steps() << " steps" << std::endl;
+            std::cout << "Average time per step: " << (context->get_steps() > 0 ? static_cast<double>(duration) / context->get_steps() : 0) << " ms" << std::endl;
+            std::cout << "Average steps per s: " << (duration > 0 ? static_cast<double>(context->get_steps())*1000.0 / duration : 0) << " steps/s" << std::endl;
+        }
+        return ret;
+    }
+};
+
+
+class ShellPrintHandler: public InterpreterPrintHandler {
+ private:
+    std::shared_ptr<ShellOutput> shell_output;
+ public:
+    ShellPrintHandler(std::shared_ptr<ShellOutput> output) : shell_output(output) {  }
+
+    void handle_print(const std::string& output, bool line_break = true) const override {
+        shell_output->handle_print(output, line_break);
     }
 };
 
@@ -232,14 +411,13 @@ class SymbolicShellEvaluator {
     std::shared_ptr<ShellOutput> shell_output;
     FormulaParser parser;
 
-    bool is_exit(const std::string& input);
-    InputPrefix get_input_prefix(std::string& input);
     InputPostfix get_input_postfix(std::string& input);
     ShellInputEvalResult evaluate_input(const std::string& input);
  public:
-    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output) : shell_input(input), shell_output(output) {
-        parser = FormulaParser();
-    }
+    SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output, const ShellParameters& params) :
+        shell_input(input),
+        shell_output(output),
+        parser(std::make_shared<ShellPrintHandler>(output), params) {}
     void run();
     bool run_single_input();
 };

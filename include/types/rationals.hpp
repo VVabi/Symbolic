@@ -7,6 +7,7 @@
 #define INCLUDE_TYPES_RATIONALS_HPP_
 
 #include <string>
+#include <algorithm>
 #include "types/ring_helpers.hpp"
 #include "string_utils/string_utils.hpp"
 #include "types/bigint.hpp"
@@ -171,6 +172,41 @@ class RationalNumber {
         }
 
         return ret;
+    }
+
+    bool operator<(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator < denominator*other.numerator;
+    }
+
+    bool operator<=(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator <= denominator*other.numerator;
+    }
+
+    bool operator>(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator > denominator*other.numerator;
+    }
+
+    bool operator>=(const RationalNumber &other) const {
+        if (denominator < 0 || other.denominator < 0) {
+            throw DatatypeInternalException("Expected positive denominators for comparison operation");
+        }
+        return numerator*other.denominator >= denominator*other.numerator;
+    }
+
+    T as_base_type() const {
+        if (denominator != RingCompanionHelper<T>::get_unit(numerator)) {
+            throw DatatypeInternalException("Cannot convert a non-integer rational number to the base type");
+        }
+        return numerator;
     }
 };
 

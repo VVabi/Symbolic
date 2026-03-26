@@ -1,0 +1,137 @@
+=== Test copy() ===
+[1, 2, 3]
+[1, 2, 3]
+=== Test len() ===
+5
+0
+=== Test list() ===
+[10, 20, 30]
+[]
+=== Test list_get() and list_set() ===
+100
+200
+300
+[100, 999, 300]
+=== Test append() ===
+[1, 2, 3, 4]
+[1, 2, 3, 4, 5, 6]
+=== Test pop() ===
+50
+[10, 20, 30, 40]
+40
+[10, 20, 30]
+=== Test slice() ===
+[1, 2, 3]
+[3, 4, 5]
+[]
+[6, 7, 8]
+=== Test dict() ===
+{}
+=== Test dict_set() and dict_get() ===
+Alice
+30
+NYC
+=== Test dict_has_key() ===
+true
+false
+=== Test assignment vs copy for lists ===
+[99, 2, 3]
+[99, 2, 3]
+[10, 20, 30]
+[88, 20, 30]
+=== Test assignment vs copy for dicts ===
+modified
+modified
+original
+changed
+=== Test nested lists and dicts ===
+[[1, 2], [3, 4, 5]]
+[1, 2]
+[100, 200]
+42
+=== Test combining operations ===
+[20, 30]
+40
+[5, 20, 30]
+=== Test comparison operators ===
+true
+false
+true
+false
+true
+false
+true
+false
+true
+false
+true
+false
+=== Test equality with different types ===
+true
+false
+true
+false
+=== Test boolean operators ===
+true
+false
+false
+false
+=== Test or operator ===
+true
+true
+true
+false
+=== Test xor operator ===
+false
+true
+true
+false
+=== Test nand operator ===
+false
+true
+true
+true
+=== Test nor operator ===
+false
+false
+false
+true
+=== Test not operator ===
+false
+true
+=== Test infix comparison operators ===
+true
+true
+true
+true
+true
+true
+=== Test infix boolean operators ===
+true
+true
+true
+=== Test mod() with integer arguments ===
+Mod(5,7)
+Mod(0,256)
+Mod(255,256)
+Mod(100,256)
+Mod(5,7)
+=== Test mod() with rational arguments ===
+Mod(4,7)
+Mod(2,7)
+Mod(5,7)
+Mod(9,11)
+Mod(7,11)
+=== Test mod_value() to extract numeric values ===
+5
+4
+100
+=== Test mod with arithmetic expressions ===
+Mod(5,7)
+Mod(3,11)
+Mod(5,7)
+=== Test mod equality ===
+true
+true
+true
+false

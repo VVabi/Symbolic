@@ -1,0 +1,240 @@
+#include <iostream>
+#include "common/lexer_deque.hpp"
+#include "common/file_location.hpp"
+#include "types/sym_types/sym_object.hpp"
+#include "exceptions/parsing_exceptions.hpp"
+#include "interpreter/polish_notation/polish.hpp"
+#include "interpreter/polish_notation/polish_base_math.hpp"
+#include "interpreter/polish_notation/polish_control_flow.hpp"
+#include "interpreter/polish_notation/polish_utils.hpp"
+#include "interpreter/polish_notation/polish_list.hpp"
+#include "types/sym_types/math_types/value_type.hpp"
+#include "types/sym_types/math_types/rational_function_type.hpp"
+#include "exceptions/parsing_type_exception.hpp"
+#include "types/sym_types/sym_math.hpp"
+#include "types/sym_types/sym_string_object.hpp"
+#include "interpreter/context.hpp"
+
+class PolishNumber: public PolishNotationElement {
+    std::shared_ptr<SymObject> symobject_value;
+ public:
+    PolishNumber(ParsedCodeElement element): PolishNotationElement(element) {
+        try {
+            symobject_value = std::make_shared<ValueType<RationalNumber<BigInt>>>(RingCompanionHelper<RationalNumber<BigInt>>::from_string(get_data(), RationalNumber<BigInt>(1)));
+        } catch (std::exception& e) {
+            try {
+                symobject_value = std::make_shared<ValueType<double>>(RingCompanionHelper<double>::from_string(get_data(), 1.0));
+            } catch (std::exception& e) {
+                throw EvalException("Cannot parse number: " + get_data(), this->get_position());
+            }
+        }
+    }
+
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                    std::shared_ptr<InterpreterContext> &context) {
+                                        UNUSED(cmd_list);
+                                        UNUSED(context);
+                                        return std::make_shared<SymObjectContainer>(symobject_value->clone());
+                                    }
+};
+
+class PolishVariable: public PolishNotationElement {
+ public:
+     PolishVariable(ParsedCodeElement element): PolishNotationElement(element) { }
+     std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                         std::shared_ptr<InterpreterContext> &context) {
+         UNUSED(cmd_list);
+
+         // First, try to get a local variable
+         auto existing_var = context->get_variable(get_data());
+         if (existing_var) {
+             if (existing_var->modifiable_in_place()) {
+                 return std::make_shared<SymObjectContainer>(existing_var);
+             }
+             return std::make_shared<SymObjectContainer>(existing_var->clone());
+         }
+
+         // Second, try to get a module constant
+         auto module_constant = context->get_module_constant(get_data());
+         if (module_constant) {
+             return std::make_shared<SymObjectContainer>(module_constant->get_object()->clone());
+         }
+
+         // Third, default to symbolic variable (polynomial)
+         auto res = Polynomial<RationalNumber<BigInt>>::get_atom(BigInt(1), 1);
+         return std::make_shared<SymObjectContainer>(std::make_shared<RationalFunctionType<RationalNumber<BigInt>>>(res));
+     }
+};
+
+class PolishString: public PolishNotationElement {
+ public:
+    PolishString(ParsedCodeElement element): PolishNotationElement(element) { }
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext> &context) {
+        UNUSED(cmd_list);
+        UNUSED(context);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymStringObject>(get_data()));
+    }
+};
+
+class PolishScopeStart: public PolishNotationElement {
+ public:
+    PolishScopeStart(ParsedCodeElement element): PolishNotationElement(element) { }
+    std::shared_ptr<SymObjectContainer> handle_wrapper(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+                                        std::shared_ptr<InterpreterContext> &context) {
+        UNUSED(cmd_list);
+        UNUSED(context);
+        throw EvalException("Internal error: ScopeStart element should not be executed directly", this->get_position());
+    }
+};
+
+std::shared_ptr<PolishNotationElement> polish_notation_element_from_lexer(const ParsedCodeElement element) {
+    switch (element.type) {
+        case ARRAY_ACCESS_START:
+            return std::make_shared<PolishArrayAccess>(element);
+        case ARRAY_ACCESS_END:
+            return std::make_shared<PolishArrayAccessEnd>(element);
+        case NUMBER:
+            return std::make_shared<PolishNumber>(element);
+        case VARIABLE:
+            return std::make_shared<PolishVariable>(element);
+        case STRING:
+            return std::make_shared<PolishString>(element);
+        case INFIX_PLUS:
+            return std::make_shared<PolishPlus>(element);
+        case INFIX_MINUS:
+            return std::make_shared<PolishMinus>(element);
+        case INFIX_MULTIPLY:
+            return std::make_shared<PolishTimes>(element);
+        case INFIX_DIVIDE:
+            return std::make_shared<PolishDiv>(element);
+        case INFIX_POWER:
+            return std::make_shared<PolishPow>(element);
+        case INFIX_ASSIGN:
+            return std::make_shared<PolishAssign>(element);
+         case INFIX_LESS: {
+             auto elem = element;
+             elem.data = "builtins.lt";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_GREATER: {
+             auto elem = element;
+             elem.data = "builtins.gt";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.eq";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_GREATER_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.gte";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_LESS_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.lte";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+         case INFIX_BITWISE_AND:
+             throw EvalException("Bitwise operators are not supported", element.position);
+         case INFIX_BITWISE_OR:
+             throw EvalException("Bitwise operators are not supported", element.position);
+          case INFIX_LOGICAL_AND: {
+              auto elem = element;
+              elem.data = "builtins.and";
+              elem.num_args = 2;
+              return std::make_shared<PolishModuleFunction>(elem);
+          }
+          case INFIX_LOGICAL_OR: {
+              auto elem = element;
+              elem.data = "builtins.or";
+              elem.num_args = 2;
+              return std::make_shared<PolishModuleFunction>(elem);
+          }
+         case INFIX_NOT_EQUAL: {
+             auto elem = element;
+             elem.data = "builtins.neq";
+             elem.num_args = 2;
+             return std::make_shared<PolishModuleFunction>(elem);
+         }
+        case UNARY_MINUS:
+            return std::make_shared<PolishUnaryMinus>(element);
+        case UNARY_PLUS:
+            return std::make_shared<PolishUnaryPlus>(element);
+        case UNARY_NOT: {
+            auto elem = element;
+            elem.data = "builtins.not";
+            elem.num_args = 1;
+            elem.num_expressions = 1;
+            return std::make_shared<PolishModuleFunction>(elem);
+        }
+        case SCOPE_START:
+            return std::make_shared<PolishScopeStart>(element);
+         case FUNCTION: {
+             if (element.num_args == -1) {
+                 throw EvalException("Function argument count not set for function: " + element.data, element.position);
+             }
+              if (element.data.find('.') != std::string::npos) {
+                  return std::make_shared<PolishModuleFunction>(element);
+              } else if (element.data == "for") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside for loop not set", element.position);
+                }
+                return std::make_shared<PolishFor>(element);
+            } else if (element.data == "while") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside while loop not set", element.position);
+                }
+                return std::make_shared<PolishWhile>(element);
+            } else if (element.data == "if") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside if statement not set", element.position);
+                }
+                return std::make_shared<PolishIf>(element);
+            } else if (element.data == "elif") {
+                if (element.num_expressions == -1) {
+                    throw EvalException("Number of expressions inside if statement not set", element.position);
+                }
+                return std::make_shared<PolishIf>(element);
+            } else if (element.data == "setparam") {
+                return std::make_shared<PolishSetParam>(element);
+            } else if (element.data == "getparam") {
+                return std::make_shared<PolishGetParam>(element);
+            } else {
+                return std::make_shared<PolishCustomFunction>(element);
+            }
+        }
+        default:
+            break;
+    }
+    throw EvalException("Unknown element type " + element.data, element.position);
+}
+
+std::shared_ptr<SymObjectContainer> iterate_wrapped(LexerDeque<std::shared_ptr<PolishNotationElement>>& cmd_list,
+        std::shared_ptr<InterpreterContext> &context) {
+    if (cmd_list.is_empty()) {
+        throw EvalException("Expression is not parseable", CodePlaceIdentifier::unknown());  // TODO(vabi) triggers eg for 3+/5; this needs to be handled in a previous step
+    }
+    auto element = cmd_list.front();
+    cmd_list.pop_front();
+    #if DEBUG_EXECUTION
+    element->debug_print(std::cout, context);
+    #endif
+    context->increment_steps();
+    try {
+        return element->handle_wrapper(cmd_list, context);
+    } catch (ParsingTypeException& e) {
+        throw EvalException(e.what(), element->get_position());
+    } catch (DatatypeInternalException&e ) {
+        throw EvalException(e.what(), element->get_position());
+    } catch (SubsetArgumentException& e) {
+        throw EvalException(e.what(), element->get_position());
+    }
+}

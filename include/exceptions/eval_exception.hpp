@@ -17,7 +17,7 @@
 class EvalException : public ParsingException {
  private:
  public:
-    EvalException(const std::string& message, int position): ParsingException(message, position) {}
+    EvalException(const std::string& message, CodePlaceIdentifier position): ParsingException(message, position) {}
 };
 
 #endif  // INCLUDE_EXCEPTIONS_EVAL_EXCEPTION_HPP_

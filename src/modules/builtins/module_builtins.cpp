@@ -1,0 +1,442 @@
+#include "modules/module_registration/module_registration.hpp"
+#include "types/sym_types/sym_string_object.hpp"
+#include "types/sym_types/sym_void.hpp"
+#include "types/sym_types/sym_list.hpp"
+#include "types/sym_types/sym_dict.hpp"
+#include "types/sym_types/sym_boolean.hpp"
+#include "types/sym_types/math_types/value_type.hpp"
+#include "exceptions/datatype_internal_exception.hpp"
+
+inline char as_ascii(std::shared_ptr<SymObject>& obj) {
+    auto rational = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(obj);
+    auto mod      = std::dynamic_pointer_cast<ValueType<ModLong>>(obj);
+
+    if (rational) {
+        auto value = rational->as_value();
+        if (value.get_denominator() != BigInt(1)) {
+            throw ParsingTypeException("Type error: Expected integer value for ascii conversion");
+        }
+
+        auto int_value = value.get_numerator().as_int64();  // TODO(vabi): potential overflow issues
+        if (int_value < 0 || int_value > 127) {
+            throw ParsingTypeException("Type error: Integer value out of ASCII range for ascii conversion");
+        }
+        return static_cast<char>(int_value);
+    } else if (mod) {
+        auto mod_value = mod->as_value();
+        if (mod_value.to_num() < 0 || mod_value.to_num() > 127) {
+            throw ParsingTypeException("Type error: Integer value out of ASCII range for ascii conversion");
+        }
+        return static_cast<char>(mod_value.to_num());
+    } else {
+        throw ParsingTypeException("Type error: Expected integer value for ascii conversion");
+    }
+}
+
+// Helper: Extract integer index from RationalNumber
+inline int64_t extract_integer_index(const std::shared_ptr<SymObject>& index_obj, const std::string& func_name) {
+    auto index = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(index_obj);
+    if (!index) {
+        throw ParsingTypeException("Type error: Expected integer index in " + func_name);
+    }
+    auto index_value = index->as_value();
+    if (index_value.get_denominator() != BigInt(1)) {
+        throw ParsingTypeException("Type error: Expected integer index in " + func_name);
+    }
+    return index_value.get_numerator().as_int64();  // TODO(vabi): potential overflow issues
+}
+
+// Helper: Validate list argument
+inline std::shared_ptr<SymListObject> get_list_argument(const std::shared_ptr<SymObject>& obj, const std::string& func_name) {
+    auto list_obj = std::dynamic_pointer_cast<SymListObject>(obj);
+    if (!list_obj) {
+        throw ParsingTypeException("Type error: Expected list as argument in " + func_name);
+    }
+    return list_obj;
+}
+
+// Helper: Validate dict argument
+inline std::shared_ptr<SymDictObject> get_dict_argument(const std::shared_ptr<SymObject>& obj, const std::string& func_name) {
+    auto dict_obj = std::dynamic_pointer_cast<SymDictObject>(obj);
+    if (!dict_obj) {
+        throw ParsingTypeException("Type error: Expected dict as argument in " + func_name);
+    }
+    return dict_obj;
+}
+
+// Helper: Get boolean argument
+inline std::shared_ptr<SymBooleanObject> get_boolean_argument(const std::shared_ptr<SymObject>& obj, const std::string& func_name) {
+    auto bool_obj = std::dynamic_pointer_cast<SymBooleanObject>(obj);
+    if (!bool_obj) {
+        throw ParsingTypeException("Type error: Expected boolean argument in " + func_name);
+    }
+    return bool_obj;
+}
+
+// Helper: Compare two numeric values of the same type
+template<typename T>
+bool compare_values(std::shared_ptr<ValueType<T>> first_val, std::shared_ptr<ValueType<T>> second_val, const std::string& op) {
+    auto first = first_val->as_value();
+    auto second = second_val->as_value();
+
+    if (op == "lt") return first < second;
+    if (op == "lte") return first <= second;
+    if (op == "gt") return first > second;
+    if (op == "gte") return first >= second;
+
+    throw ParsingTypeException("Type error: Unknown comparison operator: " + op);
+}
+
+// Helper: Perform numeric comparison between two objects
+std::shared_ptr<SymObjectContainer> perform_numeric_comparison(
+    const std::shared_ptr<SymObject>& first,
+    const std::shared_ptr<SymObject>& second,
+    const std::string& op) {
+    auto first_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(first);
+    auto second_num = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(second);
+
+    if (first_num && second_num) {
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<RationalNumber<BigInt>>(first_num, second_num, op)));
+    }
+
+    auto first_double = std::dynamic_pointer_cast<ValueType<double>>(first);
+    auto second_double = std::dynamic_pointer_cast<ValueType<double>>(second);
+    if (first_double && second_double) {
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<double>(first_double, second_double, op)));
+    }
+
+    if (first_double && second_num) {
+        auto second_as_double = std::dynamic_pointer_cast<ValueType<double>>(second_num->as_double());
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<double>(first_double, second_as_double, op)));
+    }
+
+    if (first_num && second_double) {
+        auto first_as_double = std::dynamic_pointer_cast<ValueType<double>>(first_num->as_double());
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(
+            compare_values<double>(first_as_double, second_double, op)));
+    }
+
+    throw ParsingTypeException("Type error: Expected numeric arguments for " + op + " operator");
+}
+
+// Unified boolean operation logic for AND, OR, XOR, NAND, NOR
+// Uses eager evaluation with C++ boolean operators (&&, ||, !, !=)
+// This matches the semantics of infix operators and is called by both
+// the builtins module functions (and, or, xor, nand, nor) and the
+// infix operators (&&, ||) via PolishModuleFunction delegation
+std::shared_ptr<SymObjectContainer> perform_binary_boolean_operation(
+    const std::shared_ptr<SymObject>& first,
+    const std::shared_ptr<SymObject>& second,
+    const std::string& op) {
+    auto first_bool = get_boolean_argument(first, op);
+    auto second_bool = get_boolean_argument(second, op);
+
+    bool first_val = first_bool->as_boolean();
+    bool second_val = second_bool->as_boolean();
+    bool result;
+
+    if (op == "and") {
+        result = first_val && second_val;
+    } else if (op == "or") {
+        result = first_val || second_val;
+    } else if (op == "xor") {
+        result = first_val != second_val;
+    } else if (op == "nand") {
+        result = !(first_val && second_val);
+    } else if (op == "nor") {
+        result = !(first_val || second_val);
+    } else {
+        throw ParsingTypeException("Type error: Unknown boolean operator: " + op);
+    }
+
+    return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
+}
+
+std::shared_ptr<SymObjectContainer> print(std::vector<std::shared_ptr<SymObjectContainer>> args, const std::shared_ptr<ModuleContextInterface>& context, bool line_break) {
+    auto first = args[0]->get_object();
+    std::string mode_str = "raw";
+    if (args.size() == 2) {
+        auto mode = std::dynamic_pointer_cast<SymStringObject>(args[1]->get_object());
+        if (!mode) {
+            throw ParsingTypeException("Type error: Expected string as second argument in print function");
+        }
+
+        mode_str = mode->to_string();
+    }
+    if (mode_str == "raw") {
+        context->handle_print(first->to_string(), line_break);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
+    }
+
+    if (mode_str == "ascii") {
+        auto char_obj = as_ascii(first);
+        context->handle_print(std::string(1, char_obj), line_break);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
+    }
+
+    throw ParsingTypeException("Type error: Unknown print mode: " + mode_str);
+}
+
+Module create_builtins_module() {
+    Module ret = Module("builtins");
+    ret.register_function("copy", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        return std::make_shared<SymObjectContainer>(args[0]->get_object()->clone());
+    });
+    ret.register_function("print", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        return print(args, context, false);
+    });
+    ret.register_function("println", 1, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        return print(args, context, true);
+    });
+    ret.register_function("list", 0, UINT32_MAX, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(args));
+    });
+    ret.register_function("len", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto list_obj = std::dynamic_pointer_cast<SymListObject>(args[0]->get_object());
+        if (!list_obj) {
+            throw ParsingTypeException("Type error: Expected list argument for len function");
+        }
+        auto length = static_cast<int64_t>(list_obj->as_list().size());
+        return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(RationalNumber<BigInt>(BigInt(length), BigInt(1))));
+    });
+    ret.register_function("list_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto list_obj = get_list_argument(args[0]->get_object(), "list_set");
+        int64_t int_index = extract_integer_index(args[1]->get_object(), "list_set");
+        if (int_index < 0 || static_cast<size_t>(int_index) >= list_obj->as_list().size()) {
+            throw ParsingTypeException("Index out of bounds in list_set function");
+        }
+        list_obj->set(static_cast<size_t>(int_index), args[2]);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
+    });
+    ret.register_function("list_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto list_obj = get_list_argument(args[0]->get_object(), "list_get");
+        int64_t int_index = extract_integer_index(args[1]->get_object(), "list_get");
+        if (int_index < 0 || static_cast<size_t>(int_index) >= list_obj->as_list().size()) {
+            throw ParsingTypeException("Index out of bounds in list_get function");
+        }
+        return list_obj->at(static_cast<size_t>(int_index));
+    });
+
+    // Dict functions
+    ret.register_function("dict", 0, 0, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(args);
+        UNUSED(context);
+        std::map<std::string, std::shared_ptr<SymObjectContainer>> empty_dict;
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymDictObject>(empty_dict));
+    });
+
+    ret.register_function("dict_get", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto dict_obj = get_dict_argument(args[0]->get_object(), "dict_get");
+        auto key = args[1]->get_object();
+        return dict_obj->get(key);
+    });
+
+    ret.register_function("dict_set", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto dict_obj = get_dict_argument(args[0]->get_object(), "dict_set");
+        auto key = args[1]->get_object();
+        auto value = args[2];
+        dict_obj->set(key, value);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
+    });
+
+    ret.register_function("dict_has_key", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto dict_obj = get_dict_argument(args[0]->get_object(), "dict_has_key");
+        auto key = args[1]->get_object();
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(dict_obj->has_key(key)));
+    });
+
+    // List functions: append, pop, slice
+    ret.register_function("append", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto list_obj = get_list_argument(args[0]->get_object(), "append");
+        auto value = args[1];
+        list_obj->append(value);
+        return std::make_shared<SymObjectContainer>(std::make_shared<SymVoidObject>());
+    });
+
+    ret.register_function("pop", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto list_obj = get_list_argument(args[0]->get_object(), "pop");
+        auto value = list_obj->pop();
+        if (!value) {
+            throw ParsingTypeException("Type error: Cannot pop from an empty list");
+        }
+        return value;
+    });
+
+     ret.register_function("slice", 3, 3, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto list_obj = get_list_argument(args[0]->get_object(), "slice");
+
+         int64_t start_idx = extract_integer_index(args[1]->get_object(), "slice");
+         if (start_idx < 0 || start_idx > static_cast<int64_t>(list_obj->as_list().size())) {
+             throw ParsingTypeException("Type error: Start index out of bounds in slice function");
+         }
+
+         int64_t end_idx = extract_integer_index(args[2]->get_object(), "slice");
+         if (end_idx < 0 || end_idx > static_cast<int64_t>(list_obj->as_list().size())) {
+             throw ParsingTypeException("Type error: End index out of bounds in slice function");
+         }
+
+         if (start_idx < end_idx) {
+             std::vector<std::shared_ptr<SymObjectContainer>> sliced_elements(
+                 list_obj->as_list().begin() + start_idx,
+                 list_obj->as_list().begin() + end_idx);
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(sliced_elements));
+         }
+         return std::make_shared<SymObjectContainer>(std::make_shared<SymListObject>(std::vector<std::shared_ptr<SymObjectContainer>>()));
+     });
+
+     // Comparison operators
+     ret.register_function("eq", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto first = args[0]->get_object();
+         auto second = args[1]->get_object();
+
+         if (first->equals(second)) {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
+         } else {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(false));
+         }
+     });
+
+     ret.register_function("neq", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+         UNUSED(context);
+         auto first = args[0]->get_object();
+         auto second = args[1]->get_object();
+
+         if (!first->equals(second)) {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(true));
+         } else {
+             return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(false));
+         }
+     });
+
+      // Numeric comparison operators
+      ret.register_function("lt", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "lt");
+      });
+
+      ret.register_function("lte", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "lte");
+      });
+
+      ret.register_function("gt", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "gt");
+      });
+
+      ret.register_function("gte", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_numeric_comparison(args[0]->get_object(), args[1]->get_object(), "gte");
+      });
+
+     // Boolean operators
+      ret.register_function("and", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "and");
+      });
+
+      ret.register_function("or", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "or");
+      });
+
+      ret.register_function("xor", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "xor");
+      });
+
+      ret.register_function("nand", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "nand");
+      });
+
+      ret.register_function("nor", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "nor");
+      });
+
+      ret.register_function("not", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          auto operand = get_boolean_argument(args[0]->get_object(), "not");
+          bool result = !operand->as_boolean();
+          return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
+      });
+
+      // Modular Arithmetic Functions
+      // mod(argument, modulus) - Performs modular arithmetic
+      //   Takes a rational argument a/b and integer modulus m, returning a·b⁻¹ mod m.
+      //   The modulus must be a positive integer.
+      //   The denominator b must be invertible modulo m (i.e., gcd(b, m) = 1).
+      //   Returns a ModLong value representing the result in modular arithmetic.
+      //   Examples: mod(5, 7) returns 5 mod 7
+      //            mod(1/2, 7) returns 4 (the modular inverse of 2 mod 7)
+      //   Throws ParsingTypeException if b is not invertible modulo m.
+      ret.register_function("Mod", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+            UNUSED(context);
+            auto arg_raw    = args[0]->get_object();
+            auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(arg_raw);
+            auto mod_raw    = args[1]->get_object();
+            auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(mod_raw);
+            if (!argument || !mod) {
+                throw ParsingTypeException("Type error: Expected numeric arguments in mod function");
+            }
+
+            auto value = argument->as_value();
+
+            auto modulus_num = mod->as_value().get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+            if (modulus_num <= 0) {
+                throw ParsingTypeException("Type error: Expected positive integer as modulus in mod function");
+            }
+
+            auto modulus_den = mod->as_value().get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+            if (modulus_den != 1) {
+                throw ParsingTypeException("Type error: Expected integer as modulus in mod function");
+            }
+
+            auto a = value.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+            auto b = value.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+
+            if (b > INT32_MAX || b < INT32_MIN) {
+                throw ParsingTypeException("Type error: Denominator too large in mod function");
+            }
+            if (modulus_num == 1 && b == 1) {
+                return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<ModLong>>(ModLong(0, 1)));
+            }
+            auto result = ModLong(a, modulus_num)/ModLong(b, modulus_num);
+            return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<ModLong>>(result));
+      });
+
+      // mod_value(mod_long) - Extracts the numeric value from a ModLong
+      //   Takes a ModLong value and returns the underlying integer.
+      //   This is the inverse operation of mod() - it converts a modular arithmetic
+      //   value back to a regular integer.
+      //   Example: mod_value(mod(5, 7)) returns an integer value
+      ret.register_function("mod_value", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          auto arg_raw    = args[0]->get_object();
+          auto argument   = std::dynamic_pointer_cast<ValueType<ModLong>>(arg_raw);
+          if (!argument) {
+              throw ParsingTypeException("Type error: Expected ModLong value as argument in mod_value function");
+          }
+
+          auto value = argument->as_value();
+          return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(BigInt(value.to_num())));
+      });
+
+      return ret;
+}
