@@ -5,6 +5,7 @@
 #include "types/sym_types/sym_dict.hpp"
 #include "types/sym_types/sym_boolean.hpp"
 #include "types/sym_types/math_types/value_type.hpp"
+#include "exceptions/datatype_internal_exception.hpp"
 
 inline char as_ascii(std::shared_ptr<SymObject>& obj) {
     auto rational = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(obj);
@@ -369,12 +370,73 @@ Module create_builtins_module() {
           return perform_binary_boolean_operation(args[0]->get_object(), args[1]->get_object(), "nor");
       });
 
-     ret.register_function("not", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
-         UNUSED(context);
-         auto operand = get_boolean_argument(args[0]->get_object(), "not");
-         bool result = !operand->as_boolean();
-         return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
-     });
+      ret.register_function("not", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          auto operand = get_boolean_argument(args[0]->get_object(), "not");
+          bool result = !operand->as_boolean();
+          return std::make_shared<SymObjectContainer>(std::make_shared<SymBooleanObject>(result));
+      });
 
-     return ret;
+      // Modular Arithmetic Functions
+      // mod(argument, modulus) - Performs modular arithmetic
+      //   Takes a rational argument a/b and integer modulus m, returning a·b⁻¹ mod m.
+      //   The modulus must be a positive integer.
+      //   The denominator b must be invertible modulo m (i.e., gcd(b, m) = 1).
+      //   Returns a ModLong value representing the result in modular arithmetic.
+      //   Examples: mod(5, 7) returns 5 mod 7
+      //            mod(1/2, 7) returns 4 (the modular inverse of 2 mod 7)
+      //   Throws ParsingTypeException if b is not invertible modulo m.
+      ret.register_function("Mod", 2, 2, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+            UNUSED(context);
+            auto arg_raw    = args[0]->get_object();
+            auto argument   = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(arg_raw);
+            auto mod_raw    = args[1]->get_object();
+            auto mod        = std::dynamic_pointer_cast<ValueType<RationalNumber<BigInt>>>(mod_raw);
+            if (!argument || !mod) {
+                throw ParsingTypeException("Type error: Expected numeric arguments in mod function");
+            }
+
+            auto value = argument->as_value();
+
+            auto modulus_num = mod->as_value().get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+            if (modulus_num <= 0) {
+                throw ParsingTypeException("Type error: Expected positive integer as modulus in mod function");
+            }
+
+            auto modulus_den = mod->as_value().get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+            if (modulus_den != 1) {
+                throw ParsingTypeException("Type error: Expected integer as modulus in mod function");
+            }
+
+            auto a = value.get_numerator().as_int64();  // TODO(vabi) potential overflow issues
+            auto b = value.get_denominator().as_int64();  // TODO(vabi) potential overflow issues
+
+            if (b > INT32_MAX || b < INT32_MIN) {
+                throw ParsingTypeException("Type error: Denominator too large in mod function");
+            }
+            if (modulus_num == 1 && b == 1) {
+                return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<ModLong>>(ModLong(0, 1)));
+            }
+            auto result = ModLong(a, modulus_num)/ModLong(b, modulus_num);
+            return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<ModLong>>(result));
+      });
+
+      // mod_value(mod_long) - Extracts the numeric value from a ModLong
+      //   Takes a ModLong value and returns the underlying integer.
+      //   This is the inverse operation of mod() - it converts a modular arithmetic
+      //   value back to a regular integer.
+      //   Example: mod_value(mod(5, 7)) returns an integer value
+      ret.register_function("mod_value", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+          UNUSED(context);
+          auto arg_raw    = args[0]->get_object();
+          auto argument   = std::dynamic_pointer_cast<ValueType<ModLong>>(arg_raw);
+          if (!argument) {
+              throw ParsingTypeException("Type error: Expected ModLong value as argument in mod_value function");
+          }
+
+          auto value = argument->as_value();
+          return std::make_shared<SymObjectContainer>(std::make_shared<ValueType<RationalNumber<BigInt>>>(BigInt(value.to_num())));
+      });
+
+      return ret;
 }

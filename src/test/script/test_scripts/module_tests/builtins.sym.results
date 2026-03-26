@@ -110,3 +110,28 @@ true
 true
 true
 true
+=== Test mod() with integer arguments ===
+Mod(5,7)
+Mod(0,256)
+Mod(255,256)
+Mod(100,256)
+Mod(5,7)
+=== Test mod() with rational arguments ===
+Mod(4,7)
+Mod(2,7)
+Mod(5,7)
+Mod(9,11)
+Mod(7,11)
+=== Test mod_value() to extract numeric values ===
+5
+4
+100
+=== Test mod with arithmetic expressions ===
+Mod(5,7)
+Mod(3,11)
+Mod(5,7)
+=== Test mod equality ===
+true
+true
+true
+false

@@ -2,7 +2,7 @@ a = 13*555457888,
 b = 13*75657999,
 while(b != 0) {
     t = b,
-    b = ModValue(Mod(a,b)),
+    b = mod_value(Mod(a,b)),
     a = t
 },
 println(a)
