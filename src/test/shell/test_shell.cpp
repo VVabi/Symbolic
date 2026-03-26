@@ -15,7 +15,8 @@ class TestShellInput: public ShellInput {
     TestShellInput(std::unique_ptr<std::istream> in) {
         input_stream = std::move(in);
     }
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
         std::string input;
         if (std::getline(*input_stream, input)) {
             return std::make_unique<ReplInputObject>(input);

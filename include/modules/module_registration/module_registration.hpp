@@ -40,49 +40,73 @@ class ModuleConstant {
 };
 
 class Module {
-     std::map<std::string, ModuleFunction> functions;
-     std::map<std::string, ModuleConstant> constants;
-     std::map<std::string, Module> submodules;
-     std::string name;
+    std::map<std::string, ModuleFunction> functions;
+    std::map<std::string, ModuleConstant> constants;
+    std::map<std::string, Module> submodules;
+    std::string name;
 
  public:
-     Module(std::string name): name(name) { }
+    Module(std::string name): name(name) { }
 
-     void register_function(const std::string& name, uint32_t min_num_args, uint32_t max_num_args,
-         std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>&, const std::shared_ptr<ModuleContextInterface>&)> func);
-     void register_constant(const std::string& name, std::shared_ptr<SymObjectContainer> value);
-     void register_submodule(const std::string& name, const Module& submodule);
+    void register_function(const std::string& name, uint32_t min_num_args, uint32_t max_num_args,
+        std::function<std::shared_ptr<SymObjectContainer>(std::vector<std::shared_ptr<SymObjectContainer>>&, const std::shared_ptr<ModuleContextInterface>&)> func);
+    void register_constant(const std::string& name, std::shared_ptr<SymObjectContainer> value);
+    void register_submodule(const std::string& name, const Module& submodule);
 
-     std::shared_ptr<SymObjectContainer> call_function(std::queue<std::string>& module_path,
-             std::vector<std::shared_ptr<SymObjectContainer>>& args,
-             const std::shared_ptr<ModuleContextInterface>& context) const;
-      std::shared_ptr<SymObjectContainer> get_constant(std::queue<std::string>& module_path) const;
+    std::shared_ptr<SymObjectContainer> call_function(std::queue<std::string>& module_path,
+            std::vector<std::shared_ptr<SymObjectContainer>>& args,
+            const std::shared_ptr<ModuleContextInterface>& context) const;
+    std::shared_ptr<SymObjectContainer> get_constant(std::queue<std::string>& module_path) const;
 
-      const std::string& get_name() const {
-         return name;
-     }
+    const std::string& get_name() const {
+        return name;
+    }
 
-     bool has_function(const std::string& func_name) const {
-         return functions.find(func_name) != functions.end();
-     }
+    bool has_function(const std::string& func_name) const {
+        return functions.find(func_name) != functions.end();
+    }
 
-     bool has_constant(const std::string& const_name) const {
-         return constants.find(const_name) != constants.end();
-     }
+    bool has_constant(const std::string& const_name) const {
+        return constants.find(const_name) != constants.end();
+    }
 
-     bool has_submodule(const std::string& submodule_name) const {
-         return submodules.find(submodule_name) != submodules.end();
-     }
+    bool has_submodule(const std::string& submodule_name) const {
+        return submodules.find(submodule_name) != submodules.end();
+    }
 
-     const Module* get_submodule(const std::string& submodule_name) const {
-         auto it = submodules.find(submodule_name);
-         if (it == submodules.end()) {
-             return nullptr;
-         }
-         return &it->second;
-     }
+    const Module* get_submodule(const std::string& submodule_name) const {
+        auto it = submodules.find(submodule_name);
+        if (it == submodules.end()) {
+            return nullptr;
+        }
+        return &it->second;
+    }
 
-     bool is_module_element(std::queue<std::string>& module_path) const;
+    bool is_module_element(std::queue<std::string>& module_path) const;
+
+    void get_all_autocompletable_names(const std::string& parent_path, std::vector<std::string>& names) const {
+        std::string current_path = parent_path.empty() ? name : parent_path + "." + name;
+
+        for (const auto& func_pair : functions) {
+            names.push_back(current_path + "." + func_pair.first);
+            if (current_path == "builtins") {
+                // Also add the function name without the "builtins." prefix for autocompletion convenience
+                names.push_back(func_pair.first);
+            }
+        }
+
+        for (const auto& const_pair : constants) {
+            names.push_back(current_path + "." + const_pair.first);
+            if (current_path == "builtins") {
+                // Also add the constant name without the "builtins." prefix for autocompletion convenience
+                names.push_back(const_pair.first);
+            }
+        }
+
+        for (const auto& submodule_pair : submodules) {
+            submodule_pair.second.get_all_autocompletable_names(current_path, names);
+        }
+    }
 };
 
 class ModuleRegister {
@@ -96,4 +120,5 @@ class ModuleRegister {
       std::shared_ptr<SymObjectContainer> get_module_constant(std::queue<std::string>& module_path) const;
       bool is_builtin(const std::string& name) const;
       bool is_module_element(const std::string& element_path) const;
+      void get_all_autocompletable_names(std::vector<std::string>& names) const;
 };
