@@ -1,7 +1,5 @@
 #include <memory>
 #include <string>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include "parsing/expression_parsing/math_expression_parser.hpp"
 #include "shell/command_handling.hpp"
 #include "shell/parameters/parameters.hpp"
@@ -46,8 +44,7 @@ ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& i
 static std::function<std::vector<std::string>()> autocomplete_cb;
 
 char *
-character_name_generator(const char *text, int state)
-{
+character_name_generator(const char *text, int state) {
     static int list_index, len;
     const char *name;
 
@@ -69,8 +66,7 @@ character_name_generator(const char *text, int state)
 }
 
 char **
-character_name_completion(const char *text, int start, int end)
-{
+character_name_completion(const char *text, int start, int end) {
     UNUSED(start);
     UNUSED(end);
     rl_completion_append_character = '\0';
