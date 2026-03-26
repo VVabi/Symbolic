@@ -42,20 +42,24 @@ ShellInputEvalResult SymbolicShellEvaluator::evaluate_input(const std::string& i
 }
 
 static std::function<std::vector<std::string>()> autocomplete_cb;
+static std::vector<std::string> autocomplete_names;
 
-char *
-character_name_generator(const char *text, int state) {
+static char * character_name_generator(const char *text, int state) {
     static int list_index, len;
     const char *name;
+
+    if (!autocomplete_cb) {
+        return nullptr;
+    }
 
     if (!state) {
         list_index = 0;
         len = strlen(text);
+        autocomplete_names = autocomplete_cb();
     }
 
-    auto names = autocomplete_cb();
-    for (size_t index = list_index; index < names.size(); index++) {
-        name = names[index].c_str();
+    for (size_t index = list_index; index < autocomplete_names.size(); index++) {
+        name = autocomplete_names[index].c_str();
         if (strncmp(name, text, len) == 0) {
             list_index = index + 1;
             return strdup(name);
@@ -65,8 +69,7 @@ character_name_generator(const char *text, int state) {
     return NULL;
 }
 
-char **
-character_name_completion(const char *text, int start, int end) {
+static char ** character_name_completion(const char *text, int start, int end) {
     UNUSED(start);
     UNUSED(end);
     rl_completion_append_character = '\0';

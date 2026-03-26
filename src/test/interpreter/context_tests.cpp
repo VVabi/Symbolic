@@ -23,8 +23,7 @@ class InterpreterContextTest : public ::testing::Test {
         context = std::make_shared<InterpreterContext>(
             nullptr,
             ShellParameters(),
-            create_module_register()
-        );
+            create_module_register());
     }
 
     /**
@@ -203,8 +202,7 @@ TEST_F(InterpreterContextTest, EmptyContextReturnsBuiltins) {
     auto fresh_context = std::make_shared<InterpreterContext>(
         nullptr,
         ShellParameters(),
-        create_module_register()
-    );
+        create_module_register());
 
     auto names = fresh_context->get_autocompletable_names();
 
@@ -326,18 +324,15 @@ TEST_F(InterpreterContextTest, ConstantsCannotBeOverriddenByVariables) {
     // Try to set a variable with a constant name - should throw
     EXPECT_THROW(
         context->set_variable("true", std::make_shared<SymVoidObject>()),
-        ParsingTypeException
-    );
+        ParsingTypeException);
 
     EXPECT_THROW(
         context->set_variable("false", std::make_shared<SymVoidObject>()),
-        ParsingTypeException
-    );
+        ParsingTypeException);
 
     EXPECT_THROW(
         context->set_variable("null", std::make_shared<SymVoidObject>()),
-        ParsingTypeException
-    );
+        ParsingTypeException);
 
     // Verify constants are still autocompletable
     EXPECT_TRUE(isAutocompletable("true"));
