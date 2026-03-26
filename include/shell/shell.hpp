@@ -27,6 +27,9 @@
 class ShellInput {
  public:
     virtual std::unique_ptr<FileLikeObject> get_next_input() = 0;
+    virtual void set_autocomplete_callback(const std::function<std::vector<std::string>()>& callback) {
+        UNUSED(callback);
+    }
 };
 
 class ShellOutput {
@@ -58,29 +61,9 @@ class ReadlineShellInput : public ShellInput {
         using_history();
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override {
-        char* input = readline(">> ");
+    std::unique_ptr<FileLikeObject> get_next_input() override;
 
-        // Check for EOF.
-        if (!input) {
-            return nullptr;
-        }
-
-        std::string input_str(input);
-
-        // Free buffer that was allocated by readline
-        free(input);
-
-        // Treat literal "exit" as EOF/termination for interactive REPL
-        if (input_str == "exit") {
-            return nullptr;
-        }
-
-        // Add input to readline history.
-        add_history(input_str.c_str());
-
-        return std::make_unique<ReplInputObject>(input_str);
-    }
+    void set_autocomplete_callback(const std::function<std::vector<std::string>()>& callback);
 };
 
 class CmdLineShellOutput : public ShellOutput {
@@ -364,6 +347,10 @@ class FormulaParser {
         context = std::make_shared<InterpreterContext>(print_handler, params, create_module_register());
     }
 
+    std::vector<std::string> get_autocompletable_names() {
+        return context->get_autocompletable_names();
+    }
+
     std::unique_ptr<FormulaParsingResult> parse(std::shared_ptr<FileLikeObject> file_obj) {
         auto now = std::chrono::high_resolution_clock::now();
 
@@ -417,7 +404,11 @@ class SymbolicShellEvaluator {
     SymbolicShellEvaluator(std::shared_ptr<ShellInput> input, std::shared_ptr<ShellOutput> output, const ShellParameters& params) :
         shell_input(input),
         shell_output(output),
-        parser(std::make_shared<ShellPrintHandler>(output), params) {}
+        parser(std::make_shared<ShellPrintHandler>(output), params) {
+            input->set_autocomplete_callback([this]() {
+                return parser.get_autocompletable_names();
+            });
+        }
     void run();
     bool run_single_input();
 };

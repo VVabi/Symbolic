@@ -57,6 +57,8 @@ class InterpreterContext : public ContextInterface, public ModuleContextInterfac
         variables.push({});
     }
 
+    std::vector<std::string> get_autocompletable_names() const;
+
     PreprocessedFileNavigator& get_file_navigator(const std::string& file_name) override;
 
     void set_file_navigator(const std::string& file_name, const PreprocessedFileNavigator& navigator) {

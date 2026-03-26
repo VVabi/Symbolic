@@ -74,3 +74,18 @@ void InterpreterContext::set_variable(const std::string& name, std::shared_ptr<S
     }
     variables.top()[name] = value;
 }
+
+std::vector<std::string> InterpreterContext::get_autocompletable_names() const {
+    std::vector<std::string> names;
+    if (!variables.empty()) {
+        for (const auto& pair : variables.top()) {
+            names.push_back(pair.first);
+        }
+    }
+    for (const auto& pair : constants) {
+        names.push_back(pair.first);
+    }
+
+    get_module_register().get_all_autocompletable_names(names);
+    return names;
+}

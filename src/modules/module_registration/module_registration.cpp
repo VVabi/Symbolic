@@ -168,3 +168,10 @@ bool ModuleRegister::is_module_element(const std::string& element_path) const {
 
       return module_it->second.is_module_element(path);
 }
+
+
+void ModuleRegister::get_all_autocompletable_names(std::vector<std::string>& names) const {
+     for (const auto& module_pair : modules) {
+         module_pair.second.get_all_autocompletable_names("", names);
+     }
+}
