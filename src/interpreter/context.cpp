@@ -85,6 +85,9 @@ std::vector<std::string> InterpreterContext::get_autocompletable_names() const {
     for (const auto& pair : constants) {
         names.push_back(pair.first);
     }
+    for (const auto& pair : custom_functions) {
+        names.push_back(pair.first);
+    }
 
     get_module_register().get_all_autocompletable_names(names);
     return names;

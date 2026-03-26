@@ -68,6 +68,7 @@ add_executable(Symbolic_tests
          src/test/types/modlong_tests.cpp
          src/test/types/polynomial_tests.cpp
          src/test/modules/module_constants_tests.cpp
+         src/test/interpreter/context_tests.cpp
          src/test/shell/parameters/parameter_tests.cpp
          src/test/shell/test_shell.cpp
          src/test/script/top_level_script_tests.cpp
