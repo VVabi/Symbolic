@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <functional>
 #include "cpp_utils/unused.hpp"
 #include "exceptions/parsing_exceptions.hpp"
 #include "exceptions/parsing_type_exception.hpp"
@@ -26,7 +27,7 @@
 
 class ShellInput {
  public:
-    virtual std::unique_ptr<FileLikeObject> get_next_input() = 0;
+    virtual std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) = 0;
 };
 
 class ShellOutput {
@@ -37,7 +38,9 @@ class ShellOutput {
 
 class CmdLineShellInput : public ShellInput {
  public:
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
+         std::cout << ">>> ";
         std::cout << ">>> ";
         std::string input;
         std::getline(std::cin, input);
@@ -58,29 +61,7 @@ class ReadlineShellInput : public ShellInput {
         using_history();
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override {
-        char* input = readline(">> ");
-
-        // Check for EOF.
-        if (!input) {
-            return nullptr;
-        }
-
-        std::string input_str(input);
-
-        // Free buffer that was allocated by readline
-        free(input);
-
-        // Treat literal "exit" as EOF/termination for interactive REPL
-        if (input_str == "exit") {
-            return nullptr;
-        }
-
-        // Add input to readline history.
-        add_history(input_str.c_str());
-
-        return std::make_unique<ReplInputObject>(input_str);
-    }
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override;
 };
 
 class CmdLineShellOutput : public ShellOutput {
@@ -118,7 +99,8 @@ class FileShellInput : public ShellInput {
         }
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
         if (consumed) {
             return nullptr;
         }
@@ -138,7 +120,8 @@ class FileShellLineInput : public ShellInput {
         }
     }
 
-    std::unique_ptr<FileLikeObject> get_next_input() override {
+    std::unique_ptr<FileLikeObject> get_next_input(const std::vector<std::string>& autocomplete_names = std::vector<std::string>()) override {
+        UNUSED(autocomplete_names);
         std::string input;
         if (!std::getline(file_stream, input)) {
             return nullptr;
@@ -362,6 +345,10 @@ class FormulaParser {
  public:
     FormulaParser(std::shared_ptr<InterpreterPrintHandler> print_handler, const ShellParameters& params) {
         context = std::make_shared<InterpreterContext>(print_handler, params, create_module_register());
+    }
+
+    std::vector<std::string> get_autocompletable_names() {
+        return context->get_autocompletable_names();
     }
 
     std::unique_ptr<FormulaParsingResult> parse(std::shared_ptr<FileLikeObject> file_obj) {
