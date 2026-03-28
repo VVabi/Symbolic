@@ -155,6 +155,17 @@ class RationalFunctionType: public MathWrapperType<T> {
         UNUSED(modulus);
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to Mod");
     }
+
+    std::shared_ptr<SymMathObject> derivative() override {
+        Polynomial<T> num_derivative = value.get_numerator().derivative();
+        auto den_derivative = value.get_denominator().derivative();
+        auto num = value.get_numerator();
+        auto den = value.get_denominator();
+
+        auto new_numerator = num_derivative*den - num*den_derivative;
+        auto new_denominator = den*den;
+        return std::make_shared<RationalFunctionType<T>>(RationalFunction<T>(std::move(new_numerator), std::move(new_denominator)));
+    }
 };
 
 

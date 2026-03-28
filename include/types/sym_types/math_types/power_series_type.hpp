@@ -140,6 +140,10 @@ class PowerSeriesType: public MathWrapperType<T> {
         UNUSED(modulus);
         throw DatatypeInternalException("Cannot convert " + std::string(typeid(T).name()) + " to ModLong");
     }
+
+    std::shared_ptr<SymMathObject> derivative() override {
+        return std::make_shared<PowerSeriesType<T>>(value.derivative());
+    }
 };
 
 template<>

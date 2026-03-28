@@ -35,4 +35,8 @@ class SymMathObject: public SymObject {
     virtual std::shared_ptr<SymObject> symbolic_method(const SymbolicMethodOperator& op, const uint32_t fp_size, const Subset& subset) = 0;
 
     virtual std::shared_ptr<SymMathObject> evaluate_at(std::shared_ptr<SymMathObject> input) = 0;
+
+    virtual std::shared_ptr<SymMathObject> derivative() {
+        throw DatatypeInternalException("Derivative not implemented for this type");
+    }
 };

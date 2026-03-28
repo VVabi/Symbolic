@@ -490,6 +490,19 @@ template<typename T> class PowerSeries: public PolyBase<T> {
         return ret;
     }
 
+    PowerSeries derivative() const {
+        auto zero = RingCompanionHelper<T>::get_zero(this->coefficients[0]);
+        if (this->num_coefficients() <= 1) {
+            return PowerSeries(std::vector<T>(this->num_coefficients(), zero));
+        }
+
+        auto coeffs = std::vector<T>();
+        for (uint32_t ind = 1; ind < this->num_coefficients(); ind++) {
+            coeffs.push_back(this->coefficients[ind]*ind);
+        }
+        return PowerSeries(std::move(coeffs));
+    }
+
     static PowerSeries<T> multiply_full(const PowerSeries& a, const PowerSeries& b) {
         auto ret_coeffs = multiply_full_raw(a.coefficients.data(), a.coefficients.size(), b.coefficients.data(), b.coefficients.size());
         return PowerSeries<T>(std::move(ret_coeffs));

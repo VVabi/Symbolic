@@ -205,6 +205,21 @@ template<typename T> class Polynomial: public PolyBase<T> {
         return polynomial_div(a, b).second;
     }
 
+    Polynomial derivative() const {
+        if (this->num_coefficients() <= 1) {
+            return Polynomial::get_zero(this->coefficients[0]);
+        }
+
+        std::vector<T> coeffs = std::vector<T>();
+        coeffs.reserve(this->num_coefficients()-1);
+        auto unit = RingCompanionHelper<T>::get_unit(this->coefficients[0]);
+        for (uint32_t ind = 1; ind < this->num_coefficients(); ind++) {
+            coeffs.push_back(this->coefficients[ind]*(ind*unit));
+        }
+        return Polynomial(std::move(coeffs));
+    }
+
+
     static Polynomial get_atom(const T value, const size_t idx) {
         auto coeffs = std::vector<T>(idx+1, RingCompanionHelper<T>::get_zero(value));
         coeffs[idx] = value;

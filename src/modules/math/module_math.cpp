@@ -8,10 +8,10 @@
 
 /**
  * @brief Helper function to create a power series function wrapper.
- * 
+ *
  * This factory creates lambda functions that wrap power series operations
  * (exp, log, sqrt, sin, cos, tan) for registration with the module system.
- * 
+ *
  * @param type The type of power series function (EXP, LOG, SQRT, SIN, COS, TAN)
  * @param func_name The name of the function for error messages
  * @return A lambda function compatible with Module::register_function
@@ -47,6 +47,15 @@ Module create_math_module() {
     ret.register_function("sin", 1, 1, create_power_series_function(PowerSeriesBuiltinFunctionType::SIN, "sin"));
     ret.register_function("cos", 1, 1, create_power_series_function(PowerSeriesBuiltinFunctionType::COS, "cos"));
     ret.register_function("tan", 1, 1, create_power_series_function(PowerSeriesBuiltinFunctionType::TAN, "tan"));
+    ret.register_function("derivative", 1, 1, [](std::vector<std::shared_ptr<SymObjectContainer>>& args, const std::shared_ptr<ModuleContextInterface>& context) {
+        UNUSED(context);
+        auto result = std::dynamic_pointer_cast<SymMathObject>(args[0]->get_object());
+        if (!result) {
+            throw ParsingTypeException("Type error: Expected mathematical object for derivative function");
+        }
+        auto ret = result->derivative();
+        return std::make_shared<SymObjectContainer>(ret);
+    });
 
     return ret;
 }
